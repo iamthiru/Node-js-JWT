@@ -8,6 +8,7 @@
 
 #### Steps:
 1. Face Aqcuisation:
+
     a. Dataset - JAFFEE
     b. Dataset image pre-processing and gray-scaling
     c. Dataset segregation according to the labeled emotions
