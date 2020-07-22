@@ -9,7 +9,7 @@
 #### Software Dependencies
 1. Python editor (PyCharm)
 2. OpenCV (For Computer Vision)
-3. Pandas
+3. Pandas (For DataFrame)
 4. imutils
 5. dlib (For landmark detection)
 6. OpenFace 2.0 (See the attached document for installation)
