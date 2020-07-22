@@ -1,13 +1,17 @@
 # IMPACT
 ## IMPACT Project
 
-### Face Emotion Recognition
-1. Trial Datasets to be used: JAFFEE (Japanese Female Facial Emotions and Expressions)
-2. Classification Methods: Linear (FLD or SVM), Non-Linear (Neural Networks)
-3. Expected Accuracy: 90% - 95%
+### Hardware Pre-requisities
+1. RAM (Minimum 4GB)
+2. Processor 1.6 GHz (i5)
+3. GPU (if available)
 
-#### Steps:
-1. Face Aqcuisation:
-    a. Dataset - JAFFEE; 
-    b. Dataset image pre-processing and gray-scaling; 
-    c. Dataset segregation according to the labeled emotions; 
+#### Software Dependencies
+1. Python editor (PyCharm)
+2. OpenCV (For Computer Vision)
+3. Pandas
+4. imutils
+5. dlib (For landmark detection)
+6. OpenFace 2.0 (See the attached document for installation)
+
+ 
