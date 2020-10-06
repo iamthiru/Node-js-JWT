@@ -25,7 +25,7 @@
 3. Pandas (For DataFrame)
 4. imutils
 5. dlib (For landmark detection)
-6. OpenFace 2.0 (See the attached document for installation)
+6. OpenFace 2.0 (See the OpenFace_Installation_Guide)
 
 
 #### Dataset for Study (Training/Testing)
