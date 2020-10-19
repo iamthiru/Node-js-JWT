@@ -1,3 +1,7 @@
+# Proprietary: BentenTech
+# Author: Pranav H. Deo
+# Copyright content
+
 import time
 import cv2
 import os
