@@ -1,6 +1,6 @@
 # Proprietary: BentenTech
 # Author: Pranav H. Deo
-# Copyright content
+# Copyright Content
 
 import cv2
 import pandas as pd
@@ -110,14 +110,14 @@ def Calculate_Pain(opath, fname, fl):
         # + max(row[' AU15_r'], row[' AU25_r']) + row[' AU45_r']
         indx = indx + 1
     df["Pain_PSPI"] = PSPI
-    df.to_csv(opath + fl + '_Pain.csv', index=False)
+    df.to_csv(opath + os.path.splitext(fname)[0] + '_Pain.csv', index=False)
     print("     # CSV written successfully !!")
 
 #######################################################################################################################
 
 
 # Plotting the Pain graph
-def Plot_Pain(opath, fname, fl):
+def Plot_Pain(opath, fname, fl, flag):
     # time.sleep(2)
     print("> Plotting Pain...")
     # time.sleep(2)
@@ -129,7 +129,10 @@ def Plot_Pain(opath, fname, fl):
     plt.plot(a, b)
     plt.xlabel('Frames')
     plt.ylabel('Pain')
-    plt.savefig(opath + fl + '_Pain_Plot.png')
+    if flag == 0:
+        plt.savefig(opath + fl + '_Pain_Plot.png')
+    else:
+        plt.savefig(opath + '_Pain_Plot.png')
     print("     # Pain Plot Complete")
     plt.close()
 
@@ -137,7 +140,7 @@ def Plot_Pain(opath, fname, fl):
 
 
 # Plotting the Landmarks
-def Plot_Landmarks(opath, fname, fl):
+def Plot_Landmarks(opath, fname, fl, flag):
     print("> Plotting Landmarks...")
     df = pd.read_csv(opath + fname)
     data_x = []
@@ -154,7 +157,10 @@ def Plot_Landmarks(opath, fname, fl):
     plt.plot(data_x, data_y)
     plt.xlabel('X_Co-ordinates')
     plt.ylabel('Y_Co-ordinates')
-    plt.savefig(opath + fl + '_Landmarks_Plot.png')
+    if flag == 0:
+        plt.savefig(opath + fl + '_Landmarks_Plot.png')
+    else:
+        plt.savefig(opath + '_Landmarks_Plot.png')
     print("     # Landmarks Plot Complete")
     plt.close()
 
@@ -164,6 +170,7 @@ def Plot_Landmarks(opath, fname, fl):
 def Process_Folder(opath):
     print("> Processing Folder Data...")
     dir = os.listdir(opath)
+
     for d in dir:
         if d == '.DS_Store':
             continue
@@ -180,8 +187,8 @@ def Process_Folder(opath):
         else:
             files = os.listdir(opath + '/' + d)
             for f in files:
-                if f == 'PSPI_AUs.csv':
-                    Calculate_Pain(opath + '/' + d, f)
+                if f == d + '_PSPI_AUs.csv':
+                    Calculate_Pain(opath + d + '/', f, os.path.splitext(d)[0])
 
     for d in dir:
         if d == '.DS_Store':
@@ -189,10 +196,17 @@ def Process_Folder(opath):
         else:
             fil = os.listdir(opath + '/' + d)
             for F in fil:
-                if F == 'Pain.csv':
-                    Plot_Pain(opath + '/' + d, F)
                 if F == d + '_Landmarks.csv':
-                    Plot_Landmarks(opath + '/' + d, F)
+                    Plot_Landmarks(opath + d + '/', F, os.path.splitext(d)[0], 1)
+
+    for d in dir:
+        if d == '.DS_Store':
+            continue
+        else:
+            fil = os.listdir(opath + '/' + d)
+            for F in fil:
+                if F == d + '_PSPI_AUs_Pain.csv':
+                    Plot_Pain(opath + d + '/', F, os.path.splitext(d)[0], 1)
 
 #######################################################################################################################
 
@@ -264,14 +278,14 @@ if __name__ == "__main__":
         if tag == 1:
             Retrieve_AUs(out_path, out_path + os.path.splitext(filenm)[0] + '.csv', os.path.splitext(filenm)[0])
             Calculate_Pain(out_path, os.path.splitext(filenm)[0] + '_PSPI_AUs.csv', os.path.splitext(filenm)[0])
-            Plot_Pain(out_path, os.path.splitext(filenm)[0] + '_Pain.csv', os.path.splitext(filenm)[0])
-            Plot_Landmarks(out_path, os.path.splitext(filenm)[0] + '_Landmarks.csv', os.path.splitext(filenm)[0])
+            Plot_Pain(out_path, os.path.splitext(filenm)[0] + '_Pain.csv', os.path.splitext(filenm)[0], 0)
+            Plot_Landmarks(out_path, os.path.splitext(filenm)[0] + '_Landmarks.csv', os.path.splitext(filenm)[0], 0)
 
         else:
             Retrieve_AUs(out_path, out_path + 'face.csv', 'face')
             Calculate_Pain(out_path, 'face_PSPI_AUs.csv', 'face')
-            Plot_Pain(out_path, 'face_Pain.csv', 'face')
-            Plot_Landmarks(out_path, 'face_Landmarks.csv', 'face')
+            Plot_Pain(out_path, 'face_Pain.csv', 'face', 0)
+            Plot_Landmarks(out_path, 'face_Landmarks.csv', 'face', 0)
 
     else:
         print("> NO CSV FILE ERROR...EXECUTION STOPPED !!")
