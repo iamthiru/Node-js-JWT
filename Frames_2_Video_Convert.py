@@ -1,3 +1,7 @@
+# Proprietary: BentenTech
+# Author: Pranav H. Deo
+# Copyright content
+
 import cv2
 import os
 from os.path import isfile, join
