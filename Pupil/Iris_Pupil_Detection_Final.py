@@ -1,3 +1,7 @@
+# Proprietary: BentenTech
+# Author: Pranav H. Deo
+# Copyright content
+
 import cv2
 import numpy as np
 import pandas as pd
