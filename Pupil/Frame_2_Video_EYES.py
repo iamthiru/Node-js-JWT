@@ -1,3 +1,9 @@
+# Proprietary: BentenTech
+# Author: Pranav H. Deo
+# Copyright Content
+
+# Code Description: Converges frames into Video file
+
 import cv2
 import os
 from os.path import isfile, join
