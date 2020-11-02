@@ -2,6 +2,8 @@
 # Author: Pranav H. Deo
 # Copyright content
 
+# Code Description: 4K/1080p videos. Frames dropped/averaged if pupil drops below 70%. Using previous center to estimate new center if pupil drops below 70%.
+
 import os
 import cv2
 import sys
