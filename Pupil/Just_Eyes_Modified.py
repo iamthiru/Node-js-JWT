@@ -1,3 +1,9 @@
+# Proprietary: BentenTech
+# Author: Pranav H. Deo
+# Copyright Content
+
+# Code Description: Filming 4K/1080p videos of eyes to get Pupil->Iris. Drop threshold of Pupil: 90%. Averaging over on 15 frames. Using window method to bias center detection.
+
 import os
 import cv2
 import sys
