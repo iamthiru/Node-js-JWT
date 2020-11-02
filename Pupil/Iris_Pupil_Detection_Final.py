@@ -2,6 +2,8 @@
 # Author: Pranav H. Deo
 # Copyright content
 
+# Code Description: Filming NIR video of eyes and extracting the Iris and Pupil.
+
 import cv2
 import numpy as np
 import pandas as pd
