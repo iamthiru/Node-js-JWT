@@ -2,6 +2,8 @@
 # Author: Pranav H. Deo
 # Copyright Content
 
+# Code Description: For a 4K Video, Get Face, Get Eyes using landmarks, Find Pupil and Pupil center, Find Iris using Pupil center.
+
 import os
 import cv2
 import sys
