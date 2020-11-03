@@ -39,7 +39,7 @@ def create_dataframe():
     df['Pupil Dilation'] = Pupil_Dilation
 
     for a, b in zip(Iris_Dilation, Pupil_Dilation):
-        ratio.append("{:.5f}".format(a / b))
+        ratio.append("{:.5f}".format(b / a))
     df['Ratio'] = ratio
 
     for i in range(0, len(frame_num)-1):
@@ -65,7 +65,7 @@ def create_dataframe():
     df['Processed Pupil Dilation'] = Pupil_Dilation
 
     for a, b in zip(Iris_Dilation, Pupil_Dilation):
-        processed_ratio.append("{:.5f}".format(a / b))
+        processed_ratio.append("{:.5f}".format(b / a))
     df['Processed Ratio'] = processed_ratio
     df.columns = ['Frame', 'Iris Dilation', 'Pupil Dilation', 'Ratio',
                   'Processed Iris Dilation', 'Processed Pupil Dilation', 'Processed Ratio']
@@ -128,116 +128,92 @@ def Iris_Detection(im, pup_cen):
     global iris_ypoints
     h, w = imge.shape
 
-    # Colored Videos
-    if len(pup_cen) == 0:
-        _, thresh = cv2.threshold(imge, 90, 255, cv2.THRESH_BINARY)
-        # cv2.imshow('Color Thresh', thresh)
-        canny_img = cv2.Canny(thresh, 10, 100)
-        circles = cv2.HoughCircles(canny_img, cv2.HOUGH_GRADIENT, 7, 7000, param1=1500, param2=30, minRadius=int(h/2.7), maxRadius=int(w/4))
-        if circles is not None:
-            circles = np.round(circles[0, :]).astype("int")
+    _, thresh = cv2.threshold(imge, 34, 255, cv2.THRESH_BINARY)
+    # cv2.imshow('Iris Threshold', thresh)
+    canny_img = cv2.Canny(thresh, 10, 100)
+    circles = cv2.HoughCircles(canny_img, cv2.HOUGH_GRADIENT, 7, 7000, param1=1500, param2=30, minRadius=int(h/2.35), maxRadius=int(w/10))
+    if circles is not None:
+        circles = np.round(circles[0, :]).astype("int")
 
-            for (x, y, r) in circles:
-                height, width = imge.shape
-                cv2.circle(im, (x, y), r, (255, 255, 255), 1)
-                mask = np.zeros(imge.shape, np.uint8)
-                cv2.circle(mask, (x, y), r, 255, 2)  # white mask for black border
-                cv2.circle(mask, (x, y), r, 255, -1)  # white mask for (filled) circle
-                imag = cv2.bitwise_or(imge, ~mask)  # image with white background
-
-                x1 = max(x - r - 2 // 2, 0)
-                x2 = min(x + r + 2 // 2, width)
-                y1 = max(y - r - 2 // 2, 0)
-                y2 = min(y + r + 2 // 2, height)
-
-                # Image = imag[y1:y2, x1:x2]
-                iris_xpoints.append(int((x1 + x2) / 2))
-                iris_ypoints.append(int((y1 + y2) / 2))
+        for (x, y, r) in circles:
+            print('\n')
+            print('Iris X and Y: ', x, y)
+            if len(iris_radii) == 0:
+                print('IN A')
+                cv2.circle(im, (x, y), r, (255, 0, 0), 1)
                 iris_radii.append(r)
+                iris_xpoints.append(x)
+                iris_ypoints.append(y)
+                iris_center = np.array([(sum(iris_xpoints) / len(iris_xpoints)), (sum(iris_ypoints) / len(iris_ypoints))], dtype=np.int)
+            else:
+                x_ll = int(np.floor(np.average(iris_xpoints))) - 2
+                x_ul = int(np.ceil(np.average(iris_xpoints))) + 2
+                y_ll = int(np.floor(np.average(iris_ypoints))) - 2
+                y_ul = int(np.ceil(np.average(iris_ypoints))) + 2
+                print('Range: ', x_ll, x_ul, ' ; ', y_ll, y_ul)
 
-            avg_rad = sum(iris_radii) / len(iris_radii)
-            Iris_Dilation.append(avg_rad)
+                if (x_ll <= x <= x_ul) and (y_ll <= y <= y_ul):
+                    print('IN B')
+                    cv2.circle(im, (x, y), r, (255, 0, 0), 1)
+                    # cv2.rectangle(im, (x_ll, y_ll), (x_ul, y_ul), (0, 0, 255), 1)
+                    iris_radii.append(r)
+                    iris_xpoints.append(x)
+                    iris_ypoints.append(y)
+                    iris_center = np.array([(sum(iris_xpoints) / len(iris_xpoints)), (sum(iris_ypoints) / len(iris_ypoints))], dtype=np.int)
+                else:
+                    print('IN C')
+                    x_new = int((int(np.average(iris_xpoints[-5:])) + x) / 2)
+                    y_new = int((int(np.average(iris_ypoints[-5:])) + y) / 2)
+                    cv2.circle(im, (x_new, y_new), r, (255, 0, 0), 1)
+                    # cv2.rectangle(im, (x_ll, y_ll), (x_ul, y_ul), (0, 0, 255), 1)
+                    iris_radii.append(r)
+                    iris_xpoints.append(x)
+                    iris_ypoints.append(y)
+                    iris_center = np.array([(sum(iris_xpoints) / len(iris_xpoints)), (sum(iris_ypoints) / len(iris_ypoints))], dtype=np.int)
+            Iris_Dilation.append(r)
 
-        iris_center = np.array([(sum(iris_xpoints) / len(iris_xpoints)), (sum(iris_ypoints) / len(iris_ypoints))], dtype=np.int)
-        return im, iris_center
-
-    # NIR Videos
-    else:
-        _, thresh = cv2.threshold(imge, 40, 255, cv2.THRESH_BINARY)
-        # cv2.imshow('Iris Threshold', thresh)
-        canny_img = cv2.Canny(thresh, 10, 100)
-        circles = cv2.HoughCircles(canny_img, cv2.HOUGH_GRADIENT, 7, 7000, param1=1500, param2=30, minRadius=int(h/2.35), maxRadius=int(w/10))
-        if circles is not None:
-            circles = np.round(circles[0, :]).astype("int")
-
-            for (x, y, r) in circles:
-                cv2.circle(im, (pup_cen[0], pup_cen[1]), r, (255, 0, 0), 1)
-                iris_radii.append(r)
-
-            avg_rad = sum(iris_radii) / len(iris_radii)
-            Iris_Dilation.append(avg_rad)
-
-        return im
+    return im, iris_center
 
 
 ########################################################################################################################
 
 def Pupil_Detection(im, iris_cen):
     imge = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
-    pupil_center = []
     global pupil_radii
     global pupil_xpoints
     global pupil_ypoints
     h, w = imge.shape
 
-    # NIR Videos
-    if len(iris_cen) == 0:
-        _, thresh = cv2.threshold(imge, 15, 255, cv2.THRESH_BINARY)
-        canny_img = cv2.Canny(thresh, 10, 100)
-        circles = cv2.HoughCircles(canny_img, cv2.HOUGH_GRADIENT, 7, 7000, param1=1500,
-                                   param2=30, minRadius=int(h / 12), maxRadius=int(w / 5.5))
+    _, thresh = cv2.threshold(imge, 15, 255, cv2.THRESH_BINARY)
+    # cv2.imshow('Pupil', thresh)
+    canny_img = cv2.Canny(thresh, 10, 100)
+    circles = cv2.HoughCircles(canny_img, cv2.HOUGH_GRADIENT, 7, 7000, param1=1500, param2=30, minRadius=int(h/12), maxRadius=int(w/5.5))
 
-        if circles is not None:
-            circles = np.round(circles[0, :]).astype("int")
+    if circles is not None:
+        circles = np.round(circles[0, :]).astype("int")
 
-            for (x, y, r) in circles:
-                print('\n')
-                print('Pupil X and Y: ', x, y)
-                if len(pupil_radii) == 0:
-                    print('IN A')
-                    cv2.circle(im, (x, y), r, (0, 255, 0), 1)
-                    pupil_radii.append(r)
-                    pupil_xpoints.append(x)
-                    pupil_ypoints.append(y)
-                    pupil_center = np.array([(sum(pupil_xpoints) / len(pupil_xpoints)), (sum(pupil_ypoints) / len(pupil_ypoints))], dtype=np.int)
-                else:
-                    x_ll = int(np.floor(np.average(pupil_xpoints))) - 5
-                    x_ul = int(np.ceil(np.average(pupil_xpoints))) + 5
-                    y_ll = int(np.floor(np.average(pupil_ypoints))) - 5
-                    y_ul = int(np.ceil(np.average(pupil_ypoints))) + 5
-                    print('Range: ', x_ll, x_ul, ' ; ', y_ll, y_ul)
-
-                    if (x_ll <= x <= x_ul) and (y_ll <= y <= y_ul):
-                        print('IN B')
-                        cv2.circle(im, (x, y), r, (0, 255, 0), 1)
-                        # cv2.rectangle(im, (x_ll, y_ll), (x_ul, y_ul), (0, 0, 255), 1)
-                        pupil_radii.append(r)
-                        pupil_xpoints.append(x)
-                        pupil_ypoints.append(y)
-                        pupil_center = np.array([(sum(pupil_xpoints) / len(pupil_xpoints)), (sum(pupil_ypoints) / len(pupil_ypoints))], dtype=np.int)
-                    else:
-                        print('IN C')
-                        x_new = int((int(np.average(pupil_xpoints[-15:])) + x) / 2)
-                        y_new = int((int(np.average(pupil_ypoints[-15:])) + y) / 2)
-                        cv2.circle(im, (x_new, y_new), r, (0, 255, 0), 1)
-                        # cv2.rectangle(im, (x_ll, y_ll), (x_ul, y_ul), (0, 0, 255), 1)
-                        pupil_radii.append(r)
-                        pupil_xpoints.append(x)
-                        pupil_ypoints.append(y)
-                        pupil_center = np.array([(sum(pupil_xpoints) / len(pupil_xpoints)), (sum(pupil_ypoints) / len(pupil_ypoints))], dtype=np.int)
+        for (x, y, r) in circles:
+            x_ll = int(np.floor(np.average(iris_xpoints))) - 2
+            x_ul = int(np.ceil(np.average(iris_xpoints))) + 2
+            y_ll = int(np.floor(np.average(iris_ypoints))) - 2
+            y_ul = int(np.ceil(np.average(iris_ypoints))) + 2
+            if (x_ll <= x <= x_ul) and (y_ll <= y <= y_ul):
+                cv2.circle(im, (x, y), r, (0, 255, 0), 1)
+                pupil_xpoints.append(x)
+                pupil_ypoints.append(y)
+                Pupil_Dilation.append(r)
+            elif len(pupil_xpoints) and len(pupil_ypoints) != 0:
+                avg_x = int((np.average(pupil_xpoints) + iris_cen[0]) / 2)
+                avg_y = int((np.average(pupil_ypoints) + iris_cen[1]) / 2)
+                cv2.circle(im, (avg_x, avg_y), r, (0, 255, 0), 1)
+                Pupil_Dilation.append(r)
+            else:
+                avg_x = int((x + iris_cen[0]) / 2)
+                avg_y = int((y + iris_cen[1]) / 2)
+                cv2.circle(im, (avg_x, avg_y), r, (0, 255, 0), 1)
                 Pupil_Dilation.append(r)
 
-        return im, pupil_center
+    return im
 
 
 #####################################################################################################################
@@ -272,7 +248,7 @@ fps = video.get(cv2.CAP_PROP_FPS)
 frame_rate = fps
 print('> FPS: ', fps)
 
-while video.isOpened() and count < 150:
+while video.isOpened() and count <= 250:
     if counter % 2 == 0:
         ret, frame = video.read()
 
@@ -284,10 +260,11 @@ while video.isOpened() and count < 150:
                 im = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
                 im = cv2.filter2D(im, -1, kernel)
                 im = cv2.GaussianBlur(im, (5, 5), 0)
-                Pupil, Pupil_center = Pupil_Detection(im, emptylist)
-                Iris = Iris_Detection(im, Pupil_center)
-                cv2.imshow('NIR', Iris)
-                cv2.imwrite('/Users/pranavdeo/Desktop/Output_Frames/Frame_' + str(count) + '.png', Iris)
+                # Pupil, Pupil_center = Pupil_Detection(im, emptylist)
+                Iris, Iris_center = Iris_Detection(im, emptylist)
+                Pupil = Pupil_Detection(Iris, Iris_center)
+                cv2.imshow('NIR', Pupil)
+                cv2.imwrite('/Users/pranavdeo/Desktop/Output_Frames/Frame_' + str(count) + '.png', Pupil)
                 flag = 1
 
             elif video_type == 'Color':
@@ -324,7 +301,7 @@ if flag == 1:
     if len(Pupil_Dilation) < len(frame_num):
         amt = len(frame_num) - len(Pupil_Dilation)
         for x in range(0, amt):
-            Pupil_Dilation.append(Pupil_Dilation[len(Pupil_Dilation) - 1])
+            Pupil_Dilation.append(Pupil_Dilation[len(Pupil_Dilation)-1])
 
     if len(Iris_Dilation) < len(frame_num):
         amt = len(frame_num) - len(Iris_Dilation)
