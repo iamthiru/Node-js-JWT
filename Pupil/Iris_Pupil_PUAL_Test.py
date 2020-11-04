@@ -2,6 +2,8 @@
 # Author: Pranav H. Deo
 # Copyright content
 
+# Aim: Testing Dr. Niece's Blue/Brown eyes
+
 import cv2
 import numpy as np
 import pandas as pd
