@@ -24,4 +24,8 @@
   * This HOUGH_CIRCLES Function finds us some 'X' number of circles which best fit on top of the Canny Edge detection.
   * For the circle we find:
     * We allow it to find the best X,Y center locations and Radii for the first 15 frames (Since we are using 15FPS).
-    * For the next incoming frames we use a window biasing technique, where we check if the X,Y and Radius lie in that allowable range. If yes then we allow it to detect that center and Radius; if not, then we bias it to use the last 5-10 frames average to detect the center co-ordinates and radius. This allows the algorithm a bit freedom if within the allowable window and guides it to the correct radius range and center if outside the window of tolerance.
+    * For the next incoming frames we use a window biasing technique, where we check if the X,Y and Radius lie in that allowable range. If yes then we allow it to detect that center and Radius; if not, then we bias it to use the last 5-10 frames average to detect the center co-ordinates and radius. This gives the algorithm a bit of freedom (if within the allowable window) and guides it to the correct radius range and center (if outside the window of tolerance).
+    * After this we return the frame and the center location to the Iris detection Function which makes use of these paramters to detect the correct Iris circle and center.
+    
+### IRIS DETECTION:
+* 
