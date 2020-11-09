@@ -14,10 +14,11 @@
   * The Pupil uses the frame passed to it from the IRIS_DETECTION function along with the Iris center.
   * Based on the frames, centers and radius collected within lists for Pupil and Iris, we compute the ratio (Function: CREATE_DATAFRAME).
   * A graph is created after cleaning for noise and sudden drops/surges in radii of Pupil and Iris (Function: PLOT_DILATIONS).
-  
+
+
 ### PUPIL DETECTION:
 * This function is divided into 2 parts for handling NIR and COLOR Videos.
-* NIR Part:
+* ##### NIR Part:
   * Since Pupil is the first thing which should be detected in NIR videos, we threshold the incoming frame using a manually entered number (The one which accurately find us our Pupil).
   * We use this thresholded frame to find Canny Edges and pass it to a OpenCV function: cv2.HOUGHCIRCLES().
   * Using a HOUGH_GRADIENT we set the parameters which produces the best results along with Minimum and Maximum Radii range.
@@ -26,7 +27,14 @@
     * We allow it to find the best X,Y center locations and Radii for the first 15 frames (Since we are using 15FPS).
     * For the next incoming frames we use a window biasing technique, where we check if the X,Y and Radius lie in that allowable range. If yes then we allow it to detect that center and Radius; if not, then we bias it to use the last 5-10 frames average to detect the center co-ordinates and radius. This gives the algorithm a bit of freedom (if within the allowable window) and guides it to the correct radius range and center (if outside the window of tolerance).
     * After this we return the frame and the center location to the Iris detection Function which makes use of these paramters to detect the correct Iris circle and center.
-    
+* ##### Colored Part:
+  * The Pupil detection follows the Iris detection in this case. Iris detection sends it frames with Iris region and center co-ordinates.
+  * The same process follows for Thresholding, Canny and cv2.HOUGH_CIRCLES.
+  * For the circles it finds:
+    * We use the Iris center co-ordinates as the pupils window to detect its center co-ordinates. If it lies inside that window then we allow it else we bias it to use the same center as that of the Iris.
+    * This allows it more freedom to detect the correct center and not drift away with Iris in case it fails. This guarantees robustness.
+
+
 ### IRIS DETECTION:
 * This function is also divided into 2 parts for handling NIR and COLOR Videos.
 * NIR Part:
