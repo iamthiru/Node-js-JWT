@@ -18,8 +18,8 @@
 ### PUPIL DETECTION:
 * This function is divided into 2 parts for handling NIR and COLOR Videos.
 * NIR Part:
-  * Since Pupil is the first thing which should be detected in NIR videos, we threhold the incoming frame using a manually entered number (The one which accurately find us our Pupil).
-  * We use this threholded frame to find Canny Edges and pass it to a OpenCV function: cv2.HOUGHCIRCLES().
+  * Since Pupil is the first thing which should be detected in NIR videos, we threshold the incoming frame using a manually entered number (The one which accurately find us our Pupil).
+  * We use this thresholded frame to find Canny Edges and pass it to a OpenCV function: cv2.HOUGHCIRCLES().
   * Using a HOUGH_GRADIENT we set the parameters which produces the best results along with Minimum and Maximum Radii range.
   * This HOUGH_CIRCLES Function finds us some 'X' number of circles which best fit on top of the Canny Edge detection.
   * For the circle we find:
@@ -28,4 +28,14 @@
     * After this we return the frame and the center location to the Iris detection Function which makes use of these paramters to detect the correct Iris circle and center.
     
 ### IRIS DETECTION:
-* 
+* This function is also divided into 2 parts for handling NIR and COLOR Videos.
+* NIR Part:
+  * The Iris detection follows the Pupil Detection and it makes use of the center and the frame it gets from the PUPIL_DETECTION function.
+  * A different manually entered value is used for the Iris Thresholding operation.
+  * We use this thresholded frame to find Canny Edges and pass it to a OpenCV function: cv2.HOUGHCIRCLES().
+  * Using a HOUGH_GRADIENT we set the parameters which produces the best results along with Minimum and Maximum Radii range.
+  * This HOUGH_CIRCLES Function finds us some 'X' number of circles which best fit on top of the Canny Edge detection.
+  * For the circle we find:
+    * We use the pupil center co-ordinates and Iris detected Radii for the first 15 frames (Since we are using 15FPS).
+    * For the next incoming frames we use a window biasing technique, where we check if the X,Y and Radius lie in that allowable range. If yes then we allow it to detect that center and Radius; if not, then we bias it to use the last 5-10 frames average to detect the center co-ordinates it got from the PUPIL_DETECTION function. This gives the algorithm a bit of freedom (if within the allowable window) and guides it to the correct radius range and center (if outside the window of tolerance).
+    * Finally we return the frame with embedded PUPIL and IRIS circles.
