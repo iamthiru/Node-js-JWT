@@ -2,9 +2,10 @@
 # Author: Pranav H. Deo
 # Copyright Content
 
-# Code Description: 1080p videos of eyes to get Pupil->Iris. 
-#                   Drop threshold of Pupil: 85%. Averaging over on 5 frames.
-#                   Using window method to bias center and radius detection.
+# Code Description: 
+# 1080p videos of eyes to get Pupil->Iris. 
+# Drop threshold of Pupil: 85%. Averaging over on 5 frames.
+# Using window method to bias center and radius detection.
 
 import os
 import cv2
@@ -149,10 +150,10 @@ def Iris_Detection(im, pup_cen, v_type):
                     iris_xpoints.append(pup_cen[0])
                     iris_ypoints.append(pup_cen[1])
                 else:
-                    x_ll = int(np.floor(np.average(iris_xpoints))) - 6
-                    x_ul = int(np.ceil(np.average(iris_xpoints))) + 6
-                    y_ll = int(np.floor(np.average(iris_ypoints))) - 6
-                    y_ul = int(np.ceil(np.average(iris_ypoints))) + 6
+                    x_ll = int(np.floor(np.average(pupil_xpoints))) - 6
+                    x_ul = int(np.ceil(np.average(pupil_xpoints))) + 6
+                    y_ll = int(np.floor(np.average(pupil_ypoints))) - 6
+                    y_ul = int(np.ceil(np.average(pupil_ypoints))) + 6
                     r_ll = int(np.floor(np.average(iris_radii))) - 2
                     r_ul = int(np.ceil(np.ceil(np.average(iris_radii)))) + 2
 
@@ -295,10 +296,10 @@ def Pupil_Detection(im, iris_cen, v_type):
                     pupil_xpoints.append(iris_cen[0])
                     pupil_ypoints.append(iris_cen[1])
                 else:
-                    x_ll = int(np.floor(np.average(pupil_xpoints))) - 6
-                    x_ul = int(np.ceil(np.average(pupil_xpoints))) + 6
-                    y_ll = int(np.floor(np.average(pupil_ypoints))) - 6
-                    y_ul = int(np.ceil(np.average(pupil_ypoints))) + 6
+                    x_ll = int(np.floor(np.average(iris_xpoints))) - 6
+                    x_ul = int(np.ceil(np.average(iris_xpoints))) + 6
+                    y_ll = int(np.floor(np.average(iris_ypoints))) - 6
+                    y_ul = int(np.ceil(np.average(iris_ypoints))) + 6
                     r_ll = int(np.floor(np.average(pupil_radii))) - 3
                     r_ul = int(np.ceil(np.average(pupil_radii))) + 3
 
@@ -337,12 +338,12 @@ if len(sys.argv) > 1:
     video_type = str(sys.argv[3])
     video = cv2.VideoCapture('/Users/pranavdeo/PycharmProjects/FaceEmotionRecognition/Face_NIR_Color_Videos/' + filename)
 else:
-    # ch = 1
-    # video_type = 'Color'
-    # filename = 'Dr_Niece_Video.mp4'
-    filename = '1080p_02.MOV'
-    ch = 2
-    video_type = 'NIR'
+    ch = 1
+    video_type = 'Color'
+    filename = 'Dr_Niece_Video.mp4'
+    #filename = '1080p_02.MOV'
+    #ch = 2
+    #video_type = 'NIR'
     video = cv2.VideoCapture('/Users/pranavdeo/PycharmProjects/FaceEmotionRecognition/Pupil_Input_Videos/1080p_JUST_EYES/' + filename)
 
 fps = video.get(cv2.CAP_PROP_FPS)
@@ -425,4 +426,3 @@ usage = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 end_time = time.time() - start_time
 print('Execution Time : ', end_time, ' sec')
 print('Memory Usage : ', (usage/np.power(10, 6)), ' MB')
-
