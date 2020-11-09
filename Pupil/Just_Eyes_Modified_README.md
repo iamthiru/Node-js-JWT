@@ -53,4 +53,4 @@
   * Using the same operations like Thresholding, Canny Edge and cv2.HOUGH_CIRCLES, we find the best fit circles.
   * For the circles we find:
     * For the first 15 frames we allow it to find its own center co-ordinates and the radius range.
-    * For the next incoming frames, we see if the current detected center points lies in the Allowable window. If yes, we allow it to use that center else we bias it to use the previous 5 frames center co-ordinates and radius range. This is meant to give the algorithm some bound the algorithm and give it enough freedom at the same time to get the most accurate center.
+    * For the next incoming frames, we see if the current detected center points lies in the Allowable window. If yes, we allow it to use that center else we bias it to use the previous 5-10 frames center co-ordinates and radius range. This is meant to give the algorithm some bound the algorithm and give it enough freedom at the same time to get the most accurate center.
