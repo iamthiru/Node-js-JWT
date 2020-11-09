@@ -4,6 +4,7 @@
 
 ### Main Function:
 * The choice is made based on the type of video (NIR/Color).
+* We use a 3x3 kernel to sharpen and Gaussian Blur to smoothen the frame.
 * For an NIR Video:
   * We detect the Pupil and Pupil center (in a frame) since it has more contrast as compared to the Iris (Function: PUPIL_DETECTION).
   * Iris is then detected using the returned frame from PUPIL_DETECTION along with the Pupil center.
@@ -37,7 +38,7 @@
 
 ### IRIS DETECTION:
 * This function is also divided into 2 parts for handling NIR and COLOR Videos.
-* NIR Part:
+* ##### NIR Part:
   * The Iris detection follows the Pupil Detection and it makes use of the center and the frame it gets from the PUPIL_DETECTION function.
   * A different manually entered value is used for the Iris Thresholding operation.
   * We use this thresholded frame to find Canny Edges and pass it to a OpenCV function: cv2.HOUGHCIRCLES().
@@ -47,3 +48,9 @@
     * We use the pupil center co-ordinates and Iris detected Radii for the first 15 frames (Since we are using 15FPS).
     * For the next incoming frames we use a window biasing technique, where we check if the X,Y and Radius lie in that allowable range. If yes then we allow it to detect that center and Radius; if not, then we bias it to use the last 5-10 frames average to detect the center co-ordinates it got from the PUPIL_DETECTION function. This gives the algorithm a bit of freedom (if within the allowable window) and guides it to the correct radius range and center (if outside the window of tolerance).
     * Finally we return the frame with embedded PUPIL and IRIS circles.
+* ##### Colored Part:
+  * When using a colored video, we detect the Iris first.
+  * Using the same operations like Thresholding, Canny Edge and cv2.HOUGH_CIRCLES, we find the best fit circles.
+  * For the circles we find:
+    * For the first 15 frames we allow it to find its own center co-ordinates and the radius range.
+    * For the next incoming frames, we see if the current detected center points lies in the Allowable window. If yes, we allow it to use that center else we bias it to use the previous 5 frames center co-ordinates and radius range. This is meant to give the algorithm some bound the algorithm and give it enough freedom at the same time to get the most accurate center.
