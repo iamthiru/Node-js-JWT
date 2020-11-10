@@ -30,25 +30,20 @@ filenames.sort()
 images = [cv2.imread(img) for img in filenames]
 
 point_total = []
-count = 0
 for image in images:
-    if count <= 5:
-        p_current = []
-        img_copy = image
-        src = cv2.cvtColor(img_copy, cv2.COLOR_BGR2GRAY)
-        img_copy = cv2.equalizeHist(src)
-        draw_grid(img_copy)
-        cv2.imshow('out', img_copy)
-        cv2.setMouseCallback('out', mousePoints)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
-        print('Frame Done! Loading Next Frame')
-        point_total.append(p_current)
-        print(len(point_total))
-        count = count + 1
+    p_current = []
+    img_copy = image
+    src = cv2.cvtColor(img_copy, cv2.COLOR_BGR2GRAY)
+    img_copy = cv2.equalizeHist(src)
+    draw_grid(img_copy)
+    cv2.imshow('out', img_copy)
+    cv2.setMouseCallback('out', mousePoints)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+    print('Frame Done! Loading Next Frame')
+    point_total.append(p_current)
+    print(len(point_total))
 
-point_total
-point_total[0][0]
 iris_radius = []
 pupil_radius = []
 for points in point_total:
