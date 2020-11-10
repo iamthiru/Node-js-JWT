@@ -10,7 +10,7 @@
     
   - ***Pupillary Pain:***
     * **Methods of Detection:** Verifying the increase/decrease in the diameter of Pupil (Measuring Pupil Dilation).
-    * **Method Used:** Modified HOUGH circles + DAUGMAN Model + BIASED Averaging.
+    * **Method Used:** Modified HOUGH circles + DAUGMAN Model + Window BIASING for Center and Radius.
 
 
 #### Hardware Pre-requisities
