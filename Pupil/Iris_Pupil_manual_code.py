@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[12]:
-
-
 import cv2
 from scipy.spatial import distance as dist
 import numpy as np
@@ -11,9 +5,6 @@ import glob
 import csv
 import pandas as pd 
 import matplotlib.pyplot as plt
-
-
-# In[13]:
 
 
 def draw_grid(img, line_color=(0, 255, 0), thickness=1, type_=cv2.LINE_AA, pxstep=20, pystep=20):
@@ -47,16 +38,10 @@ def mousePoints(event,x,y,flags,params):
         print(p_current)
 
 
-# In[14]:
-
-
 ## Give the path to the frames
 filenames = glob.glob(r"C:\Users\Nischal\Desktop\EyeManual\sample\*.png")
 filenames.sort()
 images = [cv2.imread(img) for img in filenames]
-
-
-# In[15]:
 
 
 point_total=[]
@@ -73,24 +58,10 @@ for image in images:
     print('Frame Done! Loading Next Frame')
     point_total.append(p_current)
     print(len(point_total))
-    
-
-
-# In[16]:
 
 
 point_total
-
-
-# In[17]:
-
-
 point_total[0][0]
-
-
-# In[18]:
-
-
 iris_dia=[]
 pupil_dia=[]
 for points in point_total:
@@ -102,16 +73,7 @@ for points in point_total:
     pupil_dia.append(PD)
     print(PD)
 
-    
-
-
-# In[19]:
-
-
 len(pupil_dia)
-
-
-# In[20]:
 
 
 data = []
@@ -127,9 +89,6 @@ df['pupil/iris_ratio'] = P_by_I
 df.to_csv (r'C:\Users\Nischal\Desktop\EyeManual\Output\data.csv', index = True, header=True)
 
 
-# In[21]:
-
-
 plt.xlabel('Frame')
 plt.ylabel('IRIS/PUPIL')
 plt.plot(I_by_P)
@@ -137,18 +96,8 @@ plt.plot(I_by_P)
 plt.savefig('./Output/IRIS_by_PUPIL.png')
 
 
-# In[22]:
-
-
 plt.xlabel('Frame')
 plt.ylabel('PUPIL/IRIS')
 plt.plot(P_by_I)
 ## Give path for plot
 plt.savefig('./Output/PUPIL_by_IRIS.png')
-
-
-# In[ ]:
-
-
-
-
