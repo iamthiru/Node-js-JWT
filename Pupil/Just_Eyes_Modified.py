@@ -72,14 +72,14 @@ def create_dataframe():
     df['Processed Ratio'] = processed_ratio
     df.columns = ['Frame', 'Iris Dilation', 'Pupil Dilation', 'Ratio',
                   'Processed Iris Dilation', 'Processed Pupil Dilation', 'Processed Ratio']
-    df.to_csv('/Users/pranavdeo/PycharmProjects/FaceEmotionRecognition/static/Face_Pupil_Output_Images/' +
+    df.to_csv('/Users/pranavdeo/PycharmProjects/FaceEmotionRecognition/static/Pupil_Output_Images/' +
               os.path.splitext(filename)[0] + '_Dilation.csv', index=False)
 
 
 ########################################################################################################################
 
 def plot_dilations():
-    df = pd.read_csv('/Users/pranavdeo/PycharmProjects/FaceEmotionRecognition/static/Face_Pupil_Output_Images/' +
+    df = pd.read_csv('/Users/pranavdeo/PycharmProjects/FaceEmotionRecognition/static/Pupil_Output_Images/' +
                      os.path.splitext(filename)[0] + '_Dilation.csv')
     x_list = df['Frame']
     y1_list = df['Iris Dilation']
@@ -118,7 +118,7 @@ def plot_dilations():
     ax4.set_yticks([0, 0.5, 1])
 
     fig.tight_layout()
-    plt.savefig('/Users/pranavdeo/PycharmProjects/FaceEmotionRecognition/static/Face_Pupil_Output_Images/' +
+    plt.savefig('/Users/pranavdeo/PycharmProjects/FaceEmotionRecognition/static/Pupil_Output_Images/' +
                 os.path.splitext(filename)[0] + '_Dilation_Plot.png')
     plt.close()
 
@@ -336,7 +336,7 @@ if len(sys.argv) > 1:
     ch = int(sys.argv[1])
     filename = str(sys.argv[2])
     video_type = str(sys.argv[3])
-    video = cv2.VideoCapture('/Users/pranavdeo/PycharmProjects/FaceEmotionRecognition/Face_NIR_Color_Videos/' + filename)
+    video = cv2.VideoCapture('/Users/pranavdeo/PycharmProjects/FaceEmotionRecognition/Pupil_Input_Videos/' + filename)
 else:
     ch = 1
     video_type = 'Color'
@@ -373,6 +373,7 @@ while video.isOpened() and count <= 250:
             elif video_type == 'Color':
                 im = cv2.filter2D(frame, -1, kernel)
                 im = cv2.GaussianBlur(im, (5, 5), 0)
+                cv2.imwrite('/Users/pranavdeo/Desktop/Results/Frames/Frame_' + str(count) + '.png', im)
                 Iris, Iris_center = Iris_Detection(im, emptylist, video_type)
                 Pupil = Pupil_Detection(Iris, Iris_center, video_type)
                 cv2.imshow('Color', Pupil)
@@ -425,4 +426,4 @@ print("\n#######################################################################
 usage = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 end_time = time.time() - start_time
 print('Execution Time : ', end_time, ' sec')
-print('Memory Usage : ', (usage/np.power(10, 6)), ' MB')
+print('Memory Usage : ', usage, ' MB')
