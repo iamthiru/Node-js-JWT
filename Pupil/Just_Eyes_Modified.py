@@ -426,4 +426,4 @@ print("\n#######################################################################
 usage = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 end_time = time.time() - start_time
 print('Execution Time : ', end_time, ' sec')
-print('Memory Usage : ', usage, ' MB')
+print('Memory Usage : ', usage)
