@@ -164,7 +164,7 @@ def Iris_Detection(im, pup_cen, v_type):
                         iris_xpoints.append(x)
                         iris_ypoints.append(y)
                     else:
-                        print('BIASING: IRIS')
+                        # print('BIASING: IRIS')
                         r = np.average(iris_radii[-5:])
                         iris_radii.append(r)
                         cv2.circle(im, (pup_cen[0], pup_cen[1]), int(r), (255, 0, 0), 1)
@@ -176,7 +176,7 @@ def Iris_Detection(im, pup_cen, v_type):
 
     # COLORED VIDEOS
     else:
-        print('\n')
+        # print('\n')
         _, thresh = cv2.threshold(imge, 80, 255, cv2.THRESH_BINARY)
         # cv2.imshow('Iris Threshold', thresh)
         canny_img = cv2.Canny(thresh, 30, 90)
@@ -208,7 +208,7 @@ def Iris_Detection(im, pup_cen, v_type):
                         iris_ypoints.append(y)
                         iris_center = [x, y]
                     else:
-                        print('BIASING: IRIS')
+                        # print('BIASING: IRIS')
                         x_new = int(np.average(iris_xpoints[-5:]))
                         y_new = int(np.average(iris_ypoints[-5:]))
                         r = np.average(iris_radii[-5:])
@@ -233,10 +233,10 @@ def Pupil_Detection(im, iris_cen, v_type):
     h, w = imge.shape
 
     if v_type == 'NIR':
-        print('\n')
+        # print('\n')
         _, thresh = cv2.threshold(imge, 15, 255, cv2.THRESH_BINARY)
         cv2.imwrite('/Users/pranavdeo/Desktop/Results/Pupil_Thresh/Frame_' + str(count) + '.png', thresh)
-        cv2.imshow('Pupil', thresh)
+        # cv2.imshow('Pupil', thresh)
         canny_img = cv2.Canny(thresh, 10, 30)
         cv2.imwrite('/Users/pranavdeo/Desktop/Results/Pupil_Canny/Frame_' + str(count) + '.png', canny_img)
         circles = cv2.HoughCircles(canny_img, cv2.HOUGH_GRADIENT, 7, 7000, param1=1500, param2=30, minRadius=int(h/12), maxRadius=int(w/5.5))
@@ -266,7 +266,7 @@ def Pupil_Detection(im, iris_cen, v_type):
                         pupil_ypoints.append(y)
                         pupil_center = [x, y]
                     else:
-                        print('BIASING: PUPIL')
+                        # print('BIASING: PUPIL')
                         x_new = int(np.average(pupil_xpoints[-5:]))
                         y_new = int(np.average(pupil_ypoints[-5:]))
                         r = np.average(pupil_radii[-5:])
@@ -281,9 +281,9 @@ def Pupil_Detection(im, iris_cen, v_type):
     # COLORED VIDEOS
     else:
         _, thresh = cv2.threshold(imge, 25, 255, cv2.THRESH_BINARY)
-        cv2.imshow('Pupil', thresh)
+        # cv2.imshow('Pupil', thresh)
         canny_img = cv2.Canny(thresh, 10, 30)
-        cv2.imshow('Canny', canny_img)
+        # cv2.imshow('Canny', canny_img)
         circles = cv2.HoughCircles(canny_img, cv2.HOUGH_GRADIENT, 7, 7000, param1=1500, param2=30, minRadius=int(h/15), maxRadius=int(w/5))
 
         if circles is not None:
@@ -309,7 +309,7 @@ def Pupil_Detection(im, iris_cen, v_type):
                         pupil_xpoints.append(x)
                         pupil_ypoints.append(y)
                     else:
-                        print('BIASING: PUPIL')
+                        # print('BIASING: PUPIL')
                         r = np.average(pupil_radii[-5:])
                         pupil_radii.append(r)
                         cv2.circle(im, (iris_cen[0], iris_cen[1]), int(r), (0, 255, 0), 1)
@@ -425,5 +425,5 @@ print("\n#######################################################################
 
 usage = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 end_time = time.time() - start_time
-print('Execution Time : ', end_time, ' sec')
-print('Memory Usage : ', usage)
+print('Execution Time : ', end_time, 'sec')
+print('Memory Usage : ', (usage/np.power(10, 6)), 'MB')
