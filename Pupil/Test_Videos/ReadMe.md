@@ -1,2 +1,6 @@
-Colored Video: Dr. Niece Blue Eyes Video
-NIR video: 1080p_02.MOV
+## Sample Video Files:
+
+#### Colored Video: Dr. Niece Blue Eyes Video
+#### NIR video: 1080p_02.MOV
+
+## Output Files:
