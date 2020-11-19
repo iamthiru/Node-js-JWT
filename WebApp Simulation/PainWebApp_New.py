@@ -1,3 +1,7 @@
+# Proprietary: BentenTech
+# Author: Pranav H. Deo
+# Copyright Content
+
 from flask import *
 import os
 import pandas as pd
@@ -124,7 +128,7 @@ def Process_Facial():
     res_img_fold = os.path.join('static', 'Facial_Output_Images')
     app.config['FACIAL_OUTPUT_FOLDER'] = res_img_fold
     img_name = str(os.path.splitext(face_fname)[0])
-    file = img_name + '_Pain.csv'
+    file = img_name + '_PSPI_AUs_Pain.csv'
     csv_file = os.path.join(app.config['FACIAL_OUTPUT_FOLDER'], file)
     df = pd.read_csv(csv_file)
     pain_score = df['Pain_PSPI']
