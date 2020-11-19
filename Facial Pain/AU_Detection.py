@@ -245,7 +245,7 @@ if __name__ == "__main__":
         if tag == 1:
             in_path = "/Users/pranavdeo/PycharmProjects/FaceEmotionRecognition/Face_Input_Videos/" + filenm
         else:
-            in_path = "/Face_Input_Videos/face.avi"
+            in_path = "/Users/pranavdeo/PycharmProjects/FaceEmotionRecognition/Face_Input_Videos/face.avi"
         os.chdir('OpenFace')
         Image_Processing(in_path, out_path)
         sign = 0
@@ -278,14 +278,14 @@ if __name__ == "__main__":
         if tag == 1:
             Retrieve_AUs(out_path, out_path + os.path.splitext(filenm)[0] + '.csv', os.path.splitext(filenm)[0])
             Calculate_Pain(out_path, os.path.splitext(filenm)[0] + '_PSPI_AUs.csv', os.path.splitext(filenm)[0])
-            Plot_Pain(out_path, os.path.splitext(filenm)[0] + '_Pain.csv', os.path.splitext(filenm)[0], 0)
-            Plot_Landmarks(out_path, os.path.splitext(filenm)[0] + '_Landmarks.csv', os.path.splitext(filenm)[0], 0)
+            Plot_Pain(out_path, os.path.splitext(filenm)[0] + '_PSPI_AUs_Pain.csv', os.path.splitext(filenm)[0], 0)
+            # Plot_Landmarks(out_path, os.path.splitext(filenm)[0] + '_Landmarks.csv', os.path.splitext(filenm)[0], 0)
 
         else:
             Retrieve_AUs(out_path, out_path + 'face.csv', 'face')
             Calculate_Pain(out_path, 'face_PSPI_AUs.csv', 'face')
-            Plot_Pain(out_path, 'face_Pain.csv', 'face', 0)
-            Plot_Landmarks(out_path, 'face_Landmarks.csv', 'face', 0)
+            Plot_Pain(out_path, 'face_PSPI_AUs_Pain.csv', 'face', 0)
+            # Plot_Landmarks(out_path, 'face_Landmarks.csv', 'face', 0)
 
     else:
         print("> NO CSV FILE ERROR...EXECUTION STOPPED !!")
