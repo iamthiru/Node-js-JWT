@@ -1,5 +1,7 @@
 ## Sample Video Files:
 
+AFTER MODIFYING THE PARAMETERS FOR THE HOUGH.CIRCLES
+
 #### Colored Video: Dr_Niece_Video.mp4
 #### NIR video: 1080p_02.MOV
 
