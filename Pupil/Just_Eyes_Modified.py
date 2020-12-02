@@ -2,8 +2,8 @@
 # Author: Pranav H. Deo
 # Copyright Content
 
-# Code Description: 
-# 1080p videos of eyes to get Pupil->Iris. 
+# Code Description:
+# 1080p videos of eyes to get Pupil->Iris.
 # Drop threshold of Pupil: 85%. Averaging over on 5 frames.
 # Using window method to bias center and radius detection.
 
@@ -54,15 +54,12 @@ def create_dataframe():
         surge_P = (0.15 + 1) * (sum(Pupil_memory)/len(Pupil_memory))
         drop_I = 0.99 * (sum(Iris_memory)/len(Iris_memory))
         surge_I = np.ceil((1 + 0.01) * (sum(Iris_memory)/len(Iris_memory)))
-        # print(int(dt_P), ' ', int(drop_P))
-        # print(int(dt_I), ' ', int(drop_I))
+
         if 0 < i < len(frame_num) and (dt_P <= drop_P or dt_P >= surge_P):
             Pupil_Dilation[i] = int((Pupil_Dilation[i-1] + Pupil_Dilation[i+1]) / 2)
-            # print('Changed dt_P : ', Pupil_Dilation[i])
+
         if 0 < i < len(frame_num) and (dt_I <= drop_I or dt_I >= surge_I):
             Iris_Dilation[i] = Iris_Dilation[i-1]
-            # print('Changed dt_I : ', Iris_Dilation[i])
-        # print('\n')
 
     df['Processed Iris Dilation'] = Iris_Dilation
     df['Processed Pupil Dilation'] = Pupil_Dilation
@@ -109,13 +106,13 @@ def plot_dilations():
     ax3.set_title('Algorithm Generated')
     ax3.set_xlabel('Frames')
     ax3.set_ylabel('Ratio')
-    ax3.set_yticks([0, 0.5, 1])
+    ax3.set_yticks([0.4, 0.5, 0.6])
 
     ax4.plot(x_list, y6_list, 'g', label='Ratio Plot')
     ax4.set_title('Processed')
     ax4.set_xlabel('Frames')
     ax4.set_ylabel('Ratio')
-    ax4.set_yticks([0, 0.5, 1])
+    ax4.set_yticks([0.4, 0.5, 0.6])
 
     fig.tight_layout()
     plt.savefig('/Users/pranavdeo/PycharmProjects/FaceEmotionRecognition/static/Pupil_Output_Images/' +
@@ -135,17 +132,17 @@ def Iris_Detection(im, pup_cen, v_type):
 
     if v_type == 'NIR':
         _, thresh = cv2.threshold(imge, 34, 255, cv2.THRESH_BINARY)
-        cv2.imwrite('/Users/pranavdeo/Desktop/Results/Iris_Thresh/Frame_' + str(count) + '.png', thresh)
+        # cv2.imwrite('/Users/pranavdeo/Desktop/Results/Iris_Thresh/Frame_' + str(count) + '.png', thresh)
         canny_img = cv2.Canny(thresh, 10, 30)
-        cv2.imwrite('/Users/pranavdeo/Desktop/Results/Iris_Canny/Frame_' + str(count) + '.png', canny_img)
-        circles = cv2.HoughCircles(canny_img, cv2.HOUGH_GRADIENT, 7, 7000, param1=1500, param2=30, minRadius=int(h / 2.35), maxRadius=int(w / 10))
+        # cv2.imwrite('/Users/pranavdeo/Desktop/Results/Iris_Canny/Frame_' + str(count) + '.png', canny_img)
+        circles = cv2.HoughCircles(canny_img, cv2.HOUGH_GRADIENT, 2, 300, param1=30, param2=10, minRadius=int(h / 2.35), maxRadius=int(w / 10))
 
         if circles is not None:
-            circles = np.round(circles[0, :]).astype("int")
+            circles = np.round(circles[0, :])
 
             for (x, y, r) in circles:
                 if len(iris_radii) == 0 or len(iris_radii) <= 15:
-                    cv2.circle(im, (pup_cen[0], pup_cen[1]), r, (255, 0, 0), 1)
+                    cv2.circle(im, (pup_cen[0], pup_cen[1]), int(r), (255, 0, 0), 1)
                     iris_radii.append(r)
                     iris_xpoints.append(pup_cen[0])
                     iris_ypoints.append(pup_cen[1])
@@ -158,7 +155,7 @@ def Iris_Detection(im, pup_cen, v_type):
                     r_ul = int(np.ceil(np.ceil(np.average(iris_radii)))) + 2
 
                     if ((x_ll <= x <= x_ul) and (y_ll <= y <= y_ul)) and (r_ll <= r <= r_ul):
-                        cv2.circle(im, (x, y), r, (255, 0, 0), 1)
+                        cv2.circle(im, (x, y), int(r), (255, 0, 0), 1)
                         # cv2.rectangle(im, (x_ll, y_ll), (x_ul, y_ul), (0, 0, 255), 1)
                         iris_radii.append(r)
                         iris_xpoints.append(x)
@@ -180,14 +177,14 @@ def Iris_Detection(im, pup_cen, v_type):
         _, thresh = cv2.threshold(imge, 80, 255, cv2.THRESH_BINARY)
         # cv2.imshow('Iris Threshold', thresh)
         canny_img = cv2.Canny(thresh, 30, 90)
-        circles = cv2.HoughCircles(canny_img, cv2.HOUGH_GRADIENT, 7, 7000, param1=1500, param2=30, minRadius=int(h / 2.7), maxRadius=int(w / 10))
+        circles = cv2.HoughCircles(canny_img, cv2.HOUGH_GRADIENT, 3, 300, param1=90, param2=30, minRadius=int(h / 2.7), maxRadius=int(w / 10))
 
         if circles is not None:
-            circles = np.round(circles[0, :]).astype("int")
+            circles = np.round(circles[0, :])
 
             for (x, y, r) in circles:
                 if len(iris_radii) == 0 or len(iris_radii) <= 15:
-                    cv2.circle(im, (x, y), r, (255, 0, 0), 1)
+                    cv2.circle(im, (x, y), int(r), (255, 0, 0), 1)
                     iris_radii.append(r)
                     iris_xpoints.append(x)
                     iris_ypoints.append(y)
@@ -201,7 +198,7 @@ def Iris_Detection(im, pup_cen, v_type):
                     r_ul = int(np.ceil(np.ceil(np.average(iris_radii)))) + 2
 
                     if ((x_ll <= x <= x_ul) and (y_ll <= y <= y_ul)) and (r_ll <= r <= r_ul):
-                        cv2.circle(im, (x, y), r, (255, 0, 0), 1)
+                        cv2.circle(im, (x, y), int(r), (255, 0, 0), 1)
                         # cv2.rectangle(im, (x_ll, y_ll), (x_ul, y_ul), (0, 0, 255), 1)
                         iris_radii.append(r)
                         iris_xpoints.append(x)
@@ -235,18 +232,18 @@ def Pupil_Detection(im, iris_cen, v_type):
     if v_type == 'NIR':
         # print('\n')
         _, thresh = cv2.threshold(imge, 15, 255, cv2.THRESH_BINARY)
-        cv2.imwrite('/Users/pranavdeo/Desktop/Results/Pupil_Thresh/Frame_' + str(count) + '.png', thresh)
+        # cv2.imwrite('/Users/pranavdeo/Desktop/Results/Pupil_Thresh/Frame_' + str(count) + '.png', thresh)
         # cv2.imshow('Pupil', thresh)
         canny_img = cv2.Canny(thresh, 10, 30)
-        cv2.imwrite('/Users/pranavdeo/Desktop/Results/Pupil_Canny/Frame_' + str(count) + '.png', canny_img)
-        circles = cv2.HoughCircles(canny_img, cv2.HOUGH_GRADIENT, 7, 7000, param1=1500, param2=30, minRadius=int(h/12), maxRadius=int(w/5.5))
+        # cv2.imwrite('/Users/pranavdeo/Desktop/Results/Pupil_Canny/Frame_' + str(count) + '.png', canny_img)
+        circles = cv2.HoughCircles(canny_img, cv2.HOUGH_GRADIENT, 1, 300, param1=30, param2=10, minRadius=int(h/12), maxRadius=int(w/5.5))
 
         if circles is not None:
-            circles = np.round(circles[0, :]).astype("int")
+            circles = np.round(circles[0, :])
 
             for (x, y, r) in circles:
                 if len(pupil_radii) == 0 or len(pupil_radii) < 15:
-                    cv2.circle(im, (x, y), r, (0, 255, 0), 1)
+                    cv2.circle(im, (x, y), int(r), (0, 255, 0), 1)
                     pupil_radii.append(r)
                     pupil_xpoints.append(x)
                     pupil_ypoints.append(y)
@@ -260,7 +257,7 @@ def Pupil_Detection(im, iris_cen, v_type):
                     r_ul = int(np.ceil(np.average(pupil_radii))) + 3
 
                     if ((x_ll <= x <= x_ul) and (y_ll <= y <= y_ul)) and (r_ll <= r <= r_ul):
-                        cv2.circle(im, (x, y), r, (0, 255, 0), 1)
+                        cv2.circle(im, (x, y), int(r), (0, 255, 0), 1)
                         pupil_radii.append(r)
                         pupil_xpoints.append(x)
                         pupil_ypoints.append(y)
@@ -284,14 +281,14 @@ def Pupil_Detection(im, iris_cen, v_type):
         # cv2.imshow('Pupil', thresh)
         canny_img = cv2.Canny(thresh, 10, 30)
         # cv2.imshow('Canny', canny_img)
-        circles = cv2.HoughCircles(canny_img, cv2.HOUGH_GRADIENT, 7, 7000, param1=1500, param2=30, minRadius=int(h/15), maxRadius=int(w/5))
+        circles = cv2.HoughCircles(canny_img, cv2.HOUGH_GRADIENT, 1, 300, param1=30, param2=10, minRadius=int(h/15), maxRadius=int(w/5))
 
         if circles is not None:
-            circles = np.round(circles[0, :]).astype("int")
+            circles = np.round(circles[0, :])
 
             for (x, y, r) in circles:
                 if len(pupil_radii) == 0 or len(pupil_radii) < 15:
-                    cv2.circle(im, (iris_cen[0], iris_cen[1]), r, (0, 255, 0), 1)
+                    cv2.circle(im, (iris_cen[0], iris_cen[1]), int(r), (0, 255, 0), 1)
                     pupil_radii.append(r)
                     pupil_xpoints.append(iris_cen[0])
                     pupil_ypoints.append(iris_cen[1])
@@ -304,7 +301,7 @@ def Pupil_Detection(im, iris_cen, v_type):
                     r_ul = int(np.ceil(np.average(pupil_radii))) + 3
 
                     if ((x_ll <= x <= x_ul) and (y_ll <= y <= y_ul)) and (r_ll <= r <= r_ul):
-                        cv2.circle(im, (x, y), r, (0, 255, 0), 1)
+                        cv2.circle(im, (x, y), int(r), (0, 255, 0), 1)
                         pupil_radii.append(r)
                         pupil_xpoints.append(x)
                         pupil_ypoints.append(y)
@@ -362,22 +359,22 @@ while video.isOpened() and count <= 250:
                 im = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
                 im = cv2.filter2D(im, -1, kernel)
                 im = cv2.GaussianBlur(im, (5, 5), 0)
-                cv2.imwrite('/Users/pranavdeo/Desktop/Results/Frames/Frame_' + str(count) + '.png', im)
+                # cv2.imwrite('/Users/pranavdeo/Desktop/Results/Frames/Frame_' + str(count) + '.png', im)
                 Pupil, Pupil_center = Pupil_Detection(im, emptylist, video_type)
-                cv2.imwrite('/Users/pranavdeo/Desktop/Results/Pupil/Frame_' + str(count) + '.png', Pupil)
+                # cv2.imwrite('/Users/pranavdeo/Desktop/Results/Pupil/Frame_' + str(count) + '.png', Pupil)
                 Iris = Iris_Detection(Pupil, Pupil_center, video_type)
-                cv2.imwrite('/Users/pranavdeo/Desktop/Results/Output_Frames/Frame_' + str(count) + '.png', im)
+                # cv2.imwrite('/Users/pranavdeo/Desktop/Results/Output_Frames/Frame_' + str(count) + '.png', im)
                 cv2.imshow('NIR', Iris)
                 flag = 1
 
             elif video_type == 'Color':
                 im = cv2.filter2D(frame, -1, kernel)
                 im = cv2.GaussianBlur(im, (5, 5), 0)
-                cv2.imwrite('/Users/pranavdeo/Desktop/Results/Frames/Frame_' + str(count) + '.png', im)
+                # cv2.imwrite('/Users/pranavdeo/Desktop/Results/Frames/Frame_' + str(count) + '.png', im)
                 Iris, Iris_center = Iris_Detection(im, emptylist, video_type)
                 Pupil = Pupil_Detection(Iris, Iris_center, video_type)
                 cv2.imshow('Color', Pupil)
-                cv2.imwrite('/Users/pranavdeo/Desktop/Results/Output_Frames/Frame_' + str(count) + '.png', Pupil)
+                # cv2.imwrite('/Users/pranavdeo/Desktop/Results/Output_Frames/Frame_' + str(count) + '.png', Pupil)
                 flag = 1
 
             else:
@@ -425,5 +422,5 @@ print("\n#######################################################################
 
 usage = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 end_time = time.time() - start_time
-print('Execution Time : ', end_time, 'sec')
+print('Execution Time : ', end_time, ' sec')
 print('Memory Usage : ', (usage/np.power(10, 6)), 'MB')
