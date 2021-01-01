@@ -4,7 +4,7 @@ import pandas as pd
 import os
 
 inpath = '/Users/pranavdeo/Desktop/UNBC/'
-outpath = '/Users/pranavdeo/Desktop/UNBC Out/'
+outpath = '/Users/pranavdeo/Desktop/UNBC_Out/'
 dir_list = os.listdir(inpath)
 
 for d in dir_list:
@@ -55,17 +55,23 @@ for d in dir_list:
             Final_DF['AU_25c'] = df['AU25_c']
             Final_DF['AU_26c'] = df['AU26_c']
             Final_DF['AU_45c'] = df['AU45_c']
-            
-            PSPI_r = df['AU04_r'] + df['AU06_r'] + df['AU07_r'] + df['AU09_r'] + df['AU10_r'] + df['AU45_r'] \
-                     + df['AU20_r'] + df['AU25_r']
+
+            row_count = df.shape[0]
+            PSPI = [0.0] * row_count
+            indx = 0
+            for index, row in df.iterrows():
+                PSPI[indx] = PSPI[indx] + row['AU04_r'] + max(row['AU06_r'], row['AU07_r']) + \
+                             max(row['AU09_r'], row['AU10_r']) + row['AU45_c']
+                indx = indx + 1
 
             sum_AU_r = df['AU01_r'] + df['AU02_r'] + df['AU04_r'] + df['AU05_r'] + df['AU06_r'] + df['AU07_r'] \
                        + df['AU09_r'] + df['AU10_r'] + df['AU12_r'] + df['AU14_r'] + df['AU15_r'] + df['AU17_r'] \
                        + df['AU20_r'] + df['AU23_r'] + df['AU25_r'] + df['AU26_r'] + df['AU45_r']
 
-            Final_DF['PSPI_r'] = PSPI_r
+            Final_DF['OpenFace_PSPI'] = PSPI
             Final_DF['sum_AU_r'] = sum_AU_r
             Final_DF.to_csv(op + '/' + f, index=False)
             print('>File Done')
 
 print('\nProcess Complete')
+
