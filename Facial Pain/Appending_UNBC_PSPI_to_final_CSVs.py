@@ -1,3 +1,8 @@
+# Proprietary: Benten Technologies, Inc.
+# Author: Pranav H. Deo
+# Copyright Content
+
+# Code Description:
 # Appending the column containing UNBC PSPI values to the final CSV file...
 
 import pandas as pd
