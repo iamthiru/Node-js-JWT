@@ -1,3 +1,8 @@
+# Proprietary: Benten Technologies, Inc.
+# Author: Pranav H. Deo
+# Copyright Content
+
+# Code Description:
 # This will create new csv files instead of appending to the same ones. Just for safety...
 
 import pandas as pd
