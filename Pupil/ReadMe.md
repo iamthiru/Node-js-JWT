@@ -21,25 +21,12 @@
 
 ### PUPIL DETECTION:
 * This function is divided into 2 parts for handling NIR and COLOR Videos.
-
-* ##### NIR Part:
+* ##### NIR and Color Part:
   * Since Pupil is the first thing which should be detected in NIR videos, we threshold the incoming frame using a manually entered number (The one which accurately find us our Pupil).
   * We use this thresholded frame and pass it to a OpenCV function: cv2.HOUGHCIRCLES() and cv2.findContours().
   * Using a HOUGH_GRADIENT we set the parameters which produces the best results along with Minimum and Maximum Radii range.
   * This HOUGH_CIRCLES Function finds us some 'X' number of circles which best fit on top of the Canny Edge detection.
   * Contour Method finds us the regions of higher intensity using the threshold value.
-  * For the Contours we find:
-    * We get the areas of the contours and try to fit a rectangle on top of them.
-    * Next we give a area range within which we ask it to detect a contour.
-    * Then we use the max diameter using the co-ordinates of the rectangle to fit a minEnclosingCircle()
-  * Else if Contour is not detected and for the Hough circles we find:
-    * We allow it to find the best X,Y center locations and Radii for the first 15 frames (Since we are using 15FPS).
-    * For the next incoming frames we use a window biasing technique, where we check if the X,Y and Radius lie in that allowable range. If yes then we allow it to detect that center and Radius; if not, then we bias it to use the last 30 frames average to detect the center co-ordinates and radius. This gives the algorithm a bit of freedom (if within the allowable window) and guides it to the correct radius range and center (if outside the window of tolerance).
-    * After this we return the frame and the center location to the Iris detection Function which makes use of these parameters to detect the correct Iris circle and center using Hough method.
-    
-* ##### Colored Part:
-  * The Iris detection follows the Pupil detection in this case too. Pupil returns center co-ordinates for the Iris to detect with ease.
-  * The same process follows for Thresholding, cv2.findContours() and cv2.HOUGH_CIRCLES.
   * For the Contours we find:
     * We get the areas of the contours and try to fit a rectangle on top of them.
     * Next we give a area range within which we ask it to detect a contour.
