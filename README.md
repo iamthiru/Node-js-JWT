@@ -20,7 +20,7 @@
 
 
 #### Software Dependencies to Run Code:
-1. Python v3 or higher (PyCharm or Jupiter)
+1. Python v3 or higher (PyCharm or Jupyter)
 2. OpenCV 4.2.0 or higher (Computer Vision Package)
 3. Pandas 1.0.5 or higher (CSV DataFrame Package)
 4. imutils 0.5.3 or higher (Image Utility Package)
@@ -31,8 +31,8 @@
 
 
 #### Deployment Requirements (Mobile and Cloud):
-1. Python v3 (Installed on mobile platform)
-2. OpenCV 4.2.0 or higher (Check CV package for Android and iOS)
+1. Python3 (Installed on mobile platform)
+2. OpenCV 4.2.0 or higher (Check OpenCV package for Android and iOS)
 
 
 #### Dataset for Study (Training/Testing)
