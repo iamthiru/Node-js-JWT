@@ -2,16 +2,19 @@
 # Author: Pranav H. Deo
 # Copyright Content
 # Date: 01/11/2021
+# Version: v1.0
 
 # Code Description:
 # * 1080p videos of eyes to get Pupil->Iris for both NIR and COLOR.
-# * Drop threshold of Pupil: 85%. If the radius increase by 15%, we stump it.
-# * Video Qualify and Drop Criteria Added (10 Frames)
+# * Drop threshold of Pupil: 85%. If the radius increase by 15% in the next immediate frame, we stump it.
+# * Video Quality and Drop Criteria Added (10 Frames)
 
 # UPDATES:
-# * Using Contour Detection Piggy-Backed with Hough when failure.
-# * Iris radius depends on Pupil radius this time.
-# * Iris radius biasing, Iris uses Pupil center.
+# * Using Contour Detection Piggy-Backed with Hough when failure for both Pupil and Iris.
+# * Iris radius depends on Pupil radius, with a shared/common center.
+# * Hard-coded cropping removed.
+# * Result Video will be created after Processing.
+# * The incoming video is judged as Qualified/Unqualified if Pupil/Iris fails on 10 consecutive frames.
 
 
 import os
