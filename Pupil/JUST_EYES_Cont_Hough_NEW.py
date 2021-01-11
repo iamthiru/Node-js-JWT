@@ -1,15 +1,17 @@
 # Proprietary: Benten Technologies, Inc.
 # Author: Pranav H. Deo
 # Copyright Content
+# Date: 01/11/2021
 
 # Code Description:
-# 1080p videos of eyes to get Pupil->Iris.
-# Drop threshold of Pupil: 85%.
+# * 1080p videos of eyes to get Pupil->Iris for both NIR and COLOR.
+# * Drop threshold of Pupil: 85%. If the radius increase by 15%, we stump it.
+# * Video Qualify and Drop Criteria Added (10 Frames)
 
 # UPDATES:
-# Using Contour Detection and Back-up Hough for Pupil.
-# Iris radius depends on Pupil radius this time.
-# Iris biasing slightly updated.
+# * Using Contour Detection Piggy-Backed with Hough when failure.
+# * Iris radius depends on Pupil radius this time.
+# * Iris radius biasing, Iris uses Pupil center.
 
 
 import os
@@ -40,10 +42,16 @@ Iris_memory = []
 
 
 ########################################################################################################################
-
-def Extract_Eye(fr):
+# TO DO: Front End Bouding Box with EYE Cropped out....
+def Extract_Eye(fr, orien):
     h, w, _ = fr.shape
-    eye_fr = fr[600:h - 800, 300:w - 300]
+    if orien == 'Vertical':
+        # eye_fr = fr[500:h - 1100, 300:w - 300]   # Trial1
+        # eye_fr = fr[350:h - 1200, 300:w - 300]   # Trial4
+        # eye_fr = fr[250:h - 1300, 300:w - 300]   # Trial5
+        eye_fr = fr[700:h - 750, 300:w - 300]  # Trial07
+    else:
+        eye_fr = fr[450:h-250, 600:w-800]       # Trial06
     return eye_fr
 
 
@@ -63,6 +71,7 @@ def create_dataframe():
         dt_I = Iris_Dilation[i]
         Pupil_memory.append(dt_P)
         Iris_memory.append(dt_I)
+        # TO DO: 85% averaging (Use 90%?)
         drop_P = 0.85 * (sum(Pupil_memory)/len(Pupil_memory))
         surge_P = (0.15 + 1) * (sum(Pupil_memory)/len(Pupil_memory))
         drop_I = 0.99 * (sum(Iris_memory)/len(Iris_memory))
@@ -136,7 +145,6 @@ def plot_dilations():
 ########################################################################################################################
 
 def Iris_Detection(im, pup_cen, v_type):
-    im = im[int(pup_cen[0]-50):int(pup_cen[0]+250), int(pup_cen[1]-300):int(pup_cen[1]+100)]
     imge = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
     iris_center = []
     global iris_radii
@@ -150,8 +158,9 @@ def Iris_Detection(im, pup_cen, v_type):
         _, thresh = cv2.threshold(imge, 35, 255, cv2.THRESH_BINARY)
         # cv2.imshow('Iris Thresh', thresh)
         # cv2.imwrite('/Users/pranavdeo/Desktop/Results/Iris_Thresh/Frame_' + str(count) + '.png', thresh)
-        # canny_img = cv2.Canny(thresh, 10, 30)
         # cv2.imwrite('/Users/pranavdeo/Desktop/Results/Iris_Canny/Frame_' + str(count) + '.png', canny_img)
+
+        # TO DO: Shadows and Hard-code value of 1.45 and 2.5
         circles = cv2.HoughCircles(thresh, cv2.HOUGH_GRADIENT, 2, 500, param1=30, param2=10, minRadius=int(np.average(pupil_radii)*1.45), maxRadius=int(np.average(pupil_radii)*2.5))
 
         if circles is not None:
@@ -171,12 +180,20 @@ def Iris_Detection(im, pup_cen, v_type):
                     r_ll = int(np.floor(np.average(iris_radii))) - 1
                     r_ul = int(np.ceil(np.ceil(np.average(iris_radii)))) + 1
 
+                    # TO DO: Do we drop when pupil fails? Or do we bias?
+
                     if ((x_ll <= x <= x_ul) and (y_ll <= y <= y_ul)) and (r_ll <= r <= r_ul):
-                        cv2.circle(im, (int(pup_cen[0]), int(pup_cen[1])), r, (255, 0, 0), 1)
+                        if len(pup_cen) > 0:
+                            cv2.circle(im, (int(pup_cen[0]), int(pup_cen[1])), r, (255, 0, 0), 1)
+                            iris_xpoints.append(pup_cen[0])
+                            iris_ypoints.append(pup_cen[1])
+                        else:
+                            cv2.circle(im, (int(x), int(y)), r, (255, 0, 0), 1)
+                            iris_xpoints.append(x)
+                            iris_ypoints.append(y)
                         # cv2.rectangle(im, (x_ll, y_ll), (x_ul, y_ul), (0, 0, 255), 1)
                         iris_radii.append(r)
-                        iris_xpoints.append(pup_cen[0])
-                        iris_ypoints.append(pup_cen[1])
+
                     else:
                         # print('BIASING: IRIS')
                         r = np.average(iris_radii[-5:])
@@ -195,59 +212,73 @@ def Iris_Detection(im, pup_cen, v_type):
 
     # COLORED VIDEOS
     else:
-        # print('\n')
         _, thresh = cv2.threshold(imge, 80, 255, cv2.THRESH_BINARY)
-        # cv2.imshow('Iris Threshold', thresh)
-        canny_img = cv2.Canny(thresh, 30, 90)
-        circles = cv2.HoughCircles(canny_img, cv2.HOUGH_GRADIENT, 3, 300, param1=90, param2=30, minRadius=int(h / 2.7), maxRadius=int(w / 10))
+        cv2.imshow('Iris Threshold', thresh)
+        circles = cv2.HoughCircles(thresh, cv2.HOUGH_GRADIENT, 2, 500, param1=90, param2=30, minRadius=int(np.average(pupil_radii)*1.45), maxRadius=int(np.average(pupil_radii)*4))
 
         if circles is not None:
             circles = np.round(circles[0, :])
 
             for (x, y, r) in circles:
-                if len(iris_radii) == 0 or len(iris_radii) <= 15:
-                    cv2.circle(im, (x, y), int(r), (255, 0, 0), 1)
+                if len(iris_radii) == 0 or len(iris_radii) < 15:
+                    cv2.circle(im, (int(pup_cen[0]), int(pup_cen[1])), int(r), (255, 0, 0), 1)
                     iris_radii.append(r)
-                    iris_xpoints.append(x)
-                    iris_ypoints.append(y)
-                    iris_center = [x, y]
+                    iris_xpoints.append(pup_cen[0])
+                    iris_ypoints.append(pup_cen[1])
+                    # iris_center = [pup_cen[0], pup_cen[1]]
                 else:
                     x_ll = int(np.floor(np.average(iris_xpoints))) - 3
                     x_ul = int(np.ceil(np.average(iris_xpoints))) + 3
                     y_ll = int(np.floor(np.average(iris_ypoints))) - 3
                     y_ul = int(np.ceil(np.average(iris_ypoints))) + 3
-                    r_ll = int(np.floor(np.average(iris_radii))) - 4
-                    r_ul = int(np.ceil(np.ceil(np.average(iris_radii)))) + 4
+                    r_ll = int(np.floor(np.average(iris_radii))) - 3
+                    r_ul = int(np.ceil(np.average(iris_radii))) + 3
 
                     if r_ll <= r <= r_ul:
-                        cv2.circle(im, (x, y), int(r), (255, 0, 0), 1)
-                        # cv2.rectangle(im, (x_ll, y_ll), (x_ul, y_ul), (0, 0, 255), 1)
-                        iris_radii.append(r)
-                        iris_xpoints.append(x)
-                        iris_ypoints.append(y)
-                        iris_center = [x, y]
+                        if len(pup_cen) > 0:
+                            cv2.circle(im, (int(pup_cen[0]), int(pup_cen[1])), r, (255, 0, 0), 1)
+                            iris_xpoints.append(pup_cen[0])
+                            iris_ypoints.append(pup_cen[1])
+                        else:
+                            cv2.circle(im, (int(x), int(y)), r, (255, 0, 0), 1)
+                            iris_xpoints.append(x)
+                            iris_ypoints.append(y)
+                        # iris_center = [x, y]
                     else:
-                        # print('BIASING: IRIS')
-                        r = np.average(iris_radii[-5:])
+                        # print('BIASING: Iris')
+                        biasing += 1
+                        r = np.average(iris_radii[-30:])
                         iris_radii.append(r)
-                        cv2.circle(im, (x, y), int(r), (255, 0, 0), 1)
-                        # cv2.rectangle(im, (x_ll, y_ll), (x_ul, y_ul), (255, 0, 0), 1)
-                        iris_xpoints.append(x)
-                        iris_ypoints.append(y)
-                        iris_center = [x, y]
+                        if len(pup_cen) < 1:
+                            cv2.circle(im, (int(x), int(y)), r, (255, 0, 0), 1)
+                            iris_xpoints.append(x)
+                            iris_ypoints.append(y)
+                        else:
+                            cv2.circle(im, (int(pup_cen[0]), int(pup_cen[1])), r, (255, 0, 0), 1)
+                            # cv2.rectangle(im, (x_ll, y_ll), (x_ul, y_ul), (255, 0, 0), 1)
+                            iris_xpoints.append(pup_cen[0])
+                            iris_ypoints.append(pup_cen[1])
+                        # iris_center = [x, y]
                 Iris_Dilation.append(r)
-        return im, iris_center
+        else:
+            return [], []
+        return im
 
 
 ########################################################################################################################
 
 def Pupil_Detection(im, iris_cen, v_type):
     imge = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
+    cv2.imshow('Gray', imge)
+    imge = cv2.equalizeHist(imge)
+    cv2.imshow('Hist', imge)
     pupil_center = []
     global pupil_radii
     global pupil_xpoints
     global pupil_ypoints
+    # TO DO: Add the color of the center pixel...
     w, h = imge.shape
+    # TO DO: Check if still using it
     global biasing
 
     if v_type == 'NIR':
@@ -261,11 +292,10 @@ def Pupil_Detection(im, iris_cen, v_type):
             for c in contours:
                 contour_area = cv2.contourArea(c)
                 x1, y1, w1, h1 = cv2.boundingRect(c)
-                if (2000 < contour_area < 25000) and (0.6 < (w1/h1) < 1.5):
+                if (2000 < contour_area < 15000) and (0.6 < (w1/h1) < 1.5):
                     # print('> CONTOUR Pupil...')
                     flg = 1
                     coords, r = cv2.minEnclosingCircle(c)
-                    # cv2.rectangle(thresh, (x1, y1), (x1 + w1, y1 + h1), (0, 0, 255), 2)
                     dia_p = max(w1, h1)
                     # cv2.circle(im, (int(coords[0]), int(coords[1])), int(r), (0, 255, 0), 1)
                     cv2.circle(im, ((int(x1 + (dia_p / 2))), int((y1 + (dia_p / 2)))), int(dia_p / 2), (0, 255, 0), 1)
@@ -275,12 +305,6 @@ def Pupil_Detection(im, iris_cen, v_type):
                     pupil_xpoints.append(x1 + (dia_p / 2))
                     pupil_ypoints.append(y1 + (dia_p / 2))
                     pupil_center = [x1 + (dia_p / 2), y1 + (dia_p / 2)]
-            '''
-            for (x2, y2, r2) in circles:
-                pupil_xpoints.append(x2)
-                pupil_ypoints.append(y2)
-                pupil_center = [x2, y2]
-            '''
 
         # Get the Hough Detection in case contour fails...
         elif circles is not None and flg == 0:
@@ -311,8 +335,74 @@ def Pupil_Detection(im, iris_cen, v_type):
                     else:
                         print('BIASING: PUPIL')
                         biasing += 1
-                        # x_new = int(np.average(pupil_xpoints[-5:]))
-                        # y_new = int(np.average(pupil_ypoints[-5:]))
+                        r = np.average(pupil_radii[-30:])
+                        pupil_radii.append(r)
+                        cv2.circle(im, (x, y), int(r), (0, 255, 0), 1)
+                        pupil_xpoints.append(x)
+                        pupil_ypoints.append(y)
+                        pupil_center = [x, y]
+                Pupil_Dilation.append(r)
+        else:
+            return [], []
+        return im, pupil_center
+
+    # COLORED VIDEOS
+    else:
+        _, thresh = cv2.threshold(imge, 36, 255, cv2.THRESH_BINARY)
+        cv2.imshow('Pupil', thresh)
+        contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        circles = cv2.HoughCircles(thresh, cv2.HOUGH_GRADIENT, 2, 300, param1=30, param2=10, minRadius=int(h/15), maxRadius=int(w/5))
+        # circles = cv2.HoughCircles(canny_img, cv2.HOUGH_GRADIENT, 1, 300, param1=30, param2=10, minRadius=int(np.average(iris_radii)/4), maxRadius=int(np.average(iris_radii)/1.2))
+        flg = 0
+
+        # Contour Method for Pupil
+        if contours is not None:
+            for c in contours:
+                contour_area = cv2.contourArea(c)
+                x1, y1, w1, h1 = cv2.boundingRect(c)
+                if (1000 <= contour_area <= 25000) and (0.2 <= (w1 / h1) <= 1.1):
+                    # print('> CONTOUR Pupil...')
+                    flg = 1
+                    coords, r = cv2.minEnclosingCircle(c)
+                    # cv2.rectangle(thresh, (x1, y1), (x1 + w1, y1 + h1), (0, 0, 255), 2)
+                    dia_p = max(w1, h1)
+                    # cv2.circle(im, (int(coords[0]), int(coords[1])), int(r), (0, 255, 0), 1)
+                    cv2.circle(im, ((int(x1 + (dia_p / 2))), int((y1 + (dia_p / 2)))), int(dia_p / 2), (0, 255, 0), 1)
+                    # cv2.rectangle(im, (x1, y1), (x1+w1, y1+h1), (0, 255, 0), 2)
+                    pupil_radii.append(w1 / 2)
+                    Pupil_Dilation.append(w1 / 2)
+                    pupil_xpoints.append(x1 + (dia_p / 2))
+                    pupil_ypoints.append(y1 + (dia_p / 2))
+                    pupil_center = [x1 + (dia_p / 2), y1 + (dia_p / 2)]
+
+        # Hough Method when Contour Fails
+        elif circles is not None and flg == 0:
+            circles = np.round(circles[0, :])
+
+            for (x, y, r) in circles:
+                if len(pupil_radii) == 0 or len(pupil_radii) < 15:
+                    cv2.circle(im, (x, y), int(r), (0, 255, 0), 1)
+                    pupil_radii.append(r)
+                    pupil_xpoints.append(x)
+                    pupil_ypoints.append(y)
+                    pupil_center = [x, y]
+                else:
+                    x_ll = int(np.floor(np.average(pupil_xpoints))) - 6
+                    x_ul = int(np.ceil(np.average(pupil_xpoints))) + 6
+                    y_ll = int(np.floor(np.average(pupil_ypoints))) - 6
+                    y_ul = int(np.ceil(np.average(pupil_ypoints))) + 6
+                    r_ll = int(np.floor(np.average(pupil_radii))) - 7
+                    r_ul = int(np.ceil(np.average(pupil_radii))) + 7
+
+                    if r_ll <= r <= r_ul:
+                        cv2.circle(im, (x, y), int(r), (0, 255, 0), 1)
+                        pupil_radii.append(r)
+                        pupil_xpoints.append(x)
+                        pupil_ypoints.append(y)
+                        pupil_center = [x, y]
+                    else:
+                        print('BIASING: PUPIL')
+                        biasing += 1
                         r = np.average(pupil_radii[-30:])
                         pupil_radii.append(r)
                         cv2.circle(im, (x, y), int(r), (0, 255, 0), 1)
@@ -323,58 +413,12 @@ def Pupil_Detection(im, iris_cen, v_type):
 
         else:
             return [], []
-
         return im, pupil_center
-
-
-    # COLORED VIDEOS
-    else:
-        _, thresh = cv2.threshold(imge, 25, 255, cv2.THRESH_BINARY)
-        # cv2.imshow('Pupil', thresh)
-        canny_img = cv2.Canny(thresh, 10, 30)
-        # cv2.imshow('Canny', canny_img)
-        # circles = cv2.HoughCircles(canny_img, cv2.HOUGH_GRADIENT, 1, 300, param1=30, param2=10, minRadius=int(h/15), maxRadius=int(w/5))
-        circles = cv2.HoughCircles(canny_img, cv2.HOUGH_GRADIENT, 1, 300, param1=30, param2=10, minRadius=int(np.average(iris_radii)/4),
-                                   maxRadius=int(np.average(iris_radii)/1.2))
-
-        if circles is not None:
-            circles = np.round(circles[0, :])
-
-            for (x, y, r) in circles:
-                if len(pupil_radii) == 0 or len(pupil_radii) < 15:
-                    cv2.circle(im, (iris_cen[0], iris_cen[1]), int(r), (0, 255, 0), 1)
-                    pupil_radii.append(r)
-                    pupil_xpoints.append(iris_cen[0])
-                    pupil_ypoints.append(iris_cen[1])
-                else:
-                    x_ll = int(np.floor(np.average(iris_xpoints))) - 6
-                    x_ul = int(np.ceil(np.average(iris_xpoints))) + 6
-                    y_ll = int(np.floor(np.average(iris_ypoints))) - 6
-                    y_ul = int(np.ceil(np.average(iris_ypoints))) + 6
-                    r_ll = int(np.floor(np.average(pupil_radii))) - 3
-                    r_ul = int(np.ceil(np.average(pupil_radii))) + 3
-
-                    if ((x_ll <= x <= x_ul) and (y_ll <= y <= y_ul)) and (r_ll <= r <= r_ul):
-                        cv2.circle(im, (iris_cen[0], iris_cen[1]), int(r), (0, 255, 0), 1)
-                        pupil_radii.append(r)
-                        pupil_xpoints.append(iris_cen[0])
-                        pupil_ypoints.append(iris_cen[1])
-                    else:
-                        # print('BIASING: PUPIL')
-                        r = np.average(pupil_radii[-5:])
-                        pupil_radii.append(r)
-                        cv2.circle(im, (iris_cen[0], iris_cen[1]), int(r), (0, 255, 0), 1)
-                        pupil_xpoints.append(iris_cen[0])
-                        pupil_ypoints.append(iris_cen[1])
-                Pupil_Dilation.append(r)
-        return im
 
 
 #####################################################################################################################
 # MAIN FUNCTION #
-
 start_time = time.time()
-
 print("\n############################## FACE - PUPIL DETECTION ##############################\n")
 flag = 0
 count = 0
@@ -383,25 +427,36 @@ emptylist = []
 kernel = np.array([[0, -1, 0], [-1, 5, -1], [0, -1, 0]])
 global filename
 biasing = 0
+frame_array = []
+Dropped_Frame_Counter = 0
 
 if len(sys.argv) > 1:
     ch = int(sys.argv[1])
     filename = str(sys.argv[2])
     video_type = str(sys.argv[3])
-    video = cv2.VideoCapture('/Users/pranavdeo/PycharmProjects/FaceEmotionRecognition/Pupil_Input_Videos/' + filename)
+    Orientation = 'Vertical'
+    # video = cv2.VideoCapture('/Users/pranavdeo/PycharmProjects/FaceEmotionRecognition/Pupil_Input_Videos/' + filename)
+    video = cv2.VideoCapture('/Users/pranavdeo/Desktop/Trials/' + filename)
 else:
-    #ch = 1
-    #video_type = 'Color'
+    ch = 1
+    video_type = 'Color'
     #filename = 'Dr_Niece_Video.mp4'
-    filename = 'Test03.MOV'
+    filename = 'Trial06.mp4'
+    Orientation = 'Horizontal'
+    #Orientation = 'Horizontal'
+    #filename = 'Test03.MOV'
     #filename = '1080p_04.MOV'
-    ch = 2
-    video_type = 'NIR'
-    video = cv2.VideoCapture('/Users/pranavdeo/PycharmProjects/FaceEmotionRecognition/Pupil_Input_Videos/1080p_JUST_EYES/' + filename)
+    #ch = 2
+    #video_type = 'NIR'
+    #video = cv2.VideoCapture('/Users/pranavdeo/PycharmProjects/FaceEmotionRecognition/Pupil_Input_Videos/1080p_JUST_EYES/' + filename)
     # video = cv2.VideoCapture('/Users/pranavdeo/Desktop/Pain Eyes/' + filename)
+    video = cv2.VideoCapture('/Users/pranavdeo/Desktop/Trials/' + filename)
 
+
+# ***************************************************************************************************
 fps = video.get(cv2.CAP_PROP_FPS)
 frame_rate = fps
+size = ()
 print('> FPS: ', fps)
 
 while video.isOpened():
@@ -413,30 +468,51 @@ while video.isOpened():
             count = count + 1
 
             if video_type == 'NIR':
-                im = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
-                im = cv2.filter2D(im, -1, kernel)
+                file_ext = filename.split(".")[-1]
+                im = frame
+                if file_ext == 'MOV' or file_ext == 'mov' or file_ext == 'MP4' or file_ext == 'mp4':
+                    im = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
+                # im = cv2.filter2D(im, -1, kernel)
                 im = cv2.GaussianBlur(im, (5, 5), 0)
-                height, width, _ = im.shape
-                if height > 1000 and width > 1000:
-                    im = Extract_Eye(im)
-                # cv2.imshow('IM', im)
-                # cv2.imwrite('/Users/pranavdeo/Desktop/Results/Frames/Frame_' + str(count) + '.png', im)
+                height, width, layers = im.shape
+                size = (width, height)
                 Pupil, Pupil_center = Pupil_Detection(im, emptylist, video_type)
-                # cv2.imwrite('/Users/pranavdeo/Desktop/Results/Pupil/Frame_' + str(count) + '.png', Pupil)
-                Iris = Iris_Detection(im, Pupil_center, video_type)
-                # cv2.imwrite('/Users/pranavdeo/Desktop/Results/Output_Frames/Frame_' + str(count) + '.png', im)
-                # Iris = cv2.equalizeHist(cv2.cvtColor(Iris, cv2.COLOR_BGR2GRAY))
-                cv2.imshow('NIR', Iris)
+                if len(Pupil_center) == 0 and (len(pupil_xpoints) and len(pupil_ypoints) != 0):
+                    Pupil_center = [pupil_xpoints[-1], pupil_ypoints[-1]]
+                elif len(Pupil_center) == 0 and (len(pupil_xpoints) and len(pupil_ypoints) == 0):
+                    Dropped_Frame_Counter += 1
+                if Dropped_Frame_Counter > 10:
+                    print('\n# VIDEO DIS-QUALIFIED..!!!')
+                    flag = 0
+                    break
+                if len(Pupil_center) != 0:
+                    Iris = Iris_Detection(im, Pupil_center, video_type)
+                cv2.imshow('NIR', im)
+                frame_array.append(im)
                 flag = 1
 
             elif video_type == 'Color':
-                im = cv2.filter2D(frame, -1, kernel)
+                file_ext = filename.split(".")[-1]
+                im = frame
+                #if file_ext == 'MOV' or file_ext == 'mov' or file_ext == 'MP4' or file_ext == 'mp4':
+                #    im = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
+                im = cv2.filter2D(im, -1, kernel)
                 im = cv2.GaussianBlur(im, (5, 5), 0)
-                # cv2.imwrite('/Users/pranavdeo/Desktop/Results/Frames/Frame_' + str(count) + '.png', im)
-                Iris, Iris_center = Iris_Detection(im, emptylist, video_type)
-                Pupil = Pupil_Detection(Iris, Iris_center, video_type)
-                cv2.imshow('Color', Pupil)
-                # cv2.imwrite('/Users/pranavdeo/Desktop/Results/Output_Frames/Frame_' + str(count) + '.png', Pupil)
+                height, width, layers = im.shape
+                size = (width, height)
+                Pupil, Pupil_center = Pupil_Detection(im, emptylist, video_type)
+                if len(Pupil_center) == 0 and (len(pupil_xpoints) and len(pupil_ypoints) != 0):
+                    Pupil_center = [pupil_xpoints[-1], pupil_ypoints[-1]]
+                elif len(Pupil_center) == 0 and (len(pupil_xpoints) and len(pupil_ypoints) == 0):
+                    Dropped_Frame_Counter += 1
+                if Dropped_Frame_Counter > 10:
+                    print('\n# VIDEO DIS-QUALIFIED..!!!')
+                    flag = 0
+                    break
+                if len(Pupil_center) != 0:
+                    Iris = Iris_Detection(im, Pupil_center, video_type)
+                cv2.imshow('Color', im)
+                frame_array.append(im)
                 flag = 1
 
             else:
@@ -456,8 +532,18 @@ while video.isOpened():
     time.sleep(0.10)
 
 
+# ***************************************************************************************************
 # Print all the results
 if flag == 1:
+    # Creates the video out of the processed frames
+    pathOut = '/Users/pranavdeo/PycharmProjects/FaceEmotionRecognition/static/Pupil_Output_Videos/' + (filename.split('.')[0]) + '.mp4'
+    out = cv2.VideoWriter(pathOut, cv2.VideoWriter_fourcc(*'DIVX'), fps, size)
+    for i in range(len(frame_array)):
+        # writing to a image array
+        out.write(frame_array[i])
+    out.release()
+
+    # Processes and creates Equal Length Lists
     print('Frames : ', len(frame_num))
     print('Iris Dilation : ', len(Iris_Dilation))
     print('Pupil Dilation : ', len(Pupil_Dilation))
@@ -484,10 +570,11 @@ if flag == 1:
     print('Frames : ', len(frame_num))
     print('Iris Dilation : ', len(Iris_Dilation))
     print('Pupil Dilation : ', len(Pupil_Dilation))
-    # print('Biasing:', biasing)
 
+    # Creates Dataframes and Plots them
     create_dataframe()
     plot_dilations()
+
 
 print("\n####################################################################################")
 
@@ -495,3 +582,5 @@ usage = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 end_time = time.time() - start_time
 print('Execution Time : ', end_time, ' sec')
 print('Memory Usage : ', (usage/np.power(10, 6)), 'MB')
+
+#####################################################################################################################
