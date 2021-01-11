@@ -1,3 +1,7 @@
+# Proprietary: Benten Technologies, Inc.
+# Author: Pranav H. Deo
+# Copyright Content
+
 import cv2
 from scipy.spatial import distance as dist
 import glob
