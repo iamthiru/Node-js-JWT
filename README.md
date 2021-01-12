@@ -5,8 +5,8 @@
 
   - ***Facial Pain:***
     * **Methods of Detection:** Finding the change/increase in the intensity of each individual Action Units.
-    * **Pain Scale Used:** Modified PSPI (Prkachin and Solomon Pain Intensity), NRS, VAS.
-    * **Action Units Used:** AU04, AU06, AU07, AU09, AU10, AU15, AU25, AU45 and AU43
+    * **Pain Scale Used:** Modified PSPI (Prkachin and Solomon Pain Intensity), NRS, VAS and OPR.
+    * **Action Units Used:** AU01, AU_02, AU_04, AU05, AU06, AU07, AU09, AU10, AU12, AU14, AU15, AU17, AU20, AU23, AU25, AU26, AU45 and AU43
     
   - ***Pupillary Pain:***
     * **Methods of Detection:** Calculating the increase/decrease in the diameter of Pupil (Measuring Pupil Dilation).
@@ -25,7 +25,7 @@
 3. Pandas 1.0.5 or higher (CSV DataFrame Package)
 4. imutils 0.5.3 or higher (Image Utility Package)
 5. dlib 19.20.0 or higher (For landmark detection)
-6. OpenFace 2.0 (See the OpenFace_Installation_Guide)
+6. OpenFace 2.2.0 (See the OpenFace_Installation_Guide)
 7. FLASK 1.1.2 (For Python WebApp Simulation)
 8. NumPy 1.18.5 (For numerical calculations)
 
