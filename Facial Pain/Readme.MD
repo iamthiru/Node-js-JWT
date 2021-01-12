@@ -1,0 +1,1 @@
+IMPACT Facial Pain Summary
