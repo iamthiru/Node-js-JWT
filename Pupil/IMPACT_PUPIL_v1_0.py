@@ -2,20 +2,21 @@
 # Author: Pranav H. Deo
 # Copyright Content
 # Date: 01/11/2021
-# Version: v1.0
+# Version: v1.1
 
 # Code Description:
 # * 1080p videos of eyes to get Pupil->Iris for both NIR and COLOR.
-# * Drop threshold of Pupil: 85%. If the radius increase by 15% in the next immediate frame, we stump it.
-# * Video Quality and Drop Criteria Added (10 Frames)
+# * Drop threshold of Pupil: 80%. If the radius increase by 20% in the next immediate frame, we stump it.
+# * Video Quality and Drop Criteria Added (20 Frames)
 
 # UPDATES:
 # * Using Contour Detection Piggy-Backed with Hough when failure for both Pupil and Iris.
 # * Iris radius depends on Pupil radius, with a shared/common center.
 # * Hard-coded cropping removed.
 # * Result Video will be created after Processing.
+# * Pupil and Iris Radius go through validity check. Based on upper and lower bound, the radius is set.
+# * The video displayed uses the adjusted radius. Works on the Fly.
 # * The incoming video is judged as Qualified/Unqualified if Pupil/Iris fails on 10 consecutive frames.
-
 
 
 import os
@@ -47,6 +48,34 @@ Iris_memory = []
 
 ########################################################################################################################
 
+def Radius_Validity_Check(radius, tag):
+    global iris_radii
+    global pupil_radii
+    global frame_num
+    if tag == 'pupil':
+        if len(frame_num) > 0:
+            drop_P = 0.80 * (sum(pupil_radii) / len(pupil_radii))
+            surge_P = (0.2 + 1) * (sum(pupil_radii) / len(pupil_radii))
+            if radius <= drop_P or radius >= surge_P:
+                R = sum(pupil_radii)/len(pupil_radii)
+            else:
+                R = radius
+        else:
+            R = radius
+    else:
+        if len(frame_num) > 0:
+            drop_I = 0.99 * (sum(iris_radii) / len(iris_radii))
+            surge_I = (1 + 0.01) * (sum(iris_radii) / len(iris_radii))
+            if len(frame_num) > 0 and (radius <= drop_I or radius >= surge_I):
+                R = sum(iris_radii) / len(iris_radii)
+            else:
+                R = radius
+        else:
+            R = radius
+    return R
+
+########################################################################################################################
+
 def create_dataframe():
     df = pd.DataFrame(frame_num)
     df['Iris Dilation'] = Iris_Dilation
@@ -61,23 +90,23 @@ def create_dataframe():
         dt_I = Iris_Dilation[i]
         Pupil_memory.append(dt_P)
         Iris_memory.append(dt_I)
-  
-        drop_P = 0.85 * (sum(Pupil_memory)/len(Pupil_memory))
-        surge_P = (0.15 + 1) * (sum(Pupil_memory)/len(Pupil_memory))
+        # TO DO: 85% averaging (Use 90%?)
+        drop_P = 0.80 * (sum(Pupil_memory)/len(Pupil_memory))
+        surge_P = (0.20 + 1) * (sum(Pupil_memory)/len(Pupil_memory))
         drop_I = 0.99 * (sum(Iris_memory)/len(Iris_memory))
         surge_I = (1 + 0.01) * (sum(Iris_memory)/len(Iris_memory))
 
-        print('\n\nPupil : ', drop_P, ' ', dt_P, ' ', surge_P)
+        #print('\n\nPupil : ', drop_P, ' ', dt_P, ' ', surge_P)
         if 0 < i < len(frame_num) and (dt_P <= drop_P or dt_P >= surge_P):
             # Pupil_Dilation[i] = int((Pupil_Dilation[i-1] + Pupil_Dilation[i+1]) / 2)
             Pupil_Dilation[i] = sum(Pupil_memory)/len(Pupil_memory)
-            print('Pupil Changed : ', Pupil_Dilation[i])
+            #print('Pupil Changed : ', Pupil_Dilation[i])
 
-        print('\n Iris : ', drop_I, ' ', dt_I, ' ', surge_I)
+        #print('\n Iris : ', drop_I, ' ', dt_I, ' ', surge_I)
         if 0 < i < len(frame_num) and (dt_I <= drop_I or dt_I >= surge_I):
             # Iris_Dilation[i] = Iris_Dilation[i-1]
             Iris_Dilation[i] = sum(Iris_memory)/len(Iris_memory)
-            print('Iris Changed : ', Iris_Dilation[i])
+            #print('Iris Changed : ', Iris_Dilation[i])
 
     df['Processed Iris Dilation'] = Iris_Dilation
     df['Processed Pupil Dilation'] = Pupil_Dilation
@@ -154,6 +183,7 @@ def Iris_Detection(im, pup_cen, v_type):
         _, thresh = cv2.threshold(imge, 35, 255, cv2.THRESH_BINARY)
         # cv2.imshow('Iris Thresh', thresh)
 
+        # TO DO: Shadows and Hard-code value of 1.45 and 2.5
         circles = cv2.HoughCircles(thresh, cv2.HOUGH_GRADIENT, 2, 500, param1=30, param2=10, minRadius=int(np.average(pupil_radii)*1.45), maxRadius=int(np.average(pupil_radii)*2.5))
 
         if circles is not None:
@@ -172,6 +202,8 @@ def Iris_Detection(im, pup_cen, v_type):
                     y_ul = int(np.ceil(np.average(pupil_ypoints))) + 3
                     r_ll = int(np.floor(np.average(iris_radii))) - 1
                     r_ul = int(np.ceil(np.ceil(np.average(iris_radii)))) + 1
+
+                    # TO DO: Do we drop when pupil fails? Or do we bias?
 
                     if ((x_ll <= x <= x_ul) and (y_ll <= y <= y_ul)) and (r_ll <= r <= r_ul):
                         if len(pup_cen) > 0:
@@ -211,6 +243,9 @@ def Iris_Detection(im, pup_cen, v_type):
 
             for (x, y, r) in circles:
                 if len(iris_radii) == 0 or len(iris_radii) < 15:
+                    if len(frame_num) > 10:
+                        # Check the value of the radius using lower and upper bound
+                        r = Radius_Validity_Check(r, 'iris')
                     cv2.circle(im, (int(pup_cen[0]), int(pup_cen[1])), int(r), (255, 0, 0), 1)
                     iris_radii.append(r)
                     iris_xpoints.append(pup_cen[0])
@@ -226,11 +261,19 @@ def Iris_Detection(im, pup_cen, v_type):
 
                     if r_ll <= r <= r_ul:
                         if len(pup_cen) > 0:
-                            cv2.circle(im, (int(pup_cen[0]), int(pup_cen[1])), r, (255, 0, 0), 1)
+                            if len(frame_num) > 10:
+                                # Check the value of the radius using lower and upper bound
+                                r = Radius_Validity_Check(r, 'iris')
+                            cv2.circle(im, (int(pup_cen[0]), int(pup_cen[1])), int(r), (255, 0, 0), 1)
+                            iris_radii.append(r)
                             iris_xpoints.append(pup_cen[0])
                             iris_ypoints.append(pup_cen[1])
                         else:
-                            cv2.circle(im, (int(x), int(y)), r, (255, 0, 0), 1)
+                            if len(frame_num) > 10:
+                                # Check the value of the radius using lower and upper bound
+                                r = Radius_Validity_Check(r, 'iris')
+                            cv2.circle(im, (int(x), int(y)), int(r), (255, 0, 0), 1)
+                            iris_radii.append(r)
                             iris_xpoints.append(x)
                             iris_ypoints.append(y)
                         # iris_center = [x, y]
@@ -239,12 +282,14 @@ def Iris_Detection(im, pup_cen, v_type):
                         r = np.average(iris_radii[-30:])
                         iris_radii.append(r)
                         if len(pup_cen) < 1:
-                            cv2.circle(im, (int(x), int(y)), r, (255, 0, 0), 1)
+                            cv2.circle(im, (int(x), int(y)), int(r), (255, 0, 0), 1)
+                            iris_radii.append(r)
                             iris_xpoints.append(x)
                             iris_ypoints.append(y)
                         else:
-                            cv2.circle(im, (int(pup_cen[0]), int(pup_cen[1])), r, (255, 0, 0), 1)
+                            cv2.circle(im, (int(pup_cen[0]), int(pup_cen[1])), int(r), (255, 0, 0), 1)
                             # cv2.rectangle(im, (x_ll, y_ll), (x_ul, y_ul), (255, 0, 0), 1)
+                            iris_radii.append(r)
                             iris_xpoints.append(pup_cen[0])
                             iris_ypoints.append(pup_cen[1])
                         # iris_center = [x, y]
@@ -262,6 +307,7 @@ def Pupil_Detection(im, iris_cen, v_type):
     global pupil_radii
     global pupil_xpoints
     global pupil_ypoints
+    # TO DO: Add the color of the center pixel...
     w, h = imge.shape
     global biasing
 
@@ -331,7 +377,7 @@ def Pupil_Detection(im, iris_cen, v_type):
 
     # COLORED VIDEOS
     else:
-        _, thresh = cv2.threshold(imge, 20, 255, cv2.THRESH_BINARY)
+        _, thresh = cv2.threshold(imge, 26, 255, cv2.THRESH_BINARY)
         cv2.imshow('Pupil', thresh)
         contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         circles = cv2.HoughCircles(thresh, cv2.HOUGH_GRADIENT, 2, 300, param1=30, param2=10, minRadius=int(min(w, h) / 12), maxRadius=int(max(w, h) / 5.5))
@@ -347,13 +393,17 @@ def Pupil_Detection(im, iris_cen, v_type):
                     flg = 1
                     coords, r = cv2.minEnclosingCircle(c)
                     dia_p = max(w1, h1)
-                    cv2.circle(im, ((int(x1 + (dia_p / 2))), int((y1 + (dia_p / 2)))), int(dia_p / 2), (0, 255, 0), 1)
+                    rad_p = dia_p / 2
+                    if len(frame_num) > 10:
+                        # Check the value of the radius using lower and upper bound
+                        rad_p = Radius_Validity_Check(dia_p/2, 'pupil')
+                    cv2.circle(im, ((int(x1 + rad_p)), int((y1 + rad_p))), int(rad_p), (0, 255, 0), 1)
                     # cv2.rectangle(im, (x1, y1), (x1+w1, y1+h1), (0, 255, 0), 2)
-                    pupil_radii.append(w1 / 2)
-                    Pupil_Dilation.append(w1 / 2)
-                    pupil_xpoints.append(x1 + (dia_p / 2))
-                    pupil_ypoints.append(y1 + (dia_p / 2))
-                    pupil_center = [x1 + (dia_p / 2), y1 + (dia_p / 2)]
+                    pupil_radii.append(rad_p)
+                    Pupil_Dilation.append(rad_p)
+                    pupil_xpoints.append(x1 + dia_p / 2)
+                    pupil_ypoints.append(y1 + dia_p / 2)
+                    pupil_center = [x1 + dia_p / 2, y1 + dia_p / 2]
 
         # Hough Method when Contour Fails
         elif circles is not None and flg == 0:
@@ -361,6 +411,9 @@ def Pupil_Detection(im, iris_cen, v_type):
             circles = np.round(circles[0, :])
             for (x, y, r) in circles:
                 if len(pupil_radii) == 0 or len(pupil_radii) < 15:
+                    if len(frame_num) > 10:
+                        # Check the value of the radius using lower and upper bound
+                        r = Radius_Validity_Check(r, 'pupil')
                     cv2.circle(im, (x, y), int(r), (0, 255, 0), 1)
                     pupil_radii.append(r)
                     pupil_xpoints.append(x)
@@ -375,6 +428,9 @@ def Pupil_Detection(im, iris_cen, v_type):
                     r_ul = int(np.ceil(np.average(pupil_radii))) + 7
 
                     if r_ll <= r <= r_ul:
+                        if len(frame_num) > 10:
+                            # Check the value of the radius using lower and upper bound
+                            r = Radius_Validity_Check(r, 'pupil')
                         cv2.circle(im, (x, y), int(r), (0, 255, 0), 1)
                         pupil_radii.append(r)
                         pupil_xpoints.append(x)
@@ -484,9 +540,9 @@ while video.isOpened():
                 Pupil, Pupil_center = Pupil_Detection(im, emptylist, video_type)
                 if len(Pupil_center) == 0 and (len(pupil_xpoints) and len(pupil_ypoints) != 0):
                     Pupil_center = [pupil_xpoints[-1], pupil_ypoints[-1]]
-                elif len(Pupil_center) == 0 and (len(pupil_xpoints) and len(pupil_ypoints) == 0):
+                elif len(Pupil_center) == 0:
                     Dropped_Frame_Counter += 1
-                if Dropped_Frame_Counter > 10:
+                if Dropped_Frame_Counter > 20:
                     print('\n# VIDEO DIS-QUALIFIED..!!!')
                     flag = 0
                     break
