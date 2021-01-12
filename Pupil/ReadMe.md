@@ -1,6 +1,6 @@
-# **File: IMPACT_PUPIL_v1_0.py**
+# **File: IMPACT_PUPIL_v1_1.py**
 
-## This readme talks about the code layout and structure of the IMPACT_PUPIL_v1_0.py script.
+## This readme talks about the code layout and structure of the IMPACT_PUPIL_v1_1.py script.
 
 ### Main Function:
 * The choice is made based on the type of video (NIR/Color).
