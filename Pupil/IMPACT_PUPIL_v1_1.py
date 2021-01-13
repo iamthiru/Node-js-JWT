@@ -1,15 +1,17 @@
 # Proprietary: Benten Technologies, Inc.
 # Author: Pranav H. Deo
 # Copyright Content
-# Date: 01/11/2021
-# Version: v1.1
+# Date: 01/13/2021
+# Version: v1.2
 
 # Code Description:
 # * 1080p videos of eyes to get Pupil->Iris for both NIR and COLOR.
 # * Drop threshold of Pupil: 80%. If the radius increase by 20% in the next immediate frame, we stump it.
-# * Video Quality and Drop Criteria Added (20 Frames)
+# * Video Quality and Drop Criteria Added (20 Frames).
 
 # UPDATES:
+# * HUGE UPDATE - Added Dynamic Threshold Detector for Pupil and Iris.
+# * Threshold value decided by looking at first 5 frames.
 # * Using Contour Detection Piggy-Backed with Hough when failure for both Pupil and Iris.
 # * Iris radius depends on Pupil radius, with a shared/common center.
 # * Hard-coded cropping removed.
@@ -45,6 +47,49 @@ processed_ratio = []
 Pupil_memory = []
 Iris_memory = []
 
+Pupil_Thresh_Store = []
+Iris_Thresh_Store = []
+
+
+########################################################################################################################
+def Dynamic_Threshold_Detector(Vid):
+    process_frames = 1
+    while Vid.isOpened() and process_frames <= 5:
+        process_frames += 1
+        retr, fr = video.read()
+        if retr:
+            # Getting Pupil Threshold Value Dynamically
+            for var in range(10, 60):
+                ima = cv2.cvtColor(fr, cv2.COLOR_BGR2GRAY)
+                _, thresh = cv2.threshold(ima, var, 255, cv2.THRESH_BINARY)
+                contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+                if contours is not None:
+                    for c in contours:
+                        contour_area = cv2.contourArea(c)
+                        x1, y1, w1, h1 = cv2.boundingRect(c)
+                        if (1500 < contour_area < 15000) and (0.6 < (w1 / h1) < 1.5):
+                            Pupil_Thresh_Store.append(var)
+
+            # Getting Iris Threshold Value Dynamically
+            for var in range(Pupil_Thresh_Store[len(Pupil_Thresh_Store) - 1], 110):
+                ima = cv2.cvtColor(fr, cv2.COLOR_BGR2GRAY)
+                _, thresh = cv2.threshold(ima, var, 255, cv2.THRESH_BINARY)
+                contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+                if contours is not None:
+                    for c in contours:
+                        contour_area = cv2.contourArea(c)
+                        x1, y1, w1, h1 = cv2.boundingRect(c)
+                        if (4500 < contour_area < 45000) and (0.6 < (w1 / h1) < 1.5):
+                            Iris_Thresh_Store.append(var)
+
+    print('Pupil Threshold : ', Pupil_Thresh_Store)
+    print('Pupil Threshold Value : ', np.mean(Pupil_Thresh_Store))
+    print('Iris Threshold : ', Iris_Thresh_Store)
+    print('Iris Threshold Value : ', np.mean(Iris_Thresh_Store))
+    return np.mean(Pupil_Thresh_Store)-4, np.mean(Iris_Thresh_Store)
+
 
 ########################################################################################################################
 
@@ -73,6 +118,7 @@ def Radius_Validity_Check(radius, tag):
         else:
             R = radius
     return R
+
 
 ########################################################################################################################
 
@@ -178,12 +224,10 @@ def Iris_Detection(im, pup_cen, v_type):
     w, h = imge.shape
     global biasing
     global pupil_radii
+    global Iris_Thresh
 
     if v_type == 'NIR':
         _, thresh = cv2.threshold(imge, 35, 255, cv2.THRESH_BINARY)
-        # cv2.imshow('Iris Thresh', thresh)
-
-        # TO DO: Shadows and Hard-code value of 1.45 and 2.5
         circles = cv2.HoughCircles(thresh, cv2.HOUGH_GRADIENT, 2, 500, param1=30, param2=10, minRadius=int(np.average(pupil_radii)*1.45), maxRadius=int(np.average(pupil_radii)*2.5))
 
         if circles is not None:
@@ -202,8 +246,6 @@ def Iris_Detection(im, pup_cen, v_type):
                     y_ul = int(np.ceil(np.average(pupil_ypoints))) + 3
                     r_ll = int(np.floor(np.average(iris_radii))) - 1
                     r_ul = int(np.ceil(np.ceil(np.average(iris_radii)))) + 1
-
-                    # TO DO: Do we drop when pupil fails? Or do we bias?
 
                     if ((x_ll <= x <= x_ul) and (y_ll <= y <= y_ul)) and (r_ll <= r <= r_ul):
                         if len(pup_cen) > 0:
@@ -233,7 +275,7 @@ def Iris_Detection(im, pup_cen, v_type):
 
     # COLORED VIDEOS
     else:
-        _, thresh = cv2.threshold(imge, 90, 255, cv2.THRESH_BINARY)
+        _, thresh = cv2.threshold(imge, abs(int(Iris_Thresh)), 255, cv2.THRESH_BINARY)
         cv2.imshow('Iris Thresh', thresh)
         circles = cv2.HoughCircles(thresh, cv2.HOUGH_GRADIENT, 2, 500, param1=90, param2=30, minRadius=int(np.average(pupil_radii)*1.45), maxRadius=int(np.average(pupil_radii)*6))
         # circles = cv2.HoughCircles(thresh, cv2.HOUGH_GRADIENT, 2, 500, param1=30, param2=10, minRadius=int(w / 10), maxRadius=int(h / 3))
@@ -307,9 +349,9 @@ def Pupil_Detection(im, iris_cen, v_type):
     global pupil_radii
     global pupil_xpoints
     global pupil_ypoints
-    # TO DO: Add the color of the center pixel...
     w, h = imge.shape
     global biasing
+    global Pupil_Thresh
 
     if v_type == 'NIR':
         _, thresh = cv2.threshold(imge, 15, 255, cv2.THRESH_BINARY)
@@ -377,7 +419,7 @@ def Pupil_Detection(im, iris_cen, v_type):
 
     # COLORED VIDEOS
     else:
-        _, thresh = cv2.threshold(imge, 26, 255, cv2.THRESH_BINARY)
+        _, thresh = cv2.threshold(imge, abs(int(Pupil_Thresh)), 255, cv2.THRESH_BINARY)
         cv2.imshow('Pupil', thresh)
         contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         circles = cv2.HoughCircles(thresh, cv2.HOUGH_GRADIENT, 2, 300, param1=30, param2=10, minRadius=int(min(w, h) / 12), maxRadius=int(max(w, h) / 5.5))
@@ -494,6 +536,9 @@ frame_rate = fps
 size = ()
 print('> FPS: ', fps)
 
+# Running Threshold Tracker:
+Pupil_Thresh, Iris_Thresh = Dynamic_Threshold_Detector(video)
+
 while video.isOpened():
     if counter % 2 == 0:
         ret, frame = video.read()
@@ -570,7 +615,7 @@ while video.isOpened():
 
 
 # ***************************************************************************************************
-# Print all the results
+# Create Video Output for Visualization
 if flag == 1:
     # Creates the video out of the processed frames
     pathOut = '/Users/pranavdeo/PycharmProjects/FaceEmotionRecognition/static/Pupil_Output_Videos/' + (filename.split('.')[0]) + '.mp4'
@@ -580,7 +625,9 @@ if flag == 1:
         out.write(frame_array[i])
     out.release()
 
-    # Processes and creates Equal Length Lists
+# ***************************************************************************************************
+# Print all the results
+# Processes and creates Equal Length Lists
     print('Frames : ', len(frame_num))
     print('Iris Dilation : ', len(Iris_Dilation))
     print('Pupil Dilation : ', len(Pupil_Dilation))
@@ -621,3 +668,4 @@ print('Execution Time : ', end_time, ' sec')
 print('Memory Usage : ', (usage/np.power(10, 6)), 'MB')
 
 #####################################################################################################################
+cv2.destroyAllWindows()
