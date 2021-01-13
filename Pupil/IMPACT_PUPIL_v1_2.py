@@ -514,21 +514,6 @@ if len(sys.argv) > 1:
     Orientation = 'Vertical'
     # video = cv2.VideoCapture('/Users/pranavdeo/PycharmProjects/FaceEmotionRecognition/Pupil_Input_Videos/' + filename)
     video = cv2.VideoCapture('/Users/pranavdeo/Desktop/Trials/' + filename)
-else:
-    ch = 1
-    video_type = 'Color'
-    #filename = 'Dr_Niece_Video.mp4'
-    filename = 'Trial06.mp4'
-    Orientation = 'Horizontal'
-    #Orientation = 'Horizontal'
-    #filename = 'Test03.MOV'
-    #filename = '1080p_04.MOV'
-    #ch = 2
-    #video_type = 'NIR'
-    #video = cv2.VideoCapture('/Users/pranavdeo/PycharmProjects/FaceEmotionRecognition/Pupil_Input_Videos/1080p_JUST_EYES/' + filename)
-    # video = cv2.VideoCapture('/Users/pranavdeo/Desktop/Pain Eyes/' + filename)
-    video = cv2.VideoCapture('/Users/pranavdeo/Desktop/Trials/' + filename)
-
 
 # ***************************************************************************************************
 fps = video.get(cv2.CAP_PROP_FPS)
