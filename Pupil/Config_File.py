@@ -9,7 +9,7 @@ import os
 ch = 1
 
 # video filename
-filename = 'Eric_Blue_Vertical01.MOV'
+filename = 'Eric_Blue_Vertical02.MOV'
 
 # video type: NIR or Color
 video_type = 'Color'
