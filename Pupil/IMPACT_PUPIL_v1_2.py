@@ -84,11 +84,11 @@ def Dynamic_Threshold_Detector(Vid):
                         if (4500 < contour_area < 45000) and (0.6 < (w1 / h1) < 1.5):
                             Iris_Thresh_Store.append(var)
 
-    print('Pupil Threshold : ', Pupil_Thresh_Store)
+    # print('Pupil Threshold : ', Pupil_Thresh_Store)
     print('Pupil Threshold Value : ', np.mean(Pupil_Thresh_Store))
-    print('Iris Threshold : ', Iris_Thresh_Store)
+    # print('Iris Threshold : ', Iris_Thresh_Store)
     print('Iris Threshold Value : ', np.mean(Iris_Thresh_Store))
-    return np.mean(Pupil_Thresh_Store)-4, np.mean(Iris_Thresh_Store)
+    return np.mean(Pupil_Thresh_Store)-5, np.mean(Iris_Thresh_Store)
 
 
 ########################################################################################################################
