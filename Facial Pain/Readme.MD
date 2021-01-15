@@ -9,10 +9,11 @@ The main aim of this project is to identify pain in a human face through facial 
 3. Pandas 1.0.5 or higher (CSV DataFrame Package)
 4. OpenFace 2.2.0 (See the OpenFace_Installation_Guide)
 5. NumPy 1.18.5 (For numerical calculations)
+6. Google Collab (For a faster GPU on the cloud for ML training)
 
 # Setup guide:
 
-OpenFace Installation
+OpenFace Installation:
 
 PyTorch Installation
 
