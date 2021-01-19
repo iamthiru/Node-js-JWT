@@ -19,7 +19,7 @@
 3. GPU (if available)
 
 
-#### Software Dependencies to Run Code:
+#### Software Dependencies:
 1. Python v3 or higher (PyCharm or Jupyter)
 2. OpenCV 4.2.0 or higher (Computer Vision Package)
 3. Pandas 1.0.5 or higher (CSV DataFrame Package)
