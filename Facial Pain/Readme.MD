@@ -10,27 +10,50 @@ The main aim of this project is to identify pain in a human face through facial 
 4. OpenFace 2.2.0 (See the OpenFace_Installation_Guide)
 5. NumPy 1.18.5 (For numerical calculations)
 6. Google Collab (For a faster GPU on the cloud for ML training)
+7. PyTorch
 
 # Setup guide:
 
 OpenFace Installation:
+```
+https://github.com/bententech/IMPACT/blob/master/OpenFace_Installation_Guide
+```
 
-PyTorch Installation
+PyTorch Installation (Conda installation):
+```
+conda install -c pytorch pytorch
+```
 
-OpenCV ?
+OpenCV (Conda installation):
+```
+conda install -c conda-forge opencv
+```
 
-Numpy
+Numpy (Conda installation):
+```
+conda install -c anaconda numpy
+```
 
-Pandas
 
-Matplotlib
+Pandas (Conda installation):
+```
+conda install -c anaconda pandas
+```
 
-Scipy
+Matplotlib (Conda installation):
+```
+conda install -c conda-forge matplotlib
+```
+
+Scipy (Conda installation):
+```
+conda install -c anaconda scipy
+```
 
 # Datasets used:
 
-UNBC
-BioVid
+1. UNBC
+2. BioVid
 
 Dataset Resource list:
 ```
@@ -46,9 +69,10 @@ This approach was done by statistically understanding the spread of data and pai
 - 3 Pain Bucket Approach: Where pain levels 1 & 2 (From BioVid Dataset) are classified as Low Pain, Pain levels 3 & 4 (From BioVid Dataset) are classified as High Pain and a No-Pain class.
 - 5 Pain Bucket Approach: Where we have No-Pain, Pain 1, Pain 2, Pain 3 and Pain 4 classes.
 
-# Known issues/bugs:
--Eye Blinking
+3) The per second (Variable) labels of pain are multiplied with their sepcific tier score value and the summation of these scores are then divided by the total number of seconds to give every video a single score. This corresponds to the sequence pain score given to the video file.
+
+
+# Known Issues/bugs:
+-Eye Blinking (FIXED)
 -Talking of the subject in the video
 -Sudden movement of the head
-
-# References:
