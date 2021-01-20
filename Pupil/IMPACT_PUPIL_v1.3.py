@@ -66,6 +66,7 @@ if len(sys.argv) > 1:
     video_type = str(sys.argv[3])
     Orientation = 'Vertical'
     # video = cv2.VideoCapture('/Users/pranavdeo/PycharmProjects/FaceEmotionRecognition/Pupil_Input_Videos/' + filename)
+    # TODO
     video = cv2.VideoCapture('/Users/pranavdeo/Desktop/Trials/' + filename)
 
 # Calculate FPS of the Video:
