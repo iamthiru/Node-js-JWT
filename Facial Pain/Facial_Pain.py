@@ -16,6 +16,9 @@ from scipy import stats
 
 # Config File: (PENDING)
 
+# Add distinction to avoid same name files.
+# Pranav_Last_name_timestamp.mp4
+
 video='Input.mp4'
 
 # Bucket values here
@@ -54,7 +57,7 @@ def fps_calculator(video_name):
 get_ipython().system("/content/OpenFace/build/bin/FeatureExtraction -f video -out_dir '/content/drive/MyDrive/' -aus")
 
 
-
+## TODO : Video rotation. MOV or MP4. Flags.
 
 # Check if the video was processed properly (Confidence check)
 
@@ -137,7 +140,8 @@ def compute_sums(csv_file):
     Final_DF['AU_25c'] = df['AU25_c']
     Final_DF['AU_26c'] = df['AU26_c']
     Final_DF['AU_45c'] = df['AU45_c']
-
+    
+    # TODO: save blink time in config and times the blink time
     num_steps = video_fps*0.45 # (video fps*0.45 sec, convert to int, denotes average human eye blink)
     new = Calculate_AU43(Final_DF['AU_45c'], int(num_steps*2))
 
@@ -168,7 +172,7 @@ def compute_sums(csv_file):
 ### BUCKET CODE
 
 # Run the Sliding window on the above csv file
-
+## TODO: Number of seconds for sliding window
 # Function to have a sliding window over the frame values to predict pain
 def Pain_labeler(video_csv, num_steps=video_fps):
     """ Sliding window for calculating pain levels """
