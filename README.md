@@ -9,7 +9,7 @@
     * **Action Units Used:** AU01, AU_02, AU_04, AU05, AU06, AU07, AU09, AU10, AU12, AU14, AU15, AU17, AU20, AU23, AU25, AU26, AU45 and AU43
     
   - ***Pupillary Pain:***
-    * **Methods of Detection:** Calculating the increase/decrease in the diameter of Pupil (Measuring Pupil Dilation).
+    * **Objective:** Pain estimation from the Pupillary Unrest measurements (Ratio: Pupil/Iris).
     * **Approach Used:** Contour for Pupil & Modified HOUGH circles for Iris (NIR and COLOR).
 
 
