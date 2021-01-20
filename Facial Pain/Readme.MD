@@ -73,6 +73,8 @@ This approach was done by statistically understanding the spread of data and pai
 
 
 # Known Issues/bugs:
--Eye Blinking (FIXED)
--Talking of the subject in the video
--Sudden movement of the head
+- Eye Blinking (FIXED)
+
+- Talking of the subject in the video
+
+- Sudden movement of the head
