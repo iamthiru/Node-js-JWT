@@ -1,6 +1,15 @@
-# Proprietary: BentenTech
+# Proprietary: Benten Technologies, Inc.
 # Author: Pranav H. Deo
 # Copyright Content
+# Date: 01/15/2021
+# Version: v1.3
+
+# Code Description:
+# Web Simulation (Alpha Version) for Pupil and Facial Pain Analysis.
+
+# UPDATES:
+# Bugs fixed for integration to Web scripts.
+# Integrated New IMPACT_PUPIL_v1.3.py for script call.
 
 from flask import *
 import os
@@ -112,7 +121,7 @@ def UploadNIRColorFace():
 @app.route('/Process_Pupil')
 def Process_Pupil():
     os.system('cd ~/PycharmProjects/FaceEmotionRecognition/')
-    os.system('python Just_Eyes_Modified.py '+str(opt)+' '+str(fname)+' '+str(video_type1))
+    os.system('python IMPACT_PUPIL_v1.3.py '+str(opt)+' '+str(fname)+' '+str(video_type1))
     res_img_fold = os.path.join('static', 'Pupil_Output_Images')
     app.config['PUPIL_OUTPUT_FOLDER'] = res_img_fold
     img_name = str(os.path.splitext(fname)[0])
