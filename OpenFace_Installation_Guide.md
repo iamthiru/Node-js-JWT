@@ -1,4 +1,4 @@
-OpenFace Installation
+# OpenFace Installation
 
 ****************************************************************************  
 1. UNIX installation:
