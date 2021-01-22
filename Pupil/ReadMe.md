@@ -15,7 +15,7 @@
    * A graph is created after cleaning for noise and sudden drops/surges in radii of Pupil and Iris (Function: PLOT_DILATIONS).
 
 
-### PUPIL DETECTION:
+### Pupil Detection:
 A. NIR and COLOR uses the same logical model/algorithm with some minute changes.
   * We use this thresholded frame and pass it to a OpenCV function: cv2.findContours() and cv2.HOUGHCIRCLES().
   * Using a Contour approach for a dynamically produced threshold for the Pupil.
@@ -31,7 +31,7 @@ A. NIR and COLOR uses the same logical model/algorithm with some minute changes.
       * Also the center detected is also collected under pupil_xpoints and pupil_ypoints.
 
 
-### IRIS DETECTION:
+### Iris Detection:
 A. NIR and COLOR uses the same logical model/algorithm with some minute changes.
   * Uses Pupil center co-ordinates and Dynamically generated threshold value from Detector module.
   * The method used for Iris detection is Hough Transform (Circle Detection Approach).
