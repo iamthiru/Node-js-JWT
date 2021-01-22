@@ -17,13 +17,13 @@
 
 ### PUPIL DETECTION:
 A. NIR and COLOR uses the same logical model/algorithm with some minute changes.
-    * We use this thresholded frame and pass it to a OpenCV function: cv2.findContours() and cv2.HOUGHCIRCLES().
-    * Using a Contour approach for a dynamically produced threshold for the Pupil.
-    * Contour Method finds us the regions of higher intensity; areas with darker regions as compared to the other regions in the frame.
-    * For the Contours we find:
-      * We get the areas of the contours and try to fit a rectangle on top of them.
-      * Next we give a area range within which we ask it to detect a contour.
-      * Then we use the max diameter using the co-ordinates of the rectangle to fit a minEnclosingCircle()
+  * We use this thresholded frame and pass it to a OpenCV function: cv2.findContours() and cv2.HOUGHCIRCLES().
+  * Using a Contour approach for a dynamically produced threshold for the Pupil.
+  * Contour Method finds us the regions of higher intensity; areas with darker regions as compared to the other regions in the frame.
+  * For the Contours we find:
+    * We get the areas of the contours and try to fit a rectangle on top of them.
+    * Next we give a area range within which we ask it to detect a contour.
+    * Then we use the max diameter using the co-ordinates of the rectangle to fit a minEnclosingCircle()
     * Else if Contour is not detected and for the Hough circles we find:
       * For a contour within the LL and UL, we find the minEnclosingCircle() and the diameter from the rectangular box that is fit on the contour.
       * For every radius collected, we run it through validity check and fit a circle on top of it.
@@ -33,10 +33,10 @@ A. NIR and COLOR uses the same logical model/algorithm with some minute changes.
 
 ### IRIS DETECTION:
 A. NIR and COLOR uses the same logical model/algorithm with some minute changes.
-    * Uses Pupil center co-ordinates and Dynamically generated threshold value from Detector module.
-    * The method used for Iris detection is Hough Transform (Circle Detection Approach).
-    * A range of circles to fit on top of the circular edge is found and the best fit circle is chosen using cv2.HoughCircles()
-    * For every circle detected, we do the radius validity check to see if the circle is really the correct one by comparing to the previously found circles.
-    * A list is maintained to store Iris radius and center co-ordinates.
-    * In case the circle goes by undetected in some frames, we use the biasing methods for the current frame using the last 5-10 frames.
-    * The computed lists for Iris radius and center is then passed forward to run analysis, CSVs and graphing.
+  * Uses Pupil center co-ordinates and Dynamically generated threshold value from Detector module.
+  * The method used for Iris detection is Hough Transform (Circle Detection Approach).
+  * A range of circles to fit on top of the circular edge is found and the best fit circle is chosen using cv2.HoughCircles()
+  * For every circle detected, we do the radius validity check to see if the circle is really the correct one by comparing to the previously found circles.
+  * A list is maintained to store Iris radius and center co-ordinates.
+  * In case the circle goes by undetected in some frames, we use the biasing methods for the current frame using the last 5-10 frames.
+  * The computed lists for Iris radius and center is then passed forward to run analysis, CSVs and graphing.
