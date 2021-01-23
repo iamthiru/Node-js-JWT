@@ -7,13 +7,13 @@
 ****************************************************************************  
 2. UNIX installation:
 
-2.A. Automatic:
+      2.A. Automatic:
 
           Download this file (unix_install.sh)
           Open your terminal and chdir to the directory where you want to set up OpenFace 2.2.0
           Run this command: sudo bash ./install.sh
 
-2.B. Manual:
+      2.B. Manual:
 
           # Installing gcc (Need latest gcc)
           sudo apt-get update
@@ -97,7 +97,7 @@
 
 3. Windows installation:
 
-3.A. Download Binaries:
+    3.A. Download Binaries:
           # The installation for windows has an option to choose 32-bit or 64-bit version:
           
           # 32-bit: 
@@ -106,14 +106,14 @@
           # 64-bit: 
           https://github.com/TadasBaltrusaitis/OpenFace/releases/download/OpenFace_2.2.0/OpenFace_v2.2.0_win_x64.zip
  
-3.B. Extract the compressed zip file and the toolbox would be extracted and ready to use. For the binaries, you need to install Visual Studio Code 2017 or the 64-bit Visual C++ redistributable package. 
+   3.B. Extract the compressed zip file and the toolbox would be extracted and ready to use. For the binaries, you need to install Visual Studio Code 2017 or the 64-bit Visual C++ redistributable package. 
           Link: https://aka.ms/vs/16/release/vc_redist.x64.exe
  
-3.C. To use the command line arguments for the Openface toolbox, check the link below to run the commands:
+   3.C. To use the command line arguments for the Openface toolbox, check the link below to run the commands:
           Link: https://github.com/TadasBaltrusaitis/OpenFace/wiki/Command-line-arguments
  
-3.D. Before using the toolbox, you need to download the Models for the software. It can be done by running the download_models.ps1 file using Powershell tool. (Right click the file and run with PowerShell)
+   3.D. Before using the toolbox, you need to download the Models for the software. It can be done by running the download_models.ps1 file using Powershell tool. (Right click the file and run with PowerShell)
  
-3.E. The toolbox can also be executed by directly using the executable files in the file directory. These files show an interactive GUI to the user to select the Image, Video or Webcam feed and the results from the algorithm will be stored in the ‘processed’ folder in the file directory.
+   3.E. The toolbox can also be executed by directly using the executable files in the file directory. These files show an interactive GUI to the user to select the Image, Video or Webcam feed and the results from the algorithm will be stored in the ‘processed’ folder in the file directory.
 
 ****************************************************************************
