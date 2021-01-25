@@ -2,7 +2,7 @@
 # Author: Pranav H. Deo
 # Copyright Content
 # Date: 01/22/2021
-# Version: v1.1
+# Version: v1.2
 
 # Code Description:
 # Web Simulation (Alpha Version) for Pupil and Facial Pain Analysis.
@@ -65,7 +65,7 @@ def UploadPupil():
             print("Option Selected: " + option_val)
             fname = option_val + fname_txtfield + lname_txtfield + '.MOV'
             write_to_txt(fname_txtfield, lname_txtfield, option_val, fname, 1, video_type1)
-            PUPIL_UPLOAD_FOLDER = '/Users/pranavdeo/PycharmProjects/FaceEmotionRecognition/Pupil_Input_Videos/'
+            PUPIL_UPLOAD_FOLDER = '/Users/pranavdeo/PycharmProjects/FaceEmotionRecognition/static/Pupil_Input_Videos/'
             app.config['PUPIL_UPLOAD_FOLDER'] = PUPIL_UPLOAD_FOLDER
             f.save(os.path.join(app.config['PUPIL_UPLOAD_FOLDER'], fname))
         print("File Uploaded: " + f.filename)
@@ -86,9 +86,9 @@ def UploadFacial():
         if "Video" in option_val:
             option = 2
             print("Option Selected: " + option_val)
-            face_fname = option_val + fname_txtfield + lname_txtfield + '.avi'
+            face_fname = fname_txtfield + lname_txtfield + '.avi'
             write_to_txt(fname_txtfield, lname_txtfield, option_val, face_fname, 2, video_type2)
-            FACIAL_UPLOAD_FOLDER = '/Users/pranavdeo/PycharmProjects/FaceEmotionRecognition/Face_Input_Videos/'
+            FACIAL_UPLOAD_FOLDER = '/Users/pranavdeo/PycharmProjects/FaceEmotionRecognition/static/Face_Input_Videos/'
             app.config['FACIAL_UPLOAD_FOLDER'] = FACIAL_UPLOAD_FOLDER
             f.save(os.path.join(app.config['FACIAL_UPLOAD_FOLDER'], face_fname))
         print("File Uploaded: " + f.filename)
@@ -111,7 +111,7 @@ def UploadNIRColorFace():
             print("Option Selected: " + option_val)
             flname = option_val + fname_txtfield + lname_txtfield + '.avi'
             write_to_txt(fname_txtfield, lname_txtfield, option_val, flname, 3, video_type3)
-            FACE_UPLOAD_FOLDER = '/Users/pranavdeo/PycharmProjects/FaceEmotionRecognition/Face_NIR_Color_Videos/'
+            FACE_UPLOAD_FOLDER = '/Users/pranavdeo/PycharmProjects/FaceEmotionRecognition/static/Face_NIR_Color_Videos/'
             app.config['FACE_UPLOAD_FOLDER'] = FACE_UPLOAD_FOLDER
             f.save(os.path.join(app.config['FACE_UPLOAD_FOLDER'], flname))
         print("File Uploaded: " + f.filename)
@@ -125,9 +125,16 @@ def Process_Pupil():
     res_img_fold = os.path.join('static', 'Pupil_Output_Images')
     app.config['PUPIL_OUTPUT_FOLDER'] = res_img_fold
     img_name = str(os.path.splitext(fname)[0])
-    file = img_name + '_Dilation_Plot.png'
-    pic = os.path.join(app.config['PUPIL_OUTPUT_FOLDER'], file)
-    return render_template('Pupil_Success.html', image_file=pic)
+    file = img_name + '_Ratio_Dilation.csv'
+    csv_file = os.path.join(app.config['PUPIL_OUTPUT_FOLDER'], file)
+    df = pd.read_csv(csv_file)
+    pupil_ratio = df['Processed Ratio']
+    max_pupil_ratio = round(pupil_ratio.max(), 2)
+    mean_pupil_ratio = round(sum(pupil_ratio) / len(pupil_ratio), 2)
+    min_pupil_ratio = round(pupil_ratio.min(), 2)
+    f = img_name + '_Dilation_Plot.png'
+    pic = os.path.join(app.config['PUPIL_OUTPUT_FOLDER'], f)
+    return render_template('Pupil_Success.html', image_file=pic, max_ratio=max_pupil_ratio, mean_ratio=mean_pupil_ratio, min_ratio=min_pupil_ratio)
 
 
 @app.route('/Process_Facial')
@@ -141,8 +148,8 @@ def Process_Facial():
     csv_file = os.path.join(app.config['FACIAL_OUTPUT_FOLDER'], file)
     df = pd.read_csv(csv_file)
     pain_score = df['Pain_PSPI']
-    max_pain_score = pain_score.max()
-    min_pain_score = pain_score.min()
+    max_pain_score = round(pain_score.max(), 2)
+    min_pain_score = round(pain_score.min(), 2)
     mean_pain_score = round(sum(pain_score) / len(pain_score), 2)
     f = img_name + '_Pain_Plot.png'
     pic = os.path.join(app.config['FACIAL_OUTPUT_FOLDER'], f)
