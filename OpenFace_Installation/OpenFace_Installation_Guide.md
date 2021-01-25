@@ -1,10 +1,59 @@
-# OpenFace Installation
+# OpenFace 2.2.0 Installation
 
 ****************************************************************************  
+
 1. Mac Installation:
-
+      
+      1.A. Manual:
+            
+          Follow this process to install OpenFace 2.2.0 on your Mac:
+          a. Install Homebrew: 'https://brew.sh'. (It is an alternative to apt-get for Mac users)
+          b. After installing Homebrew, install the following dependencies: (GCC, boost, tbb, openblas, dlib, wget and opencv)
+             > brew update
+             > brew install gcc --HEAD
+             > brew install boost
+             > brew install tbb
+             > brew install openblas
+             > brew install --build-from-source dlib
+             > brew install wget
+             > brew install opencv
+          c. Now you will have to pull the OpenFace 2.2.0 GitHub repository:
+             > git clone https://github.com/TadasBaltrusaitis/OpenFace.git
+             This will create a directory in the location you want to install OpenFace 2.2.0 (Make sure the location is the same throughout).
+          d. Place a section of code under CMakeLists.txt under the OpenFace directory just created.
+             Open the file CMakeLists.txt and traverse the file until after the OpenCV section, after which you paste the following:
+             ------------------------------------------------
+             find_package( X11 REQUIRED )
+             MESSAGE("X11 information:")
+             MESSAGE("  X11_INCLUDE_DIR: ${X11_INCLUDE_DIR}")
+             MESSAGE("  X11_LIBRARIES: ${X11_LIBRARIES}")
+             MESSAGE("  X11_LIBRARY_DIRS: ${X11_LIBRARY_DIRS}")
+             include_directories( ${X11_INCLUDE_DIR} )
+             ------------------------------------------------
+          e. Model file (.dat files) installation:
+             Find a file under OpenFace directory (you just created) named: download_models.sh
+             Copy that file and paste it under this directory: /OpenFace/lib/local/LandmarkDetector/model/patch_experts
+             After this, go to your terminal and go to that directory:
+             > cd ~/OpenFace/lib/local/LandmarkDetector/model/patch_experts
+             > bash download_models.sh
+             This will install the .dat (model) files required to run the OpenFace 2.2.0 live on your machine.
+          f. Now the important steps to finally install OpenFace 2.2.0
+             > cd OpenFace
+             > mkdir build
+             > cd build
+             > cmake -D CMAKE_BUILD_TYPE=RELEASE ..
+             > make
+             
+             Yay! You have now installed OpenFace 2.2.0 on your local platform.
+             
+          g. To test the installation:
+             > cd OpenFace
+             > build/bin/FeatureExtraction -verbose -f "../samples/default.wmv"
+             If this throws an error, you have done something incorrect or have missed an installation requirement. Please install and re-rerun.
+             Otherwise you are all set.
 
 ****************************************************************************  
+
 2. UNIX installation:
 
       2.A. Automatic:
