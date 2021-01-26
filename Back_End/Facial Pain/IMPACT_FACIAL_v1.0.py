@@ -1,6 +1,14 @@
-# Proprietary: BentenTech
+# Proprietary: Benten Technologies, Inc.
 # Author: Jagadesh N., Pranav H. Deo
 # Copyright Content
+# Date: 01/26/2021
+# Version: v1.0
+
+# Code Description:
+
+
+# UPDATES:
+
 
 import os
 import sys
