@@ -1,8 +1,7 @@
 # Proprietary: Benten Technologies, Inc.
 # Author: Pranav H. Deo
 # Copyright Content
-# Date: 01/15/2021
-# Version: v1.3
+# Date: 01/27/2021
 
 # Code Description:
 # Reflection Removal approach using IN-PAINT OpenCV technique.
