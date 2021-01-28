@@ -183,31 +183,40 @@
     </div>
 
     <form action="/UploadPupil" method="post" enctype="multipart/form-data" class="form-wrap">
-        <h2 align="center">Upload Pupil Form</h2>
+        <h2 align="center">Pupil Upload Form</h2>
         <p>
         <input type="text" name="firstname" placeholder="FIRST NAME" />
         <input type="text" name="lastname" placeholder="LAST NAME" />
         <br>
-        <h3>Select Pain Type</h3>
-        <label class="container">Neutral Video
-          <input type="radio" name="radio" value="NeutralVideo">
+        <h3>Eye Color</h3>
+        <label class="container">Brown
+          <input type="radio" name="radio" value="Brown">
           <span class="checkmark"></span>
         </label>
         &nbsp;
         &nbsp;
-        <label class="container">Pain Video
-          <input type="radio" name="radio" value="PainVideo">
+        <label class="container">Blue
+          <input type="radio" name="radio" value="Blue">
           <span class="checkmark"></span>
         </label>
         &nbsp;
         &nbsp;
-        <label class="container">Neutral & Pain Video
-          <input type="radio" name="radio" value="MixedVideo">
+        <label class="container">Green
+          <input type="radio" name="radio" value="Green">
           <span class="checkmark"></span>
         </label>
-        <h3>Select Video Type</h3>
+        &nbsp;
+        &nbsp;
+        <label class="container">Hazel
+          <input type="radio" name="radio" value="Hazel">
+          <span class="checkmark"></span>
+        </label>
+
+        <br>
+        <br>
+        <h3>Video Type</h3>
         <label class="container">NIR Video
-          <input type="radio" name="radio1" value="NIR">
+          <input type="radio" name="radio1" value="NIR Video">
           <span class="checkmark"></span>
         </label>
         &nbsp;
@@ -215,15 +224,15 @@
         &nbsp;
         &nbsp;
         <label class="container">Color Video
-          <input type="radio" name="radio1" value="Color">
+          <input type="radio" name="radio1" value="Color Video">
           <span class="checkmark"></span>
         </label>
         <br><br><br>
         <div class="upload-btn-wrapper">
             <button class="btn">Choose File</button>
-            <input type="file" name="file" accept=".jpg, .png, .avi, .mp4, .MOV"/> Upload Your File Here!
+            <input type="file" name="file" accept=".jpg, .png, .avi, .mp4, .MOV"/> Upload Video File!
         </div>
-        <br><br>
+        <br>
         <p><input class="buttonstyle" type="submit" value="UPLOAD" style="width:540px"></p>
     </form>
 
