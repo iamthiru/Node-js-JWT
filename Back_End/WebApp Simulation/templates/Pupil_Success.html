@@ -62,14 +62,16 @@
         <a href="{{url_for('FacePupilPain')}}">Face Pupil Pain</a>
     </div>
 
-    <div class="header">
-        <h1>Pupil Results</h1>
-    </div>
+    <table align="center">
+        <tr>
+            <td>
+                <video width="580" height="400" autoplay controls>
+                    <source src="{{ video_file }}" type="video/mp4">
+                </video>
+            </td>
+            <td><img class="myimages" src="{{ image_file }}"></td>
+        </tr>
+    </table>
 
-    <div class="row">
-        <div class="column">
-            <img class="myimages" src="{{ image_file }}">
-        </div>
-    </div>
 </body>
 </html>
