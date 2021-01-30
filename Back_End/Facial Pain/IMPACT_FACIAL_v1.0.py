@@ -1,13 +1,18 @@
 # Proprietary: Benten Technologies, Inc.
 # Author: Jagadesh N., Pranav H. Deo
 # Copyright Content
-# Date: 01/26/2021
+# Date: 01/29/2021
 # Version: v1.0
 
 # Code Description:
+# This code is used to read a video and predict second wise pain detection as well as predicting a single score for the video.
+# OpenFace toolbox is used to generate the Action Unit values and we compute scores per frame for Sum of AUs and PSPI.
+# The Sum of AU scores are passed through an algorithm which has a sliding window which classifies each second of the video into 1 'Neutral/ No Pain' class and 3 'Pain' classes based on the seperating boundary between BioVid Dataset Heat level boundaries shown by the selected video files (As mentioned in the Github Readme file).
+# The algorithm also computes a single video score based on a weighted sum formula (Based on actual mean of the pain level scores). (Needs to be tested)
 
 
-# UPDATES:
+## UPDATES:
+# - Added comments to explain all the functions in a detailed manner
 
 
 import os
@@ -21,7 +26,7 @@ import matplotlib.pyplot as plt
 
 #######################################################################################################################
 
-# Function to Detect Faces and Landmark them
+# Function to Detect Faces and get the Action Unit values from the video. Output would be a csv file with frame wise scores
 def OpenFace_API_Call(ipath, opath):
     os.chdir('OpenFace')
     print("> OpenFace Feature Extraction Command Executed !!")
@@ -33,7 +38,7 @@ def OpenFace_API_Call(ipath, opath):
 
 #######################################################################################################################
 
-# Read the video for fps calculation:
+# Read the video for fps calculation useful for calculation of eye closure and sliding window values.
 def fps_calculator(video_path):
     # Read the video
     vid = cv2.VideoCapture(video_path)
@@ -44,7 +49,7 @@ def fps_calculator(video_path):
 
 #######################################################################################################################
 
-# Run computations on the csv file and attach new columns
+# Run computations on the csv file and attach new columns to the csv files
 # Function to compute AU43_c (Eye closure) from AU45_c (Eye Blink)
 def Calculate_AU43(x_data, num_steps):
     # Create empty list of the size of AU_45c
@@ -66,7 +71,7 @@ def Calculate_AU43(x_data, num_steps):
 
 #######################################################################################################################
 
-# Computing PSPI, AU43 and SUM_AUs
+# Computing PSPI, AU43 and SUM_AUs and adding them to the final processed csv file and saving the file
 def Compute_PSPI_AUs(opath, fpath, D):
     df = pd.read_csv(fpath)
 
@@ -140,14 +145,16 @@ def Compute_PSPI_AUs(opath, fpath, D):
 
 #######################################################################################################################
 
-# BUCKET CODE : Run the Sliding window on the above csv file
-# Function to have a sliding window over the frame values to predict pain
+# BUCKET CODE : Run the Sliding window on the above csv file to classify the pain into buckets
+# Function to have a sliding window over the frame values to classify pain as one of the 4 bucket classes
+# NOTE: Any other mode of calculation (Deep Learning appraoches) would come here in classifying the sequence of frames into buckets
+
 def Calculate_Pain_Labeler(opath, fpath, D, num_steps):
     """ Sliding window for calculating pain levels """
     video_csv = pd.read_csv(fpath)
 
     # Bucket threshold values here:
-    no_pain_UL = 5.18
+    no_pain_UL = 5.18 # (Calculated by using Delaware Pain DB and computing scores on Neutral faces)
     pain_1_UL = 6.78  # (BioVid Pain 1 and Pain 2 labels below)
     pain_2_UL = 8.05  # (BioVid Pain 3 label below, Pain 4 label above)
 
@@ -201,9 +208,9 @@ def Calculate_Pain_Labeler(opath, fpath, D, num_steps):
 
 #######################################################################################################################
 
-# Video Labeler
+# Video Labeler: Used to read the csv file and generate a new file with high level second and pain scores. Also used to compute a video score using a weighted formula.
 def Video_Labeler(label_list):
-    # Value of each level:
+    # Value of each level (Mean of the pain levels as calcuated using BioVid Dataset):
     Pain_0 = 5.18
     Pain_1 = 6.44
     Pain_2 = 7.07
