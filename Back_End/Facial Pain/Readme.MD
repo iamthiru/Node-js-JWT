@@ -65,11 +65,29 @@ https://docs.google.com/spreadsheets/d/1rKMkymAw14Vhg54788XDA_QlAc-9oci0j1NfLsgM
 This approach was done using CNN-LSTM and CNN-GRU methods to understand the Spacial and Temporal spread of facial keypoints. When we run the subject's video through OpenFace Toolbox, we get a csv file which consists of frame wise Action Unit scores (Presence and Intensities). This file is processed to get the PSPI and Sum of AUs score per frame and the human labels are also added to the frame data. These features are then passed to the LSTM or GRU model to learn the features associated with the frames. Here, a sliding window is used to pass 'n' number of frames to the LSTMs or GRUs. This can be considered as a Hyper-Parameter while training the model.
 
 2) Statistical Approach
-This approach was done by statistically understanding the spread of data and pain scores over various subjects. When we run the subject's video through OpenFace Toolbox, we get a csv file which consists of frame wise Action Unit scores (Presence and Intensities). This file is processed to get the PSPI and Sum of AUs score per frame and the human labels are also added to the frame data. There is a sliding window which passes over the frames ('n' at a time, variable) which understands the pain score spread in the span of it's window and classifies the pain into corresponding pain buckets. There are 2 approaches for this:
+This approach was done by statistically understanding the spread of data and pain scores over various subjects. When we run the subject's video through OpenFace Toolbox, we get a csv file which consists of frame wise Action Unit scores (Presence and Intensities). This file is processed to get the PSPI and Sum of AUs score per frame and the human labels are also added to the frame data. There is a sliding window which passes over the frames ('n' at a time, variable. ex: 1 second) which understands the pain score spread in the span of it's window and classifies the pain into corresponding pain buckets. There are 2 approaches for this:
 - 3 Pain Bucket Approach: Where pain levels 1 & 2 (From BioVid Dataset) are classified as Low Pain, Pain levels 3 & 4 (From BioVid Dataset) are classified as High Pain and a No-Pain class.
-- 5 Pain Bucket Approach: Where we have No-Pain, Pain 1, Pain 2, Pain 3 and Pain 4 classes.
+- 4 Pain Bucket Approach: Where we have No-Pain, Pain 1 (pain levels 1 & 2 From BioVid Dataset are classified as Pain 1), Pain 2 and Pain 3 classes.
 
 3) The per second (Variable) labels of pain are multiplied with their sepcific tier score value and the summation of these scores are then divided by the total number of seconds to give every video a single score. This corresponds to the sequence pain score given to the video file.
+
+# Useful video files from BioVid Dataset: 
+Patients who do show facial expressions while heat pain is stimulated:
+- 071709_w_23
+- 071911_w_24
+- 073114_m_25
+- 080309_m_29
+- 080714_m_23
+- 081014_w_27
+- 091814_m_37
+- 092808_m_51
+- 092813_w_24
+- 100117_w_36
+- 100909_w_65
+- 111914_w_63
+- 112809_w_23
+- 120514_w_56
+
 
 
 # Known Issues/bugs:
@@ -78,3 +96,7 @@ This approach was done by statistically understanding the spread of data and pai
 - Talking of the subject in the video
 
 - Sudden movement of the head
+
+- With GRU and LSTMs, the key issue was the variability of the Action Unit scores corresponding to the same Patient reported pain labels. A person with small changes in facial expressions also report the heat as pain 4 along with a person with high facial expressions. This leads to the algorithm learning two different patterns for the same label.
+
+- The current algorithm is based on Heat Level of pain only. There should be more data based on other types of pain stimuli to truly understand the pain in a more comprehensive way.
