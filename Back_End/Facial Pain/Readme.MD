@@ -99,4 +99,4 @@ Patients who do show facial expressions while heat pain is stimulated:
 
 - With GRU and LSTMs, the key issue was the variability of the Action Unit scores corresponding to the same Patient reported pain labels. A person with small changes in facial expressions also report the heat as pain 4 along with a person with high facial expressions. This leads to the algorithm learning two different patterns for the same label.
 
-- The current algorithm is based on Heat Level of pain only. There should be more data based on other types of pain stimuli to truly understand the pain in a more comprehensive way.
+- The current algorithm is based on Heat Stimulated pain only. There should be more data based on other types of pain stimuli to truly understand the pain in a more comprehensive way.
