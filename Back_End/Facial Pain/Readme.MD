@@ -67,7 +67,7 @@ This approach was done using CNN-LSTM and CNN-GRU methods to understand the Spac
 2) Statistical Approach
 This approach was done by statistically understanding the spread of data and pain scores over various subjects. When we run the subject's video through OpenFace Toolbox, we get a csv file which consists of frame wise Action Unit scores (Presence and Intensities). This file is processed to get the PSPI and Sum of AUs score per frame and the human labels are also added to the frame data. There is a sliding window which passes over the frames ('n' at a time, variable. ex: 1 second) which understands the pain score spread in the span of it's window and classifies the pain into corresponding pain buckets. There are 2 approaches for this:
 - 3 Pain Bucket Approach: Where pain levels 1 & 2 (From BioVid Dataset) are classified as Low Pain, Pain levels 3 & 4 (From BioVid Dataset) are classified as High Pain and a No-Pain class.
-- 4 Pain Bucket Approach: Where we have No-Pain, Pain 1 (pain levels 1 & 2 From BioVid Dataset are classified as Pain 1), Pain 2 and Pain 3 classes.
+- 4 Pain Bucket Approach: Where we have No-Pain, Pain 1 (Heat levels 1 & 2 From BioVid Dataset are classified as Pain 1), Pain 2 (Heat level 3 From BioVid Dataset) and Pain 3 classe (Heat level 4 From BioVid Dataset).
 
 3) The per second (Variable) labels of pain are multiplied with their sepcific tier score value and the summation of these scores are then divided by the total number of seconds to give every video a single score. This corresponds to the sequence pain score given to the video file.
 
