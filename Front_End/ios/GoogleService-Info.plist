@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>964932305638-4v8gib4ltil6bdhp1gc3j4jf51i7vt07.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.964932305638-4v8gib4ltil6bdhp1gc3j4jf51i7vt07</string>
+	<key>API_KEY</key>
+	<string>AIzaSyCj20rz6OQGj_d_4pKACtDhHTsWAJ7IqeY</string>
+	<key>GCM_SENDER_ID</key>
+	<string>964932305638</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.bententech.impact</string>
+	<key>PROJECT_ID</key>
+	<string>impact-a17f9</string>
+	<key>STORAGE_BUCKET</key>
+	<string>impact-a17f9.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:964932305638:ios:0bfaffc20d66ffa7c33127</string>
+</dict>
+</plist>

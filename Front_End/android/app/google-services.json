@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "964932305638",
+    "project_id": "impact-a17f9",
+    "storage_bucket": "impact-a17f9.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:964932305638:android:9f80012f72e43d73c33127",
+        "android_client_info": {
+          "package_name": "com.impact"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "964932305638-s22mc1uc8mi6q7citcflrmi8okic38si.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCghYg20IlNIVJ6wOglX7n_njiU3QZXA2c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "964932305638-s22mc1uc8mi6q7citcflrmi8okic38si.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "964932305638-4v8gib4ltil6bdhp1gc3j4jf51i7vt07.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.bententech.impact"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
