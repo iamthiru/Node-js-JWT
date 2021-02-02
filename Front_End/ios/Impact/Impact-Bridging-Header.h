@@ -8,6 +8,6 @@
 #ifndef Impact_Bridging_Header_h
 #define Impact_Bridging_Header_h
 
-#import RNVideoProcessing.h
+#import "RNVideoProcessing.h"
 
 #endif /* Impact_Bridging_Header_h */

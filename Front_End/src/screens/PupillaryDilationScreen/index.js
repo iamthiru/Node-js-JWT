@@ -9,6 +9,7 @@ import {
     ScrollView
 } from 'react-native';
 import { RNCamera } from 'react-native-camera';
+import Slider from '@react-native-community/slider';
 import { ProcessingManager } from 'react-native-video-processing';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import RNFS from 'react-native-fs'
@@ -34,7 +35,9 @@ const CAPTURE_MODE = {
 
 const PupillaryDilationScreen = ({ navigation }) => {
 
-    const [eyeBorderType, setEyeBorderType] = useState(EYE_BORDER_TYPE.OVAL)
+    const [eyeBorderType, setEyeBorderType] = useState(EYE_BORDER_TYPE.OVAL);
+    const [showMenu, setShowMenu] = useState(false);
+    const [exposure, setExposure] = useState(0);
     const [timer, setTimer] = useState("0");
     const [duration, setDuration] = useState("00:00");
     const [processing, setProcessing] = useState(false);
@@ -63,6 +66,10 @@ const PupillaryDilationScreen = ({ navigation }) => {
         } catch (err) {
             console.warn(err);
         }
+    }
+
+    const toggleMenu = () => {
+        setShowMenu(!showMenu);
     }
 
     const switchCamera = () => {
@@ -97,19 +104,27 @@ const PupillaryDilationScreen = ({ navigation }) => {
 
         camera.recordAsync({ mute: true, quality: RNCamera.Constants.VideoQuality['1080p'] }).then((data) => {
             console.log("videoData: ", data)
-            // const options = {
-            //     cropWidth: width - 40,
-            //     cropHeight: (width - 40)/2,
+            // let options = {
+            //     cropWidth: parseInt(width - 40),
+            //     cropHeight: parseInt((width - 40)/2),
             //     cropOffsetX: 20,
-            //     cropOffsetY: ((width - ((width - 40) / 2)) / 2),
+            //     cropOffsetY: parseInt(((width - ((width - 40) / 2)) / 2)),
             // }
+            // if(Platform.OS === "ios") {
+            //     options.quality = "1920x1080"
+            // }
+
             const paddingValue = 1080 * (15/width);
-            const options = {
-                cropWidth: 1080 - (paddingValue * 2),
-                cropHeight: (1080 - (paddingValue * 2))/2,
-                cropOffsetX: paddingValue,
-                cropOffsetY: ((1080 - ((1080 - (paddingValue * 2)) / 2)) / 2) + (1080 * (35/width)),
+            let options = {
+                cropWidth: parseInt(1080 - (paddingValue * 2)),
+                cropHeight: parseInt((1080 - (paddingValue * 2))/2),
+                cropOffsetX: parseInt(paddingValue),
+                cropOffsetY: parseInt(((1080 - ((1080 - (paddingValue * 2)) / 2)) / 2) + (1080 * (35/width))),
             }
+            if(Platform.OS === "ios") {
+                options.quality = "1920x1080"
+            }
+
             ProcessingManager.crop(data.uri, options).then(croppedData => {
                 setIsRecording(false);
                 setVideoURL(croppedData);
@@ -203,6 +218,7 @@ const PupillaryDilationScreen = ({ navigation }) => {
                     onRecordingEnd={() => {
                         handleStopRecording();
                     }}
+                    exposure={exposure}
                 >
                     <View style={styles.frameTopLeft} pointerEvents="none"></View>
                     <View style={styles.frameTopRight} pointerEvents="none"></View>
@@ -219,13 +235,17 @@ const PupillaryDilationScreen = ({ navigation }) => {
             </View>
 
             {!isRecording && <ScrollView style={{ width: width, height: height - width, paddingHorizontal: 20 }}>
-                <View style={{ height: 38 }} />
+                <View style={{ height: 13 }} />
+                <View style={{ width: width - 40, alignItems: 'flex-end'}}>
+                    <CustomTouchableOpacity style={{ alignItems: "center", justifyContent: "center", width: 25, height: 25, borderRadius: 5, backgroundColor: showMenu? "#0E5F8170": "#0E5F81", alignItems: "center", justifyContent: "center" }} onPress={() => toggleMenu()}>
+                        <Ionicons name="menu" size={20} color="#FFFFFF" />
+                    </CustomTouchableOpacity>
+                </View>
                 <Text style={{ marginBottom: 14, fontSize: 16, fontWeight: '400', color: '#282828' }}>1. Find a well-lit environment.</Text>
                 <Text style={{ marginBottom: 14, fontSize: 16, fontWeight: '400', color: '#282828' }}>2. Position one eye within the circular frame.</Text>
                 {/* <Text style={{ marginBottom: 14, fontSize: 16, fontWeight: '400', color: '#282828' }}>3. Turn your device  horizontally if needed.</Text> */}
                 <Text style={{ marginBottom: 14, fontSize: 16, fontWeight: '400', color: '#282828' }}>3. Get ready to not blink for 10 seconds.</Text>
                 <Text style={{ marginBottom: 0, fontSize: 16, fontWeight: '400', color: '#282828' }}>4. Record the eye for at least 10 seconds.</Text>
-
                 <View style={{ width: width - 40, height: 30, marginTop: 20, marginBottom: 30 }}>
                     <View
                         style={{
@@ -279,6 +299,18 @@ const PupillaryDilationScreen = ({ navigation }) => {
                 <View style={{ height: 20 }} />
             </ScrollView>}
 
+            {(!isRecording && showMenu) && <View style={{ transform: [{rotate: "-90deg"}], position: "absolute", top: (width - 100) / 2, left: (width - 100) / 2, width: width-40, height: 100, alignItems: "center", justifyContent: "center", borderRadius: 10, backgroundColor: "#FFFFFF70" }}>
+                <Slider
+                    style={{ width: width - 80 }}
+                    minimumValue={0}
+                    maximumValue={1}
+                    value={exposure}
+                    onValueChange={(value) => setExposure(value)}
+                    minimumTrackTintColor="#FFFFFF"
+                    maximumTrackTintColor="#000000"
+                />
+            </View>}
+
             {isRecording && <>
                 <View style={{ height: 170, width: width, backgroundColor: '#0E5F81', alignItems: "center" }}>
                     <Text style={{ textAlign: "center", width: width, color: '#FFFFFF', fontSize: 16, fontWeight: "700", marginTop: 14, marginBottom: 20 }}>{duration}</Text>
@@ -296,7 +328,7 @@ const PupillaryDilationScreen = ({ navigation }) => {
                 <Video
                     source={{ uri: videoURL }}
                     controls={true}
-                    style={{ position: 'absolute', top: 15, left: 15, bottom: 0, right: 0 }} />
+                    style={{ position: 'absolute', top: 20, left: 20, bottom: 0, right: 0, width: width - 40, height: width - 40 }} />
             </View>
             <View style={{ width: width, justifyContent: 'center', alignItems: 'center', paddingTop: 30 }}>
                 <CustomTouchableOpacity disabled={processing}

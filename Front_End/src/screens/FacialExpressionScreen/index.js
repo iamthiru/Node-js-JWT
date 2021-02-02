@@ -172,11 +172,14 @@ const FacialExpressionScreen = ({ navigation }) => {
         camera.recordAsync({ mute: true, quality: RNCamera.Constants.VideoQuality['1080p'] }).then((data) => {
             console.log("videoData: ", data);
             const paddingValue = 1080 * (15/width);
-            const options = {
-                cropWidth: (1080 - paddingValue),
-                cropHeight: (1080 + (1080 * 0.25)),
-                cropOffsetX: ((1080 - (1080 - paddingValue)) / 2),
-                cropOffsetY: (((1080 + (1080 * 0.25)) - (1080 - paddingValue)) / 2) - (1080 * (10/width)),
+            let options = {
+                cropWidth: parseInt(1080 - paddingValue),
+                cropHeight: parseInt(1080 + (1080 * 0.25)),
+                cropOffsetX: parseInt((1080 - (1080 - paddingValue)) / 2),
+                cropOffsetY: parseInt((((1080 + (1080 * 0.25)) - (1080 - paddingValue)) / 2) - (1080 * (10/width))),
+            }
+            if(Platform.OS === "ios") {
+                options.quality = "1920x1080"
             }
             ProcessingManager.crop(data.uri, options).then(croppedData => {
                 setIsRecording(false);
@@ -365,7 +368,7 @@ const FacialExpressionScreen = ({ navigation }) => {
                 <Video
                     source={{ uri: videoURL }}
                     controls={true}
-                    style={{ position: 'absolute', top: 15, left: 7.5, bottom: 0, right: 0 }} />
+                    style={{ position: 'absolute', top: 20, left: 20, bottom: 0, right: 0, width: width - 40, height: (width + (width * 0.25)) - 40 }} />
             </View>
             <View style={{ width: width, justifyContent: 'center', alignItems: 'center', paddingTop: 30 }}>
                 <CustomTouchableOpacity disabled={processing}
