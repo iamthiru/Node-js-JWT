@@ -41,6 +41,8 @@
 	</dict>
 	<key>NSCameraUsageDescription</key>
 	<string>Please enable access to the camera</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Please enable access to the photo library</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string></string>
 	<key>UIAppFonts</key>

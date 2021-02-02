@@ -12,7 +12,8 @@ import { RNCamera } from 'react-native-camera';
 import Slider from '@react-native-community/slider';
 import { ProcessingManager } from 'react-native-video-processing';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import RNFS from 'react-native-fs'
+import CameraRoll from "@react-native-community/cameraroll";
+import MovToMp4 from 'react-native-mov-to-mp4';
 import Video from 'react-native-video';
 import CustomTouchableOpacity from '../../components/shared/CustomTouchableOpacity';
 import styles from './styles';
@@ -165,22 +166,27 @@ const PupillaryDilationScreen = ({ navigation }) => {
     }
 
     const onConfirmPress = () => {
-        if(Platform.OS === 'ios') {
-            resetStates();
-            return;
+        if(Platform.OS === "ios") {
+            const filename = `VID_${Date.now().toString()}`;
+            MovToMp4.convertMovToMp4(videoURL, filename)
+              .then(function (results) {
+                CameraRoll.save(results, { type: "video" }).then(res => {
+                    Alert.alert("Success", "Video has been saved successfully!");
+                    resetStates();
+                }).catch(err => {
+                    Alert.alert("Error", "Download Failed!");
+                    resetStates();
+                })
+            });
+        } else {
+            CameraRoll.save(videoURL, { type: "video" }).then(res => {
+                Alert.alert("Success", "Video has been saved successfully!");
+                resetStates();
+            }).catch(err => {
+                Alert.alert("Error", "Download Failed!");
+                resetStates();
+            })
         }
-        
-        let fileName = `VID_${(new Date()).getTime()}.mp4`;
-        RNFS.copyFile(videoURL, RNFS.ExternalStorageDirectoryPath + '/' + fileName).then(() => {
-            Alert.alert("Video Saved", "Video has been saved to " + RNFS.ExternalStorageDirectoryPath + '/' + fileName);
-            // setVideoURL("");
-            resetStates();
-        }, (error) => {
-            console.log("CopyFile fail for video: " + error);
-            Alert.alert("Error", "Download Failed!");
-            // setVideoURL("");
-            resetStates();
-        });
     }
 
     const onRetakePress = () => {
