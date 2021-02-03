@@ -1,7 +1,7 @@
 # Proprietary: Benten Technologies, Inc.
 # Author: Pranav H. Deo
 # Copyright Content
-# Date: 01/15/2021
+# Date: 02/03/2021
 # Version: v1.3
 
 # Code Description:
@@ -19,7 +19,7 @@
 # * Result Video will be created after Processing.
 # * Pupil and Iris Radius go through validity check. Based on upper and lower bound, the radius is set.
 # * The video displayed uses the adjusted radius. Works on the Fly.
-# * The incoming video is judged as Qualified/Unqualified if Pupil/Iris fails on 10 consecutive frames.
+# * The incoming video is Qualified/Disqualified if Pupil/Iris fails on 20 consecutive frames and if Pupil radius is below 35px.
 
 ########################################################################################################################
 # PACKAGE IMPORTS
@@ -64,9 +64,9 @@ if len(sys.argv) > 1:
     ch = int(sys.argv[1])
     filename = str(sys.argv[2])
     video_type = str(sys.argv[3])
-    Orientation = 'Vertical'
-    # video = cv2.VideoCapture('/Users/pranavdeo/PycharmProjects/FaceEmotionRecognition/Pupil_Input_Videos/' + filename)
-    # TODO
+    # FOR WEBAPP:
+    # video = cv2.VideoCapture('/Users/pranavdeo/PycharmProjects/FaceEmotionRecognition/static/Pupil_Input_Videos/' + filename)
+    # FOR CONFIG FILE:
     video = cv2.VideoCapture('/Users/pranavdeo/Desktop/Trials/' + filename)
 
 # Calculate FPS of the Video:
@@ -89,26 +89,33 @@ while video.isOpened():
 
             if video_type == 'NIR' or video_type == 'Color':
                 file_ext = filename.split(".")[-1]
-                im = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
+                im = frame
+                im = cv2.rotate(im, cv2.ROTATE_90_COUNTERCLOCKWISE)
                 im = cv2.GaussianBlur(im, (5, 5), 0)
+                im = cv2.medianBlur(im, 5)
+                im = cv2.bilateralFilter(im, 9, 75, 75)
                 height, width, layers = im.shape
                 size = (width, height)
-                Pupil, Pupil_center, pupil_radii, pupil_xpoints, pupil_ypoints, Pupil_Dilation = Detector.Pupil_Detection(im, frame_num,
-                                                                                                Pupil_Thresh, pupil_radii, pupil_xpoints,
-                                                                                                pupil_ypoints, Pupil_Dilation, video_type)
+                Pupil, Pupil_center, pupil_radii, pupil_xpoints, pupil_ypoints, Pupil_Dilation = Detector.Pupil_Detection(im, frame_num, Pupil_Thresh, pupil_radii,
+                                                                                                                          pupil_xpoints, pupil_ypoints, Pupil_Dilation, video_type)
                 if len(Pupil_center) == 0 and (len(pupil_xpoints) and len(pupil_ypoints) != 0):
                     Pupil_center = [pupil_xpoints[-1], pupil_ypoints[-1]]
                 elif len(Pupil_center) == 0:
                     Dropped_Frame_Counter += 1
-                if Dropped_Frame_Counter > 20:
+                if Dropped_Frame_Counter > 30:
                     print('\n# VIDEO DIS-QUALIFIED..!!!')
                     flag = 0
                     break
                 if len(Pupil_center) != 0:
-                    Iris, iris_radii, iris_xpoints, iris_ypoints, Iris_Dilation = Detector.Iris_Detection(im, frame_num,
-                                                                                Iris_Thresh, Pupil_center, iris_radii,
-                                                                                iris_xpoints, iris_ypoints, pupil_radii,
-                                                                                Iris_Dilation, video_type)
+                    if np.average(pupil_radii) >= 35:
+                        Iris, iris_radii, iris_xpoints, iris_ypoints, Iris_Dilation = Detector.Iris_Detection(im, frame_num, Iris_Thresh, Pupil_center,
+                                                                                                              iris_radii, iris_xpoints, iris_ypoints,
+                                                                                                              pupil_radii, Iris_Dilation, video_type)
+                    else:
+                        print('\n# VIDEO DIS-QUALIFIED..!!!')
+                        flag = 0
+                        break
+
                 cv2.imshow('Output', im)
                 frame_array.append(im)
                 flag = 1
@@ -147,5 +154,6 @@ if flag == 1:
 print('\n***************************************************************************')
 Data_Processing.Compute_Resources(start_time)
 
+video.release()
 cv2.destroyAllWindows()
 ########################################################################################################################
