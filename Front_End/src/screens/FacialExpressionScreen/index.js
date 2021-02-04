@@ -18,6 +18,7 @@ import CustomTouchableOpacity from '../../components/shared/CustomTouchableOpaci
 import styles from './styles';
 import { secondsToMinsAndSecs } from '../../utils/date';
 import EyeBoundary from './EyeBoundary';
+import { COLORS } from '../../constants/colors';
 
 const { width, height } = Dimensions.get("window");
 
@@ -287,7 +288,7 @@ const FacialExpressionScreen = ({ navigation }) => {
                     }}
                 >
                     {(!isRecording && toastText !== "") && <View style={{ position: "absolute", top: 0, width: width, height: 30, backgroundColor: "rgba(9, 48, 76, 0.5)", alignItems: 'center', justifyContent: "center" }} pointerEvents="none">
-                        <Text style={{ fontWeight: "700", fontSize: 16, color: "#FFFFFF" }}>{toastText}</Text>
+                        <Text style={{ fontWeight: "700", fontSize: 16, color: COLORS.WHITE }}>{toastText}</Text>
                     </View>}
                     <View style={styles.frameTopLeft} pointerEvents="none"></View>
                     <View style={styles.frameTopRight} pointerEvents="none"></View>
@@ -303,15 +304,15 @@ const FacialExpressionScreen = ({ navigation }) => {
 
             {!isRecording && <ScrollView style={{ width: width, height: height - ((width + (width * 0.25))), paddingHorizontal: 20 }}>
                 <View style={{ height: 38 }} />
-                <Text style={{ marginBottom: 14, fontSize: 16, fontWeight: '400', color: '#282828' }}>1. Find a well-lit environment.</Text>
-                <Text style={{ marginBottom: 14, fontSize: 16, fontWeight: '400', color: '#282828' }}>2. Position the face with in the frame.</Text>
-                <Text style={{ marginBottom: 0, fontSize: 16, fontWeight: '400', color: '#282828' }}>3. Get ready to not blink for 10 seconds.</Text>
+                <Text style={{ marginBottom: 14, fontSize: 16, fontWeight: '400', color: COLORS.GRAY_90 }}>1. Find a well-lit environment.</Text>
+                <Text style={{ marginBottom: 14, fontSize: 16, fontWeight: '400', color: COLORS.GRAY_90 }}>2. Position the face with in the frame.</Text>
+                <Text style={{ marginBottom: 0, fontSize: 16, fontWeight: '400', color: COLORS.GRAY_90 }}>3. Get ready to not blink for 10 seconds.</Text>
 
                 <View style={{ width: width - 40, height: 30, marginTop: 20, marginBottom: 30 }}>
                     <View
                         style={{
                             flexDirection: "row",
-                            backgroundColor: "#0E5F8150",
+                            backgroundColor: `${COLORS.PRIMARY_MAIN}50`,
                             width: 200,
                             justifyContent: "space-between",
                             height: 30,
@@ -321,19 +322,19 @@ const FacialExpressionScreen = ({ navigation }) => {
 
                         }}
                     >
-                        <CustomTouchableOpacity style={{ backgroundColor: (captureMode === CAPTURE_MODE.AUTO ? "#0E5F81" : "#0E5F8150"), width: 100, height: 30, borderTopLeftRadius: 10, borderBottomLeftRadius: 10, alignItems: "center", justifyContent: "center" }} onPress={() => setCaptureMode(CAPTURE_MODE.AUTO)}>
+                        <CustomTouchableOpacity style={{ backgroundColor: (captureMode === CAPTURE_MODE.AUTO ? COLORS.PRIMARY_MAIN : `${COLORS.PRIMARY_MAIN}50`), width: 100, height: 30, borderTopLeftRadius: 10, borderBottomLeftRadius: 10, alignItems: "center", justifyContent: "center" }} onPress={() => setCaptureMode(CAPTURE_MODE.AUTO)}>
                             <Text
                                 style={{
-                                    color: "#FFFFFF",
+                                    color: COLORS.WHITE,
                                     fontWeight: "700",
                                     fontSize: 17
                                 }}
                             >{"Auto"}</Text>
                         </CustomTouchableOpacity>
-                        <CustomTouchableOpacity style={{ backgroundColor: (captureMode === CAPTURE_MODE.MANUAL ? "#0E5F81" : "#0E5F8150"), width: 100, height: 30, borderTopRightRadius: 10, borderBottomRightRadius: 10, alignItems: "center", justifyContent: "center" }} onPress={() => setCaptureMode(CAPTURE_MODE.MANUAL)}>
+                        <CustomTouchableOpacity style={{ backgroundColor: (captureMode === CAPTURE_MODE.MANUAL ? COLORS.PRIMARY_MAIN : `${COLORS.PRIMARY_MAIN}50`), width: 100, height: 30, borderTopRightRadius: 10, borderBottomRightRadius: 10, alignItems: "center", justifyContent: "center" }} onPress={() => setCaptureMode(CAPTURE_MODE.MANUAL)}>
                             <Text
                                 style={{
-                                    color: "#FFFFFF",
+                                    color: COLORS.WHITE,
                                     fontWeight: "700",
                                     fontSize: 17
                                 }}
@@ -345,10 +346,10 @@ const FacialExpressionScreen = ({ navigation }) => {
                 <View style={{ flex: 1, width: width - 40, flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 20 }}>
                     <View style={{ width: 25, height: 25 }}></View>
                     <CustomTouchableOpacity disabled={processing || !enableRecording}
-                        style={{ backgroundColor: (processing || !enableRecording) ? "#0E5F8150" : "#0E5F81", borderRadius: 10, alignItems: "center", justifyContent: "center", height: 48, paddingHorizontal: 28 }}
+                        style={{ backgroundColor: (processing || !enableRecording) ? `${COLORS.PRIMARY_MAIN}50` : COLORS.PRIMARY_MAIN, borderRadius: 10, alignItems: "center", justifyContent: "center", height: 48, paddingHorizontal: 28 }}
                         onPress={onStartRecordingPress}
                     >
-                        <Text style={{ fontSize: 14, fontWeight: "700", color: "#FFFFFF", textAlign: "center" }}>{"START RECORDING"}</Text>
+                        <Text style={{ fontSize: 14, fontWeight: "700", color: COLORS.WHITE, textAlign: "center" }}>{"START RECORDING"}</Text>
                     </CustomTouchableOpacity>
                     <CustomTouchableOpacity disabled={processing} style={{ alignItems: "center", justifyContent: "center" }} onPress={() => switchCamera()}>
                         <Ionicons name="camera-reverse-outline" size={25} />
@@ -358,10 +359,10 @@ const FacialExpressionScreen = ({ navigation }) => {
             </ScrollView>}
 
             {isRecording && <>
-                <View style={{ height: 170, width: width, backgroundColor: '#0E5F81', alignItems: "center" }}>
-                    <Text style={{ textAlign: "center", width: width, color: '#FFFFFF', fontSize: 16, fontWeight: "700", marginTop: 14, marginBottom: 20 }}>{duration}</Text>
+                <View style={{ height: 170, width: width, backgroundColor: COLORS.PRIMARY_MAIN, alignItems: "center" }}>
+                    <Text style={{ textAlign: "center", width: width, color: COLORS.WHITE, fontSize: 16, fontWeight: "700", marginTop: 14, marginBottom: 20 }}>{duration}</Text>
                     <CustomTouchableOpacity disabled={captureMode === CAPTURE_MODE.AUTO} onPress={() => stopRecordingVideo()}>
-                        <View style={{ width: 54, height: 54, borderRadius: 54 / 2, backgroundColor: captureMode === CAPTURE_MODE.AUTO ? "#C9414150" : "#C94141", borderWidth: 5, borderColor: "#FFFFFF" }}></View>
+                        <View style={{ width: 54, height: 54, borderRadius: 54 / 2, backgroundColor: captureMode === CAPTURE_MODE.AUTO ? "#C9414150" : "#C94141", borderWidth: 5, borderColor: COLORS.WHITE }}></View>
                     </CustomTouchableOpacity>
                 </View>
             </>}
@@ -378,16 +379,16 @@ const FacialExpressionScreen = ({ navigation }) => {
             </View>
             <View style={{ width: width, justifyContent: 'center', alignItems: 'center', paddingTop: 30 }}>
                 <CustomTouchableOpacity disabled={processing}
-                    style={{ backgroundColor: "#0E5F81", borderRadius: 10, alignItems: "center", justifyContent: "center", height: 48, width: width - 80, paddingHorizontal: 28, marginBottom: 12 }}
+                    style={{ backgroundColor: COLORS.PRIMARY_MAIN, borderRadius: 10, alignItems: "center", justifyContent: "center", height: 48, width: width - 80, paddingHorizontal: 28, marginBottom: 12 }}
                     onPress={onConfirmPress}
                 >
-                    <Text style={{ fontSize: 14, fontWeight: "700", color: "#FFFFFF", textAlign: "center" }}>{"CONFIRM"}</Text>
+                    <Text style={{ fontSize: 14, fontWeight: "700", color: COLORS.WHITE, textAlign: "center" }}>{"CONFIRM"}</Text>
                 </CustomTouchableOpacity>
                 <CustomTouchableOpacity disabled={processing}
-                    style={{ backgroundColor: "#FFFFFF", borderRadius: 10, borderColor: "#0E5F81", borderWidth: 2, alignItems: "center", justifyContent: "center", height: 48, width: width - 80, paddingHorizontal: 28 }}
+                    style={{ backgroundColor: COLORS.WHITE, borderRadius: 10, borderColor: COLORS.PRIMARY_MAIN, borderWidth: 2, alignItems: "center", justifyContent: "center", height: 48, width: width - 80, paddingHorizontal: 28 }}
                     onPress={onRetakePress}
                 >
-                    <Text style={{ fontSize: 14, fontWeight: "700", color: "#282828", textAlign: "center" }}>{"RETAKE"}</Text>
+                    <Text style={{ fontSize: 14, fontWeight: "700", color: COLORS.GRAY_90, textAlign: "center" }}>{"RETAKE"}</Text>
                 </CustomTouchableOpacity>
             </View>
         </>)

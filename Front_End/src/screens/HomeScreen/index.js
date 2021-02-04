@@ -4,7 +4,6 @@ import {
     Text,
     Dimensions
 } from 'react-native';
-import { RNCamera } from 'react-native-camera';
 import CustomTouchableOpacity from '../../components/shared/CustomTouchableOpacity';
 import { SCREEN_NAMES } from '../../constants/navigation';
 import styles from './styles';

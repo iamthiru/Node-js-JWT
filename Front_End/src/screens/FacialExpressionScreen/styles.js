@@ -1,5 +1,6 @@
 import { StyleSheet } from "react-native";
 import { Dimensions } from 'react-native';
+import { COLORS } from "../../constants/colors";
 
 const width = Dimensions.get('window').width;
 const height = Dimensions.get('window').height;
@@ -8,7 +9,7 @@ const styles = StyleSheet.create({
     body: {
         flex: 1,
         height: height,
-        backgroundColor: "#E5E5E5"
+        backgroundColor: COLORS.GRAY_30
     },
     frameTopLeft: {
         width: 44,
@@ -16,7 +17,7 @@ const styles = StyleSheet.create({
         position: "absolute",
         top: 20,
         left: 20,
-        borderColor: "#FFFFFF",
+        borderColor: COLORS.WHITE,
         borderLeftWidth: 5,
         borderTopWidth: 5,
         borderTopLeftRadius: 10
@@ -27,7 +28,7 @@ const styles = StyleSheet.create({
         position: "absolute",
         top: 20,
         right: 20,
-        borderColor: "#FFFFFF",
+        borderColor: COLORS.WHITE,
         borderRightWidth: 5,
         borderTopWidth: 5,
         borderTopRightRadius: 10
@@ -38,7 +39,7 @@ const styles = StyleSheet.create({
         position: "absolute",
         top: (width + (width * 0.25)) - 20 - 50,
         left: 20,
-        borderColor: "#FFFFFF",
+        borderColor: COLORS.WHITE,
         borderLeftWidth: 5,
         borderBottomWidth: 5,
         borderBottomLeftRadius: 10
@@ -49,7 +50,7 @@ const styles = StyleSheet.create({
         position: "absolute",
         top: (width + (width * 0.25)) - 20 - 50,
         right: 20,
-        borderColor: "#FFFFFF",
+        borderColor: COLORS.WHITE,
         borderRightWidth: 5,
         borderBottomWidth: 5,
         borderBottomRightRadius: 10
@@ -59,7 +60,7 @@ const styles = StyleSheet.create({
         height: (width - 40) / 2,
         borderRadius: (width - 40) / 4,
         borderWidth: 5,
-        borderColor: "#FFFFFF",
+        borderColor: COLORS.WHITE,
         position: "absolute",
         top: ((width - ((width - 40) / 2)) / 2),
         left: ((width - ((width - 40) / 2)) / 2),
@@ -69,7 +70,7 @@ const styles = StyleSheet.create({
         width: (width - 40),
         height: (width - 40) / 2,
         borderWidth: 5,
-        borderColor: "#FFFFFF",
+        borderColor: COLORS.WHITE,
         position: "absolute",
         top: ((width - ((width - 40) / 2)) / 2),
         left: 20,
@@ -85,7 +86,7 @@ const styles = StyleSheet.create({
         justifyContent: "center"
     },
     timerText: {
-        color: "#FFFFFF",
+        color: COLORS.WHITE,
         fontSize: 72,
         fontWeight: "700"
     },

@@ -16,6 +16,7 @@ import PupillaryDilationScreen from './src/screens/PupillaryDilationScreen';
 import { SCREEN_NAMES } from './src/constants/navigation';
 import HomeScreen from './src/screens/HomeScreen';
 import FacialExpressionScreen from './src/screens/FacialExpressionScreen';
+import LoginScreen from './src/screens/LoginScreen';
 
 const Stack = createStackNavigator();
 
@@ -25,7 +26,7 @@ function App() {
       <SafeAreaProvider>
         <NavigationContainer>
           <Stack.Navigator
-            initialRouteName={SCREEN_NAMES.HOME}
+            initialRouteName={SCREEN_NAMES.LOGIN}
             screenOptions={({ navigation, route }) => ({
               headerTitleContainerStyle: { alignItems: "center" },
               animationEnabled: false,
@@ -35,6 +36,11 @@ function App() {
               headerTitleStyle: { fontWeight: '700', fontSize: 20, color: '#FFFFFF' },
             })}
           >
+            <Stack.Screen
+              name={SCREEN_NAMES.LOGIN}
+              component={LoginScreen}
+              options={{ headerShown: false }}
+            />
             <Stack.Screen
               name={SCREEN_NAMES.HOME}
               component={HomeScreen}
