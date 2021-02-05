@@ -14,6 +14,8 @@ import { RNCamera } from 'react-native-camera';
 import Slider from '@react-native-community/slider';
 import { ProcessingManager } from 'react-native-video-processing';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import Fontisto from 'react-native-vector-icons/Fontisto';
 import CameraRoll from "@react-native-community/cameraroll";
 import MovToMp4 from 'react-native-mov-to-mp4';
 import Video from 'react-native-video';
@@ -37,12 +39,18 @@ const CAPTURE_MODE = {
     MANUAL: "manual"
 }
 
+const SETTINGS = {
+    ZOOM: "zoom",
+    EXPOSURE: "exposure"
+}
+
 const PupillaryDilationScreen = ({ navigation }) => {
 
     const [eyeBorderType, setEyeBorderType] = useState(EYE_BORDER_TYPE.OVAL);
     const [showSpinner, setShowSpinner] = useState(false);
-    const [showMenu, setShowMenu] = useState(false);
+    const [selectedSetting, setSelectedSetting] = useState("");
     const [exposure, setExposure] = useState(0);
+    const [zoom, setZoom] = useState(Platform.OS === "ios"? 0.1 : 0.175)
     const [timer, setTimer] = useState("0");
     const [duration, setDuration] = useState("00:00");
     const [processing, setProcessing] = useState(false);
@@ -73,8 +81,8 @@ const PupillaryDilationScreen = ({ navigation }) => {
         }
     }
 
-    const toggleMenu = () => {
-        setShowMenu(!showMenu);
+    const toggleSettings = (setting) => {
+        setSelectedSetting(setting === selectedSetting? "" : setting);
     }
 
     const switchCamera = () => {
@@ -234,7 +242,7 @@ const PupillaryDilationScreen = ({ navigation }) => {
                     }}
                     useNativeZoom={true}
                     defaultVideoQuality={RNCamera.Constants.VideoQuality["1080p"]}
-                    zoom={Platform.OS === "ios"? 0.2 : 0.35}
+                    zoom={zoom}
                     onCameraReady={() => setIsCameraReady(true)}
                     onRecordingStart={() => {
                         handleStartRecording();
@@ -259,10 +267,13 @@ const PupillaryDilationScreen = ({ navigation }) => {
             </View>
 
             {!isRecording && <ScrollView style={{ width: width, height: height - width, paddingHorizontal: 20 }}>
-                <View style={{ height: 13 }} />
-                <View style={{ width: width - 40, alignItems: 'flex-end'}}>
-                    <CustomTouchableOpacity style={{ alignItems: "center", justifyContent: "center", width: 25, height: 25, borderRadius: 5, backgroundColor: showMenu? `${COLORS.PRIMARY_MAIN}70`: COLORS.PRIMARY_MAIN, alignItems: "center", justifyContent: "center" }} onPress={() => toggleMenu()}>
-                        <Ionicons name="menu" size={20} color={COLORS.WHITE} />
+                <View style={{ height: 8 }} />
+                <View style={{ flexDirection: "row", width: width - 40, justifyContent: 'flex-end', marginBottom: 8 }}>
+                    <CustomTouchableOpacity style={{ alignItems: "center", justifyContent: "center", width: 30, height: 30, borderRadius: 5, backgroundColor: selectedSetting === SETTINGS.ZOOM? COLORS.PRIMARY_MAIN : "rgba(0,0,0,0)", borderColor: COLORS.PRIMARY_MAIN, borderWidth: selectedSetting === SETTINGS.ZOOM? 0 : 2, alignItems: "center", justifyContent: "center" }} onPress={() => toggleSettings(SETTINGS.ZOOM)}>
+                        <Fontisto name="zoom" size={18} color={selectedSetting === SETTINGS.ZOOM? COLORS.WHITE : COLORS.GRAY_90}/>
+                    </CustomTouchableOpacity>
+                    <CustomTouchableOpacity style={{ marginLeft: 15, alignItems: "center", justifyContent: "center", width: 30, height: 30, borderRadius: 5, backgroundColor: selectedSetting === SETTINGS.EXPOSURE? COLORS.PRIMARY_MAIN : "rgba(0,0,0,0)", borderColor: COLORS.PRIMARY_MAIN, borderWidth: selectedSetting === SETTINGS.EXPOSURE? 0 : 2, alignItems: "center", justifyContent: "center" }} onPress={() => toggleSettings(SETTINGS.EXPOSURE)}>
+                        <MaterialIcons name="brightness-5" size={18} color={selectedSetting === SETTINGS.EXPOSURE? COLORS.WHITE : COLORS.GRAY_90}/>
                     </CustomTouchableOpacity>
                 </View>
                 <Text style={{ marginBottom: 14, fontSize: 16, fontWeight: '400', color: COLORS.GRAY_90 }}>1. Find a well-lit environment.</Text>
@@ -323,8 +334,8 @@ const PupillaryDilationScreen = ({ navigation }) => {
                 <View style={{ height: 20 }} />
             </ScrollView>}
 
-            {(!isRecording && showMenu) && <View style={{ transform: [{rotate: "-90deg"}], position: "absolute", top: (width - 100) / 2, left: (width - 100) / 2, width: width-40, height: 100, alignItems: "center", justifyContent: "center", borderRadius: 10, backgroundColor: `${COLORS.WHITE}70` }}>
-                <Slider
+            {(!isRecording && selectedSetting !== "") && <View style={{ transform: [{rotate: "-90deg"}], position: "absolute", top: (width - 100) / 2, left: (width - 100) / 2, width: width-40, height: 100, alignItems: "center", justifyContent: "center", borderRadius: 10, backgroundColor: `${COLORS.WHITE}70` }}>
+                {selectedSetting === SETTINGS.EXPOSURE && <Slider
                     style={{ width: width - 80 }}
                     minimumValue={0}
                     maximumValue={1}
@@ -332,7 +343,16 @@ const PupillaryDilationScreen = ({ navigation }) => {
                     onValueChange={(value) => setExposure(value)}
                     minimumTrackTintColor={COLORS.WHITE}
                     maximumTrackTintColor={COLORS.BLACK}
-                />
+                />}
+                {selectedSetting === SETTINGS.ZOOM && <Slider
+                    style={{ width: width - 80 }}
+                    minimumValue={0}
+                    maximumValue={1}
+                    value={zoom}
+                    onValueChange={(value) => setZoom(value)}
+                    minimumTrackTintColor={COLORS.WHITE}
+                    maximumTrackTintColor={COLORS.BLACK}
+                />}
             </View>}
 
             {isRecording && <>

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { connect } from 'react-redux';
 import {
     View,
     ScrollView,
@@ -7,6 +8,8 @@ import {
     KeyboardAvoidingView
 } from 'react-native';
 import Spinner from 'react-native-loading-spinner-overlay';
+import { updateAuthData } from '../../actions/user';
+import AuthContext from '../../components/shared/AuthContext';
 import CustomButton from '../../components/shared/CustomButton';
 import CustomCheckBox from '../../components/shared/CustomCheckBox';
 import CustomTextInput from '../../components/shared/CustomTextInput';
@@ -25,11 +28,14 @@ const LoginScreen = ({ navigation }) => {
     const [rememberDevice, setRememberDevice] = useState(false)
     const [isLoggingIn, setIsLoggingIn] = useState(false);
 
+    const { signIn } = React.useContext(AuthContext);
+    
     const handleSignIn = () => {
         setIsLoggingIn(true);
         setTimeout(() => {
+            updateAuthData({ authToken: "DUMMY_TOKEN", userId: 123 })
+            signIn({ authToken: "DUMMY_TOKEN", userId: 123 });
             setIsLoggingIn(false);
-            navigateToScreen(SCREEN_NAMES.HOME);
         }, 3000)
     }
 
@@ -81,4 +87,8 @@ const LoginScreen = ({ navigation }) => {
     );
 };
 
-export default LoginScreen;
+const mapDispatchToProps = (dispatch) => ({
+    updateAuthData: (data) => dispatch(updateAuthData(data))
+});
+
+export default connect(null, mapDispatchToProps)(LoginScreen);
