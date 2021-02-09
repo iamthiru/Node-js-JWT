@@ -41,7 +41,8 @@ const CAPTURE_MODE = {
 
 const SETTINGS = {
     ZOOM: "zoom",
-    EXPOSURE: "exposure"
+    EXPOSURE: "exposure",
+    FOCUS_DEPTH: "focusDepth"
 }
 
 const PupillaryDilationScreen = ({ navigation }) => {
@@ -51,6 +52,7 @@ const PupillaryDilationScreen = ({ navigation }) => {
     const [selectedSetting, setSelectedSetting] = useState("");
     const [exposure, setExposure] = useState(0);
     const [zoom, setZoom] = useState(Platform.OS === "ios"? 0.1 : 0.175)
+    const [focusDepth, setFocusDepth] = useState(0.3)
     const [timer, setTimer] = useState("0");
     const [duration, setDuration] = useState("00:00");
     const [processing, setProcessing] = useState(false);
@@ -117,36 +119,51 @@ const PupillaryDilationScreen = ({ navigation }) => {
 
         camera.recordAsync({ mute: true, quality: RNCamera.Constants.VideoQuality['1080p'] }).then((data) => {
             console.log("videoData: ", data)
+
             // let options = {
             //     cropWidth: parseInt(width - 40),
             //     cropHeight: parseInt((width - 40)/2),
             //     cropOffsetX: 20,
             //     cropOffsetY: parseInt(((width - ((width - 40) / 2)) / 2)),
             // }
-            // if(Platform.OS === "ios") {
-            //     options.quality = "1920x1080"
-            // }
 
-            const paddingValue = 1080 * (15/width);
-            let options = {
-                cropWidth: parseInt(1080 - (paddingValue * 2)),
-                cropHeight: parseInt((1080 - (paddingValue * 2))/2),
-                cropOffsetX: parseInt(paddingValue),
-                cropOffsetY: parseInt(((1080 - ((1080 - (paddingValue * 2)) / 2)) / 2) + (1080 * (35/width))),
-            }
-            if(Platform.OS === "ios") {
-                options.quality = "1920x1080"
-            }
 
+            // const temp = 1280/width;
             // let options = {
-            //     cropWidth: parseInt(PixelRatio.getPixelSizeForLayoutSize(width - 40)),
-            //     cropHeight: parseInt(PixelRatio.getPixelSizeForLayoutSize((width - 40)/2)),
-            //     cropOffsetY: PixelRatio.getPixelSizeForLayoutSize(20),
-            //     cropOffsetX: parseInt(PixelRatio.getPixelSizeForLayoutSize((width - ((width - 40) / 2)) / 2)),
+            //     cropWidth: parseInt(temp * (width - 40)),
+            //     cropHeight: parseInt(temp * ((width - 40) / 2)),
+            //     cropOffsetX: parseInt(temp * (20)),
+            //     cropOffsetY: parseInt(temp * ((width - ((width - 40) / 2)) / 2)),
             // }
+            // console.log("temp: ", temp);
+            // console.log("screen width: ", width)
+            // console.log("screen height: ", height)
+            // console.log("cropOptions: ", options);
+
+
+            // const screenWidth = PixelRatio.getPixelSizeForLayoutSize(width) * (PixelRatio.getPixelSizeForLayoutSize(width)/width);
+            // let options = {
+            //     cropWidth: PixelRatio.getPixelSizeForLayoutSize(width) * ((1920/1080) / (1280/800)),
+            //     cropHeight: PixelRatio.getPixelSizeForLayoutSize(height) * ((1920/1080) / (1280/800)),
+            //     cropOffsetX: 0,
+            //     cropOffsetY: 0,
+            // }
+
+            let screenWidth = PixelRatio.getPixelSizeForLayoutSize(width);
+            const paddingValue = screenWidth * (15/width);
+            let options = {
+                cropWidth: parseInt(screenWidth - (paddingValue * 2)),
+                cropHeight: parseInt((screenWidth - (paddingValue * 2))/2),
+                cropOffsetX: parseInt(paddingValue),
+                cropOffsetY: parseInt(((screenWidth - ((screenWidth - (paddingValue * 2)) / 2)) / 2) + (screenWidth * (35/width))),
+            }
+            
             if(Platform.OS === "ios") {
                 options.quality = "1920x1080"
             }
+
+            console.log("screen width: ", screenWidth)
+            console.log("cropOptions: ", options);
 
             setShowSpinner(true);
             ProcessingManager.crop(data.uri, options).then(croppedData => {
@@ -158,7 +175,6 @@ const PupillaryDilationScreen = ({ navigation }) => {
                 setShowSpinner(false);
                 setIsRecording(false);
             })
-            // setVideoURL(data.uri);
         }).catch(err => {
             setIsRecording(false);
         })
@@ -215,7 +231,6 @@ const PupillaryDilationScreen = ({ navigation }) => {
     }
 
     const onRetakePress = () => {
-        // setVideoURL("");
         resetStates();
     }
 
@@ -241,8 +256,8 @@ const PupillaryDilationScreen = ({ navigation }) => {
                         buttonNegative: 'Cancel'
                     }}
                     useNativeZoom={true}
+                    autoFocus={Platform.OS === "ios"? RNCamera.Constants.AutoFocus.off : RNCamera.Constants.AutoFocus.on}
                     defaultVideoQuality={RNCamera.Constants.VideoQuality["1080p"]}
-                    zoom={zoom}
                     onCameraReady={() => setIsCameraReady(true)}
                     onRecordingStart={() => {
                         handleStartRecording();
@@ -250,6 +265,8 @@ const PupillaryDilationScreen = ({ navigation }) => {
                     onRecordingEnd={() => {
                         handleStopRecording();
                     }}
+                    zoom={zoom}
+                    focusDepth={focusDepth}
                     exposure={exposure}
                 >
                     <View style={styles.frameTopLeft} pointerEvents="none"></View>
@@ -258,6 +275,7 @@ const PupillaryDilationScreen = ({ navigation }) => {
                     <View style={styles.frameBottomRight} pointerEvents="none"></View>
                     {eyeBorderType === EYE_BORDER_TYPE.RECTANGLE && <View style={styles.eyeBorderRect} pointerEvents="none"></View>}
                     {eyeBorderType === EYE_BORDER_TYPE.OVAL && <View style={styles.eyeBorderOval} pointerEvents="none"></View>}
+                    {eyeBorderType === EYE_BORDER_TYPE.OVAL && <View style={styles.eyeBorderCircle} pointerEvents="none"></View>}
                     {timer !== "0" && <View style={[styles.timerContainer]} pointerEvents="none"><Text style={styles.timerText}>{timer}</Text></View>}
                     {isRecording && <View style={{ position: "absolute", bottom: 0, width: width, height: 91, backgroundColor: "rgba(9, 48, 76, 0.5)", alignItems: 'center', justifyContent: "space-around" }} pointerEvents="none">
                         <Text style={{ fontWeight: "700", fontSize: 16, color: COLORS.WHITE }}>NO Blink</Text>
@@ -271,6 +289,9 @@ const PupillaryDilationScreen = ({ navigation }) => {
                 <View style={{ flexDirection: "row", width: width - 40, justifyContent: 'flex-end', marginBottom: 8 }}>
                     <CustomTouchableOpacity style={{ alignItems: "center", justifyContent: "center", width: 30, height: 30, borderRadius: 5, backgroundColor: selectedSetting === SETTINGS.ZOOM? COLORS.PRIMARY_MAIN : "rgba(0,0,0,0)", borderColor: COLORS.PRIMARY_MAIN, borderWidth: selectedSetting === SETTINGS.ZOOM? 0 : 2, alignItems: "center", justifyContent: "center" }} onPress={() => toggleSettings(SETTINGS.ZOOM)}>
                         <Fontisto name="zoom" size={18} color={selectedSetting === SETTINGS.ZOOM? COLORS.WHITE : COLORS.GRAY_90}/>
+                    </CustomTouchableOpacity>
+                    <CustomTouchableOpacity style={{ marginLeft: 15, alignItems: "center", justifyContent: "center", width: 30, height: 30, borderRadius: 5, backgroundColor: selectedSetting === SETTINGS.FOCUS_DEPTH? COLORS.PRIMARY_MAIN : "rgba(0,0,0,0)", borderColor: COLORS.PRIMARY_MAIN, borderWidth: selectedSetting === SETTINGS.FOCUS_DEPTH? 0 : 2, alignItems: "center", justifyContent: "center" }} onPress={() => toggleSettings(SETTINGS.FOCUS_DEPTH)}>
+                        <MaterialIcons name="center-focus-strong" size={18} color={selectedSetting === SETTINGS.FOCUS_DEPTH? COLORS.WHITE : COLORS.GRAY_90}/>
                     </CustomTouchableOpacity>
                     <CustomTouchableOpacity style={{ marginLeft: 15, alignItems: "center", justifyContent: "center", width: 30, height: 30, borderRadius: 5, backgroundColor: selectedSetting === SETTINGS.EXPOSURE? COLORS.PRIMARY_MAIN : "rgba(0,0,0,0)", borderColor: COLORS.PRIMARY_MAIN, borderWidth: selectedSetting === SETTINGS.EXPOSURE? 0 : 2, alignItems: "center", justifyContent: "center" }} onPress={() => toggleSettings(SETTINGS.EXPOSURE)}>
                         <MaterialIcons name="brightness-5" size={18} color={selectedSetting === SETTINGS.EXPOSURE? COLORS.WHITE : COLORS.GRAY_90}/>
@@ -317,10 +338,11 @@ const PupillaryDilationScreen = ({ navigation }) => {
                 </View>
 
                 <View style={{ flex: 1, width: width - 40, flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 20 }}>
-                    <CustomTouchableOpacity style={{ alignItems: "center", justifyContent: "center" }} onPress={() => switchEyeBorderType()}>
+                    {/* <CustomTouchableOpacity style={{ alignItems: "center", justifyContent: "center" }} onPress={() => switchEyeBorderType()}>
                         {eyeBorderType === EYE_BORDER_TYPE.OVAL && <View style={{ width: 30, height: 15, borderWidth: 2, borderColor: COLORS.BLACK }}></View>}
                         {eyeBorderType === EYE_BORDER_TYPE.RECTANGLE && <View style={{ width: 15, height: 15, borderRadius: 15 / 2, borderWidth: 2, borderColor: COLORS.BLACK, transform: [{ scaleX: 2 }] }}></View>}
-                    </CustomTouchableOpacity>
+                    </CustomTouchableOpacity> */}
+                    <View style={{ width: 25, height: 25 }}></View>
                     <CustomTouchableOpacity disabled={processing}
                         style={{ backgroundColor: processing ? `${COLORS.PRIMARY_MAIN}50` : COLORS.PRIMARY_MAIN, borderRadius: 10, alignItems: "center", justifyContent: "center", height: 48, paddingHorizontal: 28 }}
                         onPress={onStartRecordingPress}
@@ -334,25 +356,43 @@ const PupillaryDilationScreen = ({ navigation }) => {
                 <View style={{ height: 20 }} />
             </ScrollView>}
 
-            {(!isRecording && selectedSetting !== "") && <View style={{ transform: [{rotate: "-90deg"}], position: "absolute", top: (width - 100) / 2, left: (width - 100) / 2, width: width-40, height: 100, alignItems: "center", justifyContent: "center", borderRadius: 10, backgroundColor: `${COLORS.WHITE}70` }}>
-                {selectedSetting === SETTINGS.EXPOSURE && <Slider
-                    style={{ width: width - 80 }}
-                    minimumValue={0}
-                    maximumValue={1}
-                    value={exposure}
-                    onValueChange={(value) => setExposure(value)}
-                    minimumTrackTintColor={COLORS.WHITE}
-                    maximumTrackTintColor={COLORS.BLACK}
-                />}
-                {selectedSetting === SETTINGS.ZOOM && <Slider
-                    style={{ width: width - 80 }}
-                    minimumValue={0}
-                    maximumValue={1}
-                    value={zoom}
-                    onValueChange={(value) => setZoom(value)}
-                    minimumTrackTintColor={COLORS.WHITE}
-                    maximumTrackTintColor={COLORS.BLACK}
-                />}
+            {(!isRecording && selectedSetting !== "") && <View style={{ flexDirection: "row", transform: [{rotate: "-90deg"}], position: "absolute", top: (width - 100) / 2, left: (width - 100) / 2, width: width-40, height: 100, alignItems: "center", justifyContent: "center", borderRadius: 10, backgroundColor: `${COLORS.WHITE}70` }}>
+                {selectedSetting === SETTINGS.EXPOSURE && <>
+                    <Text style={{ width: 40, textAlign: 'center', transform: [{ rotate: "90deg" }] }}>{`${parseInt(exposure*100)}%`}</Text>
+                    <Slider
+                        style={{ width: width - 120 }}
+                        minimumValue={0}
+                        maximumValue={1}
+                        value={exposure}
+                        onValueChange={(value) => setExposure(value)}
+                        minimumTrackTintColor={COLORS.WHITE}
+                        maximumTrackTintColor={COLORS.BLACK}
+                    />
+                </>}
+                {selectedSetting === SETTINGS.ZOOM && <>
+                    <Text style={{ width: 40, textAlign: 'center', transform: [{ rotate: "90deg" }] }}>{`${parseInt(zoom*100)}%`}</Text>
+                    <Slider
+                        style={{ width: width - 120 }}
+                        minimumValue={0}
+                        maximumValue={1}
+                        value={zoom}
+                        onValueChange={(value) => setZoom(value)}
+                        minimumTrackTintColor={COLORS.WHITE}
+                        maximumTrackTintColor={COLORS.BLACK}
+                    />
+                </>}
+                {selectedSetting === SETTINGS.FOCUS_DEPTH && <>
+                    <Text style={{ width: 40, textAlign: 'center', transform: [{ rotate: "90deg" }] }}>{`${parseInt(focusDepth*100)}%`}</Text>
+                    <Slider
+                        style={{ width: width - 120 }}
+                        minimumValue={0}
+                        maximumValue={1}
+                        value={focusDepth}
+                        onValueChange={(value) => setFocusDepth(value)}
+                        minimumTrackTintColor={COLORS.WHITE}
+                        maximumTrackTintColor={COLORS.BLACK}
+                    />
+                </>}
             </View>}
 
             {isRecording && <>
@@ -377,6 +417,7 @@ const PupillaryDilationScreen = ({ navigation }) => {
                 <Video
                     source={{ uri: videoURL }}
                     controls={true}
+                    resizeMode={"contain"}
                     style={{ position: 'absolute', top: 20, left: 20, bottom: 0, right: 0, width: width - 40, height: width - 40 }} />
             </View>
             <View style={{ width: width, justifyContent: 'center', alignItems: 'center', paddingTop: 30 }}>

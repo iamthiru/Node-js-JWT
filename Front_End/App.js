@@ -104,10 +104,14 @@ function App() {
               dispatch({ type: AUTH_ACTIONS.RESTORE_TOKEN, token: token, userId: userId });
               store.dispatch(updateAuthData({ authToken: token, userId: userId }));
             }).catch(err => {
-
+              dispatch({ type: AUTH_ACTIONS.SKIP_ONBOARDING });
             })
+          } else {
+            dispatch({ type: AUTH_ACTIONS.SKIP_ONBOARDING });
           }
-        }).catch(error => { })
+        }).catch(error => { 
+          dispatch({ type: AUTH_ACTIONS.SKIP_ONBOARDING });
+        })
     }
 
     checkForUserToken();
