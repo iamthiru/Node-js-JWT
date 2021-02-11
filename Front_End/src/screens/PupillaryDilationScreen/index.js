@@ -150,12 +150,12 @@ const PupillaryDilationScreen = ({ navigation }) => {
             // }
 
             let screenWidth = PixelRatio.getPixelSizeForLayoutSize(width);
-            const paddingValue = screenWidth * (15/width);
+            const paddingValue = screenWidth * (60/width);
             let options = {
-                cropWidth: parseInt(screenWidth - (paddingValue * 2)),
-                cropHeight: parseInt((screenWidth - (paddingValue * 2))/2),
-                cropOffsetX: parseInt(paddingValue),
-                cropOffsetY: parseInt(((screenWidth - ((screenWidth - (paddingValue * 2)) / 2)) / 2) + (screenWidth * (35/width))),
+                cropWidth: screenWidth,
+                cropHeight: parseInt((screenWidth + paddingValue)/1.5),
+                cropOffsetX: 0,
+                cropOffsetY: parseInt((screenWidth - ((screenWidth + paddingValue) / 2)) / 2),
             }
             
             if(Platform.OS === "ios") {
@@ -256,6 +256,7 @@ const PupillaryDilationScreen = ({ navigation }) => {
                         buttonNegative: 'Cancel'
                     }}
                     useNativeZoom={true}
+                    ratio={"16:9"}
                     autoFocus={Platform.OS === "ios"? RNCamera.Constants.AutoFocus.off : RNCamera.Constants.AutoFocus.on}
                     defaultVideoQuality={RNCamera.Constants.VideoQuality["1080p"]}
                     onCameraReady={() => setIsCameraReady(true)}

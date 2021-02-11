@@ -30,7 +30,7 @@ const styles = StyleSheet.create({
         const width = ((eyePsDiff * 0.75) / 2);
         return {
             position: 'absolute',
-            top: leftEyePosition.y - (width / 2),
+            top: leftEyePosition.y - (width),
             left: leftEyePosition.x - (width / 2),
             width,
             height: width,
@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
         const width = ((eyePsDiff * 0.75) / 2);
         return {
             position: 'absolute',
-            top: rightEyePosition.y - (width / 2),
+            top: rightEyePosition.y - (width),
             left: rightEyePosition.x - (width / 2),
             width,
             height: width,

@@ -107,8 +107,8 @@ const FacialExpressionScreen = ({ navigation }) => {
 
             setBox(faceData);
 
-            if (((faceAreaWidth - faceData.width) >= 0 && (faceAreaWidth - faceData.width) <= 30 && (faceData.x - faceAreaX) >= 0 && (faceData.x - faceAreaX) <= 30) &&
-                ((faceData.y - faceAreaY) >= 0 && (faceData.y - faceAreaY) <= 30) &&
+            if (((faceAreaWidth - faceData.width) >= 0 && (faceAreaWidth - faceData.width) <= 100 && (faceData.x - faceAreaX) >= 0 && (faceData.x - faceAreaX) <= 100) &&
+                ((faceData.y - faceAreaY) >= 0 && (faceData.y - faceAreaY) <= 100) &&
                 (faceData.rollAngle >= -5 && faceData.rollAngle <= 5 && faceData.yawAngle >= -5 && faceData.yawAngle <= 7)) {
                 setEyePosition(eyeData);
                 setEnableRecording(true);
@@ -120,19 +120,19 @@ const FacialExpressionScreen = ({ navigation }) => {
                 if ((faceAreaWidth - faceData.width) < 0) {
                     setToastText("Move your face backward");
                 }
-                else if ((faceAreaWidth - faceData.width) > 30) {
+                else if ((faceAreaWidth - faceData.width) > 100) {
                     setToastText("Bring your face little closer");
                 }
                 else if ((faceData.x - faceAreaX) < 0) {
                     setToastText("Move your face right");
                 }
-                else if ((faceData.x - faceAreaX) > 30) {
+                else if ((faceData.x - faceAreaX) > 100) {
                     setToastText("Move your face left");
                 }
                 else if ((faceData.y - faceAreaY) < 0) {
                     setToastText("Move your face down");
                 }
-                else if ((faceData.y - faceAreaY) > 30) {
+                else if ((faceData.y - faceAreaY) > 100) {
                     setToastText("Move your face up");
                 }
                 else if ((faceData.rollAngle >= -5 && faceData.rollAngle <= 5 && faceData.yawAngle >= -5 && faceData.yawAngle <= 7)) {
@@ -275,6 +275,7 @@ const FacialExpressionScreen = ({ navigation }) => {
                         buttonNegative: 'Cancel'
                     }}
                     useNativeZoom={true}
+                    ratio={"16:9"}
                     defaultVideoQuality={RNCamera.Constants.VideoQuality["1080p"]}
                     faceDetectionLandmarks={RNCamera.Constants.FaceDetection.Landmarks.all}
                     onFacesDetected={onFaceDetected}
