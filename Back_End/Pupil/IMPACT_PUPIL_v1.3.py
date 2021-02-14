@@ -64,10 +64,10 @@ if len(sys.argv) > 1:
     ch = int(sys.argv[1])
     filename = str(sys.argv[2])
     video_type = str(sys.argv[3])
-    # FOR WEBAPP:
-    # video = cv2.VideoCapture('/Users/pranavdeo/PycharmProjects/FaceEmotionRecognition/static/Pupil_Input_Videos/' + filename)
-    # FOR CONFIG FILE:
-    video = cv2.VideoCapture('/Users/pranavdeo/Desktop/Trials/' + filename)
+    video = cv2.VideoCapture('/AWS_Lambda/static/Pupil_Input_Videos/' + filename)
+else:
+    video = cv2.VideoCapture('/AWS_Lambda/static/Pupil_Input_Videos/Eric_Test01.mp4')
+
 
 # Calculate FPS of the Video:
 fps = video.get(cv2.CAP_PROP_FPS)
@@ -90,7 +90,7 @@ while video.isOpened():
             if video_type == 'NIR' or video_type == 'Color':
                 file_ext = filename.split(".")[-1]
                 im = frame
-                im = cv2.rotate(im, cv2.ROTATE_90_COUNTERCLOCKWISE)
+                # im = cv2.rotate(im, cv2.ROTATE_90_COUNTERCLOCKWISE)
                 im = cv2.GaussianBlur(im, (5, 5), 0)
                 im = cv2.medianBlur(im, 5)
                 im = cv2.bilateralFilter(im, 9, 75, 75)
@@ -102,8 +102,8 @@ while video.isOpened():
                     Pupil_center = [pupil_xpoints[-1], pupil_ypoints[-1]]
                 elif len(Pupil_center) == 0:
                     Dropped_Frame_Counter += 1
-                if Dropped_Frame_Counter > 30:
-                    print('\n# VIDEO DIS-QUALIFIED..!!!')
+                if Dropped_Frame_Counter > 60:
+                    print('\n# VIDEO DIS-QUALIFIED -> Pupil Undetected.. Retake Video!!!')
                     flag = 0
                     break
                 if len(Pupil_center) != 0:
@@ -112,11 +112,11 @@ while video.isOpened():
                                                                                                               iris_radii, iris_xpoints, iris_ypoints,
                                                                                                               pupil_radii, Iris_Dilation, video_type)
                     else:
-                        print('\n# VIDEO DIS-QUALIFIED..!!!')
+                        print('\n# VIDEO DIS-QUALIFIED -> Low Pixels for Pupil.. Retake Video!!!')
                         flag = 0
                         break
 
-                cv2.imshow('Output', im)
+                # cv2.imshow('Output', im)
                 frame_array.append(im)
                 flag = 1
 
