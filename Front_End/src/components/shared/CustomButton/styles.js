@@ -5,8 +5,10 @@ const styles = StyleSheet.create({
     btnStyle: { 
         height: 48, 
         borderRadius: 10, 
+        flexDirection: "row",
         alignItems: "center", 
-        justifyContent: "center", 
+        justifyContent: "space-between", 
+        paddingHorizontal: 16
     },
     primaryBtn: {
         backgroundColor: COLORS.PRIMARY_MAIN,

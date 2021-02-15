@@ -23,6 +23,8 @@ import asyncStorage from './src/utils/asyncStorage';
 import { updateAuthData } from './src/actions/user';
 import AuthContext from './src/components/shared/AuthContext';
 import SplashScreen from './src/screens/SplashScreen';
+import PainAssessmentScreen from './src/screens/PainAssessmentScreen';
+import { COLORS } from './src/constants/colors';
 
 const Stack = createStackNavigator();
 
@@ -173,9 +175,9 @@ function App() {
                 headerTitleContainerStyle: { alignItems: "center" },
                 animationEnabled: false,
                 headerBackTitleVisible: false,
-                headerStyle: { backgroundColor: '#0E5F81', borderBottomWidth: 2, borderBottomColor: '#94C24D' },
-                headerTintColor: '#FFFFFF',
-                headerTitleStyle: { fontWeight: '700', fontSize: 20, color: '#FFFFFF' },
+                headerStyle: { backgroundColor: COLORS.PRIMARY_MAIN, borderBottomWidth: 2, borderBottomColor: COLORS.SECONDARY_DARKER },
+                headerTintColor: COLORS.WHITE,
+                headerTitleStyle: { fontWeight: '700', fontSize: 20, color: COLORS.WHITE },
               })}
             >
               {state.isLoading && <Stack.Screen
@@ -203,6 +205,11 @@ function App() {
                   name={SCREEN_NAMES.FACIAL_EXPRESSION}
                   component={FacialExpressionScreen}
                   options={{ title: "Facial Expression" }}
+                />
+                <Stack.Screen
+                  name={SCREEN_NAMES.PAIN_ASSESSMENT}
+                  component={PainAssessmentScreen}
+                  options={{ headerShown: false }}
                 />
               </>)}
             </Stack.Navigator>
