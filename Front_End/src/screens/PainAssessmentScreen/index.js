@@ -10,10 +10,10 @@ import GeneralStatusBar from '../../components/shared/GeneralStatusBar';
 import ProgressBar from '../../components/shared/ProgressBar';
 import { COLORS } from '../../constants/colors';
 import { SCREEN_NAMES } from '../../constants/navigation';
-import StepFour from './StepFour';
-import StepOne from './StepOne';
-import StepThree from './StepThree';
-import StepTwo from './StepTwo';
+import PainQuality from './PainQuality';
+import VerbalAbility from './VerbalAbility';
+import PainLocation from './PainLocation';
+import NRSScore from './NRSScore';
 import styles from './styles';
 
 const { width, height } = Dimensions.get("window");
@@ -50,7 +50,7 @@ const PainAssessmentScreen = ({ navigation }) => {
             case 4:
                 return "Pain Quality";
             default:
-                return "Verbal or Not"
+                return "-"
         }
     }
 
@@ -70,10 +70,10 @@ const PainAssessmentScreen = ({ navigation }) => {
 
                 <Text style={{ marginLeft: 25, fontSize: 12, lineHeight: 16, fontWeight: "700", color: COLORS.WHITE }}>{`Step ${currentStep} of 10`}</Text>
             </View>
-            {currentStep === 1 && <StepOne gotoNext={gotoNext} />}
-            {currentStep === 2 && <StepTwo gotoNext={gotoNext} gotoPrevious={gotoPrevious} />}
-            {currentStep === 3 && <StepThree gotoNext={gotoNext} gotoPrevious={gotoPrevious} />}
-            {currentStep === 4 && <StepFour gotoNext={gotoNext} gotoPrevious={gotoPrevious} />}
+            {currentStep === 1 && <VerbalAbility gotoNext={gotoNext} />}
+            {currentStep === 2 && <NRSScore gotoNext={gotoNext} gotoPrevious={gotoPrevious} />}
+            {currentStep === 3 && <PainLocation gotoNext={gotoNext} gotoPrevious={gotoPrevious} />}
+            {currentStep === 4 && <PainQuality gotoNext={gotoNext} gotoPrevious={gotoPrevious} />}
         </View>
     );
 };
