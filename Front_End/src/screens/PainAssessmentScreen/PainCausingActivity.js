@@ -11,15 +11,15 @@ import AntDesignIcon from 'react-native-vector-icons/AntDesign';
 import { COLORS } from '../../constants/colors';
 import CustomButton from '../../components/shared/CustomButton';
 import { getStatusBarHeight } from 'react-native-status-bar-height';
-import { PAIN_QUALITIES } from '../../constants/painAssessment';
+import { PAIN_CAUSING_ACTIVITIES } from '../../constants/painAssessment';
 import CustomCheckBox from '../../components/shared/CustomCheckBox';
 
 const { width, height } = Dimensions.get("window");
 
 
-const PainQuality = ({ gotoNext, gotoPrevious }) => {
+const PainCausingActivity = ({ gotoNext, gotoPrevious }) => {
 
-    const [selectedPainQualities, setSelectedPainQualities] = useState([]);
+    const [selectedActivities, setSelectedActivities] = useState([]);
 
     const handlePrevious = () => {
         gotoPrevious();
@@ -32,32 +32,33 @@ const PainQuality = ({ gotoNext, gotoPrevious }) => {
     return (
         <>
             <ScrollView>
-                <View style={{ width: width, borderTopWidth: 1, borderBottomWidth: 1, borderColor: COLORS.PRIMARY_MAIN, backgroundColor: COLORS.WHITE, paddingHorizontal: 30, paddingVertical: 20, marginBottom: 12 }}>
-                    <View style={{ flexDirection: "row", width: (width - 60), alignItems: "center", marginBottom: 5 }}>
-                        <Text style={{ fontSize: 16, lineHeight: 22, color: COLORS.GRAY_90, fontWeight: "700", maxWidth: (width - 60 - 15 - 15) }}>{"What is the quality of the pain?"}</Text>
+                <View style={{ width: width, borderTopWidth: 1, borderBottomWidth: 1, borderColor: COLORS.PRIMARY_MAIN, backgroundColor: COLORS.WHITE, paddingHorizontal: 30, paddingVertical: 27, marginBottom: 12 }}>
+                    <Text style={{ fontSize: 16, lineHeight: 22, color: COLORS.GRAY_90, fontWeight: "700", maxWidth: (width - 60), marginBottom: 5 }}>{"What does the pain prevent you from doing?"}</Text>
+                    <View style={{ flexDirection: "row", width: (width - 60), alignItems: "center", marginBottom: 15 }}>
+                        <Text style={{ fontSize: 14, lineHeight: 22, color: COLORS.GRAY_90, fontWeight: "700", width: (width - 60 - 15 - 15) }}>{"Choose all that applies"}</Text>
                         <CustomTouchableOpacity style={{ marginLeft: 15 }}>
                             <AntDesignIcon name={"questioncircle"} size={15} color={COLORS.PRIMARY_MAIN} />
                         </CustomTouchableOpacity>
                     </View>
-                    <Text style={{ fontSize: 14, lineHeight: 22, color: COLORS.GRAY_90, fontWeight: "700", maxWidth: (width - 60), marginBottom: 12 }}>{"Choose all that applies"}</Text>
 
-                    {PAIN_QUALITIES.map((item, index) => {
+
+                    {PAIN_CAUSING_ACTIVITIES.map((item, index) => {
                         return (
                             <CustomCheckBox
                                 key={index}
                                 label={item.label}
-                                value={selectedPainQualities.includes(item.value)}
+                                value={selectedActivities.includes(item.value)}
                                 onValueChange={value => {
                                     if (value) {
-                                        setSelectedPainQualities([...selectedPainQualities, item.value])
+                                        setSelectedActivities([...selectedActivities, item.value])
                                     }
                                     else {
-                                        let qualities = [...selectedPainQualities]
+                                        let qualities = [...selectedActivities]
                                         qualities.splice(qualities.indexOf(item.value), 1);
-                                        setSelectedPainQualities(qualities);
+                                        setSelectedActivities(qualities);
                                     }
                                 }}
-                                containerStyle={{ flexDirection: "row", width: width - 60, marginBottom: 16 }} />
+                                containerStyle={{ flexDirection: "row", width: width - 60, marginBottom: (index !== (PAIN_CAUSING_ACTIVITIES.length - 1)) ? 16 : 0 }} />
                         )
                     })}
                 </View>
@@ -84,4 +85,4 @@ const PainQuality = ({ gotoNext, gotoPrevious }) => {
     );
 };
 
-export default PainQuality;
+export default PainCausingActivity;

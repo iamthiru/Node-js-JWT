@@ -37,7 +37,7 @@ export const getPainScoreDescription = (score) => {
         case 8:
             return "Hurts Whole lot";
         case 10:
-            return "Hurts Worst ";
+            return "Hurts Worst";
         default:
             return "No Hurt";
     }

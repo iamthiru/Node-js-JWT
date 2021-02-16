@@ -29,10 +29,6 @@ const VerbalAbility = ({ gotoNext, verbalAbility, setVerbalAbility }) => {
     return (
         <>
             <ScrollView>
-                <Text style={{ width: width, textAlign: 'left', paddingLeft: 30, fontSize: 12, lineHeight: 16, color: COLORS.GRAY_80, marginTop: 16, marginBottom: 20 }}>
-                    {"Answer from last assessment is preselected"}
-                </Text>
-
                 <View style={{ width: width, borderTopWidth: 1, borderBottomWidth: 1, borderColor: COLORS.PRIMARY_MAIN, backgroundColor: COLORS.WHITE, paddingHorizontal: 30, paddingVertical: 20 }}>
                     <View style={{ flexDirection: "row", width: (width - 60), alignItems: "center", marginBottom: 20 }}>
                         <Text style={{ fontSize: 16, lineHeight: 22, color: COLORS.GRAY_90, fontWeight: "700", maxWidth: (width - 60 - 15 - 15) }}>{"Is this patient currently verbal or not ?"}</Text>

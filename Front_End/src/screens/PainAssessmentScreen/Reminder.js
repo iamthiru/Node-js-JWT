@@ -14,19 +14,18 @@ import { COLORS } from '../../constants/colors';
 import CustomRadioButton from '../../components/shared/CustomRadioButton';
 import CustomButton from '../../components/shared/CustomButton';
 import { getStatusBarHeight } from 'react-native-status-bar-height';
-import { PAIN_FREQUENCY } from '../../constants/painAssessment';
 import { formatAMPM } from '../../utils/date';
 
 const { width, height } = Dimensions.get("window");
 
 
-const PainTiming = ({ gotoNext, gotoPrevious }) => {
+const Reminder = ({ gotoNext, gotoPrevious }) => {
 
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [showTimePicker, setShowTimePicker] = useState(false);
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [selectedTime, setSelectedTime] = useState(new Date());
-    const [painFrequency, setPainFrequency] = useState(PAIN_FREQUENCY[0].value)
+    const [needReminder, setNeedReminder] = useState(true);
 
     const handlePrevious = () => {
         gotoPrevious();
@@ -37,16 +36,28 @@ const PainTiming = ({ gotoNext, gotoPrevious }) => {
     }
 
     const hideDateTimePickers = () => {
-        setShowDatePicker(false); 
+        setShowDatePicker(false);
         setShowTimePicker(false);
     }
 
     return (
         <>
             <ScrollView>
-                <View style={{ width: width, borderTopWidth: 1, borderBottomWidth: 1, borderColor: COLORS.PRIMARY_MAIN, backgroundColor: COLORS.WHITE, paddingHorizontal: 30, paddingTop: 27, paddingBottom: 67, marginBottom: 38 }}>
-                    <View style={{ flexDirection: "row", width: (width - 60), alignItems: "center", marginBottom: 15 }}>
-                        <Text style={{ fontSize: 16, lineHeight: 22, color: COLORS.GRAY_90, fontWeight: "700", maxWidth: (width - 60 - 15 - 15) }}>{"When did the pain start?"}</Text>
+                <View style={{ width: width, borderTopWidth: 1, borderBottomWidth: 1, borderColor: COLORS.PRIMARY_MAIN, backgroundColor: COLORS.WHITE, paddingHorizontal: 30, paddingVertical: 27, marginBottom: 30 }}>
+                    <View style={{ flexDirection: "row", width: (width - 60), alignItems: "center", marginBottom: 20 }}>
+                        <Text style={{ fontSize: 16, lineHeight: 22, color: COLORS.GRAY_90, fontWeight: "700", maxWidth: (width - 60 - 15 - 15) }}>{"Would you like to set a reminder for the next assessment?"}</Text>
+                        <CustomTouchableOpacity style={{ marginLeft: 15 }}>
+                            <AntDesignIcon name={"questioncircle"} size={15} color={COLORS.PRIMARY_MAIN} />
+                        </CustomTouchableOpacity>
+                    </View>
+
+                    <CustomRadioButton containerStyle={{ marginBottom: 15 }} label={"Yes"} selected={needReminder} onPress={() => setNeedReminder(true)} />
+                    <CustomRadioButton label={"No"} selected={!needReminder} onPress={() => setNeedReminder(false)} />
+                </View>
+
+                <View style={{ width: width, borderTopWidth: 1, borderBottomWidth: 1, borderColor: COLORS.PRIMARY_MAIN, backgroundColor: COLORS.WHITE, paddingHorizontal: 30, paddingVertical: 27 }}>
+                    <View style={{ flexDirection: "row", width: (width - 60), alignItems: "center", marginBottom: 20 }}>
+                        <Text style={{ fontSize: 16, lineHeight: 22, color: COLORS.GRAY_90, fontWeight: "700", width: (width - 60 - 15 - 15) }}>{"Next Assessment"}</Text>
                         <CustomTouchableOpacity style={{ marginLeft: 15 }}>
                             <AntDesignIcon name={"questioncircle"} size={15} color={COLORS.PRIMARY_MAIN} />
                         </CustomTouchableOpacity>
@@ -65,17 +76,6 @@ const PainTiming = ({ gotoNext, gotoPrevious }) => {
                             <AntDesignIcon name={"caretdown"} size={15} color={COLORS.GRAY_90} />
                         </View>
                     </CustomTouchableOpacity>
-                </View>
-
-                <View style={{ width: width, borderTopWidth: 1, borderBottomWidth: 1, borderColor: COLORS.PRIMARY_MAIN, backgroundColor: COLORS.WHITE, paddingHorizontal: 30, paddingVertical: 20 }}>
-                    <View style={{ flexDirection: "row", width: (width - 60), alignItems: "center", marginBottom: 15 }}>
-                        <Text style={{ fontSize: 16, lineHeight: 22, color: COLORS.GRAY_90, fontWeight: "700", maxWidth: (width - 60) }}>{"Choose a description"}</Text>
-                    </View>
-                    {PAIN_FREQUENCY.map((item) => {
-                        return (
-                            <CustomRadioButton key={item.value} containerStyle={{ marginBottom: 15 }} label={item.label} selected={painFrequency === item.value} onPress={() => setPainFrequency(item.value)} />
-                        )
-                    })}
                 </View>
             </ScrollView>
 
@@ -141,4 +141,4 @@ const PainTiming = ({ gotoNext, gotoPrevious }) => {
     );
 };
 
-export default PainTiming;
+export default Reminder;

@@ -3,22 +3,22 @@ import {
     View,
     Text,
     Dimensions,
-    Platform,
-    ScrollView
+    ScrollView,
+    Platform
 } from 'react-native';
+import CustomTouchableOpacity from '../../components/shared/CustomTouchableOpacity';
 import AntDesignIcon from 'react-native-vector-icons/AntDesign';
 import { COLORS } from '../../constants/colors';
 import CustomButton from '../../components/shared/CustomButton';
 import { getStatusBarHeight } from 'react-native-status-bar-height';
-import { PAIN_LOCATIONS } from '../../constants/painAssessment';
-import CustomDropDown from '../../components/shared/CustomDropDown';
+import CustomTextArea from '../../components/shared/CustomTextArea';
 
 const { width, height } = Dimensions.get("window");
 
 
-const PainLocation = ({ gotoNext, gotoPrevious }) => {
+const Note = ({ gotoNext, gotoPrevious }) => {
 
-    const [painLocation, setPainLocation] = useState(PAIN_LOCATIONS[0].value);
+    const [notes, setNotes] = useState("");
 
     const handlePrevious = () => {
         gotoPrevious();
@@ -31,16 +31,14 @@ const PainLocation = ({ gotoNext, gotoPrevious }) => {
     return (
         <>
             <ScrollView>
-                <View style={{ width: width, borderTopWidth: 1, borderBottomWidth: 1, borderColor: COLORS.PRIMARY_MAIN, backgroundColor: COLORS.WHITE, paddingHorizontal: 30, paddingVertical: 20, marginBottom: 12, ...(Platform.OS !== 'android' && { zIndex: 10 }) }}>
-                    <View style={{ flexDirection: "row", width: (width - 60), alignItems: "center", marginBottom: 16 }}>
-                        <Text style={{ fontSize: 16, lineHeight: 22, color: COLORS.GRAY_90, fontWeight: "700", maxWidth: (width - 60) }}>{"What is the location of the pain?"}</Text>
+                <View style={{ width: width, borderTopWidth: 1, borderBottomWidth: 1, borderColor: COLORS.PRIMARY_MAIN, backgroundColor: COLORS.WHITE, paddingHorizontal: 30, paddingTop: 27, paddingBottom: 200 }}>
+                    <View style={{ flexDirection: "row", width: (width - 60), alignItems: "center", marginBottom: 15 }}>
+                        <Text style={{ fontSize: 16, lineHeight: 22, color: COLORS.GRAY_90, fontWeight: "700", width: (width - 60 - 15 - 15) }}>{"Any additional note to add?"}</Text>
+                        <CustomTouchableOpacity style={{ marginLeft: 15 }}>
+                            <AntDesignIcon name={"questioncircle"} size={15} color={COLORS.PRIMARY_MAIN} />
+                        </CustomTouchableOpacity>
                     </View>
-                    <CustomDropDown
-                        items={PAIN_LOCATIONS}
-                        value={painLocation}
-                        onChangeValue={item => setPainLocation((item && item.value) ? item.value : PAIN_LOCATIONS[0].value)}
-                        containerStyle={{ marginBottom: 44 }}
-                    />
+                    <CustomTextArea placeholder="Enter Notes" value={notes} onChangeText={value => setNotes(value)} inputStyle={{ width: width - 60, height: 169 }} />
                 </View>
             </ScrollView>
 
@@ -65,4 +63,4 @@ const PainLocation = ({ gotoNext, gotoPrevious }) => {
     );
 };
 
-export default PainLocation;
+export default Note;

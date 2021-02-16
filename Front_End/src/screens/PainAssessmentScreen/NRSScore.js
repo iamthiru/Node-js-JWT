@@ -37,11 +37,7 @@ const NRSScore = ({ gotoNext, gotoPrevious, verbalAbility }) => {
     return (
         <>
             <ScrollView>
-                <Text style={{ width: width, textAlign: 'left', paddingLeft: 30, fontSize: 12, lineHeight: 16, color: COLORS.GRAY_80, marginVertical: 12 }}>
-                    {"Answer from last assessment is preselected"}
-                </Text>
-
-                {verbalAbility !== VERBAL_ABILITY.NON_VERBAL.value && <View style={{ height: 24, width: width, paddingHorizontal: 30, backgroundColor: COLORS.SECONDARY_LIGHTER, justifyContent: "center" }}>
+                {verbalAbility !== VERBAL_ABILITY.NON_VERBAL.value && <View style={{ height: 24, width: width, paddingHorizontal: 30, backgroundColor: COLORS.SECONDARY_LIGHTER, justifyContent: "center", marginTop: 5 }}>
                     <Text style={{ textAlign: "left", fontSize: 12, lineHeight: 16, color: COLORS.GRAY_90 }}>{"* 0 is no pain. 10 is the most pain"}</Text>
                 </View>}
 

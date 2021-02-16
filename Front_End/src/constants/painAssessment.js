@@ -26,3 +26,13 @@ export const PAIN_FREQUENCY = [
     { value: "intermittent", label: "Intermittent" },
     { value: "xxxx", label: "xxxx" },
 ]
+
+export const PAIN_CAUSING_ACTIVITIES = [
+    { value: "walking", label: "Walking" },
+    { value: "sleeping", label: "Sleeping" },
+    { value: "therapy", label: "Going to the therapy" },
+    { value: "talking", label: "Talking" },
+    { value: "xxx", label: "xxx" },
+    { value: "yyy", label: "yyy" },
+    { value: "others", label: "Others" }
+]

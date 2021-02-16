@@ -17,13 +17,19 @@ import NRSScore from './NRSScore';
 import styles from './styles';
 import PainTiming from './PainTiming';
 import { VERBAL_ABILITY } from '../../constants/painAssessment';
+import PainCausingActivity from './PainCausingActivity';
+import Note from './Note';
+import Reminder from './Reminder';
+import Result from './Result';
 
 const { width, height } = Dimensions.get("window");
 
+const totalSteps = 8;
 
 const PainAssessmentScreen = ({ navigation }) => {
 
     const [currentStep, setCurrentStep] = useState(1);
+    const [showResult, setShowResult] = useState(false);
 
     const [verbalAbility, setVerbalAbility] = useState(VERBAL_ABILITY.VERBAL.value);
 
@@ -32,11 +38,24 @@ const PainAssessmentScreen = ({ navigation }) => {
     };
 
     const gotoNext = () => {
-        setCurrentStep(currentStep === 5 ? 1 : (currentStep + 1))
+        if (currentStep === totalSteps) {
+            setShowResult(true);
+        } else {
+            setCurrentStep(currentStep + 1);
+        }
     }
 
     const gotoPrevious = () => {
-        setCurrentStep(currentStep - 1)
+        setCurrentStep(currentStep - 1);
+    }
+
+    const handleBackPress = () => {
+        if (showResult) {
+            setShowResult(false)
+            closeScreen();
+        } else {
+            closeScreen();
+        }
     }
 
     const closeScreen = () => {
@@ -55,6 +74,12 @@ const PainAssessmentScreen = ({ navigation }) => {
                 return "Pain Quality";
             case 5:
                 return "Time";
+            case 6:
+                return "Activity";
+            case 7:
+                return "Note";
+            case 8:
+                return "Reminder";
             default:
                 return "-"
         }
@@ -63,24 +88,38 @@ const PainAssessmentScreen = ({ navigation }) => {
     return (
         <View style={styles.body}>
             <GeneralStatusBar backgroundColor={COLORS.PRIMARY_MAIN} barStyle="light-content" />
-            <View style={{ width: width, paddingVertical: 12, backgroundColor: COLORS.PRIMARY_MAIN, borderBottomWidth: 2, borderBottomColor: COLORS.SECONDARY_DARKER }}>
-                <View style={{ flexDirection: 'row', alignItems: "center", justifyContent: 'space-between', marginBottom: 12, width: width, paddingHorizontal: 16 }}>
-                    <CustomTouchableOpacity onPress={closeScreen}><AntDesignIcon name={"arrowleft"} color={COLORS.WHITE} size={22} /></CustomTouchableOpacity>
-                    <Text style={{ fontSize: 20, lineHeight: 28, textAlign: "center", color: COLORS.WHITE }}>{getHeading()}</Text>
-                    <CustomTouchableOpacity onPress={closeScreen}><AntDesignIcon name={"close"} color={COLORS.WHITE} size={22} /></CustomTouchableOpacity>
+            <View style={{ width: width, paddingTop: 12, paddingBottom: showResult ? 7 : 12, backgroundColor: COLORS.PRIMARY_MAIN, borderBottomWidth: 2, borderBottomColor: COLORS.SECONDARY_DARKER }}>
+                <View style={{ flexDirection: 'row', alignItems: "center", justifyContent: 'space-between', marginBottom: showResult ? 0 : 12, width: width, paddingHorizontal: 16 }}>
+                    <CustomTouchableOpacity onPress={handleBackPress}><AntDesignIcon name={"arrowleft"} color={COLORS.WHITE} size={22} /></CustomTouchableOpacity>
+                    <Text style={{ fontSize: 20, lineHeight: 28, textAlign: "center", color: COLORS.WHITE }}>{showResult ? "Pain Assessment" : getHeading()}</Text>
+                    {!showResult && <CustomTouchableOpacity onPress={closeScreen}><AntDesignIcon name={"close"} color={COLORS.WHITE} size={22} /></CustomTouchableOpacity>}
+                    {showResult && <View style={{ width: 22, height: 22 }} />}
                 </View>
-
-                <View style={{ width: width - 32, height: 10, marginBottom: 6, marginHorizontal: 16 }}>
-                    <ProgressBar currentStep={currentStep} totalSteps={10} width={width - 32} containerStyle={{ width: width - 32 }} indicatorStyle={{ width: width - 32 }} />
-                </View>
-
-                <Text style={{ marginLeft: 25, fontSize: 12, lineHeight: 16, fontWeight: "700", color: COLORS.WHITE }}>{`Step ${currentStep} of 10`}</Text>
+                {!showResult && <>
+                    <View style={{ width: width - 32, height: 10, marginBottom: 6, marginHorizontal: 16 }}>
+                        <ProgressBar currentStep={currentStep} totalSteps={totalSteps} width={width - 32} containerStyle={{ width: width - 32 }} indicatorStyle={{ width: width - 32 }} />
+                    </View>
+                    <Text style={{ marginLeft: 25, fontSize: 12, lineHeight: 16, fontWeight: "700", color: COLORS.WHITE }}>{`Step ${currentStep} of ${totalSteps}`}</Text>
+                </>}
             </View>
-            {currentStep === 1 && <VerbalAbility gotoNext={gotoNext} verbalAbility={verbalAbility} setVerbalAbility={setVerbalAbility} />}
-            {currentStep === 2 && <NRSScore gotoNext={gotoNext} gotoPrevious={gotoPrevious} verbalAbility={verbalAbility} />}
-            {currentStep === 3 && <PainLocation gotoNext={gotoNext} gotoPrevious={gotoPrevious} />}
-            {currentStep === 4 && <PainQuality gotoNext={gotoNext} gotoPrevious={gotoPrevious} />}
-            {currentStep === 5 && <PainTiming gotoNext={gotoNext} gotoPrevious={gotoPrevious} />}
+
+            {showResult && <>
+                <Result />
+            </>}
+
+            {!showResult && <>
+                <Text style={{ width: width, textAlign: 'left', paddingLeft: 30, fontSize: 12, lineHeight: 16, color: COLORS.GRAY_80, marginTop: 16, marginTop: 11, marginBottom: 6 }}>
+                    {"Answer from last assessment is preselected"}
+                </Text>
+                {currentStep === 1 && <VerbalAbility gotoNext={gotoNext} verbalAbility={verbalAbility} setVerbalAbility={setVerbalAbility} />}
+                {currentStep === 2 && <NRSScore gotoNext={gotoNext} gotoPrevious={gotoPrevious} verbalAbility={verbalAbility} />}
+                {currentStep === 3 && <PainLocation gotoNext={gotoNext} gotoPrevious={gotoPrevious} />}
+                {currentStep === 4 && <PainQuality gotoNext={gotoNext} gotoPrevious={gotoPrevious} />}
+                {currentStep === 5 && <PainTiming gotoNext={gotoNext} gotoPrevious={gotoPrevious} />}
+                {currentStep === 6 && <PainCausingActivity gotoNext={gotoNext} gotoPrevious={gotoPrevious} />}
+                {currentStep === 7 && <Note gotoNext={gotoNext} gotoPrevious={gotoPrevious} />}
+                {currentStep === 8 && <Reminder gotoNext={gotoNext} gotoPrevious={gotoPrevious} />}
+            </>}
         </View>
     );
 };
