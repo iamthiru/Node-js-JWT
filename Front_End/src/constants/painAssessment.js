@@ -1,7 +1,7 @@
 export const VERBAL_ABILITY = {
-    VERBAL: "verbal",
-    NON_VERBAL: "nonVerbal",
-    OTHER: "other"
+    VERBAL: { value: "verbal", label: "Verbal" },
+    NON_VERBAL: { value: "nonVerbal", label: "Non verbal" },
+    OTHER: { value: "other", label: "Other" }
 }
 
 export const PAIN_LOCATIONS = [
@@ -19,4 +19,10 @@ export const PAIN_QUALITIES = [
     { value: "tearing", label: "Tearing" },
     { value: "xxx", label: "xxx" },
     { value: "others", label: "Others" }
+]
+
+export const PAIN_FREQUENCY = [
+    { value: "constant", label: "Constant" },
+    { value: "intermittent", label: "Intermittent" },
+    { value: "xxxx", label: "xxxx" },
 ]

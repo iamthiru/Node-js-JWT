@@ -18,9 +18,8 @@ import { getStatusBarHeight } from 'react-native-status-bar-height';
 const { width, height } = Dimensions.get("window");
 
 
-const VerbalAbility = ({ gotoNext }) => {
+const VerbalAbility = ({ gotoNext, verbalAbility, setVerbalAbility }) => {
 
-    const [verbalAbility, setVerbalAbility] = useState(VERBAL_ABILITY.VERBAL);
     const [otherText, setOtherText] = useState("");
 
     const handleContinue = () => {
@@ -41,10 +40,10 @@ const VerbalAbility = ({ gotoNext }) => {
                             <AntDesignIcon name={"questioncircle"} size={15} color={COLORS.PRIMARY_MAIN} />
                         </CustomTouchableOpacity>
                     </View>
-                    <CustomRadioButton containerStyle={{ marginBottom: 15 }} label="Verbal" selected={verbalAbility === VERBAL_ABILITY.VERBAL} onPress={() => setVerbalAbility(VERBAL_ABILITY.VERBAL)} />
-                    <CustomRadioButton containerStyle={{ marginBottom: 15 }} label="Non Verbal" selected={verbalAbility === VERBAL_ABILITY.NON_VERBAL} onPress={() => setVerbalAbility(VERBAL_ABILITY.NON_VERBAL)} />
+                    <CustomRadioButton containerStyle={{ marginBottom: 15 }} label={VERBAL_ABILITY.VERBAL.label} selected={verbalAbility === VERBAL_ABILITY.VERBAL.value} onPress={() => setVerbalAbility(VERBAL_ABILITY.VERBAL.value)} />
+                    <CustomRadioButton containerStyle={{ marginBottom: 15 }} label={VERBAL_ABILITY.NON_VERBAL.label} selected={verbalAbility === VERBAL_ABILITY.NON_VERBAL.value} onPress={() => setVerbalAbility(VERBAL_ABILITY.NON_VERBAL.value)} />
                     <View style={{ flexDirection: "row", width: (width - 60) }}>
-                        <CustomRadioButton label="Other" selected={verbalAbility === VERBAL_ABILITY.OTHER} onPress={() => setVerbalAbility(VERBAL_ABILITY.OTHER)} />
+                        <CustomRadioButton label={VERBAL_ABILITY.OTHER.label} selected={verbalAbility === VERBAL_ABILITY.OTHER.value} onPress={() => setVerbalAbility(VERBAL_ABILITY.OTHER.value)} />
                         <CustomTextInput value={otherText} onChangeText={value => setOtherText(value)} containerStyle={{ paddingBottom: 0, marginLeft: 8 }} inputStyle={{ height: 24, borderRadius: 0, borderWidth: 0, borderBottomWidth: 1, paddingLeft: 0 }} />
                     </View>
                 </View>

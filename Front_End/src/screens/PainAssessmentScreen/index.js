@@ -15,6 +15,8 @@ import VerbalAbility from './VerbalAbility';
 import PainLocation from './PainLocation';
 import NRSScore from './NRSScore';
 import styles from './styles';
+import PainTiming from './PainTiming';
+import { VERBAL_ABILITY } from '../../constants/painAssessment';
 
 const { width, height } = Dimensions.get("window");
 
@@ -23,12 +25,14 @@ const PainAssessmentScreen = ({ navigation }) => {
 
     const [currentStep, setCurrentStep] = useState(1);
 
+    const [verbalAbility, setVerbalAbility] = useState(VERBAL_ABILITY.VERBAL.value);
+
     const navigateToScreen = (screenName) => {
         navigation.navigate(screenName);
     };
 
     const gotoNext = () => {
-        setCurrentStep(currentStep === 4 ? 1 : (currentStep + 1))
+        setCurrentStep(currentStep === 5 ? 1 : (currentStep + 1))
     }
 
     const gotoPrevious = () => {
@@ -49,6 +53,8 @@ const PainAssessmentScreen = ({ navigation }) => {
                 return "Location";
             case 4:
                 return "Pain Quality";
+            case 5:
+                return "Time";
             default:
                 return "-"
         }
@@ -70,10 +76,11 @@ const PainAssessmentScreen = ({ navigation }) => {
 
                 <Text style={{ marginLeft: 25, fontSize: 12, lineHeight: 16, fontWeight: "700", color: COLORS.WHITE }}>{`Step ${currentStep} of 10`}</Text>
             </View>
-            {currentStep === 1 && <VerbalAbility gotoNext={gotoNext} />}
-            {currentStep === 2 && <NRSScore gotoNext={gotoNext} gotoPrevious={gotoPrevious} />}
+            {currentStep === 1 && <VerbalAbility gotoNext={gotoNext} verbalAbility={verbalAbility} setVerbalAbility={setVerbalAbility} />}
+            {currentStep === 2 && <NRSScore gotoNext={gotoNext} gotoPrevious={gotoPrevious} verbalAbility={verbalAbility} />}
             {currentStep === 3 && <PainLocation gotoNext={gotoNext} gotoPrevious={gotoPrevious} />}
             {currentStep === 4 && <PainQuality gotoNext={gotoNext} gotoPrevious={gotoPrevious} />}
+            {currentStep === 5 && <PainTiming gotoNext={gotoNext} gotoPrevious={gotoPrevious} />}
         </View>
     );
 };
