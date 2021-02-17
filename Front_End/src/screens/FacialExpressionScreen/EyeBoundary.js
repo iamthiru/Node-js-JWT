@@ -1,4 +1,5 @@
-import React from 'react'; import { StyleSheet, View, Image } from 'react-native';
+import React from 'react'; 
+import { StyleSheet, View, Image, Platform } from 'react-native';
 
 const EyeBoundary = ({
     rightEyePosition,
@@ -30,14 +31,14 @@ const styles = StyleSheet.create({
         const width = ((eyePsDiff * 0.75) / 2);
         return {
             position: 'absolute',
-            top: leftEyePosition.y - (width),
+            top: leftEyePosition.y - (width / 2) - (Platform.OS === "android"? 25 : 5),
             left: leftEyePosition.x - (width / 2),
             width,
             height: width,
             borderRadius: (width / 2),
             borderWidth: width * 0.1,
             borderColor: "white",
-            transform: [{ rotateX: `${yawAngle}deg` }, { rotateY: `${-rollAngle}deg` }, { scaleX: 2 }],
+            transform: [{ rotateX: `${Platform.OS === "android"? yawAngle : 0}deg` }, { rotateY: `${Platform.OS === "android"? -rollAngle : 0}deg` }, { scaleX: 2 }],
         };
     },
     rightOval: ({ rightEyePosition, leftEyePosition, yawAngle, rollAngle }) => {
@@ -45,14 +46,14 @@ const styles = StyleSheet.create({
         const width = ((eyePsDiff * 0.75) / 2);
         return {
             position: 'absolute',
-            top: rightEyePosition.y - (width),
+            top: rightEyePosition.y - (width / 2) - (Platform.OS === "android"? 25 : 5),
             left: rightEyePosition.x - (width / 2),
             width,
             height: width,
             borderRadius: (width / 2),
             borderWidth: width * 0.1,
             borderColor: "white",
-            transform: [{ rotateX: `${yawAngle}deg` }, { rotateY: `${-rollAngle}deg` }, { scaleX: 2 }],
+            transform: [{ rotateX: `${Platform.OS === "android"? yawAngle : 0}deg` }, { rotateY: `${Platform.OS === "android"? -rollAngle : 0}deg` }, { scaleX: 2 }],
         };
     }
 });
