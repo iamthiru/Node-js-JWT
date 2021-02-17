@@ -11,13 +11,13 @@ import time
 # Key file to connect to EC2.
 # Path needs to be changed based on local.
 # Do not share the .pem file.
-key = paramiko.RSAKey.from_private_key_file('/Users/pranavdeo/Downloads/imp_benten.pem')
+key = paramiko.RSAKey.from_private_key_file('/*LOCAL-PATH*/imp_benten.pem')
 client = paramiko.SSHClient()
 client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
 
 # This path has to be configured based on where the video is saved. Below is an example:
-Video_File = '/Users/pranavdeo/Downloads/APKTest03_Elina.mp4'
+Video_File = '/*UPLOAD-PATH*/APKTest03_Elina.mp4'
 _, Video_name = os.path.split(Video_File)
 Out_File = os.path.splitext(Video_name)[0] + '_Ratio_Dilation.csv'
 print(Out_File)
@@ -31,7 +31,7 @@ try:
     client.connect(hostname=instance_ip, username="ubuntu", pkey=key)
 
     # Send file from local to EC2 instance.
-    os.system('scp -i ~/Downloads/imp_benten.pem ' + Video_File + ' ubuntu@3.87.214.251:Video_Data/')
+    os.system('scp -i ~/*LOCAL-PATH-TO-PEM-FILE*/imp_benten.pem ' + Video_File + ' ubuntu@3.87.214.251:Video_Data/')
     stdin1, stdout1, stderr1 = client.exec_command('sudo docker cp ~/Video_Data/' + Video_name + ' a2bb32b4eae6:/AWS_Lambda/static/Pupil_Input_Videos/' + Video_name)
 
     # API Call to run the back-end algorithm.
@@ -40,7 +40,7 @@ try:
 
     # Code to download the output files:
     stdin3, stdout3, stderr3 = client.exec_command('sudo docker cp a2bb32b4eae6:/AWS_Lambda/static/Pupil_Output_Images/' + Out_File + ' ~/Output_Data/' + Out_File)
-    os.system('scp -i ~/Downloads/imp_benten.pem ubuntu@3.87.214.251:Output_Data/' + Out_File + ' ~/Downloads/' + Out_File)
+    os.system('scp -i ~/*LOCAL-PATH-TO-PEM-FILE*/imp_benten.pem ubuntu@3.87.214.251:Output_Data/' + Out_File + ' ~/Downloads/' + Out_File)
 
     client.close()
 
