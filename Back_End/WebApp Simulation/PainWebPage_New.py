@@ -20,6 +20,7 @@ import pandas as pd
 import boto3
 import os
 
+# Keys are Confidential. Please do not share.
 ACCESS_KEY_ID = 'AKIA2WJGO66HEXCUOVNL'
 ACCESS_SECRET_KEY = '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'
 BUCKET_NAME = 'impact-benten'
