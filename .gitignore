@@ -62,3 +62,7 @@ Front_End/ios/Pods/
 # Visual studio
 .vscode
 .vs
+
+
+#Backend
+/Back_End_Node/node_modules
