@@ -149,13 +149,13 @@ const PupillaryDilationScreen = ({ navigation }) => {
             //     cropOffsetY: 0,
             // }
 
-            let screenWidth = PixelRatio.getPixelSizeForLayoutSize(width);
+            let screenWidth = 1080;
             const paddingValue = screenWidth * (60/width);
             let options = {
                 cropWidth: screenWidth,
-                cropHeight: parseInt((screenWidth + paddingValue)/1.5),
+                cropHeight: parseInt((screenWidth + paddingValue)/2),
                 cropOffsetX: 0,
-                cropOffsetY: parseInt((screenWidth - ((screenWidth + paddingValue) / 2)) / 2),
+                cropOffsetY: parseInt((screenWidth - ((screenWidth + paddingValue) / 2)) / 2) + (100),
             }
             
             if(Platform.OS === "ios") {
@@ -166,15 +166,25 @@ const PupillaryDilationScreen = ({ navigation }) => {
             console.log("cropOptions: ", options);
 
             setShowSpinner(true);
-            ProcessingManager.crop(data.uri, options).then(croppedData => {
-                setShowSpinner(false);
-                setIsRecording(false);
-                setVideoURL(croppedData);
-            }).catch(error => {
+
+            try {
+                ProcessingManager.crop(data.uri, options).then(croppedData => {
+                    setShowSpinner(false);
+                    setIsRecording(false);
+                    setVideoURL(croppedData);
+                }).catch(error => {
+                    console.log('error', error);
+                    setShowSpinner(false);
+                    setIsRecording(false);
+                    setVideoURL(data.uri);
+                })
+            } catch(error) {
                 console.log('error', error);
                 setShowSpinner(false);
                 setIsRecording(false);
-            })
+                setVideoURL(data.uri);
+            }
+            
         }).catch(err => {
             setIsRecording(false);
         })
@@ -357,9 +367,9 @@ const PupillaryDilationScreen = ({ navigation }) => {
                 <View style={{ height: 20 }} />
             </ScrollView>}
 
-            {(!isRecording && selectedSetting !== "") && <View style={{ flexDirection: "row", transform: [{rotate: "-90deg"}], position: "absolute", top: (width - 100) / 2, left: (width - 100) / 2, width: width-40, height: 100, alignItems: "center", justifyContent: "center", borderRadius: 10, backgroundColor: `${COLORS.WHITE}70` }}>
+            {(!isRecording && selectedSetting !== "") && <View style={{ flexDirection: "row", position: "absolute", top: (width - 50 - 25), left: 20, width: width-40, height: 50 , alignItems: "center", justifyContent: "center", borderRadius: 10, backgroundColor: `${COLORS.WHITE}70` }}>
                 {selectedSetting === SETTINGS.EXPOSURE && <>
-                    <Text style={{ width: 40, textAlign: 'center', transform: [{ rotate: "90deg" }] }}>{`${parseInt(exposure*100)}%`}</Text>
+                    <Text style={{ width: 40, textAlign: 'center' }}>{`${parseInt(exposure*100)}%`}</Text>
                     <Slider
                         style={{ width: width - 120 }}
                         minimumValue={0}
@@ -371,7 +381,7 @@ const PupillaryDilationScreen = ({ navigation }) => {
                     />
                 </>}
                 {selectedSetting === SETTINGS.ZOOM && <>
-                    <Text style={{ width: 40, textAlign: 'center', transform: [{ rotate: "90deg" }] }}>{`${parseInt(zoom*100)}%`}</Text>
+                    <Text style={{ width: 40, textAlign: 'center' }}>{`${parseInt(zoom*100)}%`}</Text>
                     <Slider
                         style={{ width: width - 120 }}
                         minimumValue={0}
@@ -383,7 +393,7 @@ const PupillaryDilationScreen = ({ navigation }) => {
                     />
                 </>}
                 {selectedSetting === SETTINGS.FOCUS_DEPTH && <>
-                    <Text style={{ width: 40, textAlign: 'center', transform: [{ rotate: "90deg" }] }}>{`${parseInt(focusDepth*100)}%`}</Text>
+                    <Text style={{ width: 40, textAlign: 'center' }}>{`${parseInt(focusDepth*100)}%`}</Text>
                     <Slider
                         style={{ width: width - 120 }}
                         minimumValue={0}
