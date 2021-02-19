@@ -24,6 +24,12 @@ import styles from './styles';
 import { secondsToMinsAndSecs } from '../../utils/date';
 import { COLORS } from '../../constants/colors';
 
+import S3 from 'aws-sdk/clients/s3';
+import fs from 'react-native-fs';
+import { decode } from 'base64-arraybuffer';
+
+import { ACCESS_ID, ACCESS_KEY, BUCKET_FOLDER_FOR_PUPIL, BUCKET_NAME } from '../../constants/aws';
+
 const { width, height } = Dimensions.get("window");
 
 let camera = null;
@@ -49,6 +55,7 @@ const PupillaryDilationScreen = ({ navigation }) => {
 
     const [eyeBorderType, setEyeBorderType] = useState(EYE_BORDER_TYPE.OVAL);
     const [showSpinner, setShowSpinner] = useState(false);
+    const [spinnerMessage, setSpinnerMessage] = useState("");
     const [selectedSetting, setSelectedSetting] = useState("");
     const [exposure, setExposure] = useState(0);
     const [zoom, setZoom] = useState(Platform.OS === "ios"? 0.1 : 0.175)
@@ -166,21 +173,25 @@ const PupillaryDilationScreen = ({ navigation }) => {
             console.log("cropOptions: ", options);
 
             setShowSpinner(true);
+            setSpinnerMessage("Cropping...");
 
             try {
                 ProcessingManager.crop(data.uri, options).then(croppedData => {
                     setShowSpinner(false);
+                    setSpinnerMessage("");
                     setIsRecording(false);
                     setVideoURL(croppedData);
                 }).catch(error => {
                     console.log('error', error);
                     setShowSpinner(false);
+                    setSpinnerMessage("");
                     setIsRecording(false);
                     setVideoURL(data.uri);
                 })
             } catch(error) {
                 console.log('error', error);
                 setShowSpinner(false);
+                setSpinnerMessage("");
                 setIsRecording(false);
                 setVideoURL(data.uri);
             }
@@ -237,6 +248,55 @@ const PupillaryDilationScreen = ({ navigation }) => {
                 Alert.alert("Error", "Download Failed!");
                 resetStates();
             })
+        }
+    }
+
+    const onUploadPress = async () => {
+
+        setShowSpinner(true);
+        setSpinnerMessage("Uploading...");
+
+        try {
+            const s3bucket = new S3({
+                accessKeyId: ACCESS_ID,
+                secretAccessKey: ACCESS_KEY,
+                Bucket: BUCKET_NAME,
+                signatureVersion: 'v4',
+            });
+
+            const filename = `VID_${Date.now().toString()}.mp4`;
+            let contentType = 'video/mp4';
+            let contentDeposition = 'inline;filename="' + filename + '"';
+            const base64 = await fs.readFile(videoURL, 'base64');
+            const arrayBuffer = decode(base64);
+
+            s3bucket.createBucket(() => {
+                const params = {
+                    Bucket: BUCKET_NAME,
+                    Key: `${BUCKET_FOLDER_FOR_PUPIL}${filename}`,
+                    Body: arrayBuffer,
+                    ContentDisposition: contentDeposition,
+                    ContentType: contentType,
+                };
+                s3bucket.upload(params, (err, data) => {
+                    if (err) {
+                        // console.log('error in callback', err);
+                        Alert.alert("Error", "Error in uploading the video");
+                    } else {
+                        Alert.alert("Success", "Video has been uploaded successfully");
+                    }
+                    // console.log('success', data);
+                    // console.log("Respomse URL : " + data.Location);
+                    setShowSpinner(false);
+                    setSpinnerMessage("");
+                    resetStates();
+                });
+            });
+        } catch (err) {
+            Alert.alert("Error", "Error in uploading the video");
+            setShowSpinner(false);
+            setSpinnerMessage("");
+            resetStates();
         }
     }
 
@@ -414,11 +474,6 @@ const PupillaryDilationScreen = ({ navigation }) => {
                     </CustomTouchableOpacity>
                 </View>
             </>}
-            <Spinner
-                visible={showSpinner}
-                textContent={'Cropping...'}
-                textStyle={{ color: COLORS.WHITE }}
-            />
         </>);
     }
 
@@ -439,6 +494,12 @@ const PupillaryDilationScreen = ({ navigation }) => {
                     <Text style={{ fontSize: 14, fontWeight: "700", color: COLORS.WHITE, textAlign: "center" }}>{"CONFIRM"}</Text>
                 </CustomTouchableOpacity>
                 <CustomTouchableOpacity disabled={processing}
+                    style={{ backgroundColor: COLORS.PRIMARY_MAIN, borderRadius: 10, alignItems: "center", justifyContent: "center", height: 48, width: width - 80, paddingHorizontal: 28, marginBottom: 12 }}
+                    onPress={onUploadPress}
+                >
+                    <Text style={{ fontSize: 14, fontWeight: "700", color: COLORS.WHITE, textAlign: "center" }}>{"UPLOAD"}</Text>
+                </CustomTouchableOpacity>
+                <CustomTouchableOpacity disabled={processing}
                     style={{ backgroundColor: COLORS.WHITE, borderRadius: 10, borderColor: COLORS.PRIMARY_MAIN, borderWidth: 2, alignItems: "center", justifyContent: "center", height: 48, width: width - 80, paddingHorizontal: 28 }}
                     onPress={onRetakePress}
                 >
@@ -452,6 +513,11 @@ const PupillaryDilationScreen = ({ navigation }) => {
         <View style={styles.body}>
             {videoURL === "" && getCameraComponent()}
             {videoURL !== "" && getVideoPlayerComponent()}
+            <Spinner
+                visible={showSpinner}
+                textContent={spinnerMessage}
+                textStyle={{ color: COLORS.WHITE }}
+            />
         </View>
     );
 };
