@@ -1,7 +1,7 @@
 # Proprietary: Benten Technologies, Inc.
 # Author: Pranav H. Deo
 # Copyright Content
-# Date: 02/03/2021
+# Date: 02/19/2021
 # Version: v1.3
 
 # Code Description:
@@ -61,12 +61,13 @@ size = ()
 print("\n************************* IMPACT: PUPIL DETECTION *************************\n")
 
 if len(sys.argv) > 1:
-    ch = int(sys.argv[1])
-    filename = str(sys.argv[2])
-    video_type = str(sys.argv[3])
+    filename = str(sys.argv[1])
+    video_type = str(sys.argv[2])
     video = cv2.VideoCapture('/AWS_Lambda/static/Pupil_Input_Videos/' + filename)
+    # video = cv2.VideoCapture('s3://impact-benten/Pupil_Data/Uploads-VideoFiles/' + filename)
 else:
     video = cv2.VideoCapture('/AWS_Lambda/static/Pupil_Input_Videos/Eric_Test01.mp4')
+    # video = cv2.VideoCapture('s3://impact-benten/Pupil_Data/Uploads-VideoFiles/APKTest03_Elina.mp4')
 
 
 # Calculate FPS of the Video:
