@@ -1,19 +1,22 @@
 # Proprietary: Benten Technologies, Inc.
 # Author: Pranav H. Deo
 # Copyright Content
-# Date: 02/18/2021
-# Version: v1.3
+# Date: 02/19/2021
+# Version: v1.4
 
 # Code Description:
 # Web Simulation (Alpha Version) for Pupil and Facial Pain Analysis.
 
 # UPDATES:
+# API for IMPACT-Pupil.
 # AWS S3 Bucket securely connected; Video+Output saved to S3.
 # Bugs fixed for integration to Web scripts.
 # Pupil Output Video embedding feature for Pupil part.
 # Min, Mean and Max Scores removed for Pupil part.
 # Integrated New IMPACT_FACIAL_v1.0.py for script call.
 # Integrated New IMPACT_PUPIL_v1.3.py for script call.
+# Removed Pupil From Facial Detection.
+
 
 from flask import *
 import pandas as pd
@@ -110,8 +113,7 @@ def UploadFacial():
 
 @app.route('/Process_Pupil')
 def Process_Pupil():
-    # os.system('cd ./static')
-    os.system('python IMPACT_PUPIL_v1.3.py '+str(opt)+' '+str(fname)+' '+str(video_type1))
+    os.system('python IMPACT_PUPIL_v1.3.py ' + str(fname) + ' ' + str(video_type1))
     res_img_fold = os.path.join('static', 'Pupil_Output_Images')
     res_vid_fold = os.path.join('static', 'Pupil_Output_Videos')
     res_img_fold_S3 = 'Pupil_Data/Results-Output/'
@@ -134,9 +136,31 @@ def Process_Pupil():
     return render_template('Pupil_Success.html', image_file=pic, video_file=vid_file)
 
 
+@app.route('/mobile_pupil_api/<filename>', methods=['GET', 'POST'])
+def pupil_api(filename):
+    upload_folder_S3 = 'Pupil_Data/Results-Output/'
+    download_folder_S3 = 'Pupil_Data/Uploads-VideoFiles/'
+    PUPIL_UPLOAD_FOLDER = './static/Pupil_Input_Videos/'
+    Download_from_S3(BUCKET_NAME, download_folder_S3+filename, PUPIL_UPLOAD_FOLDER+filename)
+    os.system('python IMPACT_PUPIL_v1.3.py ' + str(filename) + ' Color')
+    res_img_fold = os.path.join('static', 'Pupil_Output_Images')
+    res_vid_fold = os.path.join('static', 'Pupil_Output_Videos')
+    app.config['PUPIL_OUTPUT_FOLDER'] = res_img_fold
+    app.config['PUPIL_VID_OUT_FOLDER'] = res_vid_fold
+    img_name = str(os.path.splitext(filename)[0])
+    file = img_name + '_Ratio_Dilation.csv'
+    csv_file = os.path.join(app.config['PUPIL_OUTPUT_FOLDER'], file)
+    f = img_name + '_Dilation_Plot.png'
+    vid_file = os.path.join(app.config['PUPIL_VID_OUT_FOLDER'], img_name + '.mp4')
+    pic = os.path.join(app.config['PUPIL_OUTPUT_FOLDER'], f)
+    Upload_2_S3(BUCKET_NAME, f, pic, upload_folder_S3)
+    Upload_2_S3(BUCKET_NAME, img_name + '.mp4', vid_file, upload_folder_S3)
+    Upload_2_S3(BUCKET_NAME, file, csv_file, upload_folder_S3)
+    return render_template('HomePage.html')
+
+
 @app.route('/Process_Facial')
 def Process_Facial():
-    # os.system('cd /AWS_Lambda/')
     os.system('python IMPACT_FACIAL_v1.0.py '+str(option)+' '+str(face_fname)+' '+str(video_type2))
     res_img_fold = os.path.join('static', 'Facial_Output_Images')
     app.config['FACIAL_OUTPUT_FOLDER'] = res_img_fold
@@ -170,7 +194,13 @@ def Upload_2_S3(buck, f, fp, s3_to_path):
     s3 = boto3.resource('s3', aws_access_key_id=ACCESS_KEY_ID, aws_secret_access_key=ACCESS_SECRET_KEY)
     bucket = s3.Bucket(buck)
     bucket.upload_file(Filename=fp, Key=s3_to_path+str(f), ExtraArgs={'ACL': 'public-read'})
-    return 'Done'
+    return 'Upload Done'
+
+
+def Download_from_S3(buck, KEY, Local_fp):
+    s3 = boto3.resource('s3', aws_access_key_id=ACCESS_KEY_ID, aws_secret_access_key=ACCESS_SECRET_KEY)
+    s3.Bucket(buck).download_file(KEY, Local_fp)
+    return 'Download Done'
 
 
 if __name__ == '__main__':
