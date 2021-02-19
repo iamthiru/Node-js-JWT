@@ -43,8 +43,12 @@
 	<string>Please enable access to the camera</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string></string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Please enable access to the microphone</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Please enable access to the photo library</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Please enable access for speech recognition</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>Lato-Black.ttf</string>

@@ -12,6 +12,7 @@ import { COLORS } from '../../constants/colors';
 import CustomButton from '../../components/shared/CustomButton';
 import { getStatusBarHeight } from 'react-native-status-bar-height';
 import CustomTextArea from '../../components/shared/CustomTextArea';
+import SpeechToText from '../../components/shared/SpeechToText';
 
 const { width, height } = Dimensions.get("window");
 
@@ -19,6 +20,10 @@ const { width, height } = Dimensions.get("window");
 const Note = ({ gotoNext, gotoPrevious }) => {
 
     const [notes, setNotes] = useState("");
+
+    const setTextFromVoicePartialResults = (partialResults) => {
+        setNotes((partialResults || []).join(' '));
+    }
 
     const handlePrevious = () => {
         gotoPrevious();
@@ -39,6 +44,7 @@ const Note = ({ gotoNext, gotoPrevious }) => {
                         </CustomTouchableOpacity>
                     </View>
                     <CustomTextArea placeholder="Enter Notes" value={notes} onChangeText={value => setNotes(value)} inputStyle={{ width: width - 60, height: 169 }} />
+                    <SpeechToText setPartialResults={setTextFromVoicePartialResults} />
                 </View>
             </ScrollView>
 
