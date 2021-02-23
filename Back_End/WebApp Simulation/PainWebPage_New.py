@@ -1,13 +1,14 @@
 # Proprietary: Benten Technologies, Inc.
 # Author: Pranav H. Deo
 # Copyright Content
-# Date: 02/19/2021
-# Version: v1.4
+# Date: 02/23/2021
+# Version: v1.5
 
 # Code Description:
 # Web Simulation (Alpha Version) for Pupil and Facial Pain Analysis.
 
 # UPDATES:
+# Login and Registration using DynamoDB.
 # API for IMPACT-Pupil.
 # AWS S3 Bucket securely connected; Video+Output saved to S3.
 # Bugs fixed for integration to Web scripts.
@@ -17,26 +18,55 @@
 # Integrated New IMPACT_PUPIL_v1.3.py for script call.
 # Removed Pupil From Facial Detection.
 
-
+##############################################################
 from flask import *
 import pandas as pd
+from boto3.dynamodb.conditions import Key, Attr
 import boto3
 import os
-
-# Keys are Confidential. Please do not share.
-ACCESS_KEY_ID = 'AKIA2WJGO66HEXCUOVNL'
-ACCESS_SECRET_KEY = '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'
+##############################################################
 BUCKET_NAME = 'impact-benten'
+# DYNAMODB:
+DB = boto3.resource('dynamodb', region_name="us-east-1")
+table_users = DB.Table('impact-users')
+table_userData = DB.Table('impact-user-data')
+##############################################################
+
 
 option_val = ""
+user_email = ""
 
 app = Flask(__name__)
-app.config.from_mapping(
-        SECRET_KEY='dev'
-    )
+app.config.from_mapping(SECRET_KEY='dev')
 
 
 @app.route('/')
+@app.route('/Login', methods=['GET', 'POST'])
+def Login():
+    if request.method == 'POST':
+        global user_email
+        user_email = request.form['email']
+        user_password = request.form['password']
+        response = table_users.query(KeyConditionExpression=Key('user-email').eq(user_email))
+        item = response['Items']
+        if user_password == item[0]['user-password']:
+            return render_template('HomePage.html')
+    return render_template('Login.html')
+
+
+@app.route('/Register', methods=['GET', 'POST'])
+def Register():
+    if request.method == 'POST':
+        global user_email
+        user_name = request.form['username']
+        user_email = request.form['email']
+        user_password = request.form['password']
+        table_users.put_item(Item={'user-email': user_email, 'user-name': user_name,  'user-password': user_password})
+        msg = 'User Registered'
+        return render_template('Login.html', msg=msg)
+    return render_template('Register.html')
+
+
 @app.route('/HomePage')
 def HomePage():
     return render_template('HomePage.html')
@@ -61,6 +91,7 @@ def Upload():
 def UploadPupil():
     global opt
     global video_type1
+    global user_email
     if request.method == 'POST':
         fname_txtfield = request.form['firstname']
         lname_txtfield = request.form['lastname']
@@ -75,11 +106,13 @@ def UploadPupil():
             # print("Eye color selected: " + eye_color_val)
             fname = eye_color_val + fname_txtfield + lname_txtfield + '.mp4'
             f.filename = fname
-            write_to_txt(fname_txtfield, lname_txtfield, eye_color_val, fname, 1, video_type1)
+            # write_to_txt(fname_txtfield, lname_txtfield, eye_color_val, fname, 1, video_type1)
             app.config['PUPIL_UPLOAD_FOLDER'] = PUPIL_UPLOAD_FOLDER
             pth = os.path.join(app.config['PUPIL_UPLOAD_FOLDER'], fname)
             f.save(os.path.join(app.config['PUPIL_UPLOAD_FOLDER'], fname))
             Upload_2_S3(BUCKET_NAME, fname, pth, PUPIL_UPLOAD_FOLDER_S3)
+            table_userData.put_item(Item={'user-email': user_email, 'user-name': fname_txtfield+' '+lname_txtfield,
+                                          'user-eyecolor': eye_color_val, 's3-filepath': 's3://impact-benten/'+PUPIL_UPLOAD_FOLDER_S3+fname})
         # print("File Uploaded: " + f.filename)
         return render_template('Calculate_Pupil.html')
 
@@ -88,6 +121,7 @@ def UploadPupil():
 def UploadFacial():
     global option
     global video_type2
+    global user_email
     if request.method == 'POST':
         fname_txtfield = request.form['firstname']
         lname_txtfield = request.form['lastname']
@@ -107,6 +141,8 @@ def UploadFacial():
             pth = os.path.join(app.config['FACIAL_UPLOAD_FOLDER'], face_fname)
             f.save(os.path.join(app.config['FACIAL_UPLOAD_FOLDER'], face_fname))
             Upload_2_S3(BUCKET_NAME, face_fname, pth, FACIAL_UPLOAD_FOLDER_S3)
+            table_userData.put_item(Item={'user-email': user_email, 'user-name': fname_txtfield + ' ' + lname_txtfield,
+                                          'user-videotype': option_val, 's3-filepath': 's3://impact-benten/'+FACIAL_UPLOAD_FOLDER_S3+face_fname})
         # print("File Uploaded: " + f.filename)
         return render_template('Calculate_Facial.html')
 
@@ -191,14 +227,14 @@ def write_to_txt(fnametxt, lnametxt, v, fln, flag, vid_type):
 
 def Upload_2_S3(buck, f, fp, s3_to_path):
     # print('> Uploading : ', f, ' ; ', s3_to_path)
-    s3 = boto3.resource('s3', aws_access_key_id=ACCESS_KEY_ID, aws_secret_access_key=ACCESS_SECRET_KEY)
+    s3 = boto3.resource('s3')
     bucket = s3.Bucket(buck)
     bucket.upload_file(Filename=fp, Key=s3_to_path+str(f), ExtraArgs={'ACL': 'public-read'})
     return 'Upload Done'
 
 
 def Download_from_S3(buck, KEY, Local_fp):
-    s3 = boto3.resource('s3', aws_access_key_id=ACCESS_KEY_ID, aws_secret_access_key=ACCESS_SECRET_KEY)
+    s3 = boto3.resource('s3')
     s3.Bucket(buck).download_file(KEY, Local_fp)
     return 'Download Done'
 
