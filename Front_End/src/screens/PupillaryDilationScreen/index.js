@@ -280,13 +280,13 @@ const PupillaryDilationScreen = ({ navigation }) => {
                 };
                 s3bucket.upload(params, (err, data) => {
                     if (err) {
-                        // console.log('error in callback', err);
+                        console.log('error in callback', err);
                         Alert.alert("Error", "Error in uploading the video");
                     } else {
                         Alert.alert("Success", "Video has been uploaded successfully");
                     }
-                    // console.log('success', data);
-                    // console.log("Respomse URL : " + data.Location);
+                    console.log('success', data);
+                    console.log("Respomse URL : " + data.Location);
                     setShowSpinner(false);
                     setSpinnerMessage("");
                     resetStates();

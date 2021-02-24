@@ -12,8 +12,6 @@ import { COLORS } from '../../../constants/colors';
 
 const SpeechToText = ({ setPartialResults }) => {
 
-    const [recognitionStarted, setRecognitionStarted] = useState(false);
-
     useEffect(() => {
         Voice.onSpeechPartialResults = onSpeechPartialResults;
         return () => {
@@ -28,12 +26,10 @@ const SpeechToText = ({ setPartialResults }) => {
     const startRecognizing = async () => {
         await Voice.start('en-Us');
         setPartialResults([]);
-        setRecognitionStarted(true);
     };
 
     const stopRecognizing = async () => {
         await Voice.stop();
-        setRecognitionStarted(false);
     };
 
     return (
