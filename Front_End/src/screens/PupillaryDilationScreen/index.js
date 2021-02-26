@@ -7,6 +7,7 @@ import {
     PermissionsAndroid,
     Platform,
     ScrollView,
+    Image,
     PixelRatio
 } from 'react-native';
 import Spinner from 'react-native-loading-spinner-overlay';
@@ -26,9 +27,10 @@ import { COLORS } from '../../constants/colors';
 
 import S3 from 'aws-sdk/clients/s3';
 import fs from 'react-native-fs';
-import { decode } from 'base64-arraybuffer';
+import { decode, encode } from 'base64-arraybuffer';
 
-import { ACCESS_ID, ACCESS_KEY, BUCKET_FOLDER_FOR_PUPIL, BUCKET_NAME } from '../../constants/aws';
+import { ACCESS_ID, ACCESS_KEY, BUCKET_FOLDER_FOR_PUPIL, BUCKET_FOLDER_FOR_PUPIL_RESULT, BUCKET_NAME } from '../../constants/aws';
+import { initiateVideoProcessingAPI } from '../../api/painAssessment';
 
 const { width, height } = Dimensions.get("window");
 
@@ -58,7 +60,7 @@ const PupillaryDilationScreen = ({ navigation }) => {
     const [spinnerMessage, setSpinnerMessage] = useState("");
     const [selectedSetting, setSelectedSetting] = useState("");
     const [exposure, setExposure] = useState(0);
-    const [zoom, setZoom] = useState(Platform.OS === "ios"? 0.1 : 0.175)
+    const [zoom, setZoom] = useState(Platform.OS === "ios" ? 0.1 : 0.175)
     const [focusDepth, setFocusDepth] = useState(0.3)
     const [timer, setTimer] = useState("0");
     const [duration, setDuration] = useState("00:00");
@@ -68,13 +70,17 @@ const PupillaryDilationScreen = ({ navigation }) => {
     const [cameraType, setCameraType] = useState(RNCamera.Constants.Type.back);
     const [isRecording, setIsRecording] = useState(false);
     const [videoURL, setVideoURL] = useState("");
+    const [resultReady, setResultReady] = useState(false);
+    const [showProcessedResult, setShowProcessedResult] = useState(false);
+    const [downloadFileName, setDownloadFileName] = useState("");
+    const [resultImageURI, setResultImageURI] = useState("");
 
     useEffect(() => {
         setTimeout(() => checkStoragePermission(), 3000);
     }, [])
 
     const checkStoragePermission = async () => {
-        if(Platform.OS !== "android") {
+        if (Platform.OS !== "android") {
             return;
         }
         try {
@@ -91,7 +97,7 @@ const PupillaryDilationScreen = ({ navigation }) => {
     }
 
     const toggleSettings = (setting) => {
-        setSelectedSetting(setting === selectedSetting? "" : setting);
+        setSelectedSetting(setting === selectedSetting ? "" : setting);
     }
 
     const switchCamera = () => {
@@ -157,15 +163,15 @@ const PupillaryDilationScreen = ({ navigation }) => {
             // }
 
             let screenWidth = 1080;
-            const paddingValue = screenWidth * (60/width);
+            const paddingValue = screenWidth * (60 / width);
             let options = {
                 cropWidth: screenWidth,
-                cropHeight: parseInt((screenWidth + paddingValue)/2),
+                cropHeight: parseInt((screenWidth + paddingValue) / 2),
                 cropOffsetX: 0,
                 cropOffsetY: parseInt((screenWidth - ((screenWidth + paddingValue) / 2)) / 2) + (100),
             }
-            
-            if(Platform.OS === "ios") {
+
+            if (Platform.OS === "ios") {
                 options.quality = "1920x1080"
             }
 
@@ -188,14 +194,14 @@ const PupillaryDilationScreen = ({ navigation }) => {
                     setIsRecording(false);
                     setVideoURL(data.uri);
                 })
-            } catch(error) {
+            } catch (error) {
                 console.log('error', error);
                 setShowSpinner(false);
                 setSpinnerMessage("");
                 setIsRecording(false);
                 setVideoURL(data.uri);
             }
-            
+
         }).catch(err => {
             setIsRecording(false);
         })
@@ -228,18 +234,18 @@ const PupillaryDilationScreen = ({ navigation }) => {
     }
 
     const onConfirmPress = () => {
-        if(Platform.OS === "ios") {
+        if (Platform.OS === "ios") {
             const filename = `VID_${Date.now().toString()}`;
             MovToMp4.convertMovToMp4(videoURL, filename)
-              .then(function (results) {
-                CameraRoll.save(results, { type: "video" }).then(res => {
-                    Alert.alert("Success", "Video has been saved successfully!");
-                    resetStates();
-                }).catch(err => {
-                    Alert.alert("Error", "Download Failed!");
-                    resetStates();
-                })
-            });
+                .then(function (results) {
+                    CameraRoll.save(results, { type: "video" }).then(res => {
+                        Alert.alert("Success", "Video has been saved successfully!");
+                        resetStates();
+                    }).catch(err => {
+                        Alert.alert("Error", "Download Failed!");
+                        resetStates();
+                    })
+                });
         } else {
             CameraRoll.save(videoURL, { type: "video" }).then(res => {
                 Alert.alert("Success", "Video has been saved successfully!");
@@ -282,14 +288,30 @@ const PupillaryDilationScreen = ({ navigation }) => {
                     if (err) {
                         console.log('error in callback', err);
                         Alert.alert("Error", "Error in uploading the video");
+                        setShowSpinner(false);
+                        setSpinnerMessage("");
+                        resetStates();
                     } else {
-                        Alert.alert("Success", "Video has been uploaded successfully");
+                        console.log('success', data);
+                        console.log("Respomse URL : " + data.Location);
+                        
+                        setSpinnerMessage("Processing...");
+                        initiateVideoProcessingAPI(filename).then((result) => {
+                            console.log("initiateVideoProcessingAPI: ", result);
+                            setTimeout(() => {
+                                let pngFileName = `${filename.substring(0, filename.lastIndexOf("."))}_Dilation_Plot.png`
+                                setDownloadFileName(pngFileName);
+                                setResultReady(true);
+                                setShowSpinner(false);
+                                setSpinnerMessage("");
+                            }, 100);
+                        }).catch(err => {
+                            Alert.alert("Error", "Error in processing the video");
+                            setShowSpinner(false);
+                            setSpinnerMessage("");
+                            resetStates("");
+                        })
                     }
-                    console.log('success', data);
-                    console.log("Respomse URL : " + data.Location);
-                    setShowSpinner(false);
-                    setSpinnerMessage("");
-                    resetStates();
                 });
             });
         } catch (err) {
@@ -298,6 +320,52 @@ const PupillaryDilationScreen = ({ navigation }) => {
             setSpinnerMessage("");
             resetStates();
         }
+    }
+
+    const onGetResultPress = () => {
+
+        setShowSpinner(true);
+        setSpinnerMessage("Retriving Result...");
+
+        const params = {
+            Bucket: BUCKET_NAME,
+            Key: `${BUCKET_FOLDER_FOR_PUPIL_RESULT}${downloadFileName}`
+        };
+
+        const s3bucket = new S3({
+            accessKeyId: ACCESS_ID,
+            secretAccessKey: ACCESS_KEY,
+            Bucket: BUCKET_NAME,
+            signatureVersion: 'v4',
+        });
+
+        s3bucket.getObject(params, (err, data) => {
+            if(err) {
+                console.log('error in getObject', err);
+                Alert.alert("Error", "Error in retriving the result");
+                setShowSpinner(false);
+                setSpinnerMessage("");
+                setResultReady(false);
+                setDownloadFileName("");
+                resetStates();
+            } else {
+                let base64Str = encode(data.Body);
+                setShowProcessedResult(true);
+                setResultImageURI(`data:${data.ContentType};base64,${base64Str}`);
+                setShowSpinner(false);
+                setSpinnerMessage("");
+                setResultReady(false);
+                setDownloadFileName("");
+                resetStates();
+            }
+        })
+    }
+
+    const onCaptureAgainPress = () => {
+        setResultReady(false);
+        setDownloadFileName("");
+        setShowProcessedResult(false);
+        setResultImageURI("");
     }
 
     const onRetakePress = () => {
@@ -327,7 +395,7 @@ const PupillaryDilationScreen = ({ navigation }) => {
                     }}
                     useNativeZoom={true}
                     ratio={"16:9"}
-                    autoFocus={Platform.OS === "ios"? RNCamera.Constants.AutoFocus.off : RNCamera.Constants.AutoFocus.on}
+                    autoFocus={Platform.OS === "ios" ? RNCamera.Constants.AutoFocus.off : RNCamera.Constants.AutoFocus.on}
                     defaultVideoQuality={RNCamera.Constants.VideoQuality["1080p"]}
                     onCameraReady={() => setIsCameraReady(true)}
                     onRecordingStart={() => {
@@ -358,14 +426,14 @@ const PupillaryDilationScreen = ({ navigation }) => {
             {!isRecording && <ScrollView style={{ width: width, height: height - width, paddingHorizontal: 20 }}>
                 <View style={{ height: 8 }} />
                 <View style={{ flexDirection: "row", width: width - 40, justifyContent: 'flex-end', marginBottom: 8 }}>
-                    <CustomTouchableOpacity style={{ alignItems: "center", justifyContent: "center", width: 30, height: 30, borderRadius: 5, backgroundColor: selectedSetting === SETTINGS.ZOOM? COLORS.PRIMARY_MAIN : "rgba(0,0,0,0)", borderColor: COLORS.PRIMARY_MAIN, borderWidth: selectedSetting === SETTINGS.ZOOM? 0 : 2, alignItems: "center", justifyContent: "center" }} onPress={() => toggleSettings(SETTINGS.ZOOM)}>
-                        <Fontisto name="zoom" size={18} color={selectedSetting === SETTINGS.ZOOM? COLORS.WHITE : COLORS.GRAY_90}/>
+                    <CustomTouchableOpacity style={{ alignItems: "center", justifyContent: "center", width: 30, height: 30, borderRadius: 5, backgroundColor: selectedSetting === SETTINGS.ZOOM ? COLORS.PRIMARY_MAIN : "rgba(0,0,0,0)", borderColor: COLORS.PRIMARY_MAIN, borderWidth: selectedSetting === SETTINGS.ZOOM ? 0 : 2, alignItems: "center", justifyContent: "center" }} onPress={() => toggleSettings(SETTINGS.ZOOM)}>
+                        <Fontisto name="zoom" size={18} color={selectedSetting === SETTINGS.ZOOM ? COLORS.WHITE : COLORS.GRAY_90} />
                     </CustomTouchableOpacity>
-                    <CustomTouchableOpacity style={{ marginLeft: 15, alignItems: "center", justifyContent: "center", width: 30, height: 30, borderRadius: 5, backgroundColor: selectedSetting === SETTINGS.FOCUS_DEPTH? COLORS.PRIMARY_MAIN : "rgba(0,0,0,0)", borderColor: COLORS.PRIMARY_MAIN, borderWidth: selectedSetting === SETTINGS.FOCUS_DEPTH? 0 : 2, alignItems: "center", justifyContent: "center" }} onPress={() => toggleSettings(SETTINGS.FOCUS_DEPTH)}>
-                        <MaterialIcons name="center-focus-strong" size={18} color={selectedSetting === SETTINGS.FOCUS_DEPTH? COLORS.WHITE : COLORS.GRAY_90}/>
+                    <CustomTouchableOpacity style={{ marginLeft: 15, alignItems: "center", justifyContent: "center", width: 30, height: 30, borderRadius: 5, backgroundColor: selectedSetting === SETTINGS.FOCUS_DEPTH ? COLORS.PRIMARY_MAIN : "rgba(0,0,0,0)", borderColor: COLORS.PRIMARY_MAIN, borderWidth: selectedSetting === SETTINGS.FOCUS_DEPTH ? 0 : 2, alignItems: "center", justifyContent: "center" }} onPress={() => toggleSettings(SETTINGS.FOCUS_DEPTH)}>
+                        <MaterialIcons name="center-focus-strong" size={18} color={selectedSetting === SETTINGS.FOCUS_DEPTH ? COLORS.WHITE : COLORS.GRAY_90} />
                     </CustomTouchableOpacity>
-                    <CustomTouchableOpacity style={{ marginLeft: 15, alignItems: "center", justifyContent: "center", width: 30, height: 30, borderRadius: 5, backgroundColor: selectedSetting === SETTINGS.EXPOSURE? COLORS.PRIMARY_MAIN : "rgba(0,0,0,0)", borderColor: COLORS.PRIMARY_MAIN, borderWidth: selectedSetting === SETTINGS.EXPOSURE? 0 : 2, alignItems: "center", justifyContent: "center" }} onPress={() => toggleSettings(SETTINGS.EXPOSURE)}>
-                        <MaterialIcons name="brightness-5" size={18} color={selectedSetting === SETTINGS.EXPOSURE? COLORS.WHITE : COLORS.GRAY_90}/>
+                    <CustomTouchableOpacity style={{ marginLeft: 15, alignItems: "center", justifyContent: "center", width: 30, height: 30, borderRadius: 5, backgroundColor: selectedSetting === SETTINGS.EXPOSURE ? COLORS.PRIMARY_MAIN : "rgba(0,0,0,0)", borderColor: COLORS.PRIMARY_MAIN, borderWidth: selectedSetting === SETTINGS.EXPOSURE ? 0 : 2, alignItems: "center", justifyContent: "center" }} onPress={() => toggleSettings(SETTINGS.EXPOSURE)}>
+                        <MaterialIcons name="brightness-5" size={18} color={selectedSetting === SETTINGS.EXPOSURE ? COLORS.WHITE : COLORS.GRAY_90} />
                     </CustomTouchableOpacity>
                 </View>
                 <Text style={{ marginBottom: 14, fontSize: 16, fontWeight: '400', color: COLORS.GRAY_90 }}>1. Find a well-lit environment.</Text>
@@ -427,9 +495,9 @@ const PupillaryDilationScreen = ({ navigation }) => {
                 <View style={{ height: 20 }} />
             </ScrollView>}
 
-            {(!isRecording && selectedSetting !== "") && <View style={{ flexDirection: "row", position: "absolute", top: (width - 50 - 25), left: 20, width: width-40, height: 50 , alignItems: "center", justifyContent: "center", borderRadius: 10, backgroundColor: `${COLORS.WHITE}70` }}>
+            {(!isRecording && selectedSetting !== "") && <View style={{ flexDirection: "row", position: "absolute", top: (width - 50 - 25), left: 20, width: width - 40, height: 50, alignItems: "center", justifyContent: "center", borderRadius: 10, backgroundColor: `${COLORS.WHITE}70` }}>
                 {selectedSetting === SETTINGS.EXPOSURE && <>
-                    <Text style={{ width: 40, textAlign: 'center' }}>{`${parseInt(exposure*100)}%`}</Text>
+                    <Text style={{ width: 40, textAlign: 'center' }}>{`${parseInt(exposure * 100)}%`}</Text>
                     <Slider
                         style={{ width: width - 120 }}
                         minimumValue={0}
@@ -441,7 +509,7 @@ const PupillaryDilationScreen = ({ navigation }) => {
                     />
                 </>}
                 {selectedSetting === SETTINGS.ZOOM && <>
-                    <Text style={{ width: 40, textAlign: 'center' }}>{`${parseInt(zoom*100)}%`}</Text>
+                    <Text style={{ width: 40, textAlign: 'center' }}>{`${parseInt(zoom * 100)}%`}</Text>
                     <Slider
                         style={{ width: width - 120 }}
                         minimumValue={0}
@@ -453,7 +521,7 @@ const PupillaryDilationScreen = ({ navigation }) => {
                     />
                 </>}
                 {selectedSetting === SETTINGS.FOCUS_DEPTH && <>
-                    <Text style={{ width: 40, textAlign: 'center' }}>{`${parseInt(focusDepth*100)}%`}</Text>
+                    <Text style={{ width: 40, textAlign: 'center' }}>{`${parseInt(focusDepth * 100)}%`}</Text>
                     <Slider
                         style={{ width: width - 120 }}
                         minimumValue={0}
@@ -487,32 +555,58 @@ const PupillaryDilationScreen = ({ navigation }) => {
                     style={{ position: 'absolute', top: 20, left: 20, bottom: 0, right: 0, width: width - 40, height: width - 40 }} />
             </View>
             <View style={{ width: width, justifyContent: 'center', alignItems: 'center', paddingTop: 30 }}>
-                <CustomTouchableOpacity disabled={processing}
+                {!resultReady && <>
+                    {/* <CustomTouchableOpacity disabled={processing}
                     style={{ backgroundColor: COLORS.PRIMARY_MAIN, borderRadius: 10, alignItems: "center", justifyContent: "center", height: 48, width: width - 80, paddingHorizontal: 28, marginBottom: 12 }}
                     onPress={onConfirmPress}
                 >
                     <Text style={{ fontSize: 14, fontWeight: "700", color: COLORS.WHITE, textAlign: "center" }}>{"CONFIRM"}</Text>
-                </CustomTouchableOpacity>
-                <CustomTouchableOpacity disabled={processing}
+                </CustomTouchableOpacity> */}
+                    <CustomTouchableOpacity disabled={processing}
+                        style={{ backgroundColor: COLORS.PRIMARY_MAIN, borderRadius: 10, alignItems: "center", justifyContent: "center", height: 48, width: width - 80, paddingHorizontal: 28, marginBottom: 12 }}
+                        onPress={onUploadPress}
+                    >
+                        <Text style={{ fontSize: 14, fontWeight: "700", color: COLORS.WHITE, textAlign: "center" }}>{"CONFIRM"}</Text>
+                    </CustomTouchableOpacity>
+                    <CustomTouchableOpacity disabled={processing}
+                        style={{ backgroundColor: COLORS.WHITE, borderRadius: 10, borderColor: COLORS.PRIMARY_MAIN, borderWidth: 2, alignItems: "center", justifyContent: "center", height: 48, width: width - 80, paddingHorizontal: 28 }}
+                        onPress={onRetakePress}
+                    >
+                        <Text style={{ fontSize: 14, fontWeight: "700", color: COLORS.GRAY_90, textAlign: "center" }}>{"RETAKE"}</Text>
+                    </CustomTouchableOpacity>
+                </>}
+
+                {resultReady && <CustomTouchableOpacity disabled={processing}
                     style={{ backgroundColor: COLORS.PRIMARY_MAIN, borderRadius: 10, alignItems: "center", justifyContent: "center", height: 48, width: width - 80, paddingHorizontal: 28, marginBottom: 12 }}
-                    onPress={onUploadPress}
+                    onPress={onGetResultPress}
                 >
-                    <Text style={{ fontSize: 14, fontWeight: "700", color: COLORS.WHITE, textAlign: "center" }}>{"UPLOAD"}</Text>
-                </CustomTouchableOpacity>
-                <CustomTouchableOpacity disabled={processing}
-                    style={{ backgroundColor: COLORS.WHITE, borderRadius: 10, borderColor: COLORS.PRIMARY_MAIN, borderWidth: 2, alignItems: "center", justifyContent: "center", height: 48, width: width - 80, paddingHorizontal: 28 }}
-                    onPress={onRetakePress}
-                >
-                    <Text style={{ fontSize: 14, fontWeight: "700", color: COLORS.GRAY_90, textAlign: "center" }}>{"RETAKE"}</Text>
-                </CustomTouchableOpacity>
+                    <Text style={{ fontSize: 14, fontWeight: "700", color: COLORS.WHITE, textAlign: "center" }}>{"GET RESULT"}</Text>
+                </CustomTouchableOpacity>}
             </View>
         </>)
     }
 
+    const getResultScreen = () => {
+        return (
+            <View style={{ width: width, alignItems: 'center', justifyContent: 'center', padding: 30 }}>
+                {resultImageURI !== "" && <Image style={{ width: width - 60, height: width - 60, resizeMode: "contain" }} source={{ uri: resultImageURI }} />}
+                <CustomTouchableOpacity disabled={processing}
+                    style={{ backgroundColor: COLORS.PRIMARY_MAIN, borderRadius: 10, alignItems: "center", justifyContent: "center", height: 48, width: width - 80, paddingHorizontal: 28, marginBottom: 12, marginTop: 30 }}
+                    onPress={onCaptureAgainPress}
+                >
+                    <Text style={{ fontSize: 14, fontWeight: "700", color: COLORS.WHITE, textAlign: "center" }}>{"CAPTURE AGAIN"}</Text>
+                </CustomTouchableOpacity>
+            </View>
+        )
+    }
+
     return (
         <View style={styles.body}>
-            {videoURL === "" && getCameraComponent()}
-            {videoURL !== "" && getVideoPlayerComponent()}
+            {!showProcessedResult && <>
+                {videoURL === "" && getCameraComponent()}
+                {videoURL !== "" && getVideoPlayerComponent()}
+            </>}
+            {showProcessedResult && getResultScreen()}
             <Spinner
                 visible={showSpinner}
                 textContent={spinnerMessage}
