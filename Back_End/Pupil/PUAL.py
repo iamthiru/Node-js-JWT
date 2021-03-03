@@ -5,18 +5,23 @@
 # Version: v1.0
 
 # Code Description:
-# PUAL Function - Python Code.
+# PUAL Function - Translating to Python Code.
 
+# **********************************************************************************************************************
 # IMPORTS:
 import numpy as np
 from scipy.fft import fft, ifft
 from scipy.ndimage import gaussian_filter
 import pandas as pd
 
+
+# **********************************************************************************************************************
 # Reading a CSV File:
 Filename = 'APKTest06_Ratio_Dilation_Pranav.csv'
 df = pd.read_csv(Filename, usecols=['Frame', 'Processed Ratio'])
 
+
+# **********************************************************************************************************************
 # PRE-DEFINED TOKENS:
 FFT_Data = []
 scan_length = len(df['Processed Ratio'])
@@ -30,6 +35,7 @@ lower_bound_white_noise_correction_millihertz = 7300
 upper_bound_white_noise_correction_millihertz = 10000
 
 
+# **********************************************************************************************************************
 # FUNCTIONS:
 def Write_to_CSV(raw_data, low_frequency_data, ratio_cleaned_data, fft_on_cleaned_data, orignial_pual, corrected_pual):
     data_frame = pd.DataFrame(columns=['Raw_Data', 'Low_Freq_Data', 'Cleaned_Data',
@@ -116,9 +122,13 @@ def Calculate_PUAL(ratio_data, fps, fft_dt):
     return PUAL_index, Corrected_PUAL
 
 
+# **********************************************************************************************************************
 if __name__ == '__main__':
     # Tests Okay - Checking the PUAL Score:
     Ratio_Data_Array = np.array(df['Processed Ratio'])
     print('\n 1. PUAL FUNCTION : ')
     PUAL_Score, Corrected_PUAL_score = Calculate_PUAL(Ratio_Data_Array, frames_per_sec, FFT_Data)
     print('\n** Original PUAL : ', PUAL_Score, '\n** Corrected PUAL : ', Corrected_PUAL_score)
+
+
+# **********************************************************************************************************************
