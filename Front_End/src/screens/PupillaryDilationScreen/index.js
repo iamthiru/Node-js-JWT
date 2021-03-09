@@ -20,6 +20,7 @@ import Fontisto from 'react-native-vector-icons/Fontisto';
 import CameraRoll from "@react-native-community/cameraroll";
 import MovToMp4 from 'react-native-mov-to-mp4';
 import Video from 'react-native-video';
+import DeviceInfo from 'react-native-device-info';
 import CustomTouchableOpacity from '../../components/shared/CustomTouchableOpacity';
 import styles from './styles';
 import { secondsToMinsAndSecs } from '../../utils/date';
@@ -130,7 +131,7 @@ const PupillaryDilationScreen = ({ navigation }) => {
             return;
         }
 
-        camera.recordAsync({ mute: true, quality: RNCamera.Constants.VideoQuality['1080p'] }).then((data) => {
+        camera.recordAsync({ mute: true, quality: RNCamera.Constants.VideoQuality['1080p'] }).then(async (data) => {
             console.log("videoData: ", data)
 
             // let options = {
@@ -162,13 +163,15 @@ const PupillaryDilationScreen = ({ navigation }) => {
             //     cropOffsetY: 0,
             // }
 
+            const deviceModel = await DeviceInfo.getModel();
+            
             let screenWidth = 1080;
             const paddingValue = screenWidth * (60 / width);
             let options = {
                 cropWidth: screenWidth,
                 cropHeight: parseInt((screenWidth + paddingValue) / 2),
                 cropOffsetX: 0,
-                cropOffsetY: parseInt((screenWidth - ((screenWidth + paddingValue) / 2)) / 2) + (100),
+                cropOffsetY: parseInt((screenWidth - ((screenWidth + paddingValue) / 2)) / 2) + (100) + (deviceModel === "iPhone 7 Plus"? 195 : 0),
             }
 
             if (Platform.OS === "ios") {
@@ -283,6 +286,7 @@ const PupillaryDilationScreen = ({ navigation }) => {
                     Body: arrayBuffer,
                     ContentDisposition: contentDeposition,
                     ContentType: contentType,
+                    ACL: "public-read"
                 };
                 s3bucket.upload(params, (err, data) => {
                     if (err) {
