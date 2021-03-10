@@ -15,7 +15,7 @@
 # Pupil Output Video embedding feature for Pupil part.
 # Min, Mean and Max Scores removed for Pupil part.
 # Integrated New IMPACT_FACIAL_v1.0.py for script call.
-# Integrated New IMPACT_PUPIL_v1.3.py for script call.
+# Integrated New IMPACT_PUPIL_v1_3.py for script call.
 # Removed Pupil From Facial Detection.
 
 ##############################################################
@@ -35,6 +35,7 @@ table_userData = DB.Table('impact-user-data')
 
 option_val = ""
 user_email = ""
+user_logged_in = False
 
 app = Flask(__name__)
 app.config.from_mapping(SECRET_KEY='dev')
@@ -43,6 +44,7 @@ app.config.from_mapping(SECRET_KEY='dev')
 @app.route('/')
 @app.route('/Login', methods=['GET', 'POST'])
 def Login():
+    global user_logged_in
     if request.method == 'POST':
         global user_email
         user_email = request.form['email']
@@ -50,12 +52,14 @@ def Login():
         response = table_users.query(KeyConditionExpression=Key('user-email').eq(user_email))
         item = response['Items']
         if user_password == item[0]['user-password']:
+            user_logged_in = True
             return render_template('HomePage.html')
     return render_template('Login.html')
 
 
 @app.route('/Register', methods=['GET', 'POST'])
 def Register():
+    global user_logged_in
     if request.method == 'POST':
         global user_email
         user_name = request.form['username']
@@ -69,22 +73,45 @@ def Register():
 
 @app.route('/HomePage')
 def HomePage():
-    return render_template('HomePage.html')
+    global user_logged_in
+    if user_logged_in is True:
+        return render_template('HomePage.html')
+    else:
+        return render_template('Login.html')
 
 
 @app.route('/FacialPain')
 def FacialPain():
-    return render_template('FacialPain_Form.html')
+    global user_logged_in
+    if user_logged_in is True:
+        return render_template('FacialPain_Form.html')
+    else:
+        return render_template('Login.html')
 
 
 @app.route('/PupilPain')
 def PupilPain():
-    return render_template('PupilPain_Form.html')
+    global user_logged_in
+    if user_logged_in is True:
+        return render_template('PupilPain_Form.html')
+    else:
+        return render_template('Login.html')
+
+
+@app.route('/Logout')
+def Logout():
+    global user_logged_in
+    user_logged_in = False
+    return render_template('Login.html')
 
 
 @app.route('/Upload')
 def Upload():
-    return render_template('FileUpload.html')
+    global user_logged_in
+    if user_logged_in is True:
+        return render_template('FileUpload.html')
+    else:
+        return render_template('Login.html')
 
 
 @app.route('/UploadPupil', methods=['GET', 'POST'])
@@ -92,7 +119,8 @@ def UploadPupil():
     global opt
     global video_type1
     global user_email
-    if request.method == 'POST':
+    global user_logged_in
+    if request.method == 'POST' and user_logged_in is True:
         fname_txtfield = request.form['firstname']
         lname_txtfield = request.form['lastname']
         eye_color_val = request.form['radio']
@@ -115,6 +143,8 @@ def UploadPupil():
                                           'user-eyecolor': eye_color_val, 's3-filepath': 's3://impact-benten/'+PUPIL_UPLOAD_FOLDER_S3+fname})
         # print("File Uploaded: " + f.filename)
         return render_template('Calculate_Pupil.html')
+    else:
+        return render_template('Login.html')
 
 
 @app.route('/UploadFacial', methods=['GET', 'POST'])
@@ -122,7 +152,8 @@ def UploadFacial():
     global option
     global video_type2
     global user_email
-    if request.method == 'POST':
+    global user_logged_in
+    if request.method == 'POST' and user_logged_in is True:
         fname_txtfield = request.form['firstname']
         lname_txtfield = request.form['lastname']
         option_val = request.form['radio']
@@ -145,31 +176,38 @@ def UploadFacial():
                                           'user-videotype': option_val, 's3-filepath': 's3://impact-benten/'+FACIAL_UPLOAD_FOLDER_S3+face_fname})
         # print("File Uploaded: " + f.filename)
         return render_template('Calculate_Facial.html')
+    else:
+        return render_template('Login.html')
 
 
 @app.route('/Process_Pupil')
 def Process_Pupil():
-    os.system('python IMPACT_PUPIL_v1.3.py ' + str(fname) + ' ' + str(video_type1))
-    res_img_fold = os.path.join('static', 'Pupil_Output_Images')
-    res_vid_fold = os.path.join('static', 'Pupil_Output_Videos')
-    res_img_fold_S3 = 'Pupil_Data/Results-Output/'
-    app.config['PUPIL_OUTPUT_FOLDER'] = res_img_fold
-    app.config['PUPIL_VID_OUT_FOLDER'] = res_vid_fold
-    img_name = str(os.path.splitext(fname)[0])
-    file = img_name + '_Ratio_Dilation.csv'
-    csv_file = os.path.join(app.config['PUPIL_OUTPUT_FOLDER'], file)
-    # df = pd.read_csv(csv_file)
-    # pupil_ratio = df['Processed Ratio']
-    # max_pupil_ratio = round(pupil_ratio.max(), 2)
-    # mean_pupil_ratio = round(sum(pupil_ratio) / len(pupil_ratio), 2)
-    # min_pupil_ratio = round(pupil_ratio.min(), 2)
-    f = img_name + '_Dilation_Plot.png'
-    vid_file = os.path.join(app.config['PUPIL_VID_OUT_FOLDER'], img_name + '.mp4')
-    pic = os.path.join(app.config['PUPIL_OUTPUT_FOLDER'], f)
-    Upload_2_S3(BUCKET_NAME, f, pic, res_img_fold_S3)
-    Upload_2_S3(BUCKET_NAME, img_name+'.mp4', vid_file, res_img_fold_S3)
-    Upload_2_S3(BUCKET_NAME, file, csv_file, res_img_fold_S3)
-    return render_template('Pupil_Success.html', image_file=pic, video_file=vid_file)
+    global user_logged_in
+    if user_logged_in is True:
+        os.system('python IMPACT_PUPIL_v1_3.py ' + str(fname) + ' ' + str(video_type1))
+        from IMPACT_PUPIL_v1_3 import token
+        if token == 'Good':
+            res_img_fold = os.path.join('static', 'Pupil_Output_Images')
+            res_vid_fold = os.path.join('static', 'Pupil_Output_Videos')
+            res_img_fold_S3 = 'Pupil_Data/Results-Output/'
+            app.config['PUPIL_OUTPUT_FOLDER'] = res_img_fold
+            app.config['PUPIL_VID_OUT_FOLDER'] = res_vid_fold
+            img_name = str(os.path.splitext(fname)[0])
+            file = 'PUAL_' + img_name + '.csv'
+            csv_file = os.path.join(app.config['PUPIL_OUTPUT_FOLDER'], file)
+            df = pd.read_csv(csv_file)
+            PUAL_SCORE = df['PUAL_Score']
+            f = img_name + '_Dilation_Plot.png'
+            vid_file = os.path.join(app.config['PUPIL_VID_OUT_FOLDER'], img_name + '.mp4')
+            pic = os.path.join(app.config['PUPIL_OUTPUT_FOLDER'], f)
+            Upload_2_S3(BUCKET_NAME, f, pic, res_img_fold_S3)
+            Upload_2_S3(BUCKET_NAME, img_name+'.mp4', vid_file, res_img_fold_S3)
+            Upload_2_S3(BUCKET_NAME, file, csv_file, res_img_fold_S3)
+            return render_template('Pupil_Success.html', image_file=pic, video_file=vid_file, score=PUAL_SCORE)
+        else:
+            return render_template('PupilPain_Form.html', message_flashed="BAD VIDEO")
+    else:
+        return render_template('Login.html')
 
 
 @app.route('/mobile_pupil_api/<filename>', methods=['GET', 'POST'])
@@ -178,39 +216,51 @@ def pupil_api(filename):
     download_folder_S3 = 'Pupil_Data/Uploads-VideoFiles/'
     PUPIL_UPLOAD_FOLDER = './static/Pupil_Input_Videos/'
     Download_from_S3(BUCKET_NAME, download_folder_S3+filename, PUPIL_UPLOAD_FOLDER+filename)
-    os.system('python IMPACT_PUPIL_v1.3.py ' + str(filename) + ' Color')
-    res_img_fold = os.path.join('static', 'Pupil_Output_Images')
-    res_vid_fold = os.path.join('static', 'Pupil_Output_Videos')
-    app.config['PUPIL_OUTPUT_FOLDER'] = res_img_fold
-    app.config['PUPIL_VID_OUT_FOLDER'] = res_vid_fold
-    img_name = str(os.path.splitext(filename)[0])
-    file = img_name + '_Ratio_Dilation.csv'
-    csv_file = os.path.join(app.config['PUPIL_OUTPUT_FOLDER'], file)
-    f = img_name + '_Dilation_Plot.png'
-    vid_file = os.path.join(app.config['PUPIL_VID_OUT_FOLDER'], img_name + '.mp4')
-    pic = os.path.join(app.config['PUPIL_OUTPUT_FOLDER'], f)
-    Upload_2_S3(BUCKET_NAME, f, pic, upload_folder_S3)
-    Upload_2_S3(BUCKET_NAME, img_name + '.mp4', vid_file, upload_folder_S3)
-    Upload_2_S3(BUCKET_NAME, file, csv_file, upload_folder_S3)
-    return render_template('HomePage.html')
+    os.system('python IMPACT_PUPIL_v1_3.py ' + str(filename) + ' Color')
+    from IMPACT_PUPIL_v1_3 import token
+    if token == 'Good':
+        res_img_fold = os.path.join('static', 'Pupil_Output_Images')
+        res_vid_fold = os.path.join('static', 'Pupil_Output_Videos')
+        app.config['PUPIL_OUTPUT_FOLDER'] = res_img_fold
+        app.config['PUPIL_VID_OUT_FOLDER'] = res_vid_fold
+        img_name = str(os.path.splitext(filename)[0])
+        file = img_name + '_Ratio_Dilation.csv'
+        csv_file = os.path.join(app.config['PUPIL_OUTPUT_FOLDER'], file)
+        file = 'PUAL_' + img_name + '.csv'
+        csv_f = os.path.join(app.config['PUPIL_OUTPUT_FOLDER'], file)
+        df = pd.read_csv(csv_f)
+        PUAL_SCORE = df['PUAL_Score']
+        f = img_name + '_Dilation_Plot.png'
+        vid_file = os.path.join(app.config['PUPIL_VID_OUT_FOLDER'], img_name + '.mp4')
+        pic = os.path.join(app.config['PUPIL_OUTPUT_FOLDER'], f)
+        Upload_2_S3(BUCKET_NAME, f, pic, upload_folder_S3)
+        Upload_2_S3(BUCKET_NAME, img_name + '.mp4', vid_file, upload_folder_S3)
+        Upload_2_S3(BUCKET_NAME, file, csv_file, upload_folder_S3)
+        return PUAL_SCORE
+    else:
+        return "Retake"
 
 
 @app.route('/Process_Facial')
 def Process_Facial():
-    os.system('python IMPACT_FACIAL_v1.0.py '+str(option)+' '+str(face_fname)+' '+str(video_type2))
-    res_img_fold = os.path.join('static', 'Facial_Output_Images')
-    app.config['FACIAL_OUTPUT_FOLDER'] = res_img_fold
-    img_name = str(os.path.splitext(face_fname)[0])
-    file = img_name + '_PSPI_AUs.csv'
-    csv_file = os.path.join(app.config['FACIAL_OUTPUT_FOLDER'], file)
-    df = pd.read_csv(csv_file)
-    pain_score = df['sum_AU_r']
-    max_pain_score = round(pain_score.max(), 2)
-    min_pain_score = round(pain_score.min(), 2)
-    mean_pain_score = round(sum(pain_score) / len(pain_score), 2)
-    f = img_name + '_Pain_Plot.png'
-    pic = os.path.join(app.config['FACIAL_OUTPUT_FOLDER'], f)
-    return render_template('Facial_Success.html', image_file=pic, max_pain=max_pain_score, mean_pain=mean_pain_score, min_pain=min_pain_score)
+    global user_logged_in
+    if user_logged_in is True:
+        os.system('python IMPACT_FACIAL_v1.0.py '+str(option)+' '+str(face_fname)+' '+str(video_type2))
+        res_img_fold = os.path.join('static', 'Facial_Output_Images')
+        app.config['FACIAL_OUTPUT_FOLDER'] = res_img_fold
+        img_name = str(os.path.splitext(face_fname)[0])
+        file = img_name + '_PSPI_AUs.csv'
+        csv_file = os.path.join(app.config['FACIAL_OUTPUT_FOLDER'], file)
+        df = pd.read_csv(csv_file)
+        pain_score = df['sum_AU_r']
+        max_pain_score = round(pain_score.max(), 2)
+        min_pain_score = round(pain_score.min(), 2)
+        mean_pain_score = round(sum(pain_score) / len(pain_score), 2)
+        f = img_name + '_Pain_Plot.png'
+        pic = os.path.join(app.config['FACIAL_OUTPUT_FOLDER'], f)
+        return render_template('Facial_Success.html', image_file=pic, max_pain=max_pain_score, mean_pain=mean_pain_score, min_pain=min_pain_score)
+    else:
+        return render_template('Login.html')
 
 
 def write_to_txt(fnametxt, lnametxt, v, fln, flag, vid_type):
