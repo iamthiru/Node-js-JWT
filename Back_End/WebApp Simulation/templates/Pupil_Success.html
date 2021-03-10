@@ -47,6 +47,13 @@
         margin-right: auto;
         }
 
+        .container {
+          padding: 40px;
+          background-color: red;
+          box-shadow: 10px 10px white;
+          border-radius: 16px;
+        }
+
         .myimages {
         width: 700px;
         height: 450px;
@@ -56,11 +63,11 @@
 <body>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <div class="navbar" id="Topnav">
-        <a href="{{url_for('HomePage')}}" style="font-size: 25px">Home</a>
-        <a href="{{url_for('PupilPain')}}" style="font-size: 25px">Pupil-Pain</a>
-        <a href="{{url_for('FacialPain')}}" style="font-size: 25px">Facial-Pain</a>
+        <a href="{{url_for('HomePage')}}" style="font-size: 20px">Home</a>
+        <a href="{{url_for('PupilPain')}}" style="font-size: 20px">Pupil-Pain</a>
+        <a href="{{url_for('FacialPain')}}" style="font-size: 20px">Facial-Pain</a>
+        <a href="{{url_for('Logout')}}" style="font-size: 20px">Logout</a>
     </div>
-
     <table align="center">
         <tr>
             <td>
@@ -68,9 +75,15 @@
                     <source src="{{ video_file }}" type="video/mp4">
                 </video>
             </td>
-            <td><img class="myimages" src="{{ image_file }}"></td>
+            <td>
+                <img class="myimages" src="{{ image_file }}">
+            </td>
         </tr>
     </table>
-
+    <table align="center" class="container">
+        <tr>
+            <td align="center"><h2>PUAL SCORE: {{ score }}</h2></td>
+        </tr>
+    </table>
 </body>
 </html>
