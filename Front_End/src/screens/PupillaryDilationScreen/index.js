@@ -13,7 +13,8 @@ import {
 import Spinner from 'react-native-loading-spinner-overlay';
 import { RNCamera } from 'react-native-camera';
 import Slider from '@react-native-community/slider';
-import { ProcessingManager } from 'react-native-video-processing';
+// import { ProcessingManager } from 'react-native-video-processing';
+import { RNFFmpeg } from 'react-native-ffmpeg';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Fontisto from 'react-native-vector-icons/Fontisto';
@@ -27,7 +28,7 @@ import { secondsToMinsAndSecs } from '../../utils/date';
 import { COLORS } from '../../constants/colors';
 
 import S3 from 'aws-sdk/clients/s3';
-import fs from 'react-native-fs';
+import fs, { stat } from 'react-native-fs';
 import { decode, encode } from 'base64-arraybuffer';
 
 import { ACCESS_ID, ACCESS_KEY, BUCKET_FOLDER_FOR_PUPIL, BUCKET_FOLDER_FOR_PUPIL_RESULT, BUCKET_NAME } from '../../constants/aws';
@@ -131,7 +132,10 @@ const PupillaryDilationScreen = ({ navigation }) => {
             return;
         }
 
-        camera.recordAsync({ mute: true, quality: RNCamera.Constants.VideoQuality['1080p'] }).then(async (data) => {
+        const recordOptions = { mute: true, quality: RNCamera.Constants.VideoQuality['1080p'] };
+        // const recordOptions = { mute: true, quality: RNCamera.Constants.VideoQuality['1080p'], videoBitrate: 30, codec: RNCamera.Constants.VideoCodec['H264'] };
+
+        camera.recordAsync(recordOptions).then(async (data) => {
             console.log("videoData: ", data)
 
             // let options = {
@@ -163,15 +167,15 @@ const PupillaryDilationScreen = ({ navigation }) => {
             //     cropOffsetY: 0,
             // }
 
-            const deviceModel = await DeviceInfo.getModel();
-            
+            /* const deviceModel = await DeviceInfo.getModel();
+
             let screenWidth = 1080;
             const paddingValue = screenWidth * (60 / width);
             let options = {
                 cropWidth: screenWidth,
                 cropHeight: parseInt((screenWidth + paddingValue) / 2),
                 cropOffsetX: 0,
-                cropOffsetY: parseInt((screenWidth - ((screenWidth + paddingValue) / 2)) / 2) + (100) + (deviceModel === "iPhone 7 Plus"? 195 : 0),
+                cropOffsetY: parseInt((screenWidth - ((screenWidth + paddingValue) / 2)) / 2) + (100) + (deviceModel === "iPhone 7 Plus" ? 195 : 0),
             }
 
             if (Platform.OS === "ios") {
@@ -179,24 +183,51 @@ const PupillaryDilationScreen = ({ navigation }) => {
             }
 
             console.log("screen width: ", screenWidth)
-            console.log("cropOptions: ", options);
+            console.log("cropOptions: ", options); */
 
             setShowSpinner(true);
             setSpinnerMessage("Cropping...");
 
             try {
-                ProcessingManager.crop(data.uri, options).then(croppedData => {
-                    setShowSpinner(false);
-                    setSpinnerMessage("");
-                    setIsRecording(false);
-                    setVideoURL(croppedData);
+                const videoType = data.uri.substring(data.uri.lastIndexOf(".") + 1, data.uri.length);
+                if (videoType.toLowerCase() !== "mp4") {
+                    let convertedVideoPath = `${data.uri.substring(0, data.uri.lastIndexOf("."))}_conv.mp4`
+                    RNFFmpeg.execute(`-i ${data.uri} -qscale 0 ${convertedVideoPath}`).then(async res => {
+                        console.log("RNFFmpeg Conversion Success")
+                        cropVideo(convertedVideoPath)
+                    }).catch(err => {
+                        console.log("RNFFmpeg Conversion Error")
+                        cropVideo(data.uri)
+                    })
+                } else {
+                    cropVideo(data.uri)
+                }
+
+                /* ProcessingManager.crop(data.uri, options).then( async croppedData => {
+                    console.log("croppedData: ", croppedData)
+
+                    let resultPath = `${croppedData.substring(0, croppedData.lastIndexOf("."))}_2.mp4`
+                    RNFFmpeg.execute(`-i ${croppedData} -filter:v fps=30 ${resultPath}`).then(async res => {
+                        setShowSpinner(false);
+                        setSpinnerMessage("");
+                        setIsRecording(false);
+                        setVideoURL(resultPath);
+
+                        console.log("RNFFmpeg success", res);
+                    }).catch(err => {
+                        console.log("RNFFmpeg err", err);
+                        setShowSpinner(false);
+                        setSpinnerMessage("");
+                        setIsRecording(false);
+                        setVideoURL(croppedData);
+                    })
                 }).catch(error => {
                     console.log('error', error);
                     setShowSpinner(false);
                     setSpinnerMessage("");
                     setIsRecording(false);
                     setVideoURL(data.uri);
-                })
+                }) */
             } catch (error) {
                 console.log('error', error);
                 setShowSpinner(false);
@@ -204,10 +235,66 @@ const PupillaryDilationScreen = ({ navigation }) => {
                 setIsRecording(false);
                 setVideoURL(data.uri);
             }
-
         }).catch(err => {
             setIsRecording(false);
         })
+    }
+
+    const cropVideo = async (videoURI) => {
+        const deviceModel = await DeviceInfo.getModel();
+
+        let screenWidth = 1080;
+        const paddingValue = screenWidth * (60 / width);
+        let options = {
+            cropWidth: screenWidth,
+            cropHeight: parseInt((screenWidth + paddingValue) / 2),
+            cropOffsetX: 0,
+            cropOffsetY: parseInt((screenWidth - ((screenWidth + paddingValue) / 2)) / 2) + (100) + (deviceModel === "iPhone 7 Plus" ? 195 : 0),
+        }
+
+        if (Platform.OS === "ios") {
+            options.quality = "1920x1080"
+        }
+
+        try {
+            let croppedResultPath = `${videoURI.substring(0, videoURI.lastIndexOf("."))}_crop.mp4`;
+            RNFFmpeg.execute(`-i ${videoURI} -filter:v "crop=${options.cropWidth}:${options.cropHeight}:${options.cropOffsetX}:${options.cropOffsetY}" ${croppedResultPath}`).then( async result => {
+                // const statResult = await stat(croppedResultPath);
+                // console.log("Before: ", statResult.size);
+
+                console.log("RNFFmpeg Crop Success");
+
+                let resultPath = `${croppedResultPath.substring(0, croppedResultPath.lastIndexOf("."))}_2.mp4`
+                RNFFmpeg.execute(`-i ${croppedResultPath} -filter:v fps=30 ${resultPath}`).then(async res => {
+                    console.log("RNFFmpeg fps success");
+                    setShowSpinner(false);
+                    setSpinnerMessage("");
+                    setIsRecording(false);
+                    setVideoURL(resultPath);
+
+                    // const statResult2 = await stat(resultPath);
+                    // console.log("After: ", statResult2.size);
+                }).catch(err => {
+                    console.log("RNFFmpeg fps error", err);
+                    setShowSpinner(false);
+                    setSpinnerMessage("");
+                    setIsRecording(false);
+                    setVideoURL(croppedResultPath);
+                })
+            }).catch(error => {
+                console.log("RNFFmpeg Crop Error", error);
+                setShowSpinner(false);
+                setSpinnerMessage("");
+                setIsRecording(false);
+                setVideoURL(videoURI);
+            })
+        } catch (error) {
+            console.log('error', error);
+            setShowSpinner(false);
+            setSpinnerMessage("");
+            setIsRecording(false);
+            setVideoURL(videoURI);
+        }
     }
 
     const handleStartRecording = () => {
@@ -298,7 +385,7 @@ const PupillaryDilationScreen = ({ navigation }) => {
                     } else {
                         console.log('success', data);
                         console.log("Respomse URL : " + data.Location);
-                        
+
                         setSpinnerMessage("Processing...");
                         initiateVideoProcessingAPI(filename).then((result) => {
                             console.log("initiateVideoProcessingAPI: ", result);
@@ -344,7 +431,7 @@ const PupillaryDilationScreen = ({ navigation }) => {
         });
 
         s3bucket.getObject(params, (err, data) => {
-            if(err) {
+            if (err) {
                 console.log('error in getObject', err);
                 Alert.alert("Error", "Error in retriving the result");
                 setShowSpinner(false);

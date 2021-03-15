@@ -9,7 +9,8 @@ import {
     Platform
 } from 'react-native';
 import { RNCamera } from 'react-native-camera';
-import { ProcessingManager } from 'react-native-video-processing';
+// import { ProcessingManager } from 'react-native-video-processing';
+import { RNFFmpeg } from 'react-native-ffmpeg';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import CameraRoll from "@react-native-community/cameraroll";
 import MovToMp4 from 'react-native-mov-to-mp4';
@@ -173,7 +174,7 @@ const FacialExpressionScreen = ({ navigation }) => {
 
         camera.recordAsync({ mute: true, quality: RNCamera.Constants.VideoQuality['1080p'] }).then((data) => {
             console.log("videoData: ", data);
-            const paddingValue = 1080 * (15/width);
+            /* const paddingValue = 1080 * (15/width);
             let options = {
                 cropWidth: parseInt(1080 - paddingValue),
                 cropHeight: parseInt(1080 + (1080 * 0.25)),
@@ -183,15 +184,53 @@ const FacialExpressionScreen = ({ navigation }) => {
             if(Platform.OS === "ios") {
                 options.quality = "1920x1080"
             }
+
             ProcessingManager.crop(data.uri, options).then(croppedData => {
                 setIsRecording(false);
                 setVideoURL(croppedData);
             }).catch(error => {
                 console.log('error', error);
                 setIsRecording(false);
-            })
+            }) */
             // setVideoURL(data.uri);
+
+            const videoType = data.uri.substring(data.uri.lastIndexOf(".") + 1, data.uri.length);
+            if (videoType.toLowerCase() !== "mp4") {
+                let convertedVideoPath = `${data.uri.substring(0, data.uri.lastIndexOf("."))}_conv.mp4`
+                RNFFmpeg.execute(`-i ${data.uri} -qscale 0 ${convertedVideoPath}`).then(async res => {
+                    console.log("RNFFmpeg Conversion Success")
+                    cropVideo(convertedVideoPath)
+                }).catch(err => {
+                    console.log("RNFFmpeg Conversion Error")
+                    cropVideo(data.uri)
+                })
+            } else {
+                cropVideo(data.uri)
+            }
+
         }).catch(err => {
+            setIsRecording(false);
+        })
+    }
+
+    const cropVideo = async (videoURI) => {
+        const paddingValue = 1080 * (15 / width);
+        let options = {
+            cropWidth: parseInt(1080 - paddingValue),
+            cropHeight: parseInt(1080 + (1080 * 0.25)),
+            cropOffsetX: parseInt((1080 - (1080 - paddingValue)) / 2),
+            cropOffsetY: parseInt((((1080 + (1080 * 0.25)) - (1080 - paddingValue)) / 2) - (1080 * (10 / width))),
+        }
+        if (Platform.OS === "ios") {
+            options.quality = "1920x1080"
+        }
+
+        let croppedResultPath = `${videoURI.substring(0, videoURI.lastIndexOf("."))}_crop.mp4`;
+        RNFFmpeg.execute(`-i ${videoURI} -filter:v "crop=${options.cropWidth}:${options.cropHeight}:${options.cropOffsetX}:${options.cropOffsetY}" ${croppedResultPath}`).then(croppedData => {
+            setIsRecording(false);
+            setVideoURL(croppedData);
+        }).catch(error => {
+            console.log('error', error);
             setIsRecording(false);
         })
     }
