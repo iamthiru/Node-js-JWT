@@ -9,10 +9,10 @@ import os
 # ch = 1
 
 # video filename
-filename = 'Elina_DarkBrown_Vertical_02.MOV'
+filename = 'Eric_Test01.mp4'
 
 # video type: NIR or Color
 video_type = 'Color'
 
-command = 'python IMPACT_PUPIL_v1.3.py ' + filename + ' ' + video_type
+command = 'python IMPACT_PUPIL_v1_3.py ' + filename + ' ' + video_type
 os.system(command)
