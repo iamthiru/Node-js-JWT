@@ -26,8 +26,8 @@ def Radius_Validity_Check(radius, input_lst, fr_nm, tag):
             R = radius
     else:
         if len(fr_nm) > 0:
-            drop_I = 0.95 * np.mean(input_lst)
-            surge_I = (1 + 0.05) * np.mean(input_lst)
+            drop_I = 0.90 * np.mean(input_lst)
+            surge_I = (1 + 0.10) * np.mean(input_lst)
             if len(fr_nm) > 0 and (radius <= drop_I or radius >= surge_I):
                 R = np.mean(input_lst)
             else:
