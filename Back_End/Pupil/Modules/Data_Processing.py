@@ -1,7 +1,7 @@
 # Proprietary: Benten Technologies, Inc.
 # Author: Pranav H. Deo
 # Copyright Content
-# Date: 01/15/2021
+# Date: 01/21/2021
 
 # Module Description:
 # * Output Video Generator
@@ -23,8 +23,7 @@ import matplotlib.pyplot as plt
 ########################################################################################################################
 
 def Output_Visual_Video_Generate(fln, fps, size, frame_array):
-    pathOut = '/Users/pranavdeo/PycharmProjects/FaceEmotionRecognition' \
-              '/static/Pupil_Output_Videos/' + (fln.split('.')[0]) + '.mp4'
+    pathOut = './static/Pupil_Output_Videos/' + (fln.split('.')[0]) + '.mp4'
     out = cv2.VideoWriter(pathOut, cv2.VideoWriter_fourcc(*'DIVX'), fps, size)
     for i in range(len(frame_array)):
         # writing to a image array
@@ -85,8 +84,8 @@ def Make_DFs(filename, frame_num, Iris_Dilation, Pupil_Dilation, ratio, processe
         Iris_memory.append(dt_I)
         drop_P = 0.80 * np.mean(Pupil_Dilation)
         surge_P = (0.20 + 1) * np.mean(Pupil_Dilation)
-        drop_I = 0.95 * np.mean(Iris_Dilation)
-        surge_I = (1 + 0.05) * np.mean(Iris_Dilation)
+        drop_I = 0.90 * np.mean(Iris_Dilation)
+        surge_I = (1 + 0.10) * np.mean(Iris_Dilation)
 
         if 0 < i < len(frame_num) and (dt_P <= drop_P or dt_P >= surge_P):
             # Pupil_Dilation[i] = int((Pupil_Dilation[i-1] + Pupil_Dilation[i+1]) / 2)
@@ -106,8 +105,8 @@ def Make_DFs(filename, frame_num, Iris_Dilation, Pupil_Dilation, ratio, processe
     df['Processed Ratio'] = processed_ratio
     df.columns = ['Frame', 'Iris Dilation', 'Pupil Dilation', 'Ratio',
                   'Processed Iris Dilation', 'Processed Pupil Dilation', 'Processed Ratio']
-    df.to_csv('/Users/pranavdeo/PycharmProjects/FaceEmotionRecognition/static/Pupil_Output_Images/' +
-              os.path.splitext(filename)[0] + '_Dilation.csv', index=False)
+    df.to_csv('./static/Pupil_Output_Images/' + os.path.splitext(filename)[0] + '_Dilation.csv', index=False)
+    df.to_csv('./static/Pupil_Output_Images/' + os.path.splitext(filename)[0] + '_Ratio_Dilation.csv', index=False, columns=['Frame', 'Processed Ratio'])
 
     return ratio, processed_ratio
 
@@ -115,8 +114,7 @@ def Make_DFs(filename, frame_num, Iris_Dilation, Pupil_Dilation, ratio, processe
 ########################################################################################################################
 
 def Grapher_Plot_Dilations(filename):
-    df = pd.read_csv('/Users/pranavdeo/PycharmProjects/FaceEmotionRecognition/static/Pupil_Output_Images/' +
-                     os.path.splitext(filename)[0] + '_Dilation.csv')
+    df = pd.read_csv('./static/Pupil_Output_Images/' + os.path.splitext(filename)[0] + '_Dilation.csv')
     x_list = df['Frame']
     y1_list = df['Iris Dilation']
     y2_list = df['Pupil Dilation']
@@ -145,17 +143,16 @@ def Grapher_Plot_Dilations(filename):
     ax3.set_title('Algorithm Generated')
     ax3.set_xlabel('Frames')
     ax3.set_ylabel('Ratio')
-    ax3.set_yticks([0.4, 0.5, 0.6])
+    ax3.set_yticks([0.3, 0.4, 0.5, 0.6])
 
     ax4.plot(x_list, y6_list, 'g', label='Ratio Plot')
     ax4.set_title('Processed')
     ax4.set_xlabel('Frames')
     ax4.set_ylabel('Ratio')
-    ax4.set_yticks([0.4, 0.5, 0.6])
+    ax4.set_yticks([0.3, 0.4, 0.5, 0.6])
 
     fig.tight_layout()
-    plt.savefig('/Users/pranavdeo/PycharmProjects/FaceEmotionRecognition/static/Pupil_Output_Images/' +
-                os.path.splitext(filename)[0] + '_Dilation_Plot.png')
+    plt.savefig('./static/Pupil_Output_Images/' + os.path.splitext(filename)[0] + '_Dilation_Plot.png')
     plt.close()
 
 
