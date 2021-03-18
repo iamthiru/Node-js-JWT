@@ -1,7 +1,7 @@
 # Proprietary: Benten Technologies, Inc.
 # Author: Pranav H. Deo
 # Copyright Content
-# Date: 01/15/2021
+# Date: 02/03/2021
 
 # Module Description:
 # * Iris Detector
@@ -25,14 +25,14 @@ def Iris_Detection(im, frame_num, iris_thresh, pup_cen, iris_radii, iris_xpoints
     w, h = imge.shape
 
     _, thresh = cv2.threshold(imge, abs(int(iris_thresh)), 255, cv2.THRESH_BINARY)
-    cv2.imshow('Iris Threshold', thresh)
+    # cv2.imshow('Iris Threshold', thresh)
 
     if v_type == 'NIR':
         circles = cv2.HoughCircles(thresh, cv2.HOUGH_GRADIENT, 2, 500, param1=30, param2=10,
-                                   minRadius=int(max(pupil_radii)*1.3), maxRadius=int(max(pupil_radii)*5))
+                                   minRadius=int(max(pupil_radii)*1.3), maxRadius=int(max(pupil_radii)*6))
     else:
         circles = cv2.HoughCircles(thresh, cv2.HOUGH_GRADIENT, 3, 800, param1=90, param2=30,
-                                   minRadius=int(max(pupil_radii)*1.3), maxRadius=int(max(pupil_radii)*5))
+                                   minRadius=int(max(pupil_radii)*1.3), maxRadius=int(max(pupil_radii)*6))
 
     if circles is not None:
         circles = np.round(circles[0, :])
@@ -105,7 +105,7 @@ def Pupil_Detection(im, frame_num, Pupil_Thresh, pupil_radii,  pupil_xpoints, pu
     w, h = imge.shape
 
     _, thresh = cv2.threshold(imge, abs(int(Pupil_Thresh)), 255, cv2.THRESH_BINARY)
-    cv2.imshow('Pupil', thresh)
+    # cv2.imshow('Pupil', thresh)
     contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     flg = 0
 
@@ -123,15 +123,15 @@ def Pupil_Detection(im, frame_num, Pupil_Thresh, pupil_radii,  pupil_xpoints, pu
                 x1, y1, w1, h1 = cv2.boundingRect(c)
 
                 if v_type == 'NIR':
-                    LL_C_Area = 2000
+                    LL_C_Area = 1500
                     UL_C_Area = 15000
                     LL_val = 0.6
                     UL_val = 1.5
                 else:
-                    LL_C_Area = 1200
-                    UL_C_Area = 25000
+                    LL_C_Area = 1000
+                    UL_C_Area = 15000
                     LL_val = 0.2
-                    UL_val = 1.15
+                    UL_val = 2
 
                 if (LL_C_Area <= contour_area <= UL_C_Area) and (LL_val <= (w1 / h1) <= UL_val):
                     flg = 1
@@ -201,7 +201,7 @@ def Threshold_Detect(Vid):
         retr, fr = Vid.read()
         if retr:
             # Getting Pupil Threshold Value Dynamically
-            for var in range(10, 60):
+            for var in range(15, 55):
                 ima = cv2.cvtColor(fr, cv2.COLOR_BGR2GRAY)
                 _, thresh = cv2.threshold(ima, var, 255, cv2.THRESH_BINARY)
                 contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -210,11 +210,11 @@ def Threshold_Detect(Vid):
                     for c in contours:
                         contour_area = cv2.contourArea(c)
                         x1, y1, w1, h1 = cv2.boundingRect(c)
-                        if (1500 < contour_area < 15000) and (0.6 < (w1 / h1) < 1.5):
+                        if (1000 < contour_area < 15000) and (0.2 < (w1 / h1) < 2):
                             Pupil_Thresh_Store.append(var)
 
             # Getting Iris Threshold Value Dynamically
-            for var in range(Pupil_Thresh_Store[len(Pupil_Thresh_Store) - 1]+10, 110):
+            for var in range(Pupil_Thresh_Store[len(Pupil_Thresh_Store) - 1]+10, 120):
                 ima = cv2.cvtColor(fr, cv2.COLOR_BGR2GRAY)
                 _, thresh = cv2.threshold(ima, var, 255, cv2.THRESH_BINARY)
                 contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -223,13 +223,13 @@ def Threshold_Detect(Vid):
                     for c in contours:
                         contour_area = cv2.contourArea(c)
                         x1, y1, w1, h1 = cv2.boundingRect(c)
-                        if (4500 < contour_area < 45000) and (0.6 < (w1 / h1) < 1.5):
+                        if (4500 < contour_area < 45000) and (0.2 < (w1 / h1) < 2):
                             Iris_Thresh_Store.append(var)
 
     # print('Pupil Threshold : ', Pupil_Thresh_Store)
     print('Pupil Threshold Value : ', np.mean(Pupil_Thresh_Store))
     # print('Iris Threshold : ', Iris_Thresh_Store)
     print('Iris Threshold Value : ', np.mean(Iris_Thresh_Store))
-    return np.mean(Pupil_Thresh_Store)-10, np.mean(Iris_Thresh_Store)
+    return np.mean(Pupil_Thresh_Store)-9, np.mean(Iris_Thresh_Store)
 
 ########################################################################################################################
