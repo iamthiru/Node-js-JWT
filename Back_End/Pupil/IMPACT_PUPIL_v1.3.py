@@ -10,7 +10,7 @@
 # * Video Quality and Drop Criteria Added (20 Frames).
 
 # UPDATES:
-# * Fixed for 30 FPS
+# * Fixed for any FPS
 # * CODE MODULES created
 # * MAJOR UPDATE - Added Dynamic Threshold Detector for Pupil and Iris.
 # * Threshold value decided by looking at first 10 frames.
@@ -20,7 +20,7 @@
 # * Result Video will be created after Processing.
 # * Pupil and Iris Radius go through validity check. Based on upper and lower bound, the radius is set.
 # * The video displayed uses the adjusted radius. Works on the Fly.
-# * The incoming video is Qualified/Disqualified if Pupil/Iris fails on 20 consecutive frames and if Pupil radius is below 35px.
+# * The incoming video is Qualified/Disqualified if Pupil/Iris fails on 20 consecutive frames + if Pupil radius < 35px.
 
 ########################################################################################################################
 # PACKAGE IMPORTS
@@ -58,20 +58,17 @@ Dropped_Frame_Counter = 0
 frame_array = []
 size = ()
 
-
 ########################################################################################################################
 
-# Fetching Plugins from Configuration Files:
-print("\n************************* IMPACT: PUPIL DETECTION *************************\n")
 
-if len(sys.argv) > 1:
+# Fetching Plugins from Configuration Files:
+if len(sys.argv) >= 2:
+    print("\n************************* IMPACT: PUPIL DETECTION *************************\n")
     filename = str(sys.argv[1])
     video_type = str(sys.argv[2])
     video = cv2.VideoCapture('./static/Pupil_Input_Videos/' + filename)
 else:
-    filename = 'APKTest03_Elina.mp4'
-    video_type = 'Color'
-    video = cv2.VideoCapture('./static/Pupil_Input_Videos/' + filename)
+    exit()
 
 # Calculate FPS of the Video:
 fps = video.get(cv2.CAP_PROP_FPS)
@@ -167,5 +164,6 @@ Data_Processing.Compute_Resources(start_time)
 
 video.release()
 cv2.destroyAllWindows()
+
 
 ########################################################################################################################
