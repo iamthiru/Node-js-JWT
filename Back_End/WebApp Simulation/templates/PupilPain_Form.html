@@ -171,9 +171,10 @@
 <body>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <div class="navbar" id="Topnav">
-        <a href="{{url_for('HomePage')}}" style="font-size: 25px">Home</a>
-        <a href="{{url_for('PupilPain')}}" style="font-size: 25px">Pupil-Pain</a>
-        <a href="{{url_for('FacialPain')}}" style="font-size: 25px">Facial-Pain</a>
+        <a href="{{url_for('HomePage')}}" style="font-size: 20px">Home</a>
+        <a href="{{url_for('PupilPain')}}" style="font-size: 20px">Pupil-Pain</a>
+        <a href="{{url_for('FacialPain')}}" style="font-size: 20px">Facial-Pain</a>
+        <a href="{{url_for('Logout')}}" style="font-size: 20px">Logout</a>
     </div>
 
     <div class="header">
@@ -209,23 +210,11 @@
           <input type="radio" name="radio" value="Hazel">
           <span class="checkmark"></span>
         </label>
-
         <br>
         <br>
-        <h3>Video Type</h3>
-        <label class="container">NIR Video
-          <input type="radio" name="radio1" value="NIR Video">
-          <span class="checkmark"></span>
-        </label>
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        <label class="container">Color Video
-          <input type="radio" name="radio1" value="Color Video">
-          <span class="checkmark"></span>
-        </label>
-        <br><br><br>
+        <br>
+        <br>
+        <br>
         <div class="upload-btn-wrapper">
             <button class="btn">Choose File</button>
             <input type="file" name="file" accept=".jpg, .png, .avi, .mp4, .MOV"/> Upload Video File!
