@@ -1,8 +1,8 @@
 # Proprietary: Benten Technologies, Inc.
 # Author: Pranav H. Deo
 # Copyright Content
-# Date: 02/03/2021
-# Version: v1.3
+# Date: 03/24/2021
+# Version: v1.4
 
 # Code Description:
 # * 1080p videos of eyes to get Pupil->Iris for both NIR and COLOR.
@@ -10,8 +10,9 @@
 # * Video Quality and Drop Criteria Added (20 Frames).
 
 # UPDATES:
-# * Fixed for any FPS
-# * CODE MODULES created
+# * Brightness Adjustor.
+# * Fixed for any FPS.
+# * CODE MODULES created.
 # * MAJOR UPDATE - Added Dynamic Threshold Detector for Pupil and Iris.
 # * Threshold value decided by looking at first 10 frames.
 # * Using Contour Detection Piggy-Backed with Hough when failure for both Pupil and Iris.
@@ -34,6 +35,7 @@ import pandas as pd
 import Detector
 import Data_Processing
 import PUAL_Gen
+import Histogram_Adjustment
 
 # GLOBAL LISTS
 Iris_Dilation = []
@@ -66,6 +68,8 @@ if len(sys.argv) >= 2:
     print("\n************************* IMPACT: PUPIL DETECTION *************************\n")
     filename = str(sys.argv[1])
     video_type = str(sys.argv[2])
+    # Running the Brightness Adjustor:
+    Histogram_Adjustment.Video_Brighten_Regenerate(filename)
     video = cv2.VideoCapture('./static/Pupil_Input_Videos/' + filename)
 else:
     exit()
@@ -164,6 +168,5 @@ Data_Processing.Compute_Resources(start_time)
 
 video.release()
 cv2.destroyAllWindows()
-
 
 ########################################################################################################################
