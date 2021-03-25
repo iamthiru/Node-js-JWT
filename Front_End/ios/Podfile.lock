@@ -170,7 +170,7 @@ PODS:
   - GTMSessionFetcher/Core (1.5.0)
   - GTMSessionFetcher/Full (1.5.0):
     - GTMSessionFetcher/Core (= 1.5.0)
-  - mobile-ffmpeg-https (4.4)
+  - mobile-ffmpeg-https-gpl (4.4)
   - nanopb (1.30906.0):
     - nanopb/decode (= 1.30906.0)
     - nanopb/encode (= 1.30906.0)
@@ -363,11 +363,8 @@ PODS:
     - React-Core
   - react-native-cameraroll (4.0.2):
     - React-Core
-  - react-native-ffmpeg (0.5.1):
-    - React
-    - react-native-ffmpeg/https (= 0.5.1)
-  - react-native-ffmpeg/https (0.5.1):
-    - mobile-ffmpeg-https (= 4.4)
+  - react-native-ffmpeg/https-gpl (0.5.1):
+    - mobile-ffmpeg-https-gpl (= 4.4)
     - React
   - react-native-mov-to-mp4 (0.2.2):
     - React
@@ -511,7 +508,7 @@ DEPENDENCIES:
   - react-native-camera (from `../node_modules/react-native-camera`)
   - react-native-camera/FaceDetectorMLKit (from `../node_modules/react-native-camera`)
   - "react-native-cameraroll (from `../node_modules/@react-native-community/cameraroll`)"
-  - react-native-ffmpeg (from `../node_modules/react-native-ffmpeg`)
+  - react-native-ffmpeg/https-gpl (from `../node_modules/react-native-ffmpeg/react-native-ffmpeg.podspec`)
   - react-native-mov-to-mp4 (from `../node_modules/react-native-mov-to-mp4`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - react-native-simple-toast (from `../node_modules/react-native-simple-toast`)
@@ -566,7 +563,7 @@ SPEC REPOS:
     - GoogleToolboxForMac
     - GoogleUtilities
     - GTMSessionFetcher
-    - mobile-ffmpeg-https
+    - mobile-ffmpeg-https-gpl
     - nanopb
     - OpenSSL-Universal
     - PromisesObjC
@@ -610,7 +607,7 @@ EXTERNAL SOURCES:
   react-native-cameraroll:
     :path: "../node_modules/@react-native-community/cameraroll"
   react-native-ffmpeg:
-    :path: "../node_modules/react-native-ffmpeg"
+    :podspec: "../node_modules/react-native-ffmpeg/react-native-ffmpeg.podspec"
   react-native-mov-to-mp4:
     :path: "../node_modules/react-native-mov-to-mp4"
   react-native-safe-area-context:
@@ -696,7 +693,7 @@ SPEC CHECKSUMS:
   GoogleToolboxForMac: 471e0c05d39506e50e6398f46fa9a12ae0efeff9
   GoogleUtilities: 7f2f5a07f888cdb145101d6042bc4422f57e70b3
   GTMSessionFetcher: b3503b20a988c4e20cc189aa798fd18220133f52
-  mobile-ffmpeg-https: 311fc4a8f671cf36d1d6b8f421e8246b790978d9
+  mobile-ffmpeg-https-gpl: 3683d680b86aa4671b8d2b3586dfee05c1a3bbad
   nanopb: 59317e09cf1f1a0af72f12af412d54edf52603fc
   OpenSSL-Universal: ff34003318d5e1163e9529b08470708e389ffcdd
   PromisesObjC: 3113f7f76903778cf4a0586bd1ab89329a0b7b97
@@ -744,6 +741,6 @@ SPEC CHECKSUMS:
   Yoga: 4bd86afe9883422a7c4028c00e34790f560923d6
   YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
 
-PODFILE CHECKSUM: f073e7b3f13d9989b40713c675c02b0821c9e1f7
+PODFILE CHECKSUM: 72162434fc72b4aeaefd77b33474457e24e956f9
 
 COCOAPODS: 1.10.0

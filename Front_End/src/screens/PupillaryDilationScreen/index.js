@@ -76,6 +76,7 @@ const PupillaryDilationScreen = ({ navigation }) => {
     const [showProcessedResult, setShowProcessedResult] = useState(false);
     const [downloadFileName, setDownloadFileName] = useState("");
     const [resultImageURI, setResultImageURI] = useState("");
+    const [fps, setFps] = useState(30);
 
     useEffect(() => {
         setTimeout(() => checkStoragePermission(), 3000);
@@ -258,22 +259,22 @@ const PupillaryDilationScreen = ({ navigation }) => {
 
         try {
             let croppedResultPath = `${videoURI.substring(0, videoURI.lastIndexOf("."))}_crop.mp4`;
-            RNFFmpeg.execute(`-i ${videoURI} -filter:v "crop=${options.cropWidth}:${options.cropHeight}:${options.cropOffsetX}:${options.cropOffsetY}" ${croppedResultPath}`).then( async result => {
-                // const statResult = await stat(croppedResultPath);
-                // console.log("Before: ", statResult.size);
+            // RNFFmpeg.execute(`-i ${videoURI} -filter:v "crop=${options.cropWidth}:${options.cropHeight}:${options.cropOffsetX}:${options.cropOffsetY}" ${croppedResultPath}`).then( async result => {
+            RNFFmpeg.execute(`-i ${videoURI} -vf "crop=${options.cropWidth}:${options.cropHeight}:${options.cropOffsetX}:${options.cropOffsetY}" -c:v libx264 -crf 0 -c:a copy ${croppedResultPath}`).then( async result => {
+                
 
                 console.log("RNFFmpeg Crop Success");
 
+                setSpinnerMessage("Converting FrameRate...");
+
                 let resultPath = `${croppedResultPath.substring(0, croppedResultPath.lastIndexOf("."))}_2.mp4`
-                RNFFmpeg.execute(`-i ${croppedResultPath} -filter:v fps=30 ${resultPath}`).then(async res => {
+                // RNFFmpeg.execute(`-i ${croppedResultPath} -filter:v fps=${fps} ${resultPath}`).then(async res => {
+                RNFFmpeg.execute(`-i ${croppedResultPath} -filter:v fps=${fps} ${resultPath}`).then(async res => {
                     console.log("RNFFmpeg fps success");
                     setShowSpinner(false);
                     setSpinnerMessage("");
                     setIsRecording(false);
                     setVideoURL(resultPath);
-
-                    // const statResult2 = await stat(resultPath);
-                    // console.log("After: ", statResult2.size);
                 }).catch(err => {
                     console.log("RNFFmpeg fps error", err);
                     setShowSpinner(false);
@@ -323,8 +324,8 @@ const PupillaryDilationScreen = ({ navigation }) => {
         clearInterval(intervalId);
     }
 
-    const onConfirmPress = () => {
-        if (Platform.OS === "ios") {
+    const onDownloadPress = () => {
+        if (false && Platform.OS === "ios") {
             const filename = `VID_${Date.now().toString()}`;
             MovToMp4.convertMovToMp4(videoURL, filename)
                 .then(function (results) {
@@ -339,10 +340,10 @@ const PupillaryDilationScreen = ({ navigation }) => {
         } else {
             CameraRoll.save(videoURL, { type: "video" }).then(res => {
                 Alert.alert("Success", "Video has been saved successfully!");
-                resetStates();
+                // resetStates();
             }).catch(err => {
                 Alert.alert("Error", "Download Failed!");
-                resetStates();
+                // resetStates();
             })
         }
     }
@@ -389,6 +390,13 @@ const PupillaryDilationScreen = ({ navigation }) => {
                         setSpinnerMessage("Processing...");
                         initiateVideoProcessingAPI(filename).then((result) => {
                             console.log("initiateVideoProcessingAPI: ", result);
+                            if(result && result.data === "Retake") {
+                                Alert.alert("Error", "Please retake the video");
+                                setShowSpinner(false);
+                                setSpinnerMessage("");
+                                resetStates(""); 
+                                return;
+                            } 
                             setTimeout(() => {
                                 let pngFileName = `${filename.substring(0, filename.lastIndexOf("."))}_Dilation_Plot.png`
                                 setDownloadFileName(pngFileName);
@@ -532,7 +540,43 @@ const PupillaryDilationScreen = ({ navigation }) => {
                 {/* <Text style={{ marginBottom: 14, fontSize: 16, fontWeight: '400', color: COLORS.GRAY_90 }}>3. Turn your device  horizontally if needed.</Text> */}
                 <Text style={{ marginBottom: 14, fontSize: 16, fontWeight: '400', color: COLORS.GRAY_90 }}>3. Get ready to not blink for 10 seconds.</Text>
                 <Text style={{ marginBottom: 0, fontSize: 16, fontWeight: '400', color: COLORS.GRAY_90 }}>4. Record the eye for at least 10 seconds.</Text>
-                <View style={{ width: width - 40, height: 30, marginTop: 20, marginBottom: 30 }}>
+
+                <View style={{ width: width - 40, height: 30, marginTop: 20, marginBottom: 30, flexDirection: "row", justifyContent: 'center', alignItems: 'center' }}>
+                    <Text style={{ fontWeight: "700", color: COLORS.GRAY_90 }}>{"FPS: "}</Text>
+                    <View
+                        style={{
+                            flexDirection: "row",
+                            backgroundColor: `${COLORS.PRIMARY_MAIN}50`,
+                            width: 160,
+                            justifyContent: "space-between",
+                            height: 30,
+                            alignItems: "center",
+                            borderRadius: 10,
+                            alignSelf: "center",
+                        }}
+                    >
+                        <CustomTouchableOpacity style={{ backgroundColor: (fps === 30 ? COLORS.PRIMARY_MAIN : `${COLORS.PRIMARY_MAIN}50`), width: 80, height: 30, borderTopLeftRadius: 10, borderBottomLeftRadius: 10, alignItems: "center", justifyContent: "center" }} onPress={() => setFps(30)}>
+                            <Text
+                                style={{
+                                    color: COLORS.WHITE,
+                                    fontWeight: "700",
+                                    fontSize: 17
+                                }}
+                            >{"30"}</Text>
+                        </CustomTouchableOpacity>
+                        <CustomTouchableOpacity style={{ backgroundColor: (fps === 60 ? COLORS.PRIMARY_MAIN : `${COLORS.PRIMARY_MAIN}50`), width: 80, height: 30, borderTopRightRadius: 10, borderBottomRightRadius: 10, alignItems: "center", justifyContent: "center" }} onPress={() => setFps(60)}>
+                            <Text
+                                style={{
+                                    color: COLORS.WHITE,
+                                    fontWeight: "700",
+                                    fontSize: 17
+                                }}
+                            >{"60"}</Text>
+                        </CustomTouchableOpacity>
+                    </View>
+                </View>
+
+                <View style={{ width: width - 40, height: 30, marginBottom: 30 }}>
                     <View
                         style={{
                             flexDirection: "row",
@@ -647,12 +691,12 @@ const PupillaryDilationScreen = ({ navigation }) => {
             </View>
             <View style={{ width: width, justifyContent: 'center', alignItems: 'center', paddingTop: 30 }}>
                 {!resultReady && <>
-                    {/* <CustomTouchableOpacity disabled={processing}
+                    <CustomTouchableOpacity disabled={processing}
                     style={{ backgroundColor: COLORS.PRIMARY_MAIN, borderRadius: 10, alignItems: "center", justifyContent: "center", height: 48, width: width - 80, paddingHorizontal: 28, marginBottom: 12 }}
-                    onPress={onConfirmPress}
+                    onPress={onDownloadPress}
                 >
-                    <Text style={{ fontSize: 14, fontWeight: "700", color: COLORS.WHITE, textAlign: "center" }}>{"CONFIRM"}</Text>
-                </CustomTouchableOpacity> */}
+                    <Text style={{ fontSize: 14, fontWeight: "700", color: COLORS.WHITE, textAlign: "center" }}>{"DOWNLOAD"}</Text>
+                </CustomTouchableOpacity>
                     <CustomTouchableOpacity disabled={processing}
                         style={{ backgroundColor: COLORS.PRIMARY_MAIN, borderRadius: 10, alignItems: "center", justifyContent: "center", height: 48, width: width - 80, paddingHorizontal: 28, marginBottom: 12 }}
                         onPress={onUploadPress}
