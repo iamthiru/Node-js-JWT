@@ -69,7 +69,7 @@ if len(sys.argv) >= 2:
     filename = str(sys.argv[1])
     video_type = str(sys.argv[2])
     # Running the Brightness Adjustor:
-    Histogram_Adjustment.Video_Brighten_Regenerate(filename)
+    # Histogram_Adjustment.Video_Brighten_Regenerate(filename)
     video = cv2.VideoCapture('./static/Pupil_Input_Videos/' + filename)
 else:
     exit()
