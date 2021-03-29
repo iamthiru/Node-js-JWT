@@ -1,13 +1,15 @@
 # Proprietary: Benten Technologies, Inc.
 # Author: Pranav H. Deo
 # Copyright Content
-# Date: 03/17/2021
-# Version: v1.5
+# Date: 03/29/2021
+# Version: v1.6
 
 # Code Description:
 # Web Simulation (Alpha Version) for Pupil and Facial Pain Analysis.
 
 # UPDATES:
+# User Session Integrated.
+# Redundant Code removal.
 # PUAL Score Integrated
 # Login and Registration using DynamoDB.
 # API for IMPACT-Pupil.
@@ -22,70 +24,67 @@
 ##############################################################
 from flask import *
 import pandas as pd
-from boto3.dynamodb.conditions import Key, Attr
+from boto3.dynamodb.conditions import Key
 import boto3
 import os
 ##############################################################
+# S3 Bucket:
 BUCKET_NAME = 'impact-benten'
 # DYNAMODB:
 DB = boto3.resource('dynamodb', region_name="us-east-1")
 table_users = DB.Table('impact-users')
 table_userData = DB.Table('impact-user-data')
 ##############################################################
-
-
 option_val = ""
-user_email = ""
-user_logged_in = False
 hard_login = False
-
 fname = ""
 face_fname = ""
 
 app = Flask(__name__)
 app.config.from_mapping(SECRET_KEY='dev')
+##############################################################
 
 
 @app.route('/')
 @app.route('/Login', methods=['GET', 'POST'])
 def Login():
-    global user_logged_in
+    session.pop('user_email', None)
     global hard_login
     if hard_login is True:
         return render_template('HomePage.html')
     elif request.method == 'POST':
-        global user_email
-        user_email = request.form['email']
-        user_password = request.form['password']
-        response = table_users.query(KeyConditionExpression=Key('user-email').eq(user_email))
+        email = request.form['email']
+        password = request.form['password']
+        response = table_users.query(KeyConditionExpression=Key('user-email').eq(email))
         item = response['Items']
-        if user_password == item[0]['user-password']:
-            user_logged_in = True
+        if item and password == item[0]['user-password']:
+            # user_logged_in = True
+            session['user_email'] = email
             return render_template('HomePage.html')
+        else:
+            return render_template('Register.html')
     return render_template('Login.html')
 
 
 @app.route('/Register', methods=['GET', 'POST'])
 def Register():
-    global user_logged_in
+    session.pop('user_email', None)
     global hard_login
     if hard_login is True:
         return render_template('HomePage.html')
     elif request.method == 'POST':
-        global user_email
         user_name = request.form['username']
-        user_email = request.form['email']
-        user_password = request.form['password']
-        table_users.put_item(Item={'user-email': user_email, 'user-name': user_name,  'user-password': user_password})
-        msg = 'User Registered'
-        return render_template('Login.html', msg=msg)
+        email = request.form['email']
+        password = request.form['password']
+        table_users.put_item(Item={'user-email': email, 'user-name': user_name,  'user-password': password})
+        return render_template('Login.html')
     return render_template('Register.html')
 
 
 @app.route('/HomePage')
 def HomePage():
-    global user_logged_in
-    if user_logged_in is True or hard_login is True:
+    session.pop('user_email', None)
+    if 'user_email' in session or hard_login is True:
         return render_template('HomePage.html')
     else:
         return render_template('Login.html')
@@ -93,8 +92,7 @@ def HomePage():
 
 @app.route('/FacialPain')
 def FacialPain():
-    global user_logged_in
-    if user_logged_in is True or hard_login is True:
+    if 'user_email' in session or hard_login is True:
         return render_template('FacialPain_Form.html')
     else:
         return render_template('Login.html')
@@ -102,8 +100,7 @@ def FacialPain():
 
 @app.route('/PupilPain')
 def PupilPain():
-    global user_logged_in
-    if user_logged_in is True or hard_login is True:
+    if 'user_email' in session or hard_login is True:
         return render_template('PupilPain_Form.html')
     else:
         return render_template('Login.html')
@@ -111,44 +108,66 @@ def PupilPain():
 
 @app.route('/Logout')
 def Logout():
-    global user_logged_in
-    user_logged_in = False
+    session.pop('user_email', None)
     return render_template('Login.html')
 
 
 @app.route('/Upload')
 def Upload():
-    global user_logged_in
-    if user_logged_in is True or hard_login is True:
+    if 'user_email' in session or hard_login is True:
         return render_template('FileUpload.html')
     else:
         return render_template('Login.html')
 
 
-@app.route('/UploadPupil', methods=['GET', 'POST'])
-def UploadPupil():
+@app.route('/Upload_Process_Pupil', methods=['GET', 'POST'])
+def Upload_Process_Pupil():
     global fname
-    global user_email
-    global user_logged_in
-    if request.method == 'POST' and (user_logged_in is True or hard_login is True):
-        fname_txtfield = request.form['firstname']
-        lname_txtfield = request.form['lastname']
-        eye_color_val = request.form['radio']
-        f = request.files['file']
-        PUPIL_UPLOAD_FOLDER_S3 = 'Pupil_Data/Uploads-VideoFiles/'
-        PUPIL_UPLOAD_FOLDER = './static/Pupil_Input_Videos/'
-        fname = eye_color_val + fname_txtfield + lname_txtfield + '.mp4'
-        f.filename = fname
-        # write_to_txt(fname_txtfield, lname_txtfield, eye_color_val, fname, 1, video_type1)
-        app.config['PUPIL_UPLOAD_FOLDER'] = PUPIL_UPLOAD_FOLDER
-        pth = os.path.join(app.config['PUPIL_UPLOAD_FOLDER'], fname)
-        f.save(os.path.join(app.config['PUPIL_UPLOAD_FOLDER'], fname))
-        if hard_login is False:
-            Upload_2_S3(BUCKET_NAME, fname, pth, PUPIL_UPLOAD_FOLDER_S3)
-            table_userData.put_item(Item={'user-email': user_email, 'user-name': fname_txtfield+' '+lname_txtfield,
-                                          'user-eyecolor': eye_color_val, 's3-filepath': 's3://impact-benten/'+PUPIL_UPLOAD_FOLDER_S3+fname})
-        # print("File Uploaded: " + f.filename)
-        return render_template('Calculate_Pupil.html')
+    if 'user_email' in session or hard_login is True:
+        if request.method == 'POST':
+            # Uploading Segment:
+            email = session['user_email']
+            fname_txtfield = request.form['firstname']
+            lname_txtfield = request.form['lastname']
+            eye_color_val = request.form['radio']
+            f = request.files['file']
+            PUPIL_UPLOAD_FOLDER_S3 = 'Pupil_Data/Uploads-VideoFiles/'
+            PUPIL_UPLOAD_FOLDER = './static/Pupil_Input_Videos/'
+            fname = eye_color_val + fname_txtfield + lname_txtfield + '.mp4'
+            f.filename = fname
+            app.config['PUPIL_UPLOAD_FOLDER'] = PUPIL_UPLOAD_FOLDER
+            pth = os.path.join(app.config['PUPIL_UPLOAD_FOLDER'], fname)
+            f.save(os.path.join(app.config['PUPIL_UPLOAD_FOLDER'], fname))
+            if hard_login is False:
+                Upload_2_S3(BUCKET_NAME, fname, pth, PUPIL_UPLOAD_FOLDER_S3)
+                table_userData.put_item(Item={'user-email': email, 'user-name': fname_txtfield+' '+lname_txtfield,
+                                              'user-eyecolor': eye_color_val, 's3-filepath': 's3://impact-benten/' + PUPIL_UPLOAD_FOLDER_S3 + fname})
+            # Processing Segment:
+            os.system('python IMPACT_PUPIL_v1_3.py ' + str(fname) + ' Color')
+            token = os.path.exists('./static/Pupil_Output_Images/' + 'PUAL_' + str(os.path.splitext(fname)[0]) + '.csv')
+            if token:
+                res_img_fold = os.path.join('static', 'Pupil_Output_Images')
+                res_vid_fold = os.path.join('static', 'Pupil_Output_Videos')
+                res_img_fold_S3 = 'Pupil_Data/Results-Output/'
+                app.config['PUPIL_OUTPUT_FOLDER'] = res_img_fold
+                app.config['PUPIL_VID_OUT_FOLDER'] = res_vid_fold
+                img_name = str(os.path.splitext(fname)[0])
+                file = 'PUAL_' + img_name + '.csv'
+                csv_file = os.path.join(app.config['PUPIL_OUTPUT_FOLDER'], file)
+                df = pd.read_csv(csv_file)
+                PUAL_SCORE = round(df['PUAL_Score'][0], 3)
+                f = img_name + '_Dilation_Plot.png'
+                vid_file = os.path.join(app.config['PUPIL_VID_OUT_FOLDER'], img_name + '.mp4')
+                pic = os.path.join(app.config['PUPIL_OUTPUT_FOLDER'], f)
+                if hard_login is False:
+                    Upload_2_S3(BUCKET_NAME, f, pic, res_img_fold_S3)
+                    Upload_2_S3(BUCKET_NAME, img_name + '.mp4', vid_file, res_img_fold_S3)
+                    Upload_2_S3(BUCKET_NAME, file, csv_file, res_img_fold_S3)
+                print('\n*************** DONE ****************\n')
+                return render_template('Pupil_Success.html', image_file=pic, video_file=vid_file, score=PUAL_SCORE)
+            else:
+                print('\n*************** TOKEN : BAD ****************\n')
+                return render_template('PupilPain_Form.html')
     else:
         return render_template('Login.html')
 
@@ -156,62 +175,25 @@ def UploadPupil():
 @app.route('/UploadFacial', methods=['GET', 'POST'])
 def UploadFacial():
     global face_fname
-    global user_email
-    global user_logged_in
-    if request.method == 'POST' and (user_logged_in is True or hard_login is True):
-        fname_txtfield = request.form['firstname']
-        lname_txtfield = request.form['lastname']
-        option_val = request.form['radio']
-        f = request.files['file']
-        FACIAL_UPLOAD_FOLDER_S3 = 'Facial_Data/Uploads-VideoFiles/'
-        FACIAL_UPLOAD_FOLDER = './static/Face_Input_Videos/'
-        face_fname = fname_txtfield + lname_txtfield + '.avi'
-        f.filename = face_fname
-        # write_to_txt(fname_txtfield, lname_txtfield, option_val, face_fname, 2, video_type2)
-        app.config['FACIAL_UPLOAD_FOLDER'] = FACIAL_UPLOAD_FOLDER
-        pth = os.path.join(app.config['FACIAL_UPLOAD_FOLDER'], face_fname)
-        f.save(os.path.join(app.config['FACIAL_UPLOAD_FOLDER'], face_fname))
-        if hard_login is False:
-            Upload_2_S3(BUCKET_NAME, face_fname, pth, FACIAL_UPLOAD_FOLDER_S3)
-            table_userData.put_item(Item={'user-email': user_email, 'user-name': fname_txtfield + ' ' + lname_txtfield,
-                                      'user-videotype': option_val, 's3-filepath': 's3://impact-benten/'+FACIAL_UPLOAD_FOLDER_S3+face_fname})
-        # print("File Uploaded: " + f.filename)
-        return render_template('Calculate_Facial.html')
-    else:
-        return render_template('Login.html')
-
-
-@app.route('/Process_Pupil')
-def Process_Pupil():
-    global user_logged_in
-    global hard_login
-    global fname
-    if user_logged_in is True or hard_login is True:
-        os.system('python IMPACT_PUPIL_v1_3.py ' + str(fname) + ' Color')
-        token = os.path.exists('./static/Pupil_Output_Images/' + 'PUAL_' + str(os.path.splitext(fname)[0]) + '.csv')
-        if token:
-            res_img_fold = os.path.join('static', 'Pupil_Output_Images')
-            res_vid_fold = os.path.join('static', 'Pupil_Output_Videos')
-            res_img_fold_S3 = 'Pupil_Data/Results-Output/'
-            app.config['PUPIL_OUTPUT_FOLDER'] = res_img_fold
-            app.config['PUPIL_VID_OUT_FOLDER'] = res_vid_fold
-            img_name = str(os.path.splitext(fname)[0])
-            file = 'PUAL_' + img_name + '.csv'
-            csv_file = os.path.join(app.config['PUPIL_OUTPUT_FOLDER'], file)
-            df = pd.read_csv(csv_file)
-            PUAL_SCORE = round(df['PUAL_Score'][0], 3)
-            f = img_name + '_Dilation_Plot.png'
-            vid_file = os.path.join(app.config['PUPIL_VID_OUT_FOLDER'], img_name + '.mp4')
-            pic = os.path.join(app.config['PUPIL_OUTPUT_FOLDER'], f)
+    if 'user_email' in session or hard_login is True:
+        if request.method == 'POST':
+            email = session['user-email']
+            fname_txtfield = request.form['firstname']
+            lname_txtfield = request.form['lastname']
+            option_val = request.form['radio']
+            f = request.files['file']
+            FACIAL_UPLOAD_FOLDER_S3 = 'Facial_Data/Uploads-VideoFiles/'
+            FACIAL_UPLOAD_FOLDER = './static/Face_Input_Videos/'
+            face_fname = fname_txtfield + lname_txtfield + '.avi'
+            f.filename = face_fname
+            app.config['FACIAL_UPLOAD_FOLDER'] = FACIAL_UPLOAD_FOLDER
+            pth = os.path.join(app.config['FACIAL_UPLOAD_FOLDER'], face_fname)
+            f.save(os.path.join(app.config['FACIAL_UPLOAD_FOLDER'], face_fname))
             if hard_login is False:
-                Upload_2_S3(BUCKET_NAME, f, pic, res_img_fold_S3)
-                Upload_2_S3(BUCKET_NAME, img_name+'.mp4', vid_file, res_img_fold_S3)
-                Upload_2_S3(BUCKET_NAME, file, csv_file, res_img_fold_S3)
-            print('\n*************** DONE ****************\n')
-            return render_template('Pupil_Success.html', image_file=pic, video_file=vid_file, score=PUAL_SCORE)
-        else:
-            print('\n*************** TOKEN : BAD ****************\n')
-            return render_template('PupilPain_Form.html')
+                Upload_2_S3(BUCKET_NAME, face_fname, pth, FACIAL_UPLOAD_FOLDER_S3)
+                table_userData.put_item(Item={'user-email': email, 'user-name': fname_txtfield + ' ' + lname_txtfield,
+                                              'user-video-type': option_val, 's3-filepath': 's3://impact-benten/' + FACIAL_UPLOAD_FOLDER_S3 + face_fname})
+            return render_template('Calculate_Facial.html')
     else:
         return render_template('Login.html')
 
@@ -251,9 +233,8 @@ def pupil_api(filename):
 
 @app.route('/Process_Facial')
 def Process_Facial():
-    global user_logged_in
     global hard_login
-    if user_logged_in is True or hard_login is True:
+    if 'user_email' in session or hard_login is True:
         os.system('python IMPACT_FACIAL_v1.0.py ' + str(face_fname) + ' Color')
         res_img_fold = os.path.join('static', 'Facial_Output_Images')
         app.config['FACIAL_OUTPUT_FOLDER'] = res_img_fold
@@ -267,7 +248,8 @@ def Process_Facial():
         mean_pain_score = round(sum(pain_score) / len(pain_score), 2)
         f = img_name + '_Pain_Plot.png'
         pic = os.path.join(app.config['FACIAL_OUTPUT_FOLDER'], f)
-        return render_template('Facial_Success.html', image_file=pic, max_pain=max_pain_score, mean_pain=mean_pain_score, min_pain=min_pain_score)
+        return render_template('Facial_Success.html', image_file=pic, max_pain=max_pain_score,
+                               mean_pain=mean_pain_score, min_pain=min_pain_score)
     else:
         return render_template('Login.html')
 
