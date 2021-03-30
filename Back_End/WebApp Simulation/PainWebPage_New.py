@@ -8,10 +8,11 @@
 # Web Simulation (Alpha Version) for Pupil and Facial Pain Analysis.
 
 # UPDATES:
+# Login/Registration Changed from DynamoDB to RDS-MySQL.
+# User Data stored in DynamoDB.
 # User Session Integrated.
 # Redundant Code removal.
 # PUAL Score Integrated
-# Login and Registration using DynamoDB.
 # API for IMPACT-Pupil.
 # AWS S3 Bucket securely connected; Video+Output saved to S3.
 # Bugs fixed for integration to Web scripts.
@@ -22,26 +23,40 @@
 # Removed Pupil From Facial Detection.
 
 ##############################################################
+import os
+import yaml
+import boto3
+import pymysql
 from flask import *
 import pandas as pd
 from boto3.dynamodb.conditions import Key
-import boto3
-import os
 ##############################################################
-# S3 Bucket:
+# --------------------- AMAZON-S3 -------------------------- #
 BUCKET_NAME = 'impact-benten'
-# DYNAMODB:
+key_db = yaml.load(open('Keys.yaml'))
+##############################################################
+# ------------------- AMAZON-RDS-MySQL --------------------- #
+db = yaml.load(open('db.yaml'))
+conn = pymysql.connect(host=db['mysql_host'],
+                       user=db['mysql_user'],
+                       password=db['mysql_password'],
+                       database=db['mysql_db'],
+                       port=int(db['mysql_port']))
+##############################################################
+# -------------------- AMAZON-DynamoDB --------------------- #
 DB = boto3.resource('dynamodb', region_name="us-east-1")
 table_users = DB.Table('impact-users')
 table_userData = DB.Table('impact-user-data')
 ##############################################################
+# ------------------- FLASK-APP CONFIG --------------------- #
+app = Flask(__name__)
+app.config.from_mapping(SECRET_KEY='dev')
+##############################################################
+# ------------------- VARIABLE CONFIGS --------------------- #
 option_val = ""
 hard_login = False
 fname = ""
 face_fname = ""
-
-app = Flask(__name__)
-app.config.from_mapping(SECRET_KEY='dev')
 ##############################################################
 
 
@@ -55,10 +70,9 @@ def Login():
     elif request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
-        response = table_users.query(KeyConditionExpression=Key('user-email').eq(email))
-        item = response['Items']
-        if item and password == item[0]['user-password']:
-            # user_logged_in = True
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM impact_users WHERE user_email = % s AND user_password = % s;', (email, password))
+        if cursor.fetchone() is not None:
             session['user_email'] = email
             return render_template('HomePage.html')
         else:
@@ -76,17 +90,20 @@ def Register():
         user_name = request.form['username']
         email = request.form['email']
         password = request.form['password']
-        table_users.put_item(Item={'user-email': email, 'user-name': user_name,  'user-password': password})
+        cur = conn.cursor()
+        cur.execute("INSERT INTO impact_users(user_name, user_email, user_password) VALUES (%s, %s, %s)", (user_name, email, password))
+        conn.commit()
+        cur.close()
         return render_template('Login.html')
     return render_template('Register.html')
 
 
 @app.route('/HomePage')
 def HomePage():
-    session.pop('user_email', None)
     if 'user_email' in session or hard_login is True:
         return render_template('HomePage.html')
     else:
+        session.pop('user_email', None)
         return render_template('Login.html')
 
 
@@ -177,6 +194,7 @@ def UploadFacial():
     global face_fname
     if 'user_email' in session or hard_login is True:
         if request.method == 'POST':
+            # Uploading Segment:
             email = session['user-email']
             fname_txtfield = request.form['firstname']
             lname_txtfield = request.form['lastname']
@@ -193,7 +211,22 @@ def UploadFacial():
                 Upload_2_S3(BUCKET_NAME, face_fname, pth, FACIAL_UPLOAD_FOLDER_S3)
                 table_userData.put_item(Item={'user-email': email, 'user-name': fname_txtfield + ' ' + lname_txtfield,
                                               'user-video-type': option_val, 's3-filepath': 's3://impact-benten/' + FACIAL_UPLOAD_FOLDER_S3 + face_fname})
-            return render_template('Calculate_Facial.html')
+            # Processing Segment:
+            os.system('python IMPACT_FACIAL_v1.0.py ' + str(face_fname) + ' Color')
+            res_img_fold = os.path.join('static', 'Facial_Output_Images')
+            app.config['FACIAL_OUTPUT_FOLDER'] = res_img_fold
+            img_name = str(os.path.splitext(face_fname)[0])
+            file = img_name + '_PSPI_AUs.csv'
+            csv_file = os.path.join(app.config['FACIAL_OUTPUT_FOLDER'], file)
+            df = pd.read_csv(csv_file)
+            pain_score = df['sum_AU_r']
+            max_pain_score = round(pain_score.max(), 2)
+            min_pain_score = round(pain_score.min(), 2)
+            mean_pain_score = round(sum(pain_score) / len(pain_score), 2)
+            f = img_name + '_Pain_Plot.png'
+            pic = os.path.join(app.config['FACIAL_OUTPUT_FOLDER'], f)
+            return render_template('Facial_Success.html', image_file=pic, max_pain=max_pain_score,
+                                   mean_pain=mean_pain_score, min_pain=min_pain_score)
     else:
         return render_template('Login.html')
 
@@ -205,8 +238,9 @@ def pupil_api(filename):
     PUPIL_UPLOAD_FOLDER = './static/Pupil_Input_Videos/'
     Download_from_S3(BUCKET_NAME, download_folder_S3+filename, PUPIL_UPLOAD_FOLDER+filename)
     os.system('python IMPACT_PUPIL_v1_3.py ' + str(filename) + ' Color')
-    token = os.path.exists('./static/Pupil_Output_Images/' + 'PUAL_' + str(os.path.splitext(fname)[0]) + '.csv')
+    token = os.path.exists('./static/Pupil_Output_Images/' + 'PUAL_' + str(os.path.splitext(filename)[0]) + '.csv')
     if token:
+        print('\n*************** TOKEN : GOOD ****************\n')
         res_img_fold = os.path.join('static', 'Pupil_Output_Images')
         res_vid_fold = os.path.join('static', 'Pupil_Output_Videos')
         app.config['PUPIL_OUTPUT_FOLDER'] = res_img_fold
@@ -224,34 +258,12 @@ def pupil_api(filename):
         Upload_2_S3(BUCKET_NAME, f, pic, upload_folder_S3)
         Upload_2_S3(BUCKET_NAME, img_name + '.mp4', vid_file, upload_folder_S3)
         Upload_2_S3(BUCKET_NAME, file, csv_file, upload_folder_S3)
-        print('\n*************** DONE ****************\n')
-        return PUAL_SCORE
+        print('PUAL : ', PUAL_SCORE)
+        print('\n*************** PROCESS DONE ****************\n')
+        return str(PUAL_SCORE)
     else:
         print('\n*************** TOKEN : BAD ****************\n')
         return "Retake"
-
-
-@app.route('/Process_Facial')
-def Process_Facial():
-    global hard_login
-    if 'user_email' in session or hard_login is True:
-        os.system('python IMPACT_FACIAL_v1.0.py ' + str(face_fname) + ' Color')
-        res_img_fold = os.path.join('static', 'Facial_Output_Images')
-        app.config['FACIAL_OUTPUT_FOLDER'] = res_img_fold
-        img_name = str(os.path.splitext(face_fname)[0])
-        file = img_name + '_PSPI_AUs.csv'
-        csv_file = os.path.join(app.config['FACIAL_OUTPUT_FOLDER'], file)
-        df = pd.read_csv(csv_file)
-        pain_score = df['sum_AU_r']
-        max_pain_score = round(pain_score.max(), 2)
-        min_pain_score = round(pain_score.min(), 2)
-        mean_pain_score = round(sum(pain_score) / len(pain_score), 2)
-        f = img_name + '_Pain_Plot.png'
-        pic = os.path.join(app.config['FACIAL_OUTPUT_FOLDER'], f)
-        return render_template('Facial_Success.html', image_file=pic, max_pain=max_pain_score,
-                               mean_pain=mean_pain_score, min_pain=min_pain_score)
-    else:
-        return render_template('Login.html')
 
 
 def write_to_txt(fnametxt, lnametxt, v, fln, flag, vid_type):
@@ -267,8 +279,8 @@ def write_to_txt(fnametxt, lnametxt, v, fln, flag, vid_type):
 
 
 def Upload_2_S3(buck, f, fp, s3_to_path):
-    # print('> Uploading : ', f, ' ; ', s3_to_path)
     s3 = boto3.resource('s3')
+    # s3 = boto3.resource('s3', aws_access_key_id=key_db['Access Key ID'], aws_secret_access_key=key_db['Secret Access Key'])
     bucket = s3.Bucket(buck)
     bucket.upload_file(Filename=fp, Key=s3_to_path+str(f), ExtraArgs={'ACL': 'public-read'})
     return 'Upload Done'
@@ -276,6 +288,7 @@ def Upload_2_S3(buck, f, fp, s3_to_path):
 
 def Download_from_S3(buck, KEY, Local_fp):
     s3 = boto3.resource('s3')
+    # s3 = boto3.resource('s3', aws_access_key_id=key_db['Access Key ID'], aws_secret_access_key=key_db['Secret Access Key'])
     s3.Bucket(buck).download_file(KEY, Local_fp)
     return 'Download Done'
 
