@@ -8,7 +8,8 @@ import {
     Platform,
     ScrollView,
     Image,
-    PixelRatio
+    PixelRatio,
+    NativeModules
 } from 'react-native';
 import Spinner from 'react-native-loading-spinner-overlay';
 import { RNCamera } from 'react-native-camera';
@@ -35,6 +36,7 @@ import { ACCESS_ID, ACCESS_KEY, BUCKET_FOLDER_FOR_PUPIL, BUCKET_FOLDER_FOR_PUPIL
 import { initiateVideoProcessingAPI } from '../../api/painAssessment';
 
 const { width, height } = Dimensions.get("window");
+const { VideoCropper } = NativeModules
 
 let camera = null;
 let intervalId = null;
@@ -193,42 +195,20 @@ const PupillaryDilationScreen = ({ navigation }) => {
                 const videoType = data.uri.substring(data.uri.lastIndexOf(".") + 1, data.uri.length);
                 if (videoType.toLowerCase() !== "mp4") {
                     let convertedVideoPath = `${data.uri.substring(0, data.uri.lastIndexOf("."))}_conv.mp4`
-                    RNFFmpeg.execute(`-i ${data.uri} -qscale 0 ${convertedVideoPath}`).then(async res => {
-                        console.log("RNFFmpeg Conversion Success")
-                        cropVideo(convertedVideoPath)
-                    }).catch(err => {
-                        console.log("RNFFmpeg Conversion Error")
-                        cropVideo(data.uri)
-                    })
-                } else {
-                    cropVideo(data.uri)
-                }
-
-                /* ProcessingManager.crop(data.uri, options).then( async croppedData => {
-                    console.log("croppedData: ", croppedData)
-
-                    let resultPath = `${croppedData.substring(0, croppedData.lastIndexOf("."))}_2.mp4`
-                    RNFFmpeg.execute(`-i ${croppedData} -filter:v fps=30 ${resultPath}`).then(async res => {
-                        setShowSpinner(false);
-                        setSpinnerMessage("");
-                        setIsRecording(false);
-                        setVideoURL(resultPath);
-
-                        console.log("RNFFmpeg success", res);
-                    }).catch(err => {
-                        console.log("RNFFmpeg err", err);
-                        setShowSpinner(false);
-                        setSpinnerMessage("");
-                        setIsRecording(false);
-                        setVideoURL(croppedData);
-                    })
-                }).catch(error => {
-                    console.log('error', error);
-                    setShowSpinner(false);
-                    setSpinnerMessage("");
-                    setIsRecording(false);
-                    setVideoURL(data.uri);
-                }) */
+                    if(Platform.OS === 'ios'){
+                       cropVideo(data.uri, true)
+                    } else {
+                        RNFFmpeg.execute(`-i ${data.uri} -qscale 0 ${convertedVideoPath}`).then(async res => {
+                            console.log("RNFFmpeg Conversion Success")
+                            cropVideo(convertedVideoPath)
+                        }).catch(err => {
+                            console.log("RNFFmpeg Conversion Error")
+                            cropVideo(data.uri)
+                        })
+                    }
+                }  else {
+                cropVideo(data.uri)
+            }
             } catch (error) {
                 console.log('error', error);
                 setShowSpinner(false);
@@ -241,7 +221,7 @@ const PupillaryDilationScreen = ({ navigation }) => {
         })
     }
 
-    const cropVideo = async (videoURI) => {
+    const cropVideo = async (videoURI, convert) => {
         const deviceModel = await DeviceInfo.getModel();
 
         let screenWidth = 1080;
@@ -259,18 +239,71 @@ const PupillaryDilationScreen = ({ navigation }) => {
 
         try {
             let croppedResultPath = `${videoURI.substring(0, videoURI.lastIndexOf("."))}_crop.mp4`;
-            // RNFFmpeg.execute(`-i ${videoURI} -filter:v "crop=${options.cropWidth}:${options.cropHeight}:${options.cropOffsetX}:${options.cropOffsetY}" ${croppedResultPath}`).then( async result => {
-            RNFFmpeg.execute(`-i ${videoURI} -vf "crop=${options.cropWidth}:${options.cropHeight}:${options.cropOffsetX}:${options.cropOffsetY}" -c:v libx264 -crf 0 -c:a copy ${croppedResultPath}`).then( async result => {
-                
+            const startTime = new Date()
+            if(Platform.OS === 'ios'){
+                console.log('vedio cropper', VideoCropper)
+                VideoCropper.crop(videoURI, options, (error, croppedData) => {
+                    if(!error){
+                        const endDate = new Date()
+                        const time = `${(endDate.getMinutes() - startTime.getMinutes())} : ${endDate.getSeconds() - startTime.getSeconds()}`
+                        console.log("RNFFmpeg Crop Success", time);
+                        let resultPath = `${croppedData.substring(0, croppedData.lastIndexOf("."))}_2.mp4`
+                        RNFFmpeg.execute(`-i ${croppedData} -filter:v fps=30 ${resultPath}`).then(async res => {
 
-                console.log("RNFFmpeg Crop Success");
+                            const filename = `VID_${Date.now().toString()}`;
+                            if(convert) {
+                                MovToMp4.convertMovToMp4(resultPath, filename)
+                                    .then((results) => {
+                                        setShowSpinner(false);
+                                        setSpinnerMessage("");
+                                        setIsRecording(false);
+                                        setVideoURL(results);
+                                    })
+                                    .catch((error) => {
+                                        console.log(error)
+                                        setShowSpinner(false);
+                                        setSpinnerMessage("");
+                                        setIsRecording(false);
+                                        setVideoURL(resultPath);
+                                    })
+                            } else {
+                                setShowSpinner(false);
+                                setSpinnerMessage("");
+                                setIsRecording(false);
+                                setVideoURL(resultPath);
+                            }
+
+                            console.log("RNFFmpeg success", res);
+                        }).catch(err => {
+                            console.log("RNFFmpeg err", err);
+                            setShowSpinner(false);
+                            setSpinnerMessage("");
+                            setIsRecording(false);
+                            setVideoURL(croppedData);
+                        })
+                    } else {
+                        console.log('error', error);
+                        setShowSpinner(false);
+                        setSpinnerMessage("");
+                        setIsRecording(false);
+                        setVideoURL(data.uri);
+                    }
+                })
+                return
+            }
+            // RNFFmpeg.execute(`-i ${videoURI} -filter:v "crop=${options.cropWidth}:${options.cropHeight}:${options.cropOffsetX}:${options.cropOffsetY}" ${croppedResultPath}`).then( async result => {
+            RNFFmpeg.execute(`-y -i ${videoURI} -vf "crop=${options.cropWidth}:${options.cropHeight}:${options.cropOffsetX}:${options.cropOffsetY}" -preset ultrafast -c:a copy -strict -2 ${croppedResultPath}`).then( async result => {
+                
+                const endDate = new Date()
+                const time = `${(endDate.getMinutes() - startTime.getMinutes())} : ${endDate.getSeconds() - startTime.getSeconds()}`
+                console.log("RNFFmpeg Crop Success", time);
 
                 setSpinnerMessage("Converting FrameRate...");
 
                 let resultPath = `${croppedResultPath.substring(0, croppedResultPath.lastIndexOf("."))}_2.mp4`
                 // RNFFmpeg.execute(`-i ${croppedResultPath} -filter:v fps=${fps} ${resultPath}`).then(async res => {
                 RNFFmpeg.execute(`-i ${croppedResultPath} -filter:v fps=${fps} ${resultPath}`).then(async res => {
-                    console.log("RNFFmpeg fps success");
+                    console.log("RNFFmpeg fps success", resultPath, time);
                     setShowSpinner(false);
                     setSpinnerMessage("");
                     setIsRecording(false);

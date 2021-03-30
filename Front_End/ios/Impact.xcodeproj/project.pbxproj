@@ -28,6 +28,8 @@
 		771B817D12934159B48D7A21 /* Lato-Thin.ttf in Resources */ = {isa = PBXBuildFile; fileRef = EC23E213E9344173BE5A8DB7 /* Lato-Thin.ttf */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
 		8BC9D24E36EA48BF96BE6104 /* Lato-LightItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = CB9A06D269EF4AC3B61FD563 /* Lato-LightItalic.ttf */; };
+		8C9AD5C72613333F00E0A200 /* VideoCropper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C9AD5C62613333F00E0A200 /* VideoCropper.swift */; };
+		8C9AD6282613385E00E0A200 /* VideoCropperBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = 8C9AD6272613385E00E0A200 /* VideoCropperBridge.m */; };
 		9DFC357ECAEF4BEDB4CEE5C1 /* Lato-BlackItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 62ACDCF8C37A494EA37A76E0 /* Lato-BlackItalic.ttf */; };
 		B51E16E33768D3E7FC8A253D /* libPods-Impact-tvOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0C66B8815025E9E0FEE5AA31 /* libPods-Impact-tvOS.a */; };
 		C83AC506A1F9425A8E181A0A /* Lato-BoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 244BA015207B496E83461C46 /* Lato-BoldItalic.ttf */; };
@@ -108,6 +110,9 @@
 		8571DDF923B44FEF96B9B36B /* Entypo.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Entypo.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Entypo.ttf"; sourceTree = "<group>"; };
 		85FB6D7140D645D5837EB846 /* FontAwesome5_Solid.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = FontAwesome5_Solid.ttf; path = "../node_modules/react-native-vector-icons/Fonts/FontAwesome5_Solid.ttf"; sourceTree = "<group>"; };
 		8777C0876FCE864F06C803C1 /* libPods-Impact-ImpactTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Impact-ImpactTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		8C9AD5C62613333F00E0A200 /* VideoCropper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoCropper.swift; sourceTree = "<group>"; };
+		8C9AD6272613385E00E0A200 /* VideoCropperBridge.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = VideoCropperBridge.m; sourceTree = "<group>"; };
+		8C9AD6E32613654900E0A200 /* Impact-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "Impact-Bridging-Header.h"; path = "Impact/Impact-Bridging-Header.h"; sourceTree = "<group>"; };
 		96F0158C2FC947DDACE23F32 /* Lato-ThinItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Lato-ThinItalic.ttf"; path = "../src/assets/fonts/Lato-ThinItalic.ttf"; sourceTree = "<group>"; };
 		987CA99E4CBA43B59D7226C3 /* FontAwesome.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = FontAwesome.ttf; path = "../node_modules/react-native-vector-icons/Fonts/FontAwesome.ttf"; sourceTree = "<group>"; };
 		AE791BEF19044D54A75E1323 /* MaterialCommunityIcons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = MaterialCommunityIcons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/MaterialCommunityIcons.ttf"; sourceTree = "<group>"; };
@@ -220,12 +225,15 @@
 			children = (
 				1D5B30D625BAE1AF00DBDBDE /* GoogleService-Info.plist */,
 				008F07F21AC5B25A0029DE68 /* main.jsbundle */,
+				8C9AD6E32613654900E0A200 /* Impact-Bridging-Header.h */,
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
 				13B07FB01A68108700A75B9A /* AppDelegate.m */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
 				13B07FB71A68108700A75B9A /* main.m */,
+				8C9AD5C62613333F00E0A200 /* VideoCropper.swift */,
+				8C9AD6272613385E00E0A200 /* VideoCropperBridge.m */,
 			);
 			name = Impact;
 			sourceTree = "<group>";
@@ -755,6 +763,8 @@
 			files = (
 				13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
+				8C9AD6282613385E00E0A200 /* VideoCropperBridge.m in Sources */,
+				8C9AD5C72613333F00E0A200 /* VideoCropper.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -795,6 +805,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 55551B5F01CA925055D639DE /* Pods-Impact-ImpactTests.debug.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
@@ -818,6 +829,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 361A135641719EBDE59EC2E2 /* Pods-Impact-ImpactTests.release.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COPY_PHASE_STRIP = NO;
 				INFOPLIST_FILE = ImpactTests/Info.plist;

@@ -5,7 +5,7 @@ platform :ios, '11.0'
 
 target 'Impact' do
   
-  pod 'react-native-ffmpeg/https-gpl', :podspec => '../node_modules/react-native-ffmpeg/react-native-ffmpeg.podspec'
+  pod 'react-native-ffmpeg/min-gpl', :podspec => '../node_modules/react-native-ffmpeg/react-native-ffmpeg.podspec'
 
   config = use_native_modules!
 
