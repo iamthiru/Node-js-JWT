@@ -146,7 +146,7 @@ const PupillaryDilationScreen = ({ navigation }) => {
             cropVideo(data.uri, (croppedVideoPath) => {
                 setSpinnerMessage("Converting FrameRate...");
                 let resultPath = `${croppedVideoPath.substring(0, croppedVideoPath.lastIndexOf("."))}_2.mp4`;
-                RNFFmpeg.execute(`-i ${croppedVideoPath} -filter:v fps=${fps} ${resultPath}`).then(async res => {
+                RNFFmpeg.execute(`-i ${croppedVideoPath} -filter:v fps=${fps} -preset ultrafast ${resultPath}`).then(async res => {
                     console.log("RRFFMPEG - FPS Conversion Success", resultPath)
                     if(Platform.OS === "ios") {
                         /* const filename = `${resultPath.substring(0, resultPath.lastIndexOf("."))}_3.mp4`;
@@ -217,7 +217,7 @@ const PupillaryDilationScreen = ({ navigation }) => {
                         successCallback(croppedVideoPath)
                     } else {
                         console.log("VideoCropper - Crop Error", error)
-                        errorCallback({ originalPath: data.uri });
+                        errorCallback({ originalPath: videoURI });
                     }
                 })
                 return
@@ -234,10 +234,7 @@ const PupillaryDilationScreen = ({ navigation }) => {
             }
         } catch (error) {
             console.log('error', error);
-            setShowSpinner(false);
-            setSpinnerMessage("");
-            setIsRecording(false);
-            setVideoURL(videoURI);
+            errorCallback({ originalPath: videoURI });
         }
     }
 

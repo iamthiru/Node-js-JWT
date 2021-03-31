@@ -6,9 +6,14 @@ import {
     Alert,
     Dimensions,
     PermissionsAndroid,
-    Platform
+    Platform,
+    NativeModules
 } from 'react-native';
 import { RNCamera } from 'react-native-camera';
+import Slider from '@react-native-community/slider';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import Fontisto from 'react-native-vector-icons/Fontisto';
+import Spinner from 'react-native-loading-spinner-overlay';
 // import { ProcessingManager } from 'react-native-video-processing';
 import { RNFFmpeg } from 'react-native-ffmpeg';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -22,6 +27,7 @@ import EyeBoundary from './EyeBoundary';
 import { COLORS } from '../../constants/colors';
 
 const { width, height } = Dimensions.get("window");
+const { VideoCropper } = NativeModules
 
 let camera = null;
 let intervalId = null;
@@ -36,6 +42,12 @@ const CAPTURE_MODE = {
     MANUAL: "manual"
 }
 
+const SETTINGS = {
+    ZOOM: "zoom",
+    EXPOSURE: "exposure",
+    FOCUS_DEPTH: "focusDepth"
+}
+
 const FacialExpressionScreen = ({ navigation }) => {
 
     const [eyeBorderType, setEyeBorderType] = useState(EYE_BORDER_TYPE.OVAL)
@@ -44,6 +56,7 @@ const FacialExpressionScreen = ({ navigation }) => {
     const [processing, setProcessing] = useState(false);
     const [enableRecording, setEnableRecording] = useState(false);
     const [captureMode, setCaptureMode] = useState(CAPTURE_MODE.AUTO);
+    const [selectedSetting, setSelectedSetting] = useState("");
     const [toastText, setToastText] = useState("");
     const [box, setBox] = useState({});
     const [eyePosition, setEyePosition] = useState({});
@@ -51,14 +64,26 @@ const FacialExpressionScreen = ({ navigation }) => {
     const [cameraType, setCameraType] = useState(RNCamera.Constants.Type.back);
     const [isRecording, setIsRecording] = useState(false);
     const [videoURL, setVideoURL] = useState("");
+    const [fps, setFps] = useState(30);
+    const [exposure, setExposure] = useState(0);
+    const [zoom, setZoom] = useState(Platform.OS === "ios" ? 0.1 : 0.175)
+    const [focusDepth, setFocusDepth] = useState(0.3)
+    const [spinnerState, setShowSpinner] = useState({
+        open: false,
+        message: ''
+    });
 
 
     useEffect(() => {
         setTimeout(() => checkStoragePermission(), 3000);
     }, [])
 
+    const toggleSettings = (setting) => {
+        setSelectedSetting(setting === selectedSetting ? "" : setting);
+    }
+
     const checkStoragePermission = async () => {
-        if(Platform.OS !== "android") {
+        if (Platform.OS !== "android") {
             return;
         }
 
@@ -174,46 +199,74 @@ const FacialExpressionScreen = ({ navigation }) => {
 
         camera.recordAsync({ mute: true, quality: RNCamera.Constants.VideoQuality['1080p'] }).then((data) => {
             console.log("videoData: ", data);
-            /* const paddingValue = 1080 * (15/width);
-            let options = {
-                cropWidth: parseInt(1080 - paddingValue),
-                cropHeight: parseInt(1080 + (1080 * 0.25)),
-                cropOffsetX: parseInt((1080 - (1080 - paddingValue)) / 2),
-                cropOffsetY: parseInt((((1080 + (1080 * 0.25)) - (1080 - paddingValue)) / 2) - (1080 * (10/width))),
-            }
-            if(Platform.OS === "ios") {
-                options.quality = "1920x1080"
-            }
-
-            ProcessingManager.crop(data.uri, options).then(croppedData => {
-                setIsRecording(false);
-                setVideoURL(croppedData);
-            }).catch(error => {
-                console.log('error', error);
-                setIsRecording(false);
-            }) */
-            // setVideoURL(data.uri);
-
-            const videoType = data.uri.substring(data.uri.lastIndexOf(".") + 1, data.uri.length);
-            if (videoType.toLowerCase() !== "mp4") {
-                let convertedVideoPath = `${data.uri.substring(0, data.uri.lastIndexOf("."))}_conv.mp4`
-                RNFFmpeg.execute(`-i ${data.uri} -qscale 0 ${convertedVideoPath}`).then(async res => {
-                    console.log("RNFFmpeg Conversion Success")
-                    cropVideo(convertedVideoPath)
+           
+            setShowSpinner({
+                open: true,
+                message: 'Cropping...'
+            })
+            cropVideo(data.uri, (croppedVideoPath) => {
+                setShowSpinner({
+                    open: true,
+                    message: 'Converting Frame Rate...'
+                }); 
+                let resultPath = `${croppedVideoPath.substring(0, croppedVideoPath.lastIndexOf("."))}_2.mp4`;
+                RNFFmpeg.execute(`-i ${croppedVideoPath} -filter:v fps=${fps} -preset ultrafast ${resultPath}`).then(async res => {
+                    console.log("RRFFMPEG - FPS Conversion Success", resultPath)
+                    if(Platform.OS === "ios") {
+                        /* const filename = `${resultPath.substring(0, resultPath.lastIndexOf("."))}_3.mp4`;
+                        MovToMp4.convertMovToMp4(resultPath, filename)
+                            .then((results) => {
+                                console.log("MovToMp4 Success", results)
+                                setShowSpinner(false);
+                                setSpinnerMessage("");
+                                setIsRecording(false);
+                                setVideoURL(results);
+                            })
+                            .catch((error) => {
+                                console.log("MovToMp4 Error", error)
+                                setShowSpinner(false);
+                                setSpinnerMessage("");
+                                setIsRecording(false);
+                                setVideoURL(resultPath);
+                            }) */
+                        setShowSpinner({
+                            open: false,
+                            message: ''
+                        });
+                        setIsRecording(false);
+                        setVideoURL(resultPath);
+                    } else {
+                        setShowSpinner({
+                            open: false,
+                            message: ''
+                        });
+                        setIsRecording(false);
+                        setVideoURL(resultPath);
+                    }
                 }).catch(err => {
-                    console.log("RNFFmpeg Conversion Error")
-                    cropVideo(data.uri)
+                    console.log("RRFFMPEG - FPS Conversion Error", err)
+                    setShowSpinner({
+                        open: false,
+                        message: ''
+                    });
+                    setIsRecording(false);
+                    setVideoURL(croppedVideoPath);
                 })
-            } else {
-                cropVideo(data.uri)
-            }
+            }, (error) => {
+                setShowSpinner({
+                    open: false,
+                    message: ''
+                });
+                setIsRecording(false);
+                setVideoURL(error.originalPath);
+            });
 
         }).catch(err => {
             setIsRecording(false);
         })
     }
 
-    const cropVideo = async (videoURI) => {
+    const cropVideo = async (videoURI, successCallback, errorCallback) => {
         const paddingValue = 1080 * (15 / width);
         let options = {
             cropWidth: parseInt(1080 - paddingValue),
@@ -225,14 +278,33 @@ const FacialExpressionScreen = ({ navigation }) => {
             options.quality = "1920x1080"
         }
 
-        let croppedResultPath = `${videoURI.substring(0, videoURI.lastIndexOf("."))}_crop.mp4`;
-        RNFFmpeg.execute(`-i ${videoURI} -filter:v "crop=${options.cropWidth}:${options.cropHeight}:${options.cropOffsetX}:${options.cropOffsetY}" ${croppedResultPath}`).then(croppedData => {
-            setIsRecording(false);
-            setVideoURL(croppedData);
-        }).catch(error => {
+        try {
+            if(Platform.OS === 'ios') {
+                VideoCropper.crop(videoURI, options, (error, croppedVideoPath) => {
+                    if(!error){
+                        console.log("VideoCropper - Crop Success", croppedVideoPath)
+                        successCallback(croppedVideoPath)
+                    } else {
+                        console.log("VideoCropper - Crop Error", error)
+                        errorCallback({ originalPath: videoURI });
+                    }
+                })
+                return
+            } else {
+                let croppedResultPath = `${videoURI.substring(0, videoURI.lastIndexOf("."))}_crop.mp4`;
+                // RNFFmpeg.execute(`-i ${videoURI} -filter:v "crop=${options.cropWidth}:${options.cropHeight}:${options.cropOffsetX}:${options.cropOffsetY}" ${croppedResultPath}`).then( async result => {
+                RNFFmpeg.execute(`-y -i ${videoURI} -vf "crop=${options.cropWidth}:${options.cropHeight}:${options.cropOffsetX}:${options.cropOffsetY}" -preset ultrafast -c:a copy -strict -2 ${croppedResultPath}`).then(async result => {
+                    console.log("RRFFMPEG - Crop Success", croppedResultPath)
+                    successCallback(croppedResultPath);
+                }).catch(error => {
+                    console.log("RRFFMPEG - Crop Error", error)
+                    errorCallback({ originalPath: videoURI });
+                })
+            }
+        } catch (error) {
             console.log('error', error);
-            setIsRecording(false);
-        })
+            errorCallback({ originalPath: videoURI });
+        }
     }
 
     const handleStartRecording = () => {
@@ -262,18 +334,18 @@ const FacialExpressionScreen = ({ navigation }) => {
     }
 
     const onConfirmPress = () => {
-        if(Platform.OS === "ios") {
+        if (Platform.OS === "ios") {
             const filename = `VID_${Date.now().toString()}`;
             MovToMp4.convertMovToMp4(videoURL, filename)
-              .then(function (results) {
-                CameraRoll.save(results, { type: "video" }).then(res => {
-                    Alert.alert("Success", "Video has been saved successfully!");
-                    resetStates();
-                }).catch(err => {
-                    Alert.alert("Error", "Download Failed!");
-                    resetStates();
-                })
-            });
+                .then(function (results) {
+                    CameraRoll.save(results, { type: "video" }).then(res => {
+                        Alert.alert("Success", "Video has been saved successfully!");
+                        resetStates();
+                    }).catch(err => {
+                        Alert.alert("Error", "Download Failed!");
+                        resetStates();
+                    })
+                });
         } else {
             CameraRoll.save(videoURL, { type: "video" }).then(res => {
                 Alert.alert("Success", "Video has been saved successfully!");
@@ -326,6 +398,9 @@ const FacialExpressionScreen = ({ navigation }) => {
                         handleStopRecording();
 
                     }}
+                    zoom={zoom}
+                    focusDepth={focusDepth}
+                    exposure={exposure}
                 >
                     {(!isRecording && toastText !== "") && <View style={{ position: "absolute", top: 0, width: width, height: 30, backgroundColor: "rgba(9, 48, 76, 0.5)", alignItems: 'center', justifyContent: "center" }} pointerEvents="none">
                         <Text style={{ fontWeight: "700", fontSize: 16, color: COLORS.WHITE }}>{toastText}</Text>
@@ -343,12 +418,58 @@ const FacialExpressionScreen = ({ navigation }) => {
             </View>
 
             {!isRecording && <ScrollView style={{ width: width, height: height - ((width + (width * 0.25))), paddingHorizontal: 20 }}>
-                <View style={{ height: 38 }} />
+                <View style={{ flexDirection: "row", width: width - 40, justifyContent: 'flex-end', marginTop: 8 }}>
+                    <CustomTouchableOpacity style={{ alignItems: "center", justifyContent: "center", width: 30, height: 30, borderRadius: 5, backgroundColor: selectedSetting === SETTINGS.ZOOM ? COLORS.PRIMARY_MAIN : "rgba(0,0,0,0)", borderColor: COLORS.PRIMARY_MAIN, borderWidth: selectedSetting === SETTINGS.ZOOM ? 0 : 2, alignItems: "center", justifyContent: "center" }} onPress={() => toggleSettings(SETTINGS.ZOOM)}>
+                        <Fontisto name="zoom" size={18} color={selectedSetting === SETTINGS.ZOOM ? COLORS.WHITE : COLORS.GRAY_90} />
+                    </CustomTouchableOpacity>
+                    <CustomTouchableOpacity style={{ marginLeft: 15, alignItems: "center", justifyContent: "center", width: 30, height: 30, borderRadius: 5, backgroundColor: selectedSetting === SETTINGS.FOCUS_DEPTH ? COLORS.PRIMARY_MAIN : "rgba(0,0,0,0)", borderColor: COLORS.PRIMARY_MAIN, borderWidth: selectedSetting === SETTINGS.FOCUS_DEPTH ? 0 : 2, alignItems: "center", justifyContent: "center" }} onPress={() => toggleSettings(SETTINGS.FOCUS_DEPTH)}>
+                        <MaterialIcons name="center-focus-strong" size={18} color={selectedSetting === SETTINGS.FOCUS_DEPTH ? COLORS.WHITE : COLORS.GRAY_90} />
+                    </CustomTouchableOpacity>
+                    <CustomTouchableOpacity style={{ marginLeft: 15, alignItems: "center", justifyContent: "center", width: 30, height: 30, borderRadius: 5, backgroundColor: selectedSetting === SETTINGS.EXPOSURE ? COLORS.PRIMARY_MAIN : "rgba(0,0,0,0)", borderColor: COLORS.PRIMARY_MAIN, borderWidth: selectedSetting === SETTINGS.EXPOSURE ? 0 : 2, alignItems: "center", justifyContent: "center" }} onPress={() => toggleSettings(SETTINGS.EXPOSURE)}>
+                        <MaterialIcons name="brightness-5" size={18} color={selectedSetting === SETTINGS.EXPOSURE ? COLORS.WHITE : COLORS.GRAY_90} />
+                    </CustomTouchableOpacity>
+                </View>
+                <View style={{ height: 10 }} />
                 <Text style={{ marginBottom: 14, fontSize: 16, fontWeight: '400', color: COLORS.GRAY_90 }}>1. Find a well-lit environment.</Text>
                 <Text style={{ marginBottom: 14, fontSize: 16, fontWeight: '400', color: COLORS.GRAY_90 }}>2. Position the face with in the frame.</Text>
                 <Text style={{ marginBottom: 0, fontSize: 16, fontWeight: '400', color: COLORS.GRAY_90 }}>3. Get ready to not blink for 10 seconds.</Text>
 
-                <View style={{ width: width - 40, height: 30, marginTop: 20, marginBottom: 30 }}>
+                <View style={{ width: width - 40, height: 30, marginTop: 20, marginBottom: 10, flexDirection: "row", justifyContent: 'center', alignItems: 'center' }}>
+                    <Text style={{ fontWeight: "700", color: COLORS.GRAY_90 }}>{"FPS: "}</Text>
+                    <View
+                        style={{
+                            flexDirection: "row",
+                            backgroundColor: `${COLORS.PRIMARY_MAIN}50`,
+                            width: 160,
+                            justifyContent: "space-between",
+                            height: 30,
+                            alignItems: "center",
+                            borderRadius: 10,
+                            alignSelf: "center",
+                        }}
+                    >
+                        <CustomTouchableOpacity style={{ backgroundColor: (fps === 30 ? COLORS.PRIMARY_MAIN : `${COLORS.PRIMARY_MAIN}50`), width: 80, height: 30, borderTopLeftRadius: 10, borderBottomLeftRadius: 10, alignItems: "center", justifyContent: "center" }} onPress={() => setFps(30)}>
+                            <Text
+                                style={{
+                                    color: COLORS.WHITE,
+                                    fontWeight: "700",
+                                    fontSize: 17
+                                }}
+                            >{"30"}</Text>
+                        </CustomTouchableOpacity>
+                        <CustomTouchableOpacity style={{ backgroundColor: (fps === 60 ? COLORS.PRIMARY_MAIN : `${COLORS.PRIMARY_MAIN}50`), width: 80, height: 30, borderTopRightRadius: 10, borderBottomRightRadius: 10, alignItems: "center", justifyContent: "center" }} onPress={() => setFps(60)}>
+                            <Text
+                                style={{
+                                    color: COLORS.WHITE,
+                                    fontWeight: "700",
+                                    fontSize: 17
+                                }}
+                            >{"60"}</Text>
+                        </CustomTouchableOpacity>
+                    </View>
+                </View>
+
+                <View style={{ width: width - 40, height: 30, marginTop: 10, marginBottom: 30 }}>
                     <View
                         style={{
                             flexDirection: "row",
@@ -398,6 +519,45 @@ const FacialExpressionScreen = ({ navigation }) => {
                 <View style={{ height: 20 }} />
             </ScrollView>}
 
+            {(!isRecording && selectedSetting !== "") && <View style={{ flexDirection: "row", position: "absolute", top: width - 40, left: 20, width: width - 40, height: 50, alignItems: "center", justifyContent: "center", borderRadius: 10, backgroundColor: `${COLORS.WHITE}70` }}>
+                {selectedSetting === SETTINGS.EXPOSURE && <>
+                    <Text style={{ width: 40, textAlign: 'center' }}>{`${parseInt(exposure * 100)}%`}</Text>
+                    <Slider
+                        style={{ width: width - 120 }}
+                        minimumValue={0}
+                        maximumValue={1}
+                        value={exposure}
+                        onValueChange={(value) => setExposure(value)}
+                        minimumTrackTintColor={COLORS.WHITE}
+                        maximumTrackTintColor={COLORS.BLACK}
+                    />
+                </>}
+                {selectedSetting === SETTINGS.ZOOM && <>
+                    <Text style={{ width: 40, textAlign: 'center' }}>{`${parseInt(zoom * 100)}%`}</Text>
+                    <Slider
+                        style={{ width: width - 120 }}
+                        minimumValue={0}
+                        maximumValue={1}
+                        value={zoom}
+                        onValueChange={(value) => setZoom(value)}
+                        minimumTrackTintColor={COLORS.WHITE}
+                        maximumTrackTintColor={COLORS.BLACK}
+                    />
+                </>}
+                {selectedSetting === SETTINGS.FOCUS_DEPTH && <>
+                    <Text style={{ width: 40, textAlign: 'center' }}>{`${parseInt(focusDepth * 100)}%`}</Text>
+                    <Slider
+                        style={{ width: width - 120 }}
+                        minimumValue={0}
+                        maximumValue={1}
+                        value={focusDepth}
+                        onValueChange={(value) => setFocusDepth(value)}
+                        minimumTrackTintColor={COLORS.WHITE}
+                        maximumTrackTintColor={COLORS.BLACK}
+                    />
+                </>}
+            </View>}
+
             {isRecording && <>
                 <View style={{ height: 170, width: width, backgroundColor: COLORS.PRIMARY_MAIN, alignItems: "center" }}>
                     <Text style={{ textAlign: "center", width: width, color: COLORS.WHITE, fontSize: 16, fontWeight: "700", marginTop: 14, marginBottom: 20 }}>{duration}</Text>
@@ -438,6 +598,11 @@ const FacialExpressionScreen = ({ navigation }) => {
         <View style={styles.body}>
             {videoURL === "" && getCameraComponent()}
             {videoURL !== "" && getVideoPlayerComponent()}
+            <Spinner
+                visible={spinnerState.open}
+                textContent={spinnerState.message}
+                textStyle={{ color: COLORS.WHITE }}
+            />
         </View>
     );
 };
