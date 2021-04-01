@@ -25,6 +25,7 @@ import AuthContext from './src/components/shared/AuthContext';
 import SplashScreen from './src/screens/SplashScreen';
 import PainAssessmentScreen from './src/screens/PainAssessmentScreen';
 import { COLORS } from './src/constants/colors';
+import NewMedication from './src/screens/NewMedication';
 
 const Stack = createStackNavigator();
 
@@ -209,6 +210,11 @@ function App() {
                 <Stack.Screen
                   name={SCREEN_NAMES.PAIN_ASSESSMENT}
                   component={PainAssessmentScreen}
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name={SCREEN_NAMES.NEW_MEDICATION}
+                  component={NewMedication}
                   options={{ headerShown: false }}
                 />
               </>)}

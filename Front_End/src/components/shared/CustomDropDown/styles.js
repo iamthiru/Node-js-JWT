@@ -3,7 +3,13 @@ import { COLORS } from "../../../constants/colors";
 
 const styles = StyleSheet.create({
     container: { 
-        height: 55 
+        minHeight: 55,
+        minWidth: 80,
+        backgroundColor: COLORS.WHITE,
+        borderColor: COLORS.GRAY_80,
+        borderWidth: 1,
+        borderRadius: 5,
+        padding: 6 
     },
     style: { 
         height: 55, 
@@ -20,18 +26,17 @@ const styles = StyleSheet.create({
         marginTop: 5
     },
     labelStyle: { 
-        fontSize: 16, 
+        fontSize: 18, 
         lineHeight: 24, 
         color: COLORS.GRAY_90, 
-        marginHorizontal: 0, 
-        paddingHorizontal: 5 
+        marginHorizontal: 5,
     },
     placeholderStyle: { 
-        fontSize: 16, 
+        fontSize: 18, 
         lineHeight: 24, 
         color: COLORS.GRAY_60, 
         marginHorizontal: 0, 
-        paddingHorizontal: 5 
+        paddingHorizontal: 5,
     },
     activeItemStyle: { 
         backgroundColor: COLORS.PRIMARY_MAIN 

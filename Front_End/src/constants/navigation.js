@@ -3,5 +3,6 @@ export const SCREEN_NAMES = {
     HOME: "Home",
     PUPILLARY_DILATION: "PupillaryDilation",
     FACIAL_EXPRESSION: "FacialExpression",
-    PAIN_ASSESSMENT: "PainAssessment"
+    PAIN_ASSESSMENT: "PainAssessment",
+    NEW_MEDICATION: 'New Medication'
 }
