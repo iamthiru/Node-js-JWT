@@ -14,7 +14,6 @@ import {
 import Spinner from 'react-native-loading-spinner-overlay';
 import { RNCamera } from 'react-native-camera';
 import Slider from '@react-native-community/slider';
-// import { ProcessingManager } from 'react-native-video-processing';
 import { RNFFmpeg } from 'react-native-ffmpeg';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
@@ -63,7 +62,7 @@ const PupillaryDilationScreen = ({ navigation }) => {
     const [showSpinner, setShowSpinner] = useState(false);
     const [spinnerMessage, setSpinnerMessage] = useState("");
     const [selectedSetting, setSelectedSetting] = useState("");
-    const [exposure, setExposure] = useState(0);
+    const [exposure, setExposure] = useState(0.3);
     const [zoom, setZoom] = useState(Platform.OS === "ios" ? 0.1 : 0.175)
     const [focusDepth, setFocusDepth] = useState(0.3)
     const [timer, setTimer] = useState("0");
@@ -149,22 +148,6 @@ const PupillaryDilationScreen = ({ navigation }) => {
                 RNFFmpeg.execute(`-i ${croppedVideoPath} -filter:v fps=${fps} -preset ultrafast ${resultPath}`).then(async res => {
                     console.log("RRFFMPEG - FPS Conversion Success", resultPath)
                     if(Platform.OS === "ios") {
-                        /* const filename = `${resultPath.substring(0, resultPath.lastIndexOf("."))}_3.mp4`;
-                        MovToMp4.convertMovToMp4(resultPath, filename)
-                            .then((results) => {
-                                console.log("MovToMp4 Success", results)
-                                setShowSpinner(false);
-                                setSpinnerMessage("");
-                                setIsRecording(false);
-                                setVideoURL(results);
-                            })
-                            .catch((error) => {
-                                console.log("MovToMp4 Error", error)
-                                setShowSpinner(false);
-                                setSpinnerMessage("");
-                                setIsRecording(false);
-                                setVideoURL(resultPath);
-                            }) */
                         setShowSpinner(false);
                         setSpinnerMessage("");
                         setIsRecording(false);
