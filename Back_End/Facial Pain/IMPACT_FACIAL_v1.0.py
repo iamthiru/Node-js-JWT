@@ -1,18 +1,21 @@
 # Proprietary: Benten Technologies, Inc.
-# Author: Jagadesh N., Pranav H. Deo
+# Author: Pranav H. Deo, Jagadesh N.
 # Copyright Content
 # Date: 01/29/2021
 # Version: v1.0
 
 # Code Description:
-# This code is used to read a video and predict second wise pain detection as well as predicting a single score for the video.
-# OpenFace toolbox is used to generate the Action Unit values and we compute scores per frame for Sum of AUs and PSPI.
-# The Sum of AU scores are passed through an algorithm which has a sliding window which classifies each second of the video into 1 'Neutral/ No Pain' class and 3 'Pain' classes based on the seperating boundary between BioVid Dataset Heat level boundaries shown by the selected video files (As mentioned in the Github Readme file).
-# The algorithm also computes a single video score based on a weighted sum formula (Based on actual mean of the pain level scores). (Needs to be tested)
+# Code built to read a video and predict second wise pain detection as well as predicting a single score for the video.
+# OpenFace toolbox is used to generate the AU values and we compute scores per frame for Sum of AUs and PSPI.
+# The Sum of AU scores are passed through an algorithm which has a sliding window which classifies each second of the
+# video into 1 'Neutral/ No Pain' class and 3 'Pain' classes based on the separating boundary between BioVid
+# Dataset Heat level boundaries shown by the selected video files (As mentioned in the Github Readme file).
+# The algorithm also computes a single video score based on a weighted sum formula (Based on actual mean of
+# the pain level scores).
 
 
-## UPDATES:
-# - Added comments to explain all the functions in a detailed manner
+# UPDATES:
+# Added comments to explain all the functions in a detailed manner
 
 
 import os
