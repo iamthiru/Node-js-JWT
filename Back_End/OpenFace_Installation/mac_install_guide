@@ -1,4 +1,4 @@
-#OpenFace 2.2.0 for Mac Installation:
+# OpenFace 2.2.0 for Mac Installation:
 As of now we do not have a bash file to execute this operation. Manual set-up of OpenFace 2.2.0 for MacOS:-
 
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
