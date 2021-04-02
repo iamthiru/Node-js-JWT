@@ -15,6 +15,7 @@ import store from './src/store';
 import PupillaryDilationScreen from './src/screens/PupillaryDilationScreen';
 import { SCREEN_NAMES } from './src/constants/navigation';
 import HomeScreen from './src/screens/HomeScreen';
+import HomeScreenOld from './src/screens/HomeScreenOld/index';
 import FacialExpressionScreen from './src/screens/FacialExpressionScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import STORAGE_KEYS from './src/constants/storage';
@@ -26,6 +27,10 @@ import SplashScreen from './src/screens/SplashScreen';
 import PainAssessmentScreen from './src/screens/PainAssessmentScreen';
 import { COLORS } from './src/constants/colors';
 import NewMedication from './src/screens/NewMedication';
+import PatientProfile from './src/screens/PatientProfile';
+import Settings from './src/screens/Settings';
+import Schedule from './src/screens/Schedule';
+import PatientList from './src/screens/PatientList';
 
 const Stack = createStackNavigator();
 
@@ -195,7 +200,32 @@ function App() {
                 <Stack.Screen
                   name={SCREEN_NAMES.HOME}
                   component={HomeScreen}
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name={SCREEN_NAMES.SETTINGS}
+                  component={Settings}
+                  options={{ title: 'Settings' }}
+                />
+                <Stack.Screen
+                  name={SCREEN_NAMES.SCHEDULE}
+                  component={Schedule}
+                  options={{ title: 'Schedule' }}
+                />
+                <Stack.Screen
+                  name={SCREEN_NAMES.PATIENT_LIST}
+                  component={PatientList}
+                  options={{ title: 'Patient List' }}
+                />
+                <Stack.Screen
+                  name={SCREEN_NAMES.HOME_OLD}
+                  component={HomeScreenOld}
                   options={{ title: "Home" }}
+                />
+                <Stack.Screen
+                  name={SCREEN_NAMES.PATIENT_PROFILE}
+                  component={PatientProfile}
+                  options={{ headerShown: false }}
                 />
                 <Stack.Screen
                   name={SCREEN_NAMES.PUPILLARY_DILATION}

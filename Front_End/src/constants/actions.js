@@ -9,3 +9,7 @@ export const AUTH_ACTIONS = {
 export const USER_ACTIONS = {
     UPDATE_AUTH_DATA: "UPDATE_AUTH_DATA"
 }
+
+export const PATIENT_ACTIONS = {
+    ADD_PATIENT: "ADD_PATIENT"
+}
