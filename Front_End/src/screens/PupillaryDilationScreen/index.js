@@ -62,7 +62,7 @@ const PupillaryDilationScreen = ({ navigation }) => {
     const [showSpinner, setShowSpinner] = useState(false);
     const [spinnerMessage, setSpinnerMessage] = useState("");
     const [selectedSetting, setSelectedSetting] = useState("");
-    const [exposure, setExposure] = useState(0.3);
+    const [exposure, setExposure] = useState(0.2);
     const [zoom, setZoom] = useState(Platform.OS === "ios" ? 0.1 : 0.175)
     const [focusDepth, setFocusDepth] = useState(0.3)
     const [timer, setTimer] = useState("0");
@@ -78,6 +78,7 @@ const PupillaryDilationScreen = ({ navigation }) => {
     const [downloadFileName, setDownloadFileName] = useState("");
     const [resultImageURI, setResultImageURI] = useState("");
     const [fps, setFps] = useState(30);
+    const [isDarkBrownEyes, setIsDarkBrownEyes] = useState(false);
 
     useEffect(() => {
         setTimeout(() => checkStoragePermission(), 3000);
@@ -401,6 +402,24 @@ const PupillaryDilationScreen = ({ navigation }) => {
         clearInterval(intervalId);
     }
 
+    const setEyeColor = (isDarkBrown) => {
+        if ((isDarkBrownEyes && isDarkBrown) || (!isDarkBrownEyes && !isDarkBrown)) {
+            return;
+        }
+
+        setIsDarkBrownEyes(isDarkBrown);
+
+        if (isDarkBrown) {
+            if (exposure !== 0.8) {
+                setExposure(0.8);
+            }
+        } else {
+            if (exposure !== 0.2) {
+                setExposure(0.2);
+            }
+        }
+    }
+
     const getCameraComponent = () => {
         return (<>
             <View style={{ height: isRecording ? (height - 170 - 50) : width, width: width, overflow: "hidden" }}>
@@ -495,6 +514,41 @@ const PupillaryDilationScreen = ({ navigation }) => {
                                     fontSize: 17
                                 }}
                             >{"60"}</Text>
+                        </CustomTouchableOpacity>
+                    </View>
+                </View>
+
+                <View style={{ width: width - 40, height: 30, marginBottom: 30, flexDirection: "row", justifyContent: 'center', alignItems: 'center' }}>
+                    <Text style={{ fontWeight: "700", color: COLORS.GRAY_90 }}>{"Eye Color: "}</Text>
+                    <View
+                        style={{
+                            flexDirection: "row",
+                            backgroundColor: `${COLORS.PRIMARY_MAIN}50`,
+                            width: 240,
+                            justifyContent: "space-between",
+                            height: 30,
+                            alignItems: "center",
+                            borderRadius: 10,
+                            alignSelf: "center",
+                        }}
+                    >
+                        <CustomTouchableOpacity style={{ backgroundColor: (isDarkBrownEyes ? COLORS.PRIMARY_MAIN : `${COLORS.PRIMARY_MAIN}50`), width: 120, height: 30, borderTopLeftRadius: 10, borderBottomLeftRadius: 10, alignItems: "center", justifyContent: "center" }} onPress={() => setEyeColor(true)}>
+                            <Text
+                                style={{
+                                    color: COLORS.WHITE,
+                                    fontWeight: "700",
+                                    fontSize: 17
+                                }}
+                            >{"Dark Brown"}</Text>
+                        </CustomTouchableOpacity>
+                        <CustomTouchableOpacity style={{ backgroundColor: (isDarkBrownEyes ? `${COLORS.PRIMARY_MAIN}50` : COLORS.PRIMARY_MAIN), width: 120, height: 30, borderTopRightRadius: 10, borderBottomRightRadius: 10, alignItems: "center", justifyContent: "center" }} onPress={() => setEyeColor(false)}>
+                            <Text
+                                style={{
+                                    color: COLORS.WHITE,
+                                    fontWeight: "700",
+                                    fontSize: 17
+                                }}
+                            >{"Other"}</Text>
                         </CustomTouchableOpacity>
                     </View>
                 </View>
