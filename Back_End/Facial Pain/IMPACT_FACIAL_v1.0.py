@@ -1,7 +1,7 @@
 # Proprietary: Benten Technologies, Inc.
 # Author: Pranav H. Deo, Jagadesh N.
 # Copyright Content
-# Date: 01/29/2021
+# Date: 04/01/2021
 # Version: v1.0
 
 # Code Description:
@@ -29,7 +29,7 @@ import matplotlib.pyplot as plt
 
 #######################################################################################################################
 
-# Function to Detect Faces and get the Action Unit values from the video. Output would be a csv file with frame wise scores
+# Function to Detect Faces and get the AU values from the video. Output would be a csv file with frame wise scores
 def OpenFace_API_Call(ipath, opath):
     os.chdir('OpenFace')
     print("> OpenFace Feature Extraction Command Executed !!")
@@ -150,8 +150,7 @@ def Compute_PSPI_AUs(opath, fpath, D):
 
 # BUCKET CODE : Run the Sliding window on the above csv file to classify the pain into buckets
 # Function to have a sliding window over the frame values to classify pain as one of the 4 bucket classes
-# NOTE: Any other mode of calculation (Deep Learning appraoches) would come here in classifying the sequence of frames into buckets
-
+# NOTE: Any other mode of calculation (DL approaches) would come here in classifying the sequence of frames into buckets
 def Calculate_Pain_Labeler(opath, fpath, D, num_steps):
     """ Sliding window for calculating pain levels """
     video_csv = pd.read_csv(fpath)
@@ -211,7 +210,8 @@ def Calculate_Pain_Labeler(opath, fpath, D, num_steps):
 
 #######################################################################################################################
 
-# Video Labeler: Used to read the csv file and generate a new file with high level second and pain scores. Also used to compute a video score using a weighted formula.
+# Video Labeler: Used to read the csv file and generate a new file with high level second and pain scores.
+# Also used to compute a video score using a weighted formula.
 def Video_Labeler(label_list):
     # Value of each level (Mean of the pain levels as calcuated using BioVid Dataset):
     Pain_0 = 5.18
@@ -269,29 +269,27 @@ def Graph_Plot(opath, fname, fl, flag):
 
 # __MAIN__
 if __name__ == "__main__":
-    print("\n############################## IMPACT FACIAL ##############################")
-    print("\n> LIST OF OPERATIONS : \n\t1. Live Video Capture \n")
-    out_path = "/Users/pranavdeo/PycharmProjects/FaceEmotionRecognition/static/Facial_Output_Images/"
     in_path = ""
+    out_path = "static/Face_Output_Images/"
     tag = 0
 
     if len(sys.argv) > 1:
+        print("\n############################## IMPACT FACIAL ##############################")
         global filenm
-        ch = int(sys.argv[1])
-        filenm = str(sys.argv[2])
-        video_type = str(sys.argv[3])
-        in_path = "/Users/pranavdeo/PycharmProjects/FaceEmotionRecognition/static/Face_Input_Videos/" + filenm
+        filenm = str(sys.argv[1])
+        in_path = "./static/Face_Input_Videos/" + filenm
         tag = 1
     else:
-        ch = int(input("> Enter Choice : "))
-        in_path = "/Users/pranavdeo/PycharmProjects/FaceEmotionRecognition/static/Face_Input_Videos/face.avi"
+        print("\n############################## IMPACT FACIAL ##############################")
+        filenm = "face.mp4"
+        in_path = "./static/Face_Input_Videos/" + filenm
 
     print("\n************* Video Capture Complete *************")
     print("> Extracting Features...")
+    video_fps = fps_calculator(in_path)
 
     if tag == 1:
-        video_fps = fps_calculator(in_path)
-        print(video_fps)
+        print('> FPS: ', video_fps)
         OpenFace_API_Call(in_path, out_path)
         Compute_PSPI_AUs(out_path, out_path + os.path.splitext(filenm)[0] + '.csv', os.path.splitext(filenm)[0])
         video_label_list = Calculate_Pain_Labeler(out_path, out_path + os.path.splitext(filenm)[0] + '_PSPI_AUs.csv',
@@ -299,6 +297,7 @@ if __name__ == "__main__":
         final_video_label = Video_Labeler(video_label_list)
         Graph_Plot(out_path, os.path.splitext(filenm)[0] + '_PSPI_AUs.csv', os.path.splitext(filenm)[0], 0)
     else:
+        OpenFace_API_Call(in_path, out_path)
         Compute_PSPI_AUs(out_path, out_path + 'face.csv', 'face')
         video_label_list = Calculate_Pain_Labeler(out_path, out_path + 'face_PSPI_AUs.csv', 'face', int(video_fps))
         final_video_label = Video_Labeler(video_label_list)
