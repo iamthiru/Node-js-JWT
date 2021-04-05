@@ -51,31 +51,35 @@ const PatientProfile = ({ navigation }) => {
             >
                 <View
                     style={{
-                        height: 40,
+                        height: 50,
                         width: width,
                         marginHorizontal: 10,
-                        justifyContent: 'center'
+                        justifyContent: 'center',
+                        marginBottom: 10
                     }}
                 >
                     <View
                         style={{
                             position: 'absolute',
-                            left: 10,
-                            top: 10
+                            top: 12,
+                            zIndex: 1
                         }}
                     >
                         <CustomTouchableOpacity
-                            style={{
-                                width: 40,
-                                height: 30
+                            onPress={() => {
+                                navigation.goBack()
                             }}
                         >
-                            <AntDesignIcon name={"arrowleft"} size={20} color={COLORS.GRAY_90} />
+                            <AntDesignIcon name={"arrowleft"} size={26} color={COLORS.GRAY_90} />
                         </CustomTouchableOpacity>
                     </View>
                     <Text
                         style={{
-                            textAlign: 'center'
+                            textAlign: 'center',
+                            color: COLORS.PRIMARY_MAIN,
+                            fontSize: 24,
+                            lineHeight: 30,
+                            fontWeight: '400'
                         }}
                     >
                         Patient Profile

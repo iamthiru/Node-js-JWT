@@ -26,20 +26,41 @@ const PatientDetailCard = ({ profile }) => {
     return (
         <View
             style={{
-                width: width-60,
+                width: width - 60,
                 marginHorizontal: 30,
                 marginBottom: 20
             }}
         >
-            <Text>
+            <Text
+                style={{
+                    color: COLORS.PRIMARY_DARKER,
+                    fontSize: 20,
+                    lineHeight: 32,
+                    fontWeight: '700'
+                }}
+            >
                 {profile?.name}
             </Text>
-            <Text>
+            <Text
+                style={{
+                    color: COLORS.PRIMARY_DARKER,
+                    fontSize: 16,
+                    lineHeight: 32,
+                    fontWeight: '400'
+                }}
+            >
                 {(new Date().getFullYear()) - (new Date(profile.dob).getFullYear())}
-                {" year old, "+ profile.gender}
+                {" year old, " + profile.gender}
             </Text>
-            <Text>
-                {"Medical Number: "+profile.medicalNumber}
+            <Text
+                style={{
+                    color: COLORS.PRIMARY_DARKER,
+                    fontSize: 16,
+                    lineHeight: 32,
+                    fontWeight: '400'
+                }}
+            >
+                {"Medical Number: " + profile.medicalNumber}
             </Text>
             <View
                 style={{
@@ -48,10 +69,24 @@ const PatientDetailCard = ({ profile }) => {
                     right: 10
                 }}
             >
-                <CustomTouchableOpacity>
-                    <Text>
+                <CustomTouchableOpacity
+                    style={{
+                        borderBottomColor: COLORS.PRIMARY_MAIN,
+                        borderBottomWidth: 1,
+                        alignItems: 'center'
+                    }}
+                >
+                    <Text
+                        style={[styles.h3Label,
+                        {
+                            color: COLORS.PRIMARY_MAIN,
+                            marginRight: 0,
+                            fontWeight: '400'
+                        }
+                        ]}
+                    >
                         Edit
-                    </Text>
+                   </Text>
                 </CustomTouchableOpacity>
             </View>
         </View>

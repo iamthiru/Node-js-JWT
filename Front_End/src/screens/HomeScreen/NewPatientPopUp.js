@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import {
     View,
     Text,
@@ -21,7 +21,8 @@ import CustomDropDown from '../../components/shared/CustomDropDown';
 import CustomButton from '../../components/shared/CustomButton';
 import { useNavigation } from '@react-navigation/core';
 import { SCREEN_NAMES } from '../../constants/navigation';
-// import { View } from 'react-native'
+import { useDispatch } from 'react-redux';
+import { PATIENT_ACTIONS } from '../../constants/actions';
 
 const { width, height } = Dimensions.get("window");
 
@@ -30,6 +31,7 @@ const NewPatientPopUp = ({
     onClose
 }) => {
     const navigation = useNavigation()
+    const dispatch = useDispatch()
     const [showDatePicker, setShowDatePicker] = useState(false)
     const [selectedDate, setSelectedDate] = useState(null)
     const [gender, setGender] = useState(null)
@@ -37,6 +39,58 @@ const NewPatientPopUp = ({
     const [firstName, setFirstName] = useState('')
     const [lastName, setLastName] = useState('')
     const [medicalRecord, setMedicalRecord] = useState('')
+    const [errorState, setErrorState] = useState([])
+
+    const validate = useCallback(() => {
+        if(errorState?.length){
+            return true
+        }
+        if(
+            !lastName ||
+            !firstName ||
+            !gender ||
+            !eyeColor ||
+            !selectedDate 
+        ){
+            return true
+        }
+        return false
+    }, [
+        errorState,
+        firstName,
+        lastName,
+        gender,
+        eyeColor,
+        selectedDate,
+    ])
+
+    const handleSubmit = useCallback(() => {
+        dispatch({
+            type: PATIENT_ACTIONS.ADD_PATIENT,
+            payload: {
+                id: parseInt(Math.random(10)*1000).toString(),
+                firstName: firstName,
+                time: `3:00 pm`,
+                lastName: lastName,
+                name: firstName + ' ' + lastName,
+                gender: gender,
+                dob: `${selectedDate.getMonth() + 1}/${selectedDate.getDate()}/${selectedDate.getFullYear()}`,
+                medicalRecord: medicalRecord,
+                eyeColor: eyeColor
+            }
+        })
+        if(onClose){
+            onClose()
+        }
+    },[
+        dispatch,
+        firstName,
+        lastName,
+        gender,
+        eyeColor,
+        selectedDate,
+        medicalRecord,
+    ])
 
     return (
         <ReactNativeModal
@@ -104,6 +158,8 @@ const NewPatientPopUp = ({
                             borderBottomWidth: 1,
                             alignItems: 'center'
                         }}
+                        disabled={validate()}
+                        onPress={handleSubmit}
                     >
                         <Text
                             style={[styles.h3Label,
@@ -330,12 +386,13 @@ const NewPatientPopUp = ({
                         }}
                     >
                         <CustomButton
-                            onPress={() => { }}
+                            onPress={handleSubmit}
                             title="Confirm"
                             textStyle={{ color: COLORS.GRAY_90, textAlign: 'center' }}
+                            disabled={validate()}
                             style={{
                                 width: ((width) * 0.6),
-                                backgroundColor: COLORS.PRIMARY_MAIN,
+                                backgroundColor: validate() ? COLORS.SECONDARY_LIGHTER : COLORS.PRIMARY_MAIN,
                                 borderColor: COLORS.PRIMARY_MAIN,
                                 borderWidth: 1,
                                 alignItems: 'center',

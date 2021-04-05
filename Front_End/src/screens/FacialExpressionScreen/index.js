@@ -24,6 +24,7 @@ import styles from './styles';
 import { secondsToMinsAndSecs } from '../../utils/date';
 import EyeBoundary from './EyeBoundary';
 import { COLORS } from '../../constants/colors';
+import { SCREEN_NAMES } from '../../constants/navigation';
 
 const { width, height } = Dimensions.get("window");
 const { VideoCropper } = NativeModules
@@ -317,27 +318,28 @@ const FacialExpressionScreen = ({ navigation }) => {
     }
 
     const onConfirmPress = () => {
-        if (false && Platform.OS === "ios") {
-            const filename = `VID_${Date.now().toString()}`;
-            MovToMp4.convertMovToMp4(videoURL, filename)
-                .then(function (results) {
-                    CameraRoll.save(results, { type: "video" }).then(res => {
-                        Alert.alert("Success", "Video has been saved successfully!");
-                        resetStates();
-                    }).catch(err => {
-                        Alert.alert("Error", "Download Failed!");
-                        resetStates();
-                    })
-                });
-        } else {
-            CameraRoll.save(videoURL, { type: "video" }).then(res => {
-                Alert.alert("Success", "Video has been saved successfully!");
-                resetStates();
-            }).catch(err => {
-                Alert.alert("Error", "Download Failed!");
-                resetStates();
-            })
-        }
+        // if (false && Platform.OS === "ios") {
+        //     const filename = `VID_${Date.now().toString()}`;
+        //     MovToMp4.convertMovToMp4(videoURL, filename)
+        //         .then(function (results) {
+        //             CameraRoll.save(results, { type: "video" }).then(res => {
+        //                 Alert.alert("Success", "Video has been saved successfully!");
+        //                 resetStates();
+        //             }).catch(err => {
+        //                 Alert.alert("Error", "Download Failed!");
+        //                 resetStates();
+        //             })
+        //         });
+        // } else {
+        //     CameraRoll.save(videoURL, { type: "video" }).then(res => {
+        //         Alert.alert("Success", "Video has been saved successfully!");
+        //         resetStates();
+        //     }).catch(err => {
+        //         Alert.alert("Error", "Download Failed!");
+        //         resetStates();
+        //     })
+        // }
+        navigation.navigate(SCREEN_NAMES.HOME_OLD)
     }
 
     const onRetakePress = () => {

@@ -1,5 +1,6 @@
 import { Platform, StyleSheet } from "react-native";
 import { Dimensions } from 'react-native';
+import DeviceInfo from "react-native-device-info";
 import { COLORS } from "../../constants/colors";
 
 const width = Dimensions.get('window').width;
@@ -14,16 +15,14 @@ const styles = StyleSheet.create({
         justifyContent: "center"
     },
     headingContainer: {
-        height: height * 0.22,
-        justifyContent: 'flex-end',
-        minHeight: 140,
-        maxHeight: 150,
+        justifyContent: 'flex-start',
         width: width,
         marginTop: Platform.OS === 'android' ? -20 : 0,
         backgroundColor: COLORS.WHITE,
         borderBottomColor: COLORS.BLACK,
         borderBottomWidth: 1,
-        marginBottom: 10
+        marginBottom: 10,
+        paddingTop: DeviceInfo.hasNotch() ? 45 : 20
     },
     secondaryButton: {
         width: (width) * 0.6,

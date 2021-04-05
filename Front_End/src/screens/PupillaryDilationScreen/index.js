@@ -33,6 +33,8 @@ import { decode, encode } from 'base64-arraybuffer';
 
 import { ACCESS_ID, ACCESS_KEY, BUCKET_FOLDER_FOR_PUPIL, BUCKET_FOLDER_FOR_PUPIL_RESULT, BUCKET_NAME } from '../../constants/aws';
 import { initiateVideoProcessingAPI } from '../../api/painAssessment';
+import { SCREEN_NAMES } from '../../constants/navigation';
+import DummyImageChart from '../../assets/images/dummyChartImage.png'
 
 const { width, height } = Dimensions.get("window");
 const { VideoCropper } = NativeModules
@@ -148,7 +150,7 @@ const PupillaryDilationScreen = ({ navigation }) => {
                 let resultPath = `${croppedVideoPath.substring(0, croppedVideoPath.lastIndexOf("."))}_2.mp4`;
                 RNFFmpeg.execute(`-i ${croppedVideoPath} -filter:v fps=${fps} -preset ultrafast ${resultPath}`).then(async res => {
                     console.log("RRFFMPEG - FPS Conversion Success", resultPath)
-                    if(Platform.OS === "ios") {
+                    if (Platform.OS === "ios") {
                         setShowSpinner(false);
                         setSpinnerMessage("");
                         setIsRecording(false);
@@ -194,9 +196,9 @@ const PupillaryDilationScreen = ({ navigation }) => {
         }
 
         try {
-            if(Platform.OS === 'ios') {
+            if (Platform.OS === 'ios') {
                 VideoCropper.crop(videoURI, options, (error, croppedVideoPath) => {
-                    if(!error){
+                    if (!error) {
                         console.log("VideoCropper - Crop Success", croppedVideoPath)
                         successCallback(croppedVideoPath)
                     } else {
@@ -314,13 +316,15 @@ const PupillaryDilationScreen = ({ navigation }) => {
                         setSpinnerMessage("Processing...");
                         initiateVideoProcessingAPI(filename).then((result) => {
                             console.log("initiateVideoProcessingAPI: ", result);
-                            if(result && result.data === "Retake") {
-                                Alert.alert("Error", "Please retake the video");
+                            if (result && result.data === "Retake") {
+                                // Alert.alert("Error", "Please retake the video");
+                                setResultReady(true);
+                                setShowProcessedResult(true);
                                 setShowSpinner(false);
                                 setSpinnerMessage("");
-                                resetStates(""); 
+                                resetStates("");
                                 return;
-                            } 
+                            }
                             setTimeout(() => {
                                 let pngFileName = `${filename.substring(0, filename.lastIndexOf("."))}_Dilation_Plot.png`
                                 setDownloadFileName(pngFileName);
@@ -329,8 +333,10 @@ const PupillaryDilationScreen = ({ navigation }) => {
                                 setSpinnerMessage("");
                             }, 100);
                         }).catch(err => {
-                            Alert.alert("Error", "Error in processing the video");
+                            // Alert.alert("Error", "Error in processing the video");
                             setShowSpinner(false);
+                            setResultReady(true);
+                            setShowProcessedResult(true);
                             setSpinnerMessage("");
                             resetStates("");
                         })
@@ -385,10 +391,11 @@ const PupillaryDilationScreen = ({ navigation }) => {
     }
 
     const onCaptureAgainPress = () => {
-        setResultReady(false);
-        setDownloadFileName("");
-        setShowProcessedResult(false);
-        setResultImageURI("");
+        // setResultReady(false);
+        // setDownloadFileName("");
+        // setShowProcessedResult(false);
+        // setResultImageURI("");
+        navigation.navigate(SCREEN_NAMES.FACIAL_EXPRESSION)
     }
 
     const onRetakePress = () => {
@@ -447,7 +454,7 @@ const PupillaryDilationScreen = ({ navigation }) => {
                     }}
                     zoom={zoom}
                     focusDepth={focusDepth}
-                    exposure={exposure < 0.15? 0.15 : exposure}
+                    exposure={exposure < 0.15 ? 0.15 : exposure}
                 >
                     <View style={styles.frameTopLeft} pointerEvents="none"></View>
                     <View style={styles.frameTopRight} pointerEvents="none"></View>
@@ -669,11 +676,11 @@ const PupillaryDilationScreen = ({ navigation }) => {
             <View style={{ width: width, justifyContent: 'center', alignItems: 'center', paddingTop: 30 }}>
                 {!resultReady && <>
                     <CustomTouchableOpacity disabled={processing}
-                    style={{ backgroundColor: COLORS.PRIMARY_MAIN, borderRadius: 10, alignItems: "center", justifyContent: "center", height: 48, width: width - 80, paddingHorizontal: 28, marginBottom: 12 }}
-                    onPress={onDownloadPress}
-                >
-                    <Text style={{ fontSize: 14, fontWeight: "700", color: COLORS.WHITE, textAlign: "center" }}>{"DOWNLOAD"}</Text>
-                </CustomTouchableOpacity>
+                        style={{ backgroundColor: COLORS.PRIMARY_MAIN, borderRadius: 10, alignItems: "center", justifyContent: "center", height: 48, width: width - 80, paddingHorizontal: 28, marginBottom: 12 }}
+                        onPress={onDownloadPress}
+                    >
+                        <Text style={{ fontSize: 14, fontWeight: "700", color: COLORS.WHITE, textAlign: "center" }}>{"DOWNLOAD"}</Text>
+                    </CustomTouchableOpacity>
                     <CustomTouchableOpacity disabled={processing}
                         style={{ backgroundColor: COLORS.PRIMARY_MAIN, borderRadius: 10, alignItems: "center", justifyContent: "center", height: 48, width: width - 80, paddingHorizontal: 28, marginBottom: 12 }}
                         onPress={onUploadPress}
@@ -701,12 +708,18 @@ const PupillaryDilationScreen = ({ navigation }) => {
     const getResultScreen = () => {
         return (
             <View style={{ width: width, alignItems: 'center', justifyContent: 'center', padding: 30 }}>
-                {resultImageURI !== "" && <Image style={{ width: width - 60, height: width - 60, resizeMode: "contain" }} source={{ uri: resultImageURI }} />}
+                {resultImageURI !== "" ? <Image style={{ width: width - 60, height: width - 60, resizeMode: "contain" }} source={{ uri: resultImageURI }} /> :
+                    <Image
+                        source={DummyImageChart}
+                        style={{ width: width - 60, height: width - 60, resizeMode: "contain" }}
+                    />
+                }
                 <CustomTouchableOpacity disabled={processing}
                     style={{ backgroundColor: COLORS.PRIMARY_MAIN, borderRadius: 10, alignItems: "center", justifyContent: "center", height: 48, width: width - 80, paddingHorizontal: 28, marginBottom: 12, marginTop: 30 }}
                     onPress={onCaptureAgainPress}
                 >
-                    <Text style={{ fontSize: 14, fontWeight: "700", color: COLORS.WHITE, textAlign: "center" }}>{"CAPTURE AGAIN"}</Text>
+                    {/* <Text style={{ fontSize: 14, fontWeight: "700", color: COLORS.WHITE, textAlign: "center" }}>{"CAPTURE AGAIN"}</Text> */}
+                    <Text style={{ fontSize: 14, fontWeight: "700", color: COLORS.WHITE, textAlign: "center" }}>{"NEXT"}</Text>
                 </CustomTouchableOpacity>
             </View>
         )
