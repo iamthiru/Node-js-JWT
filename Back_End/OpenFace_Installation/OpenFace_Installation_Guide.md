@@ -10,7 +10,7 @@
           a. Install Homebrew: 'https://brew.sh'. (It is an alternative to apt-get for Mac users)
           b. After installing Homebrew, install the following dependencies: (GCC, boost, tbb, openblas, dlib, wget and opencv)
              > brew update
-             > brew install gcc --HEAD
+             > brew install gcc
              > brew install boost
              > brew install tbb
              > brew install openblas
