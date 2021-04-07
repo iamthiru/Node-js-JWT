@@ -35,6 +35,7 @@ import { ACCESS_ID, ACCESS_KEY, BUCKET_FOLDER_FOR_PUPIL, BUCKET_FOLDER_FOR_PUPIL
 import { initiateVideoProcessingAPI } from '../../api/painAssessment';
 import { SCREEN_NAMES } from '../../constants/navigation';
 import DummyImageChart from '../../assets/images/dummyChartImage.png'
+import CustomButton from '../../components/shared/CustomButton';
 
 const { width, height } = Dimensions.get("window");
 const { VideoCropper } = NativeModules
@@ -79,7 +80,8 @@ const PupillaryDilationScreen = ({ navigation }) => {
     const [showProcessedResult, setShowProcessedResult] = useState(false);
     const [downloadFileName, setDownloadFileName] = useState("");
     const [resultImageURI, setResultImageURI] = useState("");
-    const [fps, setFps] = useState(30);
+    const [fps, setFps] = useState(60);
+    const [flashOn, setFlashOn] = useState(false);
     const [isDarkBrownEyes, setIsDarkBrownEyes] = useState(false);
 
     useEffect(() => {
@@ -317,9 +319,9 @@ const PupillaryDilationScreen = ({ navigation }) => {
                         initiateVideoProcessingAPI(filename).then((result) => {
                             console.log("initiateVideoProcessingAPI: ", result);
                             if (result && result.data === "Retake") {
-                                // Alert.alert("Error", "Please retake the video");
+                                Alert.alert("Error", "Please retake the video");
                                 setResultReady(true);
-                                setShowProcessedResult(true);
+                                // setShowProcessedResult(true);
                                 setShowSpinner(false);
                                 setSpinnerMessage("");
                                 resetStates("");
@@ -333,10 +335,10 @@ const PupillaryDilationScreen = ({ navigation }) => {
                                 setSpinnerMessage("");
                             }, 100);
                         }).catch(err => {
-                            // Alert.alert("Error", "Error in processing the video");
+                            Alert.alert("Error", "Error in processing the video");
                             setShowSpinner(false);
                             setResultReady(true);
-                            setShowProcessedResult(true);
+                            // setShowProcessedResult(true);
                             setSpinnerMessage("");
                             resetStates("");
                         })
@@ -391,11 +393,11 @@ const PupillaryDilationScreen = ({ navigation }) => {
     }
 
     const onCaptureAgainPress = () => {
-        // setResultReady(false);
-        // setDownloadFileName("");
-        // setShowProcessedResult(false);
-        // setResultImageURI("");
-        navigation.navigate(SCREEN_NAMES.FACIAL_EXPRESSION)
+        setResultReady(false);
+        setDownloadFileName("");
+        setShowProcessedResult(false);
+        setResultImageURI("");
+        // navigation.navigate(SCREEN_NAMES.FACIAL_EXPRESSION)
     }
 
     const onRetakePress = () => {
@@ -455,6 +457,11 @@ const PupillaryDilationScreen = ({ navigation }) => {
                     zoom={zoom}
                     focusDepth={focusDepth}
                     exposure={exposure < 0.15 ? 0.15 : exposure}
+                    flashMode={
+                        (flashOn && isCameraReady) ? 
+                        RNCamera.Constants.FlashMode.on :
+                        RNCamera.Constants.FlashMode.off
+                    }
                 >
                     <View style={styles.frameTopLeft} pointerEvents="none"></View>
                     <View style={styles.frameTopRight} pointerEvents="none"></View>
@@ -473,7 +480,17 @@ const PupillaryDilationScreen = ({ navigation }) => {
 
             {!isRecording && <ScrollView style={{ width: width, height: height - width, paddingHorizontal: 20 }}>
                 <View style={{ height: 8 }} />
-                <View style={{ flexDirection: "row", width: width - 40, justifyContent: 'flex-end', marginBottom: 8 }}>
+                <View style={{ flexDirection: "row", width: width - 40, justifyContent: 'space-between', marginBottom: 8 }}>
+                    <View>
+                        <Text>
+                            FPS: {fps}
+                        </Text>
+                    </View>
+                    <View
+                        style={{
+                            flexDirection: 'row'
+                        }}
+                    >
                     <CustomTouchableOpacity style={{ alignItems: "center", justifyContent: "center", width: 30, height: 30, borderRadius: 5, backgroundColor: selectedSetting === SETTINGS.ZOOM ? COLORS.PRIMARY_MAIN : "rgba(0,0,0,0)", borderColor: COLORS.PRIMARY_MAIN, borderWidth: selectedSetting === SETTINGS.ZOOM ? 0 : 2, alignItems: "center", justifyContent: "center" }} onPress={() => toggleSettings(SETTINGS.ZOOM)}>
                         <Fontisto name="zoom" size={18} color={selectedSetting === SETTINGS.ZOOM ? COLORS.WHITE : COLORS.GRAY_90} />
                     </CustomTouchableOpacity>
@@ -483,6 +500,7 @@ const PupillaryDilationScreen = ({ navigation }) => {
                     <CustomTouchableOpacity style={{ marginLeft: 15, alignItems: "center", justifyContent: "center", width: 30, height: 30, borderRadius: 5, backgroundColor: selectedSetting === SETTINGS.EXPOSURE ? COLORS.PRIMARY_MAIN : "rgba(0,0,0,0)", borderColor: COLORS.PRIMARY_MAIN, borderWidth: selectedSetting === SETTINGS.EXPOSURE ? 0 : 2, alignItems: "center", justifyContent: "center" }} onPress={() => toggleSettings(SETTINGS.EXPOSURE)}>
                         <MaterialIcons name="brightness-5" size={18} color={selectedSetting === SETTINGS.EXPOSURE ? COLORS.WHITE : COLORS.GRAY_90} />
                     </CustomTouchableOpacity>
+                    </View>
                 </View>
                 <Text style={{ marginBottom: 14, fontSize: 16, fontWeight: '400', color: COLORS.GRAY_90 }}>1. Find a well-lit environment.</Text>
                 <Text style={{ marginBottom: 14, fontSize: 16, fontWeight: '400', color: COLORS.GRAY_90 }}>2. Position one eye within the circular frame.</Text>
@@ -490,7 +508,7 @@ const PupillaryDilationScreen = ({ navigation }) => {
                 <Text style={{ marginBottom: 14, fontSize: 16, fontWeight: '400', color: COLORS.GRAY_90 }}>3. Get ready to not blink for 10 seconds.</Text>
                 <Text style={{ marginBottom: 0, fontSize: 16, fontWeight: '400', color: COLORS.GRAY_90 }}>4. Record the eye for at least 10 seconds.</Text>
 
-                <View style={{ width: width - 40, height: 30, marginTop: 20, marginBottom: 30, flexDirection: "row", justifyContent: 'center', alignItems: 'center' }}>
+                {/* <View style={{ width: width - 40, height: 30, marginTop: 20, marginBottom: 30, flexDirection: "row", justifyContent: 'center', alignItems: 'center' }}>
                     <Text style={{ fontWeight: "700", color: COLORS.GRAY_90 }}>{"FPS: "}</Text>
                     <View
                         style={{
@@ -523,9 +541,9 @@ const PupillaryDilationScreen = ({ navigation }) => {
                             >{"60"}</Text>
                         </CustomTouchableOpacity>
                     </View>
-                </View>
+                </View> */}
 
-                <View style={{ width: width - 40, height: 30, marginBottom: 30, flexDirection: "row", justifyContent: 'center', alignItems: 'center' }}>
+                <View style={{ width: width - 40, height: 30, marginTop: 20, marginBottom: 30, flexDirection: "row", justifyContent: 'center', alignItems: 'center' }}>
                     <Text style={{ fontWeight: "700", color: COLORS.GRAY_90 }}>{"Eye Color: "}</Text>
                     <View
                         style={{
@@ -539,21 +557,49 @@ const PupillaryDilationScreen = ({ navigation }) => {
                             alignSelf: "center",
                         }}
                     >
-                        <CustomTouchableOpacity style={{ backgroundColor: (isDarkBrownEyes ? COLORS.PRIMARY_MAIN : `${COLORS.PRIMARY_MAIN}50`), width: 120, height: 30, borderTopLeftRadius: 10, borderBottomLeftRadius: 10, alignItems: "center", justifyContent: "center" }} onPress={() => setEyeColor(true)}>
+                        <CustomTouchableOpacity 
+                            style={{ 
+                                backgroundColor: (isDarkBrownEyes ? COLORS.SECONDARY_MAIN : `${COLORS.GRAY_40}`), 
+                                width: 120, 
+                                height: 30, 
+                                borderTopLeftRadius: 10, 
+                                borderBottomLeftRadius: 10, 
+                                alignItems: "center", 
+                                justifyContent: "center",
+                                borderWidth: isDarkBrownEyes ? 1 : 0
+                            }} 
+                            onPress={() => setEyeColor(true)}
+                        >
                             <Text
                                 style={{
-                                    color: COLORS.WHITE,
+                                    color: isDarkBrownEyes ? COLORS.GRAY_90 : COLORS.WHITE,
                                     fontWeight: "700",
-                                    fontSize: 17
+                                    fontSize: 14,
+                                    lineHeight: 17,
+                                    textTransform: 'uppercase'
                                 }}
                             >{"Dark Brown"}</Text>
                         </CustomTouchableOpacity>
-                        <CustomTouchableOpacity style={{ backgroundColor: (isDarkBrownEyes ? `${COLORS.PRIMARY_MAIN}50` : COLORS.PRIMARY_MAIN), width: 120, height: 30, borderTopRightRadius: 10, borderBottomRightRadius: 10, alignItems: "center", justifyContent: "center" }} onPress={() => setEyeColor(false)}>
+                        <CustomTouchableOpacity 
+                            style={{ 
+                                backgroundColor: (isDarkBrownEyes ? `${COLORS.GRAY_40}` : COLORS.SECONDARY_MAIN), 
+                                width: 120, 
+                                height: 30, 
+                                borderTopRightRadius: 10, 
+                                borderBottomRightRadius: 10, 
+                                alignItems: "center", 
+                                justifyContent: "center" ,
+                                borderWidth: isDarkBrownEyes ? 0 : 1
+                            }} 
+                            onPress={() => setEyeColor(false)}
+                        >
                             <Text
                                 style={{
-                                    color: COLORS.WHITE,
+                                    color: !isDarkBrownEyes ? COLORS.GRAY_90 : COLORS.WHITE,
                                     fontWeight: "700",
-                                    fontSize: 17
+                                    fontSize: 14,
+                                    lineHeight: 17,
+                                    textTransform: 'uppercase'
                                 }}
                             >{"Other"}</Text>
                         </CustomTouchableOpacity>
@@ -574,21 +620,49 @@ const PupillaryDilationScreen = ({ navigation }) => {
 
                         }}
                     >
-                        <CustomTouchableOpacity style={{ backgroundColor: (captureMode === CAPTURE_MODE.AUTO ? COLORS.PRIMARY_MAIN : `${COLORS.PRIMARY_MAIN}50`), width: 100, height: 30, borderTopLeftRadius: 10, borderBottomLeftRadius: 10, alignItems: "center", justifyContent: "center" }} onPress={() => setCaptureMode(CAPTURE_MODE.AUTO)}>
+                        <CustomTouchableOpacity 
+                            style={{ 
+                                backgroundColor: (captureMode === CAPTURE_MODE.AUTO ? COLORS.SECONDARY_MAIN : `${COLORS.GRAY_40}`), 
+                                width: 100, 
+                                height: 30, 
+                                borderTopLeftRadius: 10, 
+                                borderBottomLeftRadius: 10, 
+                                alignItems: "center", 
+                                justifyContent: "center",
+                                borderWidth: (captureMode === CAPTURE_MODE.AUTO) ? 1 : 0 
+                            }} 
+                            onPress={() => setCaptureMode(CAPTURE_MODE.AUTO)}
+                        >
                             <Text
                                 style={{
-                                    color: COLORS.WHITE,
+                                    color: (captureMode === CAPTURE_MODE.AUTO) ? COLORS.GRAY_90 : COLORS.WHITE,
                                     fontWeight: "700",
-                                    fontSize: 17
+                                    fontSize: 14,
+                                    lineHeight: 17,
+                                    textTransform: 'uppercase'
                                 }}
                             >{"Auto"}</Text>
                         </CustomTouchableOpacity>
-                        <CustomTouchableOpacity style={{ backgroundColor: (captureMode === CAPTURE_MODE.MANUAL ? COLORS.PRIMARY_MAIN : `${COLORS.PRIMARY_MAIN}50`), width: 100, height: 30, borderTopRightRadius: 10, borderBottomRightRadius: 10, alignItems: "center", justifyContent: "center" }} onPress={() => setCaptureMode(CAPTURE_MODE.MANUAL)}>
+                        <CustomTouchableOpacity 
+                            style={{ 
+                                backgroundColor: (captureMode === CAPTURE_MODE.MANUAL ? COLORS.SECONDARY_MAIN : `${COLORS.GRAY_40}`), 
+                                width: 100, 
+                                height: 30, 
+                                borderTopRightRadius: 10, 
+                                borderBottomRightRadius: 10, 
+                                alignItems: "center", 
+                                justifyContent: "center",
+                                borderWidth: (captureMode === CAPTURE_MODE.MANUAL) ? 1 : 0  
+                            }} 
+                            onPress={() => setCaptureMode(CAPTURE_MODE.MANUAL)}
+                        >
                             <Text
                                 style={{
-                                    color: COLORS.WHITE,
+                                    color: (captureMode === CAPTURE_MODE.MANUAL) ? COLORS.GRAY_90 : COLORS.WHITE,
                                     fontWeight: "700",
-                                    fontSize: 17
+                                    fontSize: 14,
+                                    lineHeight: 17,
+                                    textTransform: 'uppercase'
                                 }}
                             >{"Manual"}</Text>
                         </CustomTouchableOpacity>
@@ -600,13 +674,31 @@ const PupillaryDilationScreen = ({ navigation }) => {
                         {eyeBorderType === EYE_BORDER_TYPE.OVAL && <View style={{ width: 30, height: 15, borderWidth: 2, borderColor: COLORS.BLACK }}></View>}
                         {eyeBorderType === EYE_BORDER_TYPE.RECTANGLE && <View style={{ width: 15, height: 15, borderRadius: 15 / 2, borderWidth: 2, borderColor: COLORS.BLACK, transform: [{ scaleX: 2 }] }}></View>}
                     </CustomTouchableOpacity> */}
-                    <View style={{ width: 25, height: 25 }}></View>
-                    <CustomTouchableOpacity disabled={processing}
+                    <CustomTouchableOpacity disabled={processing} style={{ alignItems: "center", justifyContent: "center" }} onPress={() => {
+                        setFlashOn(!flashOn)
+                    }}>
+                        <Ionicons name={flashOn ? 'md-flash-off' : 'md-flash'} size={25} color={flashOn ? COLORS.GRAY_60 : COLORS.GRAY_90} />
+                    </CustomTouchableOpacity>
+                    {/* <CustomTouchableOpacity disabled={processing}
                         style={{ backgroundColor: processing ? `${COLORS.PRIMARY_MAIN}50` : COLORS.PRIMARY_MAIN, borderRadius: 10, alignItems: "center", justifyContent: "center", height: 48, paddingHorizontal: 28 }}
                         onPress={onStartRecordingPress}
                     >
                         <Text style={{ fontSize: 14, fontWeight: "700", color: COLORS.WHITE, textAlign: "center" }}>{"START RECORDING"}</Text>
-                    </CustomTouchableOpacity>
+                    </CustomTouchableOpacity> */}
+                     <CustomButton
+                            onPress={onStartRecordingPress}
+                            title="Start Recording"
+                            textStyle={{ color: COLORS.WHITE, textAlign: 'center' }}
+                            disabled={processing}
+                            style={{
+                                width: (width) * 0.5,
+                                backgroundColor: processing ? COLORS.GRAY_40 : COLORS.PRIMARY_MAIN,
+                                borderColor: COLORS.PRIMARY_MAIN,
+                                borderWidth: 1,
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                            }}
+                        />
                     <CustomTouchableOpacity disabled={processing} style={{ alignItems: "center", justifyContent: "center" }} onPress={() => switchCamera()}>
                         <Ionicons name="camera-reverse-outline" size={25} />
                     </CustomTouchableOpacity>
@@ -718,8 +810,8 @@ const PupillaryDilationScreen = ({ navigation }) => {
                     style={{ backgroundColor: COLORS.PRIMARY_MAIN, borderRadius: 10, alignItems: "center", justifyContent: "center", height: 48, width: width - 80, paddingHorizontal: 28, marginBottom: 12, marginTop: 30 }}
                     onPress={onCaptureAgainPress}
                 >
-                    {/* <Text style={{ fontSize: 14, fontWeight: "700", color: COLORS.WHITE, textAlign: "center" }}>{"CAPTURE AGAIN"}</Text> */}
-                    <Text style={{ fontSize: 14, fontWeight: "700", color: COLORS.WHITE, textAlign: "center" }}>{"NEXT"}</Text>
+                    <Text style={{ fontSize: 14, fontWeight: "700", color: COLORS.WHITE, textAlign: "center" }}>{"CAPTURE AGAIN"}</Text>
+                    {/* <Text style={{ fontSize: 14, fontWeight: "700", color: COLORS.WHITE, textAlign: "center" }}>{"NEXT"}</Text> */}
                 </CustomTouchableOpacity>
             </View>
         )
