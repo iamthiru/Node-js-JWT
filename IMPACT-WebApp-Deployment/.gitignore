@@ -1,0 +1,6 @@
+.idea
+*.yaml
+.DS_Store
+__pycache__
+OpenFaceTest.py
+venv

@@ -63,6 +63,9 @@ Front_End/ios/Pods/
 .vscode
 .vs
 
-
 #Backend
 /Back_End/Back_End_Node/node_modules
+
+# Excluding venv and AWS Keys
+venv
+/IMPACT-WebApp-Deployment/Keys.yaml

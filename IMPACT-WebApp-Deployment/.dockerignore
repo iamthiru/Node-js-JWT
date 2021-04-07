@@ -1,0 +1,6 @@
+# Ignore these files
+.idea
+.DS_Store
+__pycache__
+venv
+.git

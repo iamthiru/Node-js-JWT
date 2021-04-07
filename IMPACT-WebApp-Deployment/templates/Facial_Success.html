@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>IMPACT: Facial Results</title>
+    <style>
+        .rcorners1 {
+          border-radius: 50px;
+          background: #46E1FA;
+          padding: 10px;
+          width: 200px;
+          height: 35px;
+        }
+        .rcorners2 {
+          border-radius: 50px;
+          background: #73AD21;
+          padding: 10px;
+          width: 200px;
+          height: 35px;
+        }
+        .rcorners3 {
+          border-radius: 50px;
+          background: #FA6646;
+          padding: 10px;
+          width: 200px;
+          height: 35px;
+        }
+
+        .header {
+          background-color: #f1f1f1;
+          padding: 5px;
+          text-align: center;
+        }
+
+        .navbar {
+          background-color: #333;
+          overflow: hidden;
+        }
+
+        /* Style the links inside the navigation bar */
+        .navbar a {
+          float: left;
+          color: #f2f2f2;
+          text-align: center;
+          padding: 14px 16px;
+          text-decoration: none;
+          font-size: 17px;
+        }
+
+        /* Change the color of links on hover */
+        .navbar a:hover {
+          background-color: #ddd;
+          color: black;
+        }
+
+        /* Add a color to the active/current link */
+        .navbar a.active {
+          background-color: #4CAF50;
+          color: white;
+        }
+
+        .column {
+        float: center;
+        width: 50%;
+        height: 30%
+        padding: 10px;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        }
+
+        .myimages {
+        width: 900px;
+        height: 650px;
+        }
+    </style>
+</head>
+<body>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <div class="navbar" id="Topnav">
+        <a href="{{url_for('HomePage')}}" style="font-size: 20px">Home</a>
+        <a href="{{url_for('PupilPain')}}" style="font-size: 20px">Pupil-Pain</a>
+        <a href="{{url_for('FacialPain')}}" style="font-size: 20px">Facial-Pain</a>
+        <a href="{{url_for('Logout')}}" style="font-size: 20px">Logout</a>
+    </div>
+
+    <div class="header">
+        <h1>Facial Results (PSPI)</h1>
+    </div>
+
+    <table align="center">
+        <tr>
+            <td><img class="myimages" src="{{ image_file }}"></td>
+            <td>
+                <h3 align="center" class="rcorners1">Low Score: {{ min_pain }}</h3>
+                <h3 align="center" class="rcorners2">Mean Score: {{ mean_pain }}</h3>
+                <h3 align="center" class="rcorners3">High Score: {{ max_pain }}</h3>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
