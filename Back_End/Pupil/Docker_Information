@@ -1,7 +1,0 @@
-- Docker Images available for:
-    * pdeo2020/impact-benten:v01
-    * pdeo2020/impact-benten:v02
-    * pdeo2020/impact-benten:v03_ec2_s3
-    * pdeo2020/impact-benten:v04_ec2_s3 (WebApp and Mobile App API Integrated)[Latest]
-    
-- Docker Images pushed to Docker Hub
