@@ -31,12 +31,11 @@ import matplotlib.pyplot as plt
 
 # Function to Detect Faces and get the AU values from the video. Output would be a csv file with frame wise scores
 def OpenFace_API_Call(ipath, opath):
-    os.chdir('OpenFace')
     print("> OpenFace Feature Extraction Command Executed !!")
-    cmd = "build/bin/FeatureExtraction -f " + ipath + " -out_dir " + opath + " -aus"
+    cmd = "OpenFace/build/bin/FeatureExtraction -f " + ipath + " -out_dir " + opath + " -aus"
     print(cmd)
     subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True).communicate()
-    print("     # AUs Detected...")
+    print("# AUs Detected...")
 
 
 #######################################################################################################################
@@ -270,7 +269,7 @@ def Graph_Plot(opath, fname, fl, flag):
 # __MAIN__
 if __name__ == "__main__":
     in_path = ""
-    out_path = "static/Face_Output_Images/"
+    out_path = "./static/Face_Output_Images/"
     tag = 0
 
     if len(sys.argv) > 1:
