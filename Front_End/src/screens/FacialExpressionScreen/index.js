@@ -390,7 +390,7 @@ const FacialExpressionScreen = ({ navigation }) => {
                     exposure={exposure < 0.15 ? 0.15 : exposure}
                     flashMode={
                         (flashOn && isCameraReady) ? 
-                        RNCamera.Constants.FlashMode.on :
+                        RNCamera.Constants.FlashMode.torch :
                         RNCamera.Constants.FlashMode.off
                     }
                 >

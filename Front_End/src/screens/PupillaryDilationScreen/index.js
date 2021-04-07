@@ -320,7 +320,7 @@ const PupillaryDilationScreen = ({ navigation }) => {
                             console.log("initiateVideoProcessingAPI: ", result);
                             if (result && result.data === "Retake") {
                                 Alert.alert("Error", "Please retake the video");
-                                setResultReady(true);
+                                // setResultReady(true);
                                 // setShowProcessedResult(true);
                                 setShowSpinner(false);
                                 setSpinnerMessage("");
@@ -337,7 +337,7 @@ const PupillaryDilationScreen = ({ navigation }) => {
                         }).catch(err => {
                             Alert.alert("Error", "Error in processing the video");
                             setShowSpinner(false);
-                            setResultReady(true);
+                            // setResultReady(true);
                             // setShowProcessedResult(true);
                             setSpinnerMessage("");
                             resetStates("");
@@ -459,7 +459,7 @@ const PupillaryDilationScreen = ({ navigation }) => {
                     exposure={exposure < 0.15 ? 0.15 : exposure}
                     flashMode={
                         (flashOn && isCameraReady) ? 
-                        RNCamera.Constants.FlashMode.on :
+                        RNCamera.Constants.FlashMode.torch :
                         RNCamera.Constants.FlashMode.off
                     }
                 >

@@ -41,7 +41,7 @@ const HomeScreenOld = ({ navigation }) => {
                 style={{ backgroundColor: "#0E5F81", borderRadius: 10, alignItems: "center", justifyContent: "center", height: 48, width: width - 60, paddingHorizontal: 28 }}
                 onPress={() => navigateToScreen(SCREEN_NAMES.NEW_MEDICATION)}
             >
-                <Text style={{ fontSize: 14, fontWeight: "700", color: "#FFFFFF", textAlign: "center" }}>{"New Medication"}</Text>
+                <Text style={{ fontSize: 14, fontWeight: "700", color: "#FFFFFF", textAlign: "center" }}>{"NEW MEDICATION"}</Text>
             </CustomTouchableOpacity>
         </View>
     );
