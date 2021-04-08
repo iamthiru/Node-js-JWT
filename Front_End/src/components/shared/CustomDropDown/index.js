@@ -55,7 +55,6 @@ const CustomDropDown = ({ items,
                 activeOpacity={1}
                 onPress={() => {
                     dropDownRef?.current?.measure((fx, fy, width, height, px, py) => {
-                        console.log(px, py, fx, fy, width, height)
                         setTopLeft({
                             top: py + height - 20,
                             left: px - 20,

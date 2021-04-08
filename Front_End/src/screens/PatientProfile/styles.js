@@ -19,9 +19,6 @@ const styles = StyleSheet.create({
         width: width,
         marginTop: Platform.OS === 'android' ? -20 : 0,
         backgroundColor: COLORS.WHITE,
-        borderBottomColor: COLORS.BLACK,
-        borderBottomWidth: 1,
-        marginBottom: 10,
         paddingTop: DeviceInfo.hasNotch() ? 45 : 20
     },
     secondaryButton: {

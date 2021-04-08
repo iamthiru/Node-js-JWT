@@ -85,16 +85,14 @@ const PatientProfile = ({ navigation }) => {
                         Patient Profile
                     </Text>
                 </View>
-                <PatientDetailCard 
+            </View>
+            <ScrollView
+                showsHorizontalScrollIndicator={false}
+                showsVerticalScrollIndicator={false}
+            >
+                <PatientDetailCard
                     profile={item}
                 />
-            </View>
-
-            <View
-                style={{
-                    flex: 1
-                }}
-            >
                 <View
                     style={{
                         paddingVertical: 20,
@@ -118,20 +116,26 @@ const PatientProfile = ({ navigation }) => {
                     />
 
                 </View>
-                <ScrollView
-                    showsHorizontalScrollIndicator={false}
-                    showsVerticalScrollIndicator={false}
-                >
-                    {Boolean(entry) ?
-                        <NoEntryCard />:
-                        <>
-                            <LatestEntryCard />
-                            <SummaryChart />
-                            <AllEntryCard />
-                        </>
-                    }
-                </ScrollView>
-            </View>
+                {Boolean(entry) ?
+                    <NoEntryCard /> :
+                    <>
+                        <LatestEntryCard />
+                        <SummaryChart 
+                            patientData={[15, 32, 22, 25, 14, 19, 4, 10, 21, 8, 13, 11, 40 ].map(data => {
+                                return (
+                                    {
+                                        value: data,
+                                        time: '3:00 pm',
+                                        score: data%10,
+                                        xxmed: data*10
+                                    }
+                                )
+                            })}
+                        />
+                        <AllEntryCard />
+                    </>
+                }
+            </ScrollView>
             <Footer
             />
         </View>

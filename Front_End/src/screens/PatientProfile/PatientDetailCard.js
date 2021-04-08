@@ -26,9 +26,12 @@ const PatientDetailCard = ({ profile }) => {
     return (
         <View
             style={{
-                width: width - 60,
-                marginHorizontal: 30,
-                marginBottom: 20
+                width: width,
+                paddingHorizontal: 30,
+                paddingBottom: 20,
+                backgroundColor: COLORS.WHITE,
+                borderBottomColor: COLORS.BLACK,
+                borderBottomWidth: 1
             }}
         >
             <Text
@@ -66,7 +69,7 @@ const PatientDetailCard = ({ profile }) => {
                 style={{
                     position: 'absolute',
                     top: 10,
-                    right: 10
+                    right: 30
                 }}
             >
                 <CustomTouchableOpacity
