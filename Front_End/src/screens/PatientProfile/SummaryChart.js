@@ -9,6 +9,7 @@ import {
     LineChart
   } from "react-native-chart-kit";
 import CustomTouchableOpacity from '../../components/shared/CustomTouchableOpacity';
+import SummaryChartReport from '../../components/SummaryChatReport';
 
 import { COLORS } from '../../constants/colors';
 import styles from './styles'
@@ -41,7 +42,7 @@ const TIME_FILTER_OPTIONS = [
     'All'
 ]
 
-const SummaryChart = ({ patientData }) => {
+const SummaryChart = ({ patientData,patientReport }) => {
     const [selectedTime, setSelectedTime] = useState(TIME_FILTER_OPTIONS[0])
     const [xPoint, setXPoint] = useState(0)
     const [currentIndex, setCurrentIndex] = useState(0)
@@ -341,6 +342,9 @@ const SummaryChart = ({ patientData }) => {
                     </CustomTouchableOpacity>
                 </Animated.View>}
             </View>
+            <SummaryChartReport 
+            patientReport ={patientReport}
+             />
         </View>
     );
 };

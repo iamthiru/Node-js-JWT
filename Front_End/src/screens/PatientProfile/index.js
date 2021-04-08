@@ -35,6 +35,41 @@ const PatientProfile = ({ navigation }) => {
     } = params
     const entry = false
 
+    const reportData= 
+        {
+            key:'time',
+            time:'Sep 10, 2020, 4:00 pm',
+            score:'9',
+            medication :{
+                medication_per:'xxxmed 500 mg', 
+                medication_times:'every 4 hour'
+
+             },
+             note:'Lorem ipsum dolor sit amet, consectetur elit',
+             button:'View Entry'
+
+        }
+
+        const latestEntryData =
+        {
+            key:'latest_entry',
+            time:'Sep 10, 2020, 5:00 pm',
+            buttonText:'11',
+            pain_Medication:{
+                name:'xxxxx',
+                Dosage:'xxxxx',
+                Usage:{
+                    dose:'1 pill every 4 hour',
+                    start_time:'Starting Sep 10, 2020, 3:0 pm',
+                    end_time:'No end time'
+                }
+
+            }
+
+
+        }
+
+
     return (
         <View
             style={styles.body}
@@ -119,7 +154,7 @@ const PatientProfile = ({ navigation }) => {
                 {Boolean(entry) ?
                     <NoEntryCard /> :
                     <>
-                        <LatestEntryCard />
+                        <LatestEntryCard   latestEntryData = {latestEntryData}/>
                         <SummaryChart 
                             patientData={[15, 32, 22, 25, 14, 19, 4, 10, 21, 8, 13, 11, 40 ].map(data => {
                                 return (
@@ -131,6 +166,9 @@ const PatientProfile = ({ navigation }) => {
                                     }
                                 )
                             })}
+
+                            patientReport ={reportData}
+                           
                         />
                         <AllEntryCard />
                     </>
