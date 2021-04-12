@@ -66,7 +66,7 @@ const PupillaryDilationScreen = ({ navigation }) => {
     const [spinnerMessage, setSpinnerMessage] = useState("");
     const [selectedSetting, setSelectedSetting] = useState("");
     const [exposure, setExposure] = useState(0.2);
-    const [zoom, setZoom] = useState(Platform.OS === "ios" ? 0.1 : 0.175)
+    const [zoom, setZoom] = useState(Platform.OS === "ios" ? 0.02 : 0.175)
     const [focusDepth, setFocusDepth] = useState(0.3)
     const [timer, setTimer] = useState("0");
     const [duration, setDuration] = useState("00:00");
@@ -482,9 +482,9 @@ const PupillaryDilationScreen = ({ navigation }) => {
                 <View style={{ height: 8 }} />
                 <View style={{ flexDirection: "row", width: width - 40, justifyContent: 'space-between', marginBottom: 8 }}>
                     <View>
-                        <Text>
+                        {/* <Text>
                             FPS: {fps}
-                        </Text>
+                        </Text> */}
                     </View>
                     <View
                         style={{
@@ -508,7 +508,7 @@ const PupillaryDilationScreen = ({ navigation }) => {
                 <Text style={{ marginBottom: 14, fontSize: 16, fontWeight: '400', color: COLORS.GRAY_90 }}>3. Get ready to not blink for 10 seconds.</Text>
                 <Text style={{ marginBottom: 0, fontSize: 16, fontWeight: '400', color: COLORS.GRAY_90 }}>4. Record the eye for at least 10 seconds.</Text>
 
-                {/* <View style={{ width: width - 40, height: 30, marginTop: 20, marginBottom: 30, flexDirection: "row", justifyContent: 'center', alignItems: 'center' }}>
+                <View style={{ width: width - 40, height: 30, marginTop: 20, marginBottom: 30, flexDirection: "row", justifyContent: 'center', alignItems: 'center' }}>
                     <Text style={{ fontWeight: "700", color: COLORS.GRAY_90 }}>{"FPS: "}</Text>
                     <View
                         style={{
@@ -522,26 +522,48 @@ const PupillaryDilationScreen = ({ navigation }) => {
                             alignSelf: "center",
                         }}
                     >
-                        <CustomTouchableOpacity style={{ backgroundColor: (fps === 30 ? COLORS.PRIMARY_MAIN : `${COLORS.PRIMARY_MAIN}50`), width: 80, height: 30, borderTopLeftRadius: 10, borderBottomLeftRadius: 10, alignItems: "center", justifyContent: "center" }} onPress={() => setFps(30)}>
+                        <CustomTouchableOpacity
+                            style={{
+                                backgroundColor: (fps === 30 ? COLORS.SECONDARY_MAIN : `${COLORS.GRAY_40}`),
+                                width: 80,
+                                height: 30,
+                                borderTopLeftRadius: 10,
+                                borderBottomLeftRadius: 10,
+                                alignItems: "center",
+                                justifyContent: "center",
+                                borderWidth: fps === 30 ? 1 : 0
+                            }}
+                            onPress={() => setFps(30)}>
                             <Text
                                 style={{
-                                    color: COLORS.WHITE,
+                                    color: fps === 30 ? COLORS.GRAY_90 : COLORS.WHITE,
                                     fontWeight: "700",
                                     fontSize: 17
                                 }}
                             >{"30"}</Text>
                         </CustomTouchableOpacity>
-                        <CustomTouchableOpacity style={{ backgroundColor: (fps === 60 ? COLORS.PRIMARY_MAIN : `${COLORS.PRIMARY_MAIN}50`), width: 80, height: 30, borderTopRightRadius: 10, borderBottomRightRadius: 10, alignItems: "center", justifyContent: "center" }} onPress={() => setFps(60)}>
+                        <CustomTouchableOpacity
+                            style={{
+                                backgroundColor: (fps === 60 ? COLORS.SECONDARY_MAIN : `${COLORS.GRAY_40}`),
+                                width: 80,
+                                height: 30,
+                                borderTopRightRadius: 10,
+                                borderBottomRightRadius: 10,
+                                alignItems: "center",
+                                justifyContent: "center",
+                                borderWidth: fps === 60 ? 1 : 0
+                            }}
+                            onPress={() => setFps(60)}>
                             <Text
                                 style={{
-                                    color: COLORS.WHITE,
+                                    color: fps === 60 ? COLORS.GRAY_90 : COLORS.WHITE,
                                     fontWeight: "700",
                                     fontSize: 17
                                 }}
                             >{"60"}</Text>
                         </CustomTouchableOpacity>
                     </View>
-                </View> */}
+                </View>
 
                 <View style={{ width: width - 40, height: 30, marginTop: 20, marginBottom: 30, flexDirection: "row", justifyContent: 'center', alignItems: 'center' }}>
                     <Text style={{ fontWeight: "700", color: COLORS.GRAY_90 }}>{"Eye Color: "}</Text>
