@@ -31,8 +31,16 @@ const styles = StyleSheet.create({
     primaryBtnText: {
         color: COLORS.WHITE, 
     },
+    teritaryBtn:{
+        color:COLORS.GRAY_90,
+    },
     secondaryBtnText: {
         color: COLORS.GRAY_90
+    },
+    teritaryBtnView:{
+        width:150,
+        borderWidth: 2,
+        borderColor: COLORS.PRIMARY_MAIN
     }
 });
 

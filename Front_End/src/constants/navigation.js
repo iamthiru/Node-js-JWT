@@ -9,5 +9,8 @@ export const SCREEN_NAMES = {
     PATIENT_PROFILE: 'Patient Profile',
     PATIENT_LIST: 'Patient List',
     SCHEDULE: 'Schedule',
-    SETTINGS: 'Settings'
+    SETTINGS: 'Settings',
+    ASSIGN_PATIENT:'Assign Patient',
+    PAINASSESSMENT: 'Pain Assessment',
+    PATIENT_DEATAIL_MODAL: 'Patient Detail Modal'
 }

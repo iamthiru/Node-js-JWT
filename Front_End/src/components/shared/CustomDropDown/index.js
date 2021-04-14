@@ -9,6 +9,9 @@ import styles from './styles'
 
 const CustomDropDown = ({ items,
     value,
+    labelText,
+    TextStyle,
+    caretdown,
     onChangeValue,
     placeholder = "Select",
     containerStyle = {},
@@ -19,7 +22,8 @@ const CustomDropDown = ({ items,
     activeItemStyle = {},
     activeLabelStyle = {},
     itemStyle = {},
-    arrowSize = 25,
+    arrowSize,
+    arrow,
     error,
     dropDownMaxHeight = 165 }) => {
     const window = useWindowDimensions()
@@ -58,7 +62,7 @@ const CustomDropDown = ({ items,
                         setTopLeft({
                             top: py + height - 20,
                             left: px - 20,
-                            width: width,
+                            width: dropDownStyle?.width || width,
                             height: dropDownStyle?.height || 100
                         })
                     })
@@ -81,23 +85,43 @@ const CustomDropDown = ({ items,
                     }}
                     renderToHardwareTextureAndroid
                 >
+                    {labelText && <Text style ={{
+                        fontSize:12,
+                        lineHeight:16,
+                        fontWeight:'400',
+                        color:COLORS.GRAY_90
+                    }}>{labelText}</Text>}
                     <Text
                         numberOfLines={1}
-                        style={
+                        style={[
                             value ?
                                 styles.labelStyle :
-                                styles.placeholderStyle
+                                styles.placeholderStyle,
+                                labelStyle
+                        ]
                         }
                     >
                         {label || placeholder}
                     </Text>
-                    <AntDesignIcon name={showPopUp ? "up" : "down"} color={COLORS.GRAY_60} size={22} style={{
-                        fontWeight: 'bold',
-                        transform: [{
-                            translateX: 2
-                        }],
-                        marginHorizontal: 6
-                    }} />
+                    {
+                        caretdown ?
+                        <AntDesignIcon name={showPopUp ? "caretup" : "caretdown"} 
+                        color={arrow?COLORS.PRIMARY_MAIN:COLORS.GRAY_90} size={arrowSize} style={{
+                            fontWeight:'bold',
+                            transform: [{
+                                translateX: 2
+                            }],
+                            marginHorizontal: 6
+                        }} />:
+                        <AntDesignIcon name={showPopUp ? "up" : "down"} color={arrow?COLORS.PRIMARY_DARKER:COLORS.GRAY_60} size={22} style={{
+                            fontWeight:'bold',
+                            transform: [{
+                                translateX: 2
+                            }],
+                            marginHorizontal: 6
+                        }} />
+                    }
+                   
                 </View>
 
             </CustomTouchableOpacity>
@@ -168,7 +192,8 @@ const CustomDropDown = ({ items,
                                             numberOfLines={1}
                                             style={{
                                                 ...styles.labelStyle,
-                                                ...(active ? styles.activeLabelStyle : {})
+                                                ...labelStyle,
+                                                ...(active ? styles.activeLabelStyle : {}),
                                             }}
                                         >
                                             {item?.label}

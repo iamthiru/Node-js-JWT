@@ -13,7 +13,7 @@ import styles from './styles';
 // import { View } from 'react-native'
 
 const PatientListItem = ({
-    item
+    props
 }) => {
     const navigation = useNavigation()
 
@@ -21,11 +21,8 @@ const PatientListItem = ({
         <CustomTouchableOpacity
             style={styles.patientItemContainer}
             onPress={() => {
-                navigation.navigate(SCREEN_NAMES.PATIENT_PROFILE, {
-                    item: {
-                        ...item
-                    }
-                })
+                navigation.navigate(SCREEN_NAMES.PATIENT_PROFILE,props
+                )
             }}
         >
             <Text
@@ -33,7 +30,7 @@ const PatientListItem = ({
                     width: undefined
                 }]}
             >
-                {item?.name}
+                {props?.name}
             </Text>
             <View
                 style={{
@@ -47,7 +44,7 @@ const PatientListItem = ({
                     }
                     ]}
                 >
-                    {item?.time}
+                    {props?.time}
                 </Text>
                 <AntDesignIcon name={"arrowright"} size={20} color={COLORS.GRAY_90}/>
             </View>

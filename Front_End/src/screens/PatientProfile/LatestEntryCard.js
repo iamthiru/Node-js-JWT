@@ -1,18 +1,18 @@
 import React from 'react';
-import {View, Text} from 'react-native';
+import {View, Text, useWindowDimensions} from 'react-native';
 import CustomTouchableOpacity from '../../components/shared/CustomTouchableOpacity';
 import {COLORS} from '../../constants/colors';
 import styles from './styles';
 
-// const { width, height } = Dimensions.get("window");
-
 const LatestEntryCard = ({latestEntryData}) => {
+  const { width, height } =useWindowDimensions();
+  
   return (
     <View
       style={[
         styles.patientCardContainer,
         {
-          height: 220,
+          height: height>800?height*0.37:height*0.45,
         },
       ]}>
       <View style={styles.latestEntryView}>
@@ -48,6 +48,7 @@ const LatestEntryCard = ({latestEntryData}) => {
       <View
         style={{
           paddingLeft: 20,
+          paddingTop:10
         }}>
         <Text style={styles.latestPainAssignText}>
             Pain Medication:
@@ -56,7 +57,10 @@ const LatestEntryCard = ({latestEntryData}) => {
           style={{
             paddingLeft: 25,
           }}>
-          <View style={{flexDirection: 'row'}}>
+          <View style={{
+            flexDirection: 'row',
+            paddingTop:10
+            }}>
             <Text style={styles.latestSubDataText}>
                 Name:
                 </Text>
@@ -64,7 +68,8 @@ const LatestEntryCard = ({latestEntryData}) => {
               {latestEntryData.pain_Medication.name}
             </Text>
           </View>
-          <View style={{flexDirection: 'row'}}>
+          <View style={{flexDirection: 'row',paddingVertical:10
+           }}>
             <Text style={styles.latestSubDataText}>
                 Dosage:
                 </Text>

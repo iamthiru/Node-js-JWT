@@ -76,7 +76,7 @@ const HomeScreen = ({ navigation }) => {
                     }}
                 >
                     <CustomButton
-                        onPress={() => { navigation.navigate(SCREEN_NAMES.PAIN_ASSESSMENT) }}
+                        onPress={() => { navigation.navigate(SCREEN_NAMES.PAINASSESSMENT) }}
                         title="New Pain Assessment"
                         textStyle={{ flex: 1, color: COLORS.GRAY_90, textAlign: 'center', paddingHorizontal: 5 }}
                         iconLeft={<MaterialCommunityIcons name={"clipboard-plus"} size={20} color={COLORS.GRAY_90} />}
@@ -121,7 +121,7 @@ const HomeScreen = ({ navigation }) => {
                             renderItem={({ item }) => {
                                 return (
                                     <PatientListItem
-                                        item={item}
+                                        props={item}
                                     />
                                 )
                             }}
@@ -145,7 +145,7 @@ const HomeScreen = ({ navigation }) => {
                 }
             </View>
             {/* Add Footer Here */}
-           <Footer />
+           <Footer/>
            <NewPatientPopUp
                 open={openNewPatient}
                 onClose={() => {

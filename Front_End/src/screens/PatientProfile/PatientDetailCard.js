@@ -63,7 +63,7 @@ const PatientDetailCard = ({ profile }) => {
                     fontWeight: '400'
                 }}
             >
-                {"Medical Number: " + profile.medicalNumber}
+                {"Medical Number: " + profile.medicalRecord}
             </Text>
             <View
                 style={{

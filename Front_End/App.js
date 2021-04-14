@@ -31,6 +31,9 @@ import PatientProfile from './src/screens/PatientProfile';
 import Settings from './src/screens/Settings';
 import Schedule from './src/screens/Schedule';
 import PatientList from './src/screens/PatientList';
+import AssignPatient from './src/screens/AssignPatient';
+import PainAssessment from './src/screens/PainAssessment';
+import PatientDetailModal from './src/components/PatientDetailsModal';
 
 const Stack = createStackNavigator();
 
@@ -205,7 +208,7 @@ function App() {
                 <Stack.Screen
                   name={SCREEN_NAMES.SETTINGS}
                   component={Settings}
-                  options={{ title: 'Settings' }}
+                  options={{ headerShown:false}}
                 />
                 <Stack.Screen
                   name={SCREEN_NAMES.SCHEDULE}
@@ -215,7 +218,7 @@ function App() {
                 <Stack.Screen
                   name={SCREEN_NAMES.PATIENT_LIST}
                   component={PatientList}
-                  options={{ title: 'Patient List' }}
+                  options={{ headerShown: false }}
                 />
                 <Stack.Screen
                   name={SCREEN_NAMES.HOME_OLD}
@@ -235,7 +238,8 @@ function App() {
                 <Stack.Screen
                   name={SCREEN_NAMES.FACIAL_EXPRESSION}
                   component={FacialExpressionScreen}
-                  options={{ title: "Facial Expression" }}
+                  options={{ title: "Facial Expression",
+                }}
                 />
                 <Stack.Screen
                   name={SCREEN_NAMES.PAIN_ASSESSMENT}
@@ -246,6 +250,21 @@ function App() {
                   name={SCREEN_NAMES.NEW_MEDICATION}
                   component={NewMedication}
                   options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                name = {SCREEN_NAMES.ASSIGN_PATIENT}
+                component = {AssignPatient}
+                options ={{headerShown:false}}
+                />
+                <Stack.Screen
+                name ={SCREEN_NAMES.PAINASSESSMENT}
+                component = {PainAssessment}
+                options ={{headerShown:false}}
+                />
+                <Stack.Screen
+                name = {SCREEN_NAMES.PATIENT_DEATAIL_MODAL}
+                component = {PatientDetailModal}
+                options = {{headerShown:false}}
                 />
               </>)}
             </Stack.Navigator>

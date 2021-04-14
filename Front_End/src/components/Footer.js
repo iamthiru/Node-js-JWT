@@ -1,8 +1,7 @@
 
 import React from 'react'
-import { View, Dimensions, Text, StyleSheet, Platform } from 'react-native';
+import { View, Dimensions, Text, Platform } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import AntDesignIcon from 'react-native-vector-icons/AntDesign';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import DeviceInfo from 'react-native-device-info'
@@ -11,13 +10,9 @@ import { COLORS } from '../constants/colors';
 import { SCREEN_NAMES } from '../constants/navigation';
 
 const { width, height } = Dimensions.get("window");
-
-const styles = StyleSheet.create({
-
-})
-
-
-const Footer = () => {
+const Footer = ({
+    marginBottom
+}) => {
     const route = useRoute()
     const navigation = useNavigation()
 
@@ -32,7 +27,7 @@ const Footer = () => {
                 minHeight: 60,
                 maxHeight: 70,
                 marginTop: 5,
-                marginBottom: DeviceInfo.hasNotch() ? 30 : 10,
+                marginBottom: marginBottom ? marginBottom : DeviceInfo.hasNotch() ? 30 : 10,
                 flexDirection: 'row',
                 justifyContent: 'space-between',
                 backgroundColor: COLORS.WHITE,

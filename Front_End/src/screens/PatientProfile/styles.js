@@ -49,21 +49,20 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   summaryChatReportMainView: {
-    marginTop:10,
+    marginTop: 30,
     width: width,
     backgroundColor: COLORS.GRAY_10,
+    marginBottom: 20,
   },
   summaryChatReportView: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginHorizontal: 20,
-    paddingLeft: 30,
     marginTop: 15,
   },
   summaryChatreportNoteView: {
     marginHorizontal: 20,
     paddingVertical: 10,
-    paddingLeft: 30,
   },
   summaryReportDataText: {
     fontSize: 14,
@@ -77,7 +76,8 @@ const styles = StyleSheet.create({
   summaryChatReportButtonView: {
     justifyContent: 'center',
     alignItems: 'flex-end',
-    marginRight: 10,
+    marginHorizontal: 20,
+    paddingBottom: 10,
   },
   summaryChatReportButtonText: {
     fontSize: 12,
@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginHorizontal: 20,
-    marginTop: 3,
+    marginTop: 15,
   },
   latestEntryButtonStyle: {
     width: 55,
@@ -102,9 +102,9 @@ const styles = StyleSheet.create({
   },
   latest_subTextData: {
     fontSize: 14,
-    lineHeight: 20,
+    lineHeight: 23,
     fontWeight: '400',
-    paddingLeft:10,
+    paddingLeft: 10,
     color: COLORS.GRAY_90,
   },
   latestText: {
@@ -129,6 +129,75 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: COLORS.PRIMARY_DARKER,
   },
+  allEntriesMainView: {
+    width: width,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingTop: 20,
+  },
+  allEntryText: {
+    fontSize: 20,
+    fontWeight: '700',
+    paddingHorizontal: 30,
+    color: COLORS.PRIMARY_DARKER,
+  },
+  allEntryTimeText: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginHorizontal: 20,
+    marginTop: 20,
+  },
+  allEntriesContainer: {
+    width: width * 0.9,
+    flexDirection: 'row',
+    height: 50,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 10,
+    marginLeft: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.PRIMARY_MAIN,
+  },
+  allEntriesButtonStyle: {
+    width: 55,
+    height: 35,
+    borderRadius: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: COLORS.PRIMARY_MAIN,
+  },
+  textStyle: {
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: '400',
+  },
+  containerStyle: {
+    borderRadius: 20,
+    borderColor: COLORS.PRIMARY_MAIN,
+    minHeight: 40,
+    width: 180,
+    marginRight: 15,
+  },
+  noEntrySubLabel: {
+    paddingTop: 10,
+    width: width * 0.55,
+    color: COLORS.GRAY_90,
+    fontSize: 16,
+    lineHeight: 24,
+  },
+  noEntryMainLabel: {
+    color: COLORS.PRIMARY_DARKER,
+    fontSize: 20,
+    fontWeight: '700',
+    lineHeight: 28,
+  },
+  dropDownLabel:{
+    fontSize: 12, 
+lineHeight: 24, 
+color: COLORS.GRAY_90, 
+marginHorizontal: 5,
+  }
 });
 
 export default styles;

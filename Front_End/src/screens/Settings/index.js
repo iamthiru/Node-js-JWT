@@ -1,45 +1,47 @@
-import { useRoute } from '@react-navigation/core';
 import React from 'react';
-import {
-    View,
-    Text,
-    SafeAreaView,
-    Dimensions
-} from 'react-native';
+import {View, Text, SafeAreaView, ScrollView} from 'react-native';
 import Footer from '../../components/Footer';
+import {COLORS} from '../../constants/colors';
+import Account from '../../components/SettingComponents/Account';
+import Notification from '../../components/SettingComponents/Notification';
+import Others from '../../components/SettingComponents/Others';
+import CustomButton from '../../components/shared/CustomButton';
+import {
+  ACCOUNT_DATA,
+  NOTIFICATIONS_DATA,
+  OTHER_DATA,
+} from '../../constants/settingsConstants';
+import styles from './styles';
 
-const { width, height } = Dimensions.get("window");
-
-
-const Settings = ({ navigation }) => {
-
-    return (
-            <View
-                style={{
-                    flex: 1,
-                    width: width,
-                    justifyContent: 'center',
-                    alignItems: 'center'
-                }}
-            >
-               <View
-                style={{
-                    flex: 1
-                }}
-               >
-               <Text>
-                    Settings
-                </Text>
-                <Text>
-                    Welcome,
-                </Text>
-                <Text>
-                </Text>
-               </View>
-                <Footer
-                />
-            </View>
-    );
+const Settings = ({navigation}) => {
+  return (
+    <SafeAreaView style={styles.safeAreaView}>
+      <View style={styles.mainView}>
+        <Text style={styles.labelStyle}>Settings</Text>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          style={{
+            marginTop: 40,
+          }}>
+          <Account data={ACCOUNT_DATA} />
+          <Notification data={NOTIFICATIONS_DATA} />
+          <Others data={OTHER_DATA} />
+        </ScrollView>
+        <View style={styles.btnView}>
+          <CustomButton
+            onPress={() => {}}
+            title="Logout"
+            type="tertiary"
+            textStyle={styles.textStyle}
+            style={{
+              backgroundColor: COLORS.WHITE,
+            }}
+          />
+        </View>
+      </View>
+      <Footer marginBottom={-5} />
+    </SafeAreaView>
+  );
 };
 
 export default Settings;

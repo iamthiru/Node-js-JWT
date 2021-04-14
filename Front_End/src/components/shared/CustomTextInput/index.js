@@ -3,7 +3,23 @@ import { View, Text, TextInput } from 'react-native';
 import styles from './styles';
 import { COLORS } from '../../../constants/colors';
 
-const CustomTextInput = ({ label, containerStyle, labelStyle, inputStyle, value, onChangeText, placeholder, isRequired, keyboardType = "default", maxLength, onBlur, error, helperText = "", errorText = "", secureTextEntry = false, editable = true }) => {
+const CustomTextInput = ({ 
+    label, 
+    containerStyle, 
+    labelStyle, 
+    inputStyle, 
+    value, 
+    onChangeText,
+     placeholder, 
+     isRequired, 
+     keyboardType = "default", 
+     maxLength, 
+     onBlur, 
+     error, 
+     helperText = "",
+      errorText = "", 
+      secureTextEntry = false, 
+      editable = true }) => {
 
     return (
         <View style={[styles.container, (containerStyle || {})]}>
