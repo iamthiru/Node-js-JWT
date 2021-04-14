@@ -79,6 +79,7 @@ const PupillaryDilationScreen = ({ navigation }) => {
     const [resultReady, setResultReady] = useState(false);
     const [showProcessedResult, setShowProcessedResult] = useState(false);
     const [downloadFileName, setDownloadFileName] = useState("");
+    const [resultValue, setResultValue] = useState("");
     const [resultImageURI, setResultImageURI] = useState("");
     const [fps, setFps] = useState(60);
     const [flashOn, setFlashOn] = useState(false);
@@ -327,13 +328,19 @@ const PupillaryDilationScreen = ({ navigation }) => {
                                 resetStates("");
                                 return;
                             }
-                            setTimeout(() => {
+
+                            setResultValue(result.data);
+                            setResultReady(true);
+                            setShowSpinner(false);
+                            setSpinnerMessage("");
+
+                            /* setTimeout(() => {
                                 let pngFileName = `${filename.substring(0, filename.lastIndexOf("."))}_Dilation_Plot.png`
                                 setDownloadFileName(pngFileName);
                                 setResultReady(true);
                                 setShowSpinner(false);
                                 setSpinnerMessage("");
-                            }, 100);
+                            }, 100); */
                         }).catch(err => {
                             Alert.alert("Error", "Error in processing the video");
                             setShowSpinner(false);
@@ -809,12 +816,21 @@ const PupillaryDilationScreen = ({ navigation }) => {
                     </CustomTouchableOpacity>
                 </>}
 
-                {resultReady && <CustomTouchableOpacity disabled={processing}
+                {/* {resultReady && <CustomTouchableOpacity disabled={processing}
                     style={{ backgroundColor: COLORS.PRIMARY_MAIN, borderRadius: 10, alignItems: "center", justifyContent: "center", height: 48, width: width - 80, paddingHorizontal: 28, marginBottom: 12 }}
                     onPress={onGetResultPress}
                 >
                     <Text style={{ fontSize: 14, fontWeight: "700", color: COLORS.WHITE, textAlign: "center" }}>{"GET RESULT"}</Text>
-                </CustomTouchableOpacity>}
+                </CustomTouchableOpacity>} */}
+                {resultReady && <>
+                    <Text style={{ fontSize: 16, fontWeight: "700", color: COLORS.GRAY_90, textAlign: "center", marginBottom: 15 }}>{`RESULT: ${resultValue}`}</Text>
+                    <CustomTouchableOpacity disabled={processing}
+                        style={{ backgroundColor: COLORS.PRIMARY_MAIN, borderRadius: 10, alignItems: "center", justifyContent: "center", height: 48, width: width - 80, paddingHorizontal: 28, marginBottom: 12 }}
+                        onPress={() => navigation.navigate(SCREEN_NAMES.FACIAL_EXPRESSION)}
+                    >
+                        <Text style={{ fontSize: 14, fontWeight: "700", color: COLORS.WHITE, textAlign: "center" }}>{"NEXT"}</Text>
+                    </CustomTouchableOpacity>
+                </>}
             </View>
         </>)
     }
