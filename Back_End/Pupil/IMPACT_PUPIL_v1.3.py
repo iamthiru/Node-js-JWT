@@ -1,8 +1,8 @@
 # Proprietary: Benten Technologies, Inc.
 # Author: Pranav H. Deo
 # Copyright Content
-# Date: 03/24/2021
-# Version: v1.4
+# Date: 04/12/2021
+# Version: v1.5
 
 # Code Description:
 # * 1080p videos of eyes to get Pupil->Iris for both NIR and COLOR.
@@ -10,7 +10,8 @@
 # * Video Quality and Drop Criteria Added (20 Frames).
 
 # UPDATES:
-# * Brightness Adjustor.
+# * Frame Cropper based on pixel and center co-ordinates.
+# * Histogram Equalization Adjustor.
 # * Fixed for any FPS.
 # * CODE MODULES created.
 # * MAJOR UPDATE - Added Dynamic Threshold Detector for Pupil and Iris.
@@ -35,7 +36,6 @@ import pandas as pd
 import Detector
 import Data_Processing
 import PUAL_Gen
-import Histogram_Adjustment
 
 # GLOBAL LISTS
 Iris_Dilation = []
@@ -93,12 +93,11 @@ while video.isOpened():
 
         if video_type == 'NIR' or video_type == 'Color':
             file_ext = filename.split(".")[-1]
-            im = frame
+            height, width, layers = frame.shape
+            im = Detector.Frame_Cropper(frame)
             # im = cv2.rotate(im, cv2.ROTATE_90_COUNTERCLOCKWISE)
             im = cv2.GaussianBlur(im, (5, 5), 0)
-            im = cv2.medianBlur(im, 5)
-            im = cv2.bilateralFilter(im, 9, 75, 75)
-            height, width, layers = im.shape
+            # im = cv2.bilateralFilter(im, 9, 75, 75)
             size = (width, height)
             Pupil, Pupil_center, pupil_radii, pupil_xpoints, pupil_ypoints, Pupil_Dilation = Detector.Pupil_Detection(im, frame_num, Pupil_Thresh, pupil_radii,
                                                                                                                       pupil_xpoints, pupil_ypoints, Pupil_Dilation, video_type)
@@ -122,7 +121,7 @@ while video.isOpened():
                     flag = 0
                     break
 
-            # cv2.imshow('Output', im)
+            cv2.imshow('Frame', im)
             frame_array.append(im)
             flag = 1
 
