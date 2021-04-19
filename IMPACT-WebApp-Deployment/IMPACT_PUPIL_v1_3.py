@@ -97,7 +97,6 @@ while video.isOpened():
             height, width, layers = frame.shape
             original_im = frame
             im = Detector.Frame_Cropper(frame)
-            # im = cv2.rotate(im, cv2.ROTATE_90_COUNTERCLOCKWISE)
             im = cv2.GaussianBlur(im, (5, 5), 0)
             # im = cv2.bilateralFilter(im, 9, 75, 75)
             size = (width, height)
@@ -124,7 +123,7 @@ while video.isOpened():
                     break
 
             cv2.imshow('Frame', original_im)
-            frame_array.append(im)
+            frame_array.append(original_im)
             flag = 1
 
         else:

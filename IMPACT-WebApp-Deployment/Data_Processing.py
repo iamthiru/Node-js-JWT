@@ -23,10 +23,9 @@ import matplotlib.pyplot as plt
 ########################################################################################################################
 
 def Output_Visual_Video_Generate(fln, fps, size, frame_array):
-    pathOut = './static/Pupil_Output_Videos/' + (fln.split('.')[0]) + '.mp4'
+    pathOut = './static/Pupil_Output_Videos/' + (fln.split('.')[0]) + '.MP4'
     out = cv2.VideoWriter(pathOut, cv2.VideoWriter_fourcc(*'DIVX'), fps, size)
     for i in range(len(frame_array)):
-        # writing to a image array
         out.write(frame_array[i])
     out.release()
 
