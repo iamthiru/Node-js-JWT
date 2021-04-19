@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
         height: (width + 60) / 2,
         borderRadius: (width + 60) / 4,
         borderWidth: 2,
-        borderColor: COLORS.WHITE,
+        borderColor:COLORS.WHITE,
         position: "absolute",
         top: ((width - ((width + 60) / 2)) / 2),
         left: ((width - ((width + 60) / 2)) / 2),
@@ -100,6 +100,17 @@ const styles = StyleSheet.create({
         fontSize: 72,
         fontWeight: "700"
     },
+    scrollViewStyle:{ 
+        width: width, 
+        height: height - width,
+         paddingHorizontal: 20
+         },
+         pointsText:{ 
+             marginBottom: 14, 
+             fontSize: 16, 
+             fontWeight: '400', 
+             color: COLORS.GRAY_90 
+            }
 });
 
 export default styles;

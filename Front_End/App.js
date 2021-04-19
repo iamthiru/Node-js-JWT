@@ -201,6 +201,11 @@ function App() {
                 />
               </>) : (<>
                 <Stack.Screen
+                  name={SCREEN_NAMES.HOME_OLD}
+                  component={HomeScreenOld}
+                  options={{ title: "Home" }}
+                />
+                <Stack.Screen
                   name={SCREEN_NAMES.HOME}
                   component={HomeScreen}
                   options={{ headerShown: false }}
@@ -220,11 +225,7 @@ function App() {
                   component={PatientList}
                   options={{ headerShown: false }}
                 />
-                <Stack.Screen
-                  name={SCREEN_NAMES.HOME_OLD}
-                  component={HomeScreenOld}
-                  options={{ title: "Home" }}
-                />
+              
                 <Stack.Screen
                   name={SCREEN_NAMES.PATIENT_PROFILE}
                   component={PatientProfile}

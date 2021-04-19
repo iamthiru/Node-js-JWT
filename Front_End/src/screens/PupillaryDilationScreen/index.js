@@ -91,6 +91,11 @@ const PupillaryDilationScreen = ({ navigation }) => {
     const [flashOn, setFlashOn] = useState(false);
     const [isDarkBrownEyes, setIsDarkBrownEyes] = useState(false);
     const [processingTimer, setProcessingTimer] = useState("0");
+    const[foucsPoints,setFocusPoints] = useState({
+      x:0.5,
+      y:0.5,
+      autoExposure: true
+    })
 
     useEffect(() => {
         setTimeout(() => checkStoragePermission(), 3000);
@@ -473,7 +478,13 @@ const PupillaryDilationScreen = ({ navigation }) => {
 
     const getCameraComponent = () => {
         return (<>
-            <View style={{ height: isRecording ? (height - 170 - 50) : width, width: width, overflow: "hidden" }}>
+            <View 
+              style={{ 
+                height: isRecording ? (height - 170 - 50) : width,
+                width: width, 
+                overflow: "hidden"
+              }}
+            >
                 <RNCamera
                     ref={ref => { camera = ref; }}
                     style={{ height: (height - 170 - 50), width: width }}
@@ -488,6 +499,7 @@ const PupillaryDilationScreen = ({ navigation }) => {
                     useNativeZoom={true}
                     ratio={"16:9"}
                     autoFocus={Platform.OS === "ios" ? RNCamera.Constants.AutoFocus.off : RNCamera.Constants.AutoFocus.on}
+                    autoFocusPointOfInterest ={foucsPoints||{}}
                     defaultVideoQuality={RNCamera.Constants.VideoQuality["1080p"]}
                     onCameraReady={() => setIsCameraReady(true)}
                     onRecordingStart={() => {
@@ -497,14 +509,28 @@ const PupillaryDilationScreen = ({ navigation }) => {
                         handleStopRecording();
                     }}
                     zoom={zoom}
-                    focusDepth={focusDepth}
-                    exposure={exposure < 0.15 ? 0.15 : exposure}
+                    // focusDepth={focusDepth}
+                    // exposure={exposure < 0.15 ? 0.15 : exposure}
                     flashMode={
                         (flashOn && isCameraReady) ? 
                         RNCamera.Constants.FlashMode.torch :
                         RNCamera.Constants.FlashMode.off
                     }
                 >
+                  <CustomTouchableOpacity
+                    activeOpacity={1}
+                    onPress={(evt) => {
+                     setFocusPoints({
+                       x:parseFloat(1 - (evt.nativeEvent.pageX)/width),
+                       y:parseFloat(1 - (evt.nativeEvent.pageY-60)/width),
+                       autoExposure:true
+                     })
+
+                    }}
+                   style ={{
+                    flex:1
+                  }}>
+                  
                     <View style={styles.frameTopLeft} pointerEvents="none"></View>
                     <View style={styles.frameTopRight} pointerEvents="none"></View>
                     <View style={styles.frameBottomLeft} pointerEvents="none"></View>
@@ -517,10 +543,11 @@ const PupillaryDilationScreen = ({ navigation }) => {
                         <Text style={{ fontWeight: "700", fontSize: 16, color: COLORS.WHITE }}>NO Blink</Text>
                         <Text style={{ fontWeight: "700", fontSize: 16, color: COLORS.WHITE }}>Record for at least 10 seconds</Text>
                     </View>}
+                  </CustomTouchableOpacity>
                 </RNCamera>
             </View>
 
-            {!isRecording && <ScrollView style={{ width: width, height: height - width, paddingHorizontal: 20 }}>
+            {!isRecording && <ScrollView style={styles.scrollViewStyle}>
                 <View style={{ height: 8 }} />
                 <View style={{ flexDirection: "row", width: width - 40, justifyContent: 'space-between', marginBottom: 8 }}>
                     <View>
@@ -536,19 +563,19 @@ const PupillaryDilationScreen = ({ navigation }) => {
                     <CustomTouchableOpacity style={{ alignItems: "center", justifyContent: "center", width: 30, height: 30, borderRadius: 5, backgroundColor: selectedSetting === SETTINGS.ZOOM ? COLORS.PRIMARY_MAIN : "rgba(0,0,0,0)", borderColor: COLORS.PRIMARY_MAIN, borderWidth: selectedSetting === SETTINGS.ZOOM ? 0 : 2, alignItems: "center", justifyContent: "center" }} onPress={() => toggleSettings(SETTINGS.ZOOM)}>
                         <Fontisto name="zoom" size={18} color={selectedSetting === SETTINGS.ZOOM ? COLORS.WHITE : COLORS.GRAY_90} />
                     </CustomTouchableOpacity>
-                    <CustomTouchableOpacity style={{ marginLeft: 15, alignItems: "center", justifyContent: "center", width: 30, height: 30, borderRadius: 5, backgroundColor: selectedSetting === SETTINGS.FOCUS_DEPTH ? COLORS.PRIMARY_MAIN : "rgba(0,0,0,0)", borderColor: COLORS.PRIMARY_MAIN, borderWidth: selectedSetting === SETTINGS.FOCUS_DEPTH ? 0 : 2, alignItems: "center", justifyContent: "center" }} onPress={() => toggleSettings(SETTINGS.FOCUS_DEPTH)}>
+                    {/* <CustomTouchableOpacity style={{ marginLeft: 15, alignItems: "center", justifyContent: "center", width: 30, height: 30, borderRadius: 5, backgroundColor: selectedSetting === SETTINGS.FOCUS_DEPTH ? COLORS.PRIMARY_MAIN : "rgba(0,0,0,0)", borderColor: COLORS.PRIMARY_MAIN, borderWidth: selectedSetting === SETTINGS.FOCUS_DEPTH ? 0 : 2, alignItems: "center", justifyContent: "center" }} onPress={() => toggleSettings(SETTINGS.FOCUS_DEPTH)}>
                         <MaterialIcons name="center-focus-strong" size={18} color={selectedSetting === SETTINGS.FOCUS_DEPTH ? COLORS.WHITE : COLORS.GRAY_90} />
                     </CustomTouchableOpacity>
                     <CustomTouchableOpacity style={{ marginLeft: 15, alignItems: "center", justifyContent: "center", width: 30, height: 30, borderRadius: 5, backgroundColor: selectedSetting === SETTINGS.EXPOSURE ? COLORS.PRIMARY_MAIN : "rgba(0,0,0,0)", borderColor: COLORS.PRIMARY_MAIN, borderWidth: selectedSetting === SETTINGS.EXPOSURE ? 0 : 2, alignItems: "center", justifyContent: "center" }} onPress={() => toggleSettings(SETTINGS.EXPOSURE)}>
                         <MaterialIcons name="brightness-5" size={18} color={selectedSetting === SETTINGS.EXPOSURE ? COLORS.WHITE : COLORS.GRAY_90} />
-                    </CustomTouchableOpacity>
+                    </CustomTouchableOpacity> */}
                     </View>
                 </View>
-                <Text style={{ marginBottom: 14, fontSize: 16, fontWeight: '400', color: COLORS.GRAY_90 }}>1. Find a well-lit environment.</Text>
-                <Text style={{ marginBottom: 14, fontSize: 16, fontWeight: '400', color: COLORS.GRAY_90 }}>2. Position one eye within the circular frame.</Text>
+                <Text style={styles.pointsText}>1. Find a well-lit environment.</Text>
+                <Text style={styles.pointsText}>2. Position one eye within the circular frame.</Text>
                 {/* <Text style={{ marginBottom: 14, fontSize: 16, fontWeight: '400', color: COLORS.GRAY_90 }}>3. Turn your device  horizontally if needed.</Text> */}
-                <Text style={{ marginBottom: 14, fontSize: 16, fontWeight: '400', color: COLORS.GRAY_90 }}>3. Get ready to not blink for 10 seconds.</Text>
-                <Text style={{ marginBottom: 0, fontSize: 16, fontWeight: '400', color: COLORS.GRAY_90 }}>4. Record the eye for at least 10 seconds.</Text>
+                <Text style={styles.pointsText}>3. Get ready to not blink for 10 seconds.</Text>
+                <Text style={styles.pointsText}>4. Record the eye for at least 10 seconds.</Text>
 
                 <View style={{ width: width - 40, height: 30, marginTop: 20, marginBottom: 30, flexDirection: "row", justifyContent: 'center', alignItems: 'center' }}>
                     <Text style={{ fontWeight: "700", color: COLORS.GRAY_90 }}>{"FPS: "}</Text>
