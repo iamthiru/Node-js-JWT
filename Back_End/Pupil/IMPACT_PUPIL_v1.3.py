@@ -1,7 +1,7 @@
 # Proprietary: Benten Technologies, Inc.
 # Author: Pranav H. Deo
 # Copyright Content
-# Date: 04/14/2021
+# Date: 04/19/2021
 # Version: v1.5
 
 # Code Description:
@@ -97,9 +97,8 @@ while video.isOpened():
             height, width, layers = frame.shape
             original_im = frame
             im = Detector.Frame_Cropper(frame)
-            # im = cv2.rotate(im, cv2.ROTATE_90_COUNTERCLOCKWISE)
             im = cv2.GaussianBlur(im, (5, 5), 0)
-            # im = cv2.bilateralFilter(im, 9, 75, 75)
+            im = cv2.bilateralFilter(im, 9, 75, 75)
             size = (width, height)
             Pupil, Pupil_center, pupil_radii, pupil_xpoints, pupil_ypoints, Pupil_Dilation = Detector.Pupil_Detection(original_im, im, frame_num, Pupil_Thresh, pupil_radii,
                                                                                                                       pupil_xpoints, pupil_ypoints, Pupil_Dilation, video_type)
@@ -124,7 +123,7 @@ while video.isOpened():
                     break
 
             cv2.imshow('Frame', original_im)
-            frame_array.append(im)
+            frame_array.append(original_im)
             flag = 1
 
         else:
