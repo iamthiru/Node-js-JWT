@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:964932305638:android:830c719c071a36aec33127",
+        "mobilesdk_app_id": "1:964932305638:android:9f80012f72e43d73c33127",
         "android_client_info": {
-          "package_name": "com.bententech.impact"
+          "package_name": "com.impact"
         }
       },
       "oauth_client": [

@@ -1,4 +1,4 @@
-package com.impact;
+package com.bententech.impact;
 
 import com.facebook.react.ReactActivity;
 

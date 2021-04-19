@@ -129,7 +129,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.impact"
+        applicationId "com.bententech.impact"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 20
@@ -194,6 +194,20 @@ dependencies {
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"
 
     implementation 'com.android.support:multidex:1.0.3'
+
+    implementation platform('com.google.firebase:firebase-bom:27.0.0')
+
+    implementation (project(':react-native-camera')) {
+        exclude group: "com.google.android.gms"
+        exclude group: "com.google.android.gms", module: "play-services-vision"
+        exclude group: "com.google.firebase", module: "firebase-ml-vision-face-model"
+    }
+    implementation ("com.google.firebase:firebase-ml-vision:19.0.3") {
+        force = true;
+    }
+    implementation ("com.google.firebase:firebase-ml-vision-face-model:17.0.2") {
+        force = true;
+    }
 
     debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}") {
       exclude group:'com.facebook.fbjni'

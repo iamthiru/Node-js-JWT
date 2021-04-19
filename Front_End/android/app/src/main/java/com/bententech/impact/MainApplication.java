@@ -1,4 +1,4 @@
-package com.impact;
+package com.bententech.impact;
 
 import android.app.Application;
 import android.content.Context;
