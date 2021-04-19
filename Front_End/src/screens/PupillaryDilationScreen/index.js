@@ -42,6 +42,7 @@ const { VideoCropper } = NativeModules
 
 let camera = null;
 let intervalId = null;
+let processingIntervalId = null;
 
 const EYE_BORDER_TYPE = {
     OVAL: "oval",
@@ -59,15 +60,20 @@ const SETTINGS = {
     FOCUS_DEPTH: "focusDepth"
 }
 
+const DEFAULT_DARK_BROWN_EXPOSURE = 0.8;
+const DEFAULT_OTHER_EXPOSURE = 0.0; //0.2
+
 const PupillaryDilationScreen = ({ navigation }) => {
 
     const [eyeBorderType, setEyeBorderType] = useState(EYE_BORDER_TYPE.OVAL);
     const [showSpinner, setShowSpinner] = useState(false);
     const [spinnerMessage, setSpinnerMessage] = useState("");
     const [selectedSetting, setSelectedSetting] = useState("");
-    const [exposure, setExposure] = useState(0.2);
-    const [zoom, setZoom] = useState(Platform.OS === "ios" ? 0.02 : 0.175)
-    const [focusDepth, setFocusDepth] = useState(0.3)
+    const [exposure, setExposure] = useState(DEFAULT_OTHER_EXPOSURE);
+    // const [zoom, setZoom] = useState(Platform.OS === "ios" ? 0.02 : 0.175)
+    const [zoom, setZoom] = useState(0.1)
+    // const [focusDepth, setFocusDepth] = useState(0.3)
+    const [focusDepth, setFocusDepth] = useState(0.1)
     const [timer, setTimer] = useState("0");
     const [duration, setDuration] = useState("00:00");
     const [processing, setProcessing] = useState(false);
@@ -84,6 +90,7 @@ const PupillaryDilationScreen = ({ navigation }) => {
     const [fps, setFps] = useState(60);
     const [flashOn, setFlashOn] = useState(false);
     const [isDarkBrownEyes, setIsDarkBrownEyes] = useState(false);
+    const [processingTimer, setProcessingTimer] = useState("0");
 
     useEffect(() => {
         setTimeout(() => checkStoragePermission(), 3000);
@@ -118,6 +125,19 @@ const PupillaryDilationScreen = ({ navigation }) => {
         setEyeBorderType(eyeBorderType === EYE_BORDER_TYPE.OVAL ? EYE_BORDER_TYPE.RECTANGLE : EYE_BORDER_TYPE.OVAL);
     }
 
+    const startProcessingTimer = () => {
+        let timerValue = 0
+        processingIntervalId = setInterval(() => {
+            timerValue += 1
+            setProcessingTimer(timerValue.toString())
+        }, 1000)
+    }
+
+    const clearProcessingTimer = () => {
+        setProcessingTimer("0");
+        clearInterval(processingIntervalId);
+    }
+
     const onStartRecordingPress = () => {
         setProcessing(true);
         let timerValue = 3;
@@ -147,6 +167,7 @@ const PupillaryDilationScreen = ({ navigation }) => {
 
             setShowSpinner(true);
             setSpinnerMessage("Cropping...");
+            startProcessingTimer();
 
             cropVideo(data.uri, (croppedVideoPath) => {
                 setSpinnerMessage("Converting FrameRate...");
@@ -156,11 +177,13 @@ const PupillaryDilationScreen = ({ navigation }) => {
                     if (Platform.OS === "ios") {
                         setShowSpinner(false);
                         setSpinnerMessage("");
+                        clearProcessingTimer();
                         setIsRecording(false);
                         setVideoURL(resultPath);
                     } else {
                         setShowSpinner(false);
                         setSpinnerMessage("");
+                        clearProcessingTimer();
                         setIsRecording(false);
                         setVideoURL(resultPath);
                     }
@@ -168,12 +191,14 @@ const PupillaryDilationScreen = ({ navigation }) => {
                     console.log("RRFFMPEG - FPS Conversion Error", err)
                     setShowSpinner(false);
                     setSpinnerMessage("");
+                    clearProcessingTimer();
                     setIsRecording(false);
                     setVideoURL(croppedVideoPath);
                 })
             }, (error) => {
                 setShowSpinner(false);
                 setSpinnerMessage("");
+                clearProcessingTimer();
                 setIsRecording(false);
                 setVideoURL(error.originalPath);
             });
@@ -281,6 +306,7 @@ const PupillaryDilationScreen = ({ navigation }) => {
 
         setShowSpinner(true);
         setSpinnerMessage("Uploading...");
+        startProcessingTimer();
 
         try {
             const s3bucket = new S3({
@@ -311,6 +337,7 @@ const PupillaryDilationScreen = ({ navigation }) => {
                         Alert.alert("Error", "Error in uploading the video");
                         setShowSpinner(false);
                         setSpinnerMessage("");
+                        clearProcessingTimer();
                         resetStates();
                     } else {
                         console.log('success', data);
@@ -325,6 +352,7 @@ const PupillaryDilationScreen = ({ navigation }) => {
                                 // setShowProcessedResult(true);
                                 setShowSpinner(false);
                                 setSpinnerMessage("");
+                                clearProcessingTimer();
                                 resetStates("");
                                 return;
                             }
@@ -333,6 +361,7 @@ const PupillaryDilationScreen = ({ navigation }) => {
                             setResultReady(true);
                             setShowSpinner(false);
                             setSpinnerMessage("");
+                            clearProcessingTimer();
 
                             /* setTimeout(() => {
                                 let pngFileName = `${filename.substring(0, filename.lastIndexOf("."))}_Dilation_Plot.png`
@@ -340,6 +369,7 @@ const PupillaryDilationScreen = ({ navigation }) => {
                                 setResultReady(true);
                                 setShowSpinner(false);
                                 setSpinnerMessage("");
+                                clearProcessingTimer();
                             }, 100); */
                         }).catch(err => {
                             Alert.alert("Error", "Error in processing the video");
@@ -347,6 +377,7 @@ const PupillaryDilationScreen = ({ navigation }) => {
                             // setResultReady(true);
                             // setShowProcessedResult(true);
                             setSpinnerMessage("");
+                            clearProcessingTimer();
                             resetStates("");
                         })
                     }
@@ -356,6 +387,7 @@ const PupillaryDilationScreen = ({ navigation }) => {
             Alert.alert("Error", "Error in uploading the video");
             setShowSpinner(false);
             setSpinnerMessage("");
+            clearProcessingTimer();
             resetStates();
         }
     }
@@ -364,6 +396,7 @@ const PupillaryDilationScreen = ({ navigation }) => {
 
         setShowSpinner(true);
         setSpinnerMessage("Retriving Result...");
+        startProcessingTimer();
 
         const params = {
             Bucket: BUCKET_NAME,
@@ -383,6 +416,7 @@ const PupillaryDilationScreen = ({ navigation }) => {
                 Alert.alert("Error", "Error in retriving the result");
                 setShowSpinner(false);
                 setSpinnerMessage("");
+                clearProcessingTimer();
                 setResultReady(false);
                 setDownloadFileName("");
                 resetStates();
@@ -392,6 +426,7 @@ const PupillaryDilationScreen = ({ navigation }) => {
                 setResultImageURI(`data:${data.ContentType};base64,${base64Str}`);
                 setShowSpinner(false);
                 setSpinnerMessage("");
+                clearProcessingTimer();
                 setResultReady(false);
                 setDownloadFileName("");
                 resetStates();
@@ -426,12 +461,12 @@ const PupillaryDilationScreen = ({ navigation }) => {
         setIsDarkBrownEyes(isDarkBrown);
 
         if (isDarkBrown) {
-            if (exposure !== 0.8) {
-                setExposure(0.8);
+            if (exposure !== DEFAULT_DARK_BROWN_EXPOSURE) {
+                setExposure(DEFAULT_DARK_BROWN_EXPOSURE);
             }
         } else {
-            if (exposure !== 0.2) {
-                setExposure(0.2);
+            if (exposure !== DEFAULT_OTHER_EXPOSURE) {
+                setExposure(DEFAULT_OTHER_EXPOSURE);
             }
         }
     }
@@ -864,7 +899,7 @@ const PupillaryDilationScreen = ({ navigation }) => {
             {showProcessedResult && getResultScreen()}
             <Spinner
                 visible={showSpinner}
-                textContent={spinnerMessage}
+                textContent={`${spinnerMessage} ${processingTimer !== "0"? `${processingTimer} secs` : ""}`}
                 textStyle={{ color: COLORS.WHITE }}
             />
         </View>

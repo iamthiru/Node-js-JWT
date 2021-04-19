@@ -132,7 +132,7 @@ android {
         applicationId "com.impact"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 19
+        versionCode 20
         versionName "1.0"
         missingDimensionStrategy 'react-native-camera', 'mlkit'
         multiDexEnabled true
@@ -142,7 +142,7 @@ android {
             reset()
             enable enableSeparateBuildPerCPUArchitecture
             universalApk false  // If true, also generate a universal APK
-            include "armeabi-v7a", "x86", "arm64-v8a", "x86_64"
+            include "armeabi-v7a", "x86", "arm64-v8a", "x86_64" 
         }
     }
     signingConfigs {
