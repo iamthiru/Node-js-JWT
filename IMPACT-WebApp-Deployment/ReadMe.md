@@ -8,10 +8,10 @@
 
 ### Provisioning AWS Services Manually for IMPACT App Deployment
 
-***Step 1: Deploy an instance (Reference - LINK)
-***Step 2: Deploy an RDS instance (Reference - LINK)
-***Step 3: Creating an S3 Bucket for Storage (Reference - LINK)
+* Step 1: Deploy an instance (Reference - LINK)
+* Step 2: Deploy an RDS instance (Reference - LINK)
+* Step 3: Creating an S3 Bucket for Storage (Reference - LINK)
 
 ### Provisioning AWS Services Automatically using CloudFormation
 
-***Upload the document named IMPACT-CFTemplate.yaml to CloudFormation which will automatically provision all the resources for you.
+* Upload the document named IMPACT-CFTemplate.yaml to CloudFormation which will automatically provision all the resources for you.
