@@ -33,12 +33,17 @@ Parameters:
   PublicSubnet2CIDR:
     Description: IMPACT Public Subnet 2
     Type: String
-    Default: 10.192.4.0/24
-
-  PrivateSubnetCIDR:
-    Description: IMPACT Private Subnet
-    Type: String
     Default: 10.192.2.0/24
+
+  PrivateSubnet1CIDR:
+    Description: IMPACT Private Subnet 1
+    Type: String
+    Default: 10.192.3.0/24
+
+  PrivateSubnet2CIDR:
+    Description: IMPACT Private Subnet 2
+    Type: String
+    Default: 10.192.4.0/24
 
   # ------------ EC2 Config ------------
   KeyName:
@@ -66,24 +71,24 @@ Parameters:
     AllowedPattern: (\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})
     ConstraintDescription: Must be of a valid IP CIDR range of the form x.x.x.x/x.
 
-    # ------------ DB Config ------------
-    DBName:
-      Default: impact
-      Description: MyRDSMySQLDB
-      Type: String
-      MinLength: 1
-      MaxLength: 16
-      AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
-      ConstraintDescription: Must begin with a letter and contain only alphanumeric characters.
+  # ------------ DB Config ------------
+  DBName:
+    Default: impactdb
+    Description: MyRDSMySQLDB
+    Type: String
+    MinLength: 1
+    MaxLength: 16
+    AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
+    ConstraintDescription: Must begin with a letter and contain only alphanumeric characters.
 
-    DBInstanceID:
-      Default: impact
-      Description: My database instance
-      Type: String
-      MinLength: 1
-      MaxLength: 63
-      AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
-      ConstraintDescription: Must begin with a letter and contain only alphanumeric characters.
+  DBInstanceID:
+    Default: impacttest
+    Description: My database instance
+    Type: String
+    MinLength: 1
+    MaxLength: 63
+    AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
+    ConstraintDescription: Must begin with a letter and contain only alphanumeric characters.
 # ----------------------------------------------------------------------------------------------------------------------
 # Resources Section
 # ----------------------------------------------------------------------------------------------------------------------
@@ -122,16 +127,27 @@ Resources:
         - Key: Name
           Value: IMPACT-PublicSubnet2
 
-  ImpactPrivateSubnet:
+  ImpactPrivateSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref 'ImpactVPC'
       AvailabilityZone: "us-east-1c"
-      CidrBlock: !Ref 'PrivateSubnetCIDR'
+      CidrBlock: !Ref 'PrivateSubnet1CIDR'
       MapPublicIpOnLaunch: false
       Tags:
         - Key: Name
-          Value: IMPACT-PrivateSubnet
+          Value: IMPACT-PrivateSubnet-01
+
+  ImpactPrivateSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref 'ImpactVPC'
+      AvailabilityZone: "us-east-1d"
+      CidrBlock: !Ref 'PrivateSubnet2CIDR'
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: IMPACT-PrivateSubnet-02
 
 # --------------------------------------------- INTERNET GATEWAY & ROUTES ----------------------------------------------
   ImpactInternetGateway:
@@ -147,7 +163,7 @@ Resources:
       InternetGatewayId: !Ref 'ImpactInternetGateway'
       VpcId: !Ref 'ImpactVPC'
 
-  MyAppPublicRouteTable:
+  ImpactPublicRouteTable:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref 'ImpactVPC'
@@ -179,7 +195,7 @@ Resources:
   WebServerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      VpcId: !Ref 'MyAppVPC'
+      VpcId: !Ref 'ImpactVPC'
       GroupDescription: SSH port 22; TCP port 80, 3306 and 5000
       SecurityGroupIngress:
         - IpProtocol: tcp
@@ -218,7 +234,8 @@ Resources:
           - Effect: Allow
             Action: 'dynamodb:*'
             Resource: '*'
-      Roles: !Ref 'ImpactIAMRole'
+      Roles:
+        - !Ref 'ImpactIAMRole'
 
   ImpactIAMRole:
     Type: AWS::IAM::Role
@@ -365,7 +382,8 @@ Resources:
     Properties:
       DBSubnetGroupDescription: Subnet Group for RDS-MySQL database
       SubnetIds:
-        - !Ref 'ImpactPrivateSubnet'
+        - !Ref 'ImpactPrivateSubnet1'
+        - !Ref 'ImpactPrivateSubnet2'
       Tags:
         - Key: Name
           Value: IMPACT-RDS-SubnetGroup
@@ -397,7 +415,7 @@ Resources:
 # Output Section
 # ----------------------------------------------------------------------------------------------------------------------
 Outputs:
-  MyWebServerSecGroup:
+  ImpactWebServerSecGroup:
     Description: Reference to the created WebServerSecurityGroup
     Value: !Ref 'WebServerSecurityGroup'
 
@@ -417,9 +435,13 @@ Outputs:
     Description: Reference to the public subnet 02
     Value: !Ref 'ImpactPublicSubnet2'
 
-  ImpactPrivateSubnet:
+  ImpactPrivateSubnet1:
     Description: Reference to the private subnet
-    Value: !Ref 'ImpactPrivateSubnet'
+    Value: !Ref 'ImpactPrivateSubnet1'
+
+  ImpactPrivateSubnet2:
+    Description: Reference to the private subnet
+    Value: !Ref 'ImpactPrivateSubnet2'
 
   ImpactLaunchTemplate:
     Description: Launch Template
@@ -433,7 +455,7 @@ Outputs:
     Description: Auto-Scaling Groups
     Value: !Ref 'ImpactASG02'
 
-  MyRDS:
+  ImpactRDS:
     Description: RDS-DB
     Value: !Ref 'ImpactDatabase'
 # ----------------------------------------------------------------------------------------------------------------------
