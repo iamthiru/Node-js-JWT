@@ -1,10 +1,57 @@
 # AWS Cloud Deployment
 
-## Resources Under Utilization:
+### Resources Under Utilization:
 1. EC2 (Elastic Cloud Compute)
 2. S3 (Simple Storage Service)
 3. RDS (Relational Database Service)
 4. IAM (Identity & Access Management)
 
-## About:
+### Provision an EC2 Instance for IMPACT App Deployment
+
+***Step 1: Deploy an instance (Reference - LINK)
+
+[Copy the Below User-Data for the Instance]
+
+Content-Type: multipart/mixed; boundary="//"
+MIME-Version: 1.0
+
+--//
+Content-Type: text/cloud-config; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: attachment; filename="cloud-config.txt"
+
+#cloud-config
+cloud_final_modules:
+- [scripts-user, always]
+
+--//
+Content-Type: text/x-shellscript; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: attachment; filename="userdata.txt"
+
+#!/bin/bash
+#==========================================
+# Installing LAMP
+#==========================================
+apt-get update
+apt-get -y upgrade
+apt install -y apache2
+apt-get install php libapache2-mod-php php-mysql php-curl php-gd php-json php-zip php-mbstring 
+service apache2 restart
+apt-get install -y mysql-server
+#==========================================
+# Installing Docker
+#==========================================
+apt install -y apt-transport-https ca-certificates curl software-properties-common
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
+apt-get update
+apt install -y docker-ce
+docker login -u pdeo2020 -p Pdeo_2020
+docker pull pdeo2020/impact-benten:v11
+docker run -d -p 5000:5000 --name impact pdeo2020/impact-benten:v11
+--//
+
 
