@@ -1,0 +1,397 @@
+# Proprietary: Benten Technologies, Inc.
+# Author: Pranav H. Deo
+# Copyright Content
+# Date: 04/20/2021
+
+# Content Description:
+# CloudFormation is a template with the help of which one can deploy their cloud architecture in minutes without
+# manually provisioning it one at a time. It has the description of all the resources to deploy the resources.
+
+# Resources:
+# EC2, RDS, S3, IAMRole, ElasticIP
+
+# ----------------------------------------------------------------------------------------------------------------------
+# AWS CloudFormation Template
+# ----------------------------------------------------------------------------------------------------------------------
+AWSTemplateFormatVersion: '2010-09-09'
+Description: IMPACT CLOUD DEPLOYMENT TEMPLATE
+# ----------------------------------------------------------------------------------------------------------------------
+# Parameters Section
+# ----------------------------------------------------------------------------------------------------------------------
+Parameters:
+  # ------------ VPC, Subnets CIDR ------------
+  VPCCIDR:
+    Description: IMPACT DEFAULT VPC
+    Type: String
+    Default: 172.31.0.0/16
+
+  PublicSubnet1CIDR:
+    Description: IMPACT Public Subnet 1
+    Type: String
+    Default: 172.31.32.0/20
+
+  PublicSubnet2CIDR:
+    Description: IMPACT Public Subnet 2
+    Type: String
+    Default: 172.31.0.0/20
+
+  PrivateSubnetCIDR:
+    Description: IMPACT Private Subnet
+    Type: String
+    Default: 172.31.80.0/20
+
+  # ------------ EC2 Config ------------
+  KeyName:
+    Description: imp_benten
+    Type: AWS::EC2::KeyPair::KeyName
+    Default: imp_benten
+    ConstraintDescription: imp_benten
+
+  InstanceType:
+    Description: EC2 Instance
+    Type: String
+    Default: t3.xlarge
+
+  AmiId:
+    Description: Ubuntu 20.04 LTS AMI Id
+    Type: String
+    Default: ami-042e8287309f5df03
+
+  SSHLocation:
+    Description: Addresses from where one could get into an instance
+    Type: String
+    MinLength: 9
+    MaxLength: 18
+    Default: 0.0.0.0/0
+    AllowedPattern: (\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})
+    ConstraintDescription: Must be of a valid IP CIDR range of the form x.x.x.x/x.
+
+    # ------------ DB Config ------------
+    DBName:
+      Default: impact
+      Description: MyRDSMySQLDB
+      Type: String
+      MinLength: 1
+      MaxLength: 16
+      AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
+      ConstraintDescription: Must begin with a letter and contain only alphanumeric characters.
+
+    DBInstanceID:
+      Default: impact
+      Description: My database instance
+      Type: String
+      MinLength: 1
+      MaxLength: 63
+      AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
+      ConstraintDescription: Must begin with a letter and contain only alphanumeric characters.
+# ----------------------------------------------------------------------------------------------------------------------
+# Resources Section
+# ----------------------------------------------------------------------------------------------------------------------
+Resources:
+# --------------------------------------- VPC, PUBLIC-PRIVATE SUBNETS & ASSOCIATION ------------------------------------
+  ImpactVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref 'VPCCIDR'
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      InstanceTenancy: default
+      Tags:
+        - Key: Name
+          Value: IMPACT-VPC
+
+  ImpactPublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref 'ImpactVPC'
+      AvailabilityZone: "us-east-1a"
+      CidrBlock: !Ref 'PublicSubnet1CIDR'
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: IMPACT-PublicSubnet1
+
+  ImpactPublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref 'ImpactVPC'
+      AvailabilityZone: "us-east-1b"
+      CidrBlock: !Ref 'PublicSubnet2CIDR'
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: IMPACT-PublicSubnet2
+
+  ImpactPrivateSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref 'ImpactVPC'
+      AvailabilityZone: "us-east-1c"
+      CidrBlock: !Ref 'PrivateSubnetCIDR'
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: IMPACT-PrivateSubnet
+
+# ----------------------------------- WEB SECURITY GROUPS, IAM ROLE & INSTANCE PROFILE ---------------------------------
+  WebServerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !Ref 'MyAppVPC'
+      GroupDescription: SSH port 22; TCP port 80, 3306 and 5000
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: !Ref 'SSHLocation'
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: !Ref 'SSHLocation'
+        - IpProtocol: tcp
+          FromPort: 5000
+          ToPort: 5000
+          CidrIp: !Ref 'SSHLocation'
+        - IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          CidrIp: !Ref 'SSHLocation'
+      Tags:
+        - Key: Name
+          Value: IMPACT-WSSG
+
+  ImpactManagedPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: EC2-S3-RDS-DynamoDB-Policy
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action: 's3:*'
+            Resource: '*'
+          - Effect: Allow
+            Action: 'rds:*'
+            Resource: '*'
+          - Effect: Allow
+            Action: 'dynamodb:*'
+            Resource: '*'
+      Roles: !Ref 'ImpactIAMRole'
+
+  ImpactIAMRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: IMPACT-EC2-S3-RDS
+      Description: IAM role for EC2, S3 and RDS Access
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - 'ec2.amazonaws.com'
+            Action:
+              - 'sts:AssumeRole'
+      Path: '/'
+
+  ImpactInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: '/'
+      Roles:
+        - Ref: 'ImpactIAMRole'
+
+# --------------------------------------- LAUNCH TEMPLATE & AUTO-SCALING GROUPS ----------------------------------------
+  ImpactLaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateName: ImpactLT
+      LaunchTemplateData:
+        IamInstanceProfile:
+          Arn: !GetAtt
+            - ImpactInstanceProfile
+            - Arn
+        DisableApiTermination: true
+        ImageId: !Ref 'AmiId'
+        InstanceType: !Ref 'InstanceType'
+        KeyName: !Ref 'KeyName'
+        SecurityGroupIds:
+          - !GetAtt WebServerSecurityGroup.GroupId
+        BlockDeviceMappings:
+          - DeviceName: /dev/sdm
+            Ebs:
+              VolumeType: io1
+              Encrypted: false
+              Iops: 200
+              DeleteOnTermination: true
+              VolumeSize: 20
+        Monitoring:
+          Enabled: true
+        UserData: !Base64 |
+          #!/bin/bash
+          #==========================================
+          # Installing LAMP
+          #==========================================
+          apt-get update
+          apt-get -y upgrade
+          apt install -y apache2
+          apt-get install php libapache2-mod-php php-mysql php-curl php-gd php-json php-zip php-mbstring
+          service apache2 restart
+          apt-get install -y mysql-server
+          #==========================================
+          # Installing Docker
+          #==========================================
+          apt install -y apt-transport-https ca-certificates curl software-properties-common
+          curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+          add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
+          apt-get update
+          apt install -y docker-ce
+          docker login -u pdeo2020 -p Pdeo_2020
+          docker pull pdeo2020/impact-benten:v11
+          docker run -d -p 5000:5000 --name impact pdeo2020/impact-benten:v11
+        TagSpecifications:
+          - ResourceType: instance
+            Tags:
+              - Key: Name
+                Value: IMPACT-LaunchTemplate
+
+  ImpactASG01:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      AutoScalingGroupName: ImpactASG01
+      AvailabilityZones:
+        - us-east-1a
+      VPCZoneIdentifier:
+        - !Ref 'ImpactPublicSubnet1'
+      MinSize: "1"
+      MaxSize: "5"
+      DesiredCapacity: "3"
+      HealthCheckGracePeriod: 300
+      LaunchTemplate:
+        LaunchTemplateId: !Ref 'ImpactLaunchTemplate'
+        Version: !GetAtt ImpactLaunchTemplate.LatestVersionNumber
+      MetricsCollection:
+        - Granularity: "1Minute"
+          Metrics:
+            - "GroupMinSize"
+            - "GroupMaxSize"
+      Tags:
+        - Key: Name
+          Value: IMPACT-EC2
+          PropagateAtLaunch: "true"
+
+  ImpactASG02:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      AutoScalingGroupName: ImpactASG02
+      AvailabilityZones:
+        - us-east-1b
+      VPCZoneIdentifier:
+        - !Ref 'ImpactPublicSubnet2'
+      MinSize: "1"
+      MaxSize: "5"
+      DesiredCapacity: "3"
+      HealthCheckGracePeriod: 300
+      LaunchTemplate:
+        LaunchTemplateId: !Ref 'ImpactLaunchTemplate'
+        Version: !GetAtt ImpactLaunchTemplate.LatestVersionNumber
+      MetricsCollection:
+        - Granularity: "1Minute"
+          Metrics:
+            - "GroupMinSize"
+            - "GroupMaxSize"
+      Tags:
+        - Key: Name
+          Value: IMPACT-EC2
+          PropagateAtLaunch: "true"
+
+# ------------------------------------- RDS DB, SECURITY GROUPS & DB SUBNET GROUPS -------------------------------------
+  ImpactRDSSG:
+    Type: AWS::RDS::DBSecurityGroup
+    Properties:
+      GroupDescription: Security Group for RDS Instance
+      EC2VpcId: !Ref 'ImpactVPC'
+      DBSecurityGroupIngress:
+        EC2SecurityGroupId:
+          Ref: WebServerSecurityGroup
+      Tags:
+        - Key: Name
+          Value: IMPACT-RDS-SG
+
+  ImpactDBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: Subnet Group for RDS-MySQL database
+      SubnetIds:
+        - !Ref 'ImpactPrivateSubnet'
+      Tags:
+        - Key: Name
+          Value: IMPACT-RDS-SubnetGroup
+
+  ImpactDatabase:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBName: !Ref 'DBName'
+      DBInstanceIdentifier: !Ref 'DBInstanceID'
+      MultiAZ: false
+      DBSubnetGroupName: !Ref 'ImpactDBSubnetGroup'
+      PubliclyAccessible: true
+      AllocatedStorage: '5'
+      DBInstanceClass: db.t2.micro
+      Engine: MySQL
+      StorageType: io1
+      Port: 3306
+      MonitoringInterval: '60'
+      MonitoringRoleArn: 'arn:aws:iam::aws:policy/service-role/AmazonRDSEnhancedMonitoringRole'
+      MasterUsername: admin
+      MasterUserPassword: admin123
+      DBSecurityGroups: [!Ref 'ImpactRDSSG']
+      Tags:
+        -
+          Key: Name
+          Value: IMPACT-RDS
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Output Section
+# ----------------------------------------------------------------------------------------------------------------------
+Outputs:
+  MyWebServerSecGroup:
+    Description: Reference to the created WebServerSecurityGroup
+    Value: !Ref 'WebServerSecurityGroup'
+
+  ImpactIAMRole:
+    Description: Reference to the created IAM Role
+    Value: !Ref 'ImpactIAMRole'
+
+  ImpactVPC:
+    Description: Reference to the created VPC
+    Value: !Ref 'ImpactVPC'
+
+  ImpactPublicSubnet1:
+    Description: Reference to the public subnet 01
+    Value: !Ref 'ImpactPublicSubnet1'
+
+  ImpactPublicSubnet2:
+    Description: Reference to the public subnet 02
+    Value: !Ref 'ImpactPublicSubnet2'
+
+  ImpactPrivateSubnet:
+    Description: Reference to the private subnet
+    Value: !Ref 'ImpactPrivateSubnet'
+
+  ImpactLaunchTemplate:
+    Description: Launch Template
+    Value: !Ref 'ImpactLaunchTemplate'
+
+  ImpactASG01:
+    Description: Auto-Scaling Groups
+    Value: !Ref 'ImpactASG01'
+
+  ImpactASG02:
+    Description: Auto-Scaling Groups
+    Value: !Ref 'ImpactASG02'
+
+  MyRDS:
+    Description: RDS-DB
+    Value: !Ref 'ImpactDatabase'
+# ----------------------------------------------------------------------------------------------------------------------
