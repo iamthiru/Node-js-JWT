@@ -1,7 +1,7 @@
 # Proprietary: Benten Technologies, Inc.
 # Author: Pranav H. Deo
 # Copyright Content
-# Date: 04/14/2021
+# Date: 04/19/2021
 
 # Module Description:
 # * Iris Detector
@@ -16,6 +16,8 @@ import numpy as np
 # LIST INITIALIZATION
 Pupil_Thresh_Store = []
 Iris_Thresh_Store = []
+x_adj = 260
+y_adj = 40
 
 
 ########################################################################################################################
@@ -30,10 +32,10 @@ def Histogram_Equalization(frame):
 
 def Frame_Cropper(frame):
     h, w, layers = frame.shape
-    x1 = int((w / 2) - 270)
-    y1 = int((h / 2) - 250)
-    x2 = int((w / 2) + 270)
-    y2 = int((h / 2) + 250)
+    x1 = int((w / 2) - 280)
+    y1 = int((h / 2) - 265)
+    x2 = int((w / 2) + 280)
+    y2 = int((h / 2) + 265)
     im = frame[y1:y2, x1:x2]
     return im
 
@@ -146,13 +148,13 @@ def Pupil_Detection(or_im, im, frame_num, Pupil_Thresh, pupil_radii, pupil_xpoin
                 if len(frame_num) > 10:
                     # Check the value of the radius using lower and upper bound
                     rad_p = Validator.Radius_Validity_Check(dia_p / 2, pupil_radii, frame_num, 'pupil')
-                cv2.circle(or_im, ((int(x1 + rad_p))+270, int((y1 + rad_p))+55), int(rad_p), (0, 255, 0), 1)
+                cv2.circle(or_im, ((int(x1 + rad_p))+x_adj, int((y1 + rad_p))+y_adj), int(rad_p), (0, 255, 0), 1)
                 # cv2.rectangle(im, (x1, y1), (x1+w1, y1+h1), (0, 255, 0), 2)
                 pupil_radii.append(rad_p)
                 Pupil_Dilation.append(rad_p)
-                pupil_xpoints.append((x1 + dia_p / 2)+270)
-                pupil_ypoints.append((y1 + dia_p / 2)+55)
-                pupil_center = [(x1 + dia_p / 2)+270, (y1 + dia_p / 2)+55]
+                pupil_xpoints.append((x1 + dia_p / 2)+x_adj)
+                pupil_ypoints.append((y1 + dia_p / 2)+y_adj)
+                pupil_center = [(x1 + dia_p / 2)+x_adj, (y1 + dia_p / 2)+y_adj]
 
     # Hough Method when Contour Fails
     elif circles is not None and flg == 0:
@@ -163,11 +165,11 @@ def Pupil_Detection(or_im, im, frame_num, Pupil_Thresh, pupil_radii, pupil_xpoin
                 if len(frame_num) > 10:
                     # Check the value of the radius using lower and upper bound
                     r = Validator.Radius_Validity_Check(r, pupil_radii, frame_num, 'pupil')
-                cv2.circle(or_im, (x+270, y+55), int(r), (0, 255, 0), 1)
+                cv2.circle(or_im, (x+x_adj, y+y_adj), int(r), (0, 255, 0), 1)
                 pupil_radii.append(r)
-                pupil_xpoints.append(x+270)
-                pupil_ypoints.append(y+55)
-                pupil_center = [x+270, y+55]
+                pupil_xpoints.append(x+x_adj)
+                pupil_ypoints.append(y+y_adj)
+                pupil_center = [x+x_adj, y+y_adj]
             else:
                 r_ll = int(np.floor(np.average(pupil_radii))) - 7
                 r_ul = int(np.ceil(np.average(pupil_radii))) + 7
@@ -176,18 +178,18 @@ def Pupil_Detection(or_im, im, frame_num, Pupil_Thresh, pupil_radii, pupil_xpoin
                     if len(frame_num) > 10:
                         # Check the value of the radius using lower and upper bound
                         r = Validator.Radius_Validity_Check(r, pupil_radii, frame_num, 'pupil')
-                    cv2.circle(im, (x+270, y+55), int(r), (0, 255, 0), 1)
+                    cv2.circle(im, (x+x_adj, y+y_adj), int(r), (0, 255, 0), 1)
                     pupil_radii.append(r)
-                    pupil_xpoints.append(x+270)
-                    pupil_ypoints.append(y+55)
-                    pupil_center = [x+270, y+55]
+                    pupil_xpoints.append(x+x_adj)
+                    pupil_ypoints.append(y+y_adj)
+                    pupil_center = [x+x_adj, y+y_adj]
                 else:
                     r = np.average(pupil_radii[-15:])
                     pupil_radii.append(r)
-                    cv2.circle(im, (x+270, y+55), int(r), (0, 255, 0), 1)
-                    pupil_xpoints.append(x+270)
-                    pupil_ypoints.append(y+55)
-                    pupil_center = [x+270, y+55]
+                    cv2.circle(im, (x+x_adj, y+y_adj), int(r), (0, 255, 0), 1)
+                    pupil_xpoints.append(x+x_adj)
+                    pupil_ypoints.append(y+y_adj)
+                    pupil_center = [x+x_adj, y+y_adj]
 
             Pupil_Dilation.append(r)
 
@@ -210,7 +212,7 @@ def Threshold_Detect(Vid):
             # Histogram Equalize the Frame
             ima = Histogram_Equalization(ima)
             # Getting Pupil Threshold Value Dynamically
-            for var in range(15, 35):
+            for var in range(15, 36):
                 _, thresh = cv2.threshold(ima, var, 255, cv2.THRESH_BINARY)
                 contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
@@ -223,7 +225,7 @@ def Threshold_Detect(Vid):
                             Pupil_Thresh_Store.append(var)
 
             # Getting Iris Threshold Value Dynamically
-            for var in range(Pupil_Thresh_Store[len(Pupil_Thresh_Store) - 1] + 30, 200):
+            for var in range(Pupil_Thresh_Store[len(Pupil_Thresh_Store) - 1] + 100, 255):
                 _, thresh = cv2.threshold(ima, var, 255, cv2.THRESH_BINARY)
                 contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 

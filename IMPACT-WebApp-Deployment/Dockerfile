@@ -19,4 +19,6 @@ RUN ["apt-get", "install", "-y", "ca-certificates"]
 RUN ["apt-get", "install", "-y", "curl"]
 RUN ["apt-get", "install", "-y", "gnupg"]
 RUN ["apt-get", "install", "-y", "lsb-release"]
+RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+RUN ["apt-get", "install", "-y", "docker.io"]
 CMD ["flask", "run", "--host", "0.0.0.0"]
