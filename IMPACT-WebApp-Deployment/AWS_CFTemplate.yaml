@@ -21,24 +21,24 @@ Description: IMPACT CLOUD DEPLOYMENT TEMPLATE
 Parameters:
   # ------------ VPC, Subnets CIDR ------------
   VPCCIDR:
-    Description: IMPACT DEFAULT VPC
+    Description: IMPACT VPC
     Type: String
-    Default: 172.31.0.0/16
+    Default: 10.192.0.0/16
 
   PublicSubnet1CIDR:
     Description: IMPACT Public Subnet 1
     Type: String
-    Default: 172.31.32.0/20
+    Default: 10.192.1.0/24
 
   PublicSubnet2CIDR:
     Description: IMPACT Public Subnet 2
     Type: String
-    Default: 172.31.0.0/20
+    Default: 10.192.4.0/24
 
   PrivateSubnetCIDR:
     Description: IMPACT Private Subnet
     Type: String
-    Default: 172.31.80.0/20
+    Default: 10.192.2.0/24
 
   # ------------ EC2 Config ------------
   KeyName:
@@ -132,6 +132,48 @@ Resources:
       Tags:
         - Key: Name
           Value: IMPACT-PrivateSubnet
+
+# --------------------------------------------- INTERNET GATEWAY & ROUTES ----------------------------------------------
+  ImpactInternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: IMPACT-InternetGateway
+
+  ImpactVPCGatewayAtt:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref 'ImpactInternetGateway'
+      VpcId: !Ref 'ImpactVPC'
+
+  MyAppPublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref 'ImpactVPC'
+      Tags:
+        - Key: Name
+          Value: IMPACT-RouteTable
+
+  ImpactPublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: ImpactVPCGatewayAtt
+    Properties:
+      RouteTableId: !Ref 'ImpactPublicRouteTable'
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref 'ImpactInternetGateway'
+
+  PublicSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref 'ImpactPublicSubnet1'
+      RouteTableId: !Ref 'ImpactPublicRouteTable'
+
+  PublicSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref 'ImpactPublicSubnet2'
+      RouteTableId: !Ref 'ImpactPublicRouteTable'
 
 # ----------------------------------- WEB SECURITY GROUPS, IAM ROLE & INSTANCE PROFILE ---------------------------------
   WebServerSecurityGroup:
