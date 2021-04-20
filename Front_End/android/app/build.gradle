@@ -132,7 +132,7 @@ android {
         applicationId "com.bententech.impact"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 21
+        versionCode 22
         versionName "1.0"
         missingDimensionStrategy 'react-native-camera', 'mlkit'
         multiDexEnabled true

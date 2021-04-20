@@ -28,7 +28,7 @@ import {secondsToMinsAndSecs} from '../../utils/date';
 import {COLORS} from '../../constants/colors';
 
 import S3 from 'aws-sdk/clients/s3';
-import fs, {stat} from 'react-native-fs';
+import fs from 'react-native-fs';
 import {decode, encode} from 'base64-arraybuffer';
 
 import {
@@ -42,7 +42,6 @@ import {initiateVideoProcessingAPI} from '../../api/painAssessment';
 import {SCREEN_NAMES} from '../../constants/navigation';
 import DummyImageChart from '../../assets/images/dummyChartImage.png';
 import CustomButton from '../../components/shared/CustomButton';
-import {IdentityStore} from 'aws-sdk';
 
 const {width, height} = Dimensions.get('window');
 const {VideoCropper} = NativeModules;
