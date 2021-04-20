@@ -1,7 +1,7 @@
 # Proprietary: Benten Technologies, Inc.
 # Author: Pranav H. Deo
 # Copyright Content
-# Date: 03/29/2021
+# Date: 04/20/2021
 # Version: v1.6
 
 # Code Description:
@@ -29,7 +29,6 @@ import boto3
 import pymysql
 from flask import *
 import pandas as pd
-from boto3.dynamodb.conditions import Key
 ##############################################################
 # --------------------- AMAZON-S3 -------------------------- #
 BUCKET_NAME = 'impact-benten'
@@ -53,10 +52,10 @@ table_userData = Dynamo_DB.Table('impact-user-data')
 # ------------------- FLASK-APP CONFIG --------------------- #
 app = Flask(__name__)
 app.config.from_mapping(SECRET_KEY='dev')
+app.secret_key = 'ImpactProjectDevelopment'
 ##############################################################
 # ------------------- VARIABLE CONFIGS --------------------- #
 option_val = ""
-hard_login = False
 fname = ""
 face_fname = ""
 ##############################################################
@@ -66,12 +65,17 @@ face_fname = ""
 @app.route('/Login', methods=['GET', 'POST'])
 def Login():
     session.pop('user_email', None)
-    global hard_login
-    if hard_login is True:
-        return render_template('HomePage.html')
-    elif request.method == 'POST':
+    if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
+        cur = conn.cursor()
+        cur.execute('SELECT * FROM information_schema.tables WHERE table_name = "impact_users"')
+        if cur.fetchone() is None:
+            create_table = "create table impact_users (user_name varchar(100)," \
+                           "user_email varchar(100),user_password varchar(100))"
+            cur.execute(create_table)
+            conn.commit()
+            cur.close()
         cursor = conn.cursor()
         cursor.execute('SELECT * FROM impact_users WHERE user_email = % s AND user_password = % s;', (email, password))
         if cursor.fetchone() is not None:
@@ -87,24 +91,30 @@ def Login():
 @app.route('/Register', methods=['GET', 'POST'])
 def Register():
     session.pop('user_email', None)
-    global hard_login
-    if hard_login is True:
-        return render_template('HomePage.html')
-    elif request.method == 'POST':
+    if request.method == 'POST':
         user_name = request.form['username']
         email = request.form['email']
         password = request.form['password']
         cur = conn.cursor()
-        cur.execute("INSERT INTO impact_users(user_name, user_email, user_password) VALUES (%s, %s, %s)", (user_name, email, password))
+        cur.execute('SELECT * FROM information_schema.tables WHERE table_name = "impact_users"')
+        if cur.fetchone() is None:
+            create_table = "create table impact_users (user_name varchar(100)," \
+                           "user_email varchar(100),user_password varchar(100))"
+            cur.execute(create_table)
+            conn.commit()
+            cur.close()
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO impact_users(user_name, user_email, user_password) "
+                       "VALUES (%s, %s, %s)", (user_name, email, password))
         conn.commit()
-        cur.close()
+        cursor.close()
         return render_template('Login.html')
     return render_template('Register.html')
 
 
 @app.route('/HomePage')
 def HomePage():
-    if 'user_email' in session or hard_login is True:
+    if 'user_email' in session:
         return render_template('HomePage.html')
     else:
         session.pop('user_email', None)
@@ -113,7 +123,7 @@ def HomePage():
 
 @app.route('/FacialPain')
 def FacialPain():
-    if 'user_email' in session or hard_login is True:
+    if 'user_email' in session:
         return render_template('FacialPain_Form.html')
     else:
         return render_template('Login.html')
@@ -121,7 +131,7 @@ def FacialPain():
 
 @app.route('/PupilPain')
 def PupilPain():
-    if 'user_email' in session or hard_login is True:
+    if 'user_email' in session:
         return render_template('PupilPain_Form.html')
     else:
         return render_template('Login.html')
@@ -135,7 +145,7 @@ def Logout():
 
 @app.route('/Upload')
 def Upload():
-    if 'user_email' in session or hard_login is True:
+    if 'user_email' in session:
         return render_template('FileUpload.html')
     else:
         return render_template('Login.html')
@@ -144,7 +154,7 @@ def Upload():
 @app.route('/Upload_Process_Pupil', methods=['GET', 'POST'])
 def Upload_Process_Pupil():
     global fname
-    if 'user_email' in session or hard_login is True:
+    if 'user_email' in session:
         if request.method == 'POST':
             # Uploading Segment:
             email = session['user_email']
@@ -159,11 +169,10 @@ def Upload_Process_Pupil():
             app.config['PUPIL_UPLOAD_FOLDER'] = PUPIL_UPLOAD_FOLDER
             pth = os.path.join(app.config['PUPIL_UPLOAD_FOLDER'], fname)
             f.save(os.path.join(app.config['PUPIL_UPLOAD_FOLDER'], fname))
-            if hard_login is False:
-                Upload_2_S3(BUCKET_NAME, fname, pth, PUPIL_UPLOAD_FOLDER_S3)
-                table_userData.put_item(Item={'user-email': email, 'user-name': fname_txtfield+' '+lname_txtfield,
-                                              'user-eyecolor': eye_color_val,  'user-metric': 'Pupil Pain',
-                                              's3-filepath': 's3://impact-benten/'+PUPIL_UPLOAD_FOLDER_S3+fname})
+            Upload_2_S3(BUCKET_NAME, fname, pth, PUPIL_UPLOAD_FOLDER_S3)
+            table_userData.put_item(Item={'user-email': email, 'user-name': fname_txtfield+' '+lname_txtfield,
+                                          'user-eyecolor': eye_color_val,  'user-metric': 'Pupil Pain',
+                                          's3-filepath': 's3://impact-benten/'+PUPIL_UPLOAD_FOLDER_S3+fname})
             # Processing Segment:
             os.system('python IMPACT_PUPIL_v1_3.py ' + str(fname) + ' Color')
             token = os.path.exists('./static/Pupil_Output_Images/' + 'PUAL_' + str(os.path.splitext(fname)[0]) + '.csv')
@@ -181,10 +190,9 @@ def Upload_Process_Pupil():
                 f = img_name + '_Dilation_Plot.png'
                 vid_file = os.path.join(app.config['PUPIL_VID_OUT_FOLDER'], img_name + '.mp4')
                 pic = os.path.join(app.config['PUPIL_OUTPUT_FOLDER'], f)
-                if hard_login is False:
-                    Upload_2_S3(BUCKET_NAME, f, pic, res_img_fold_S3)
-                    Upload_2_S3(BUCKET_NAME, img_name + '.mp4', vid_file, res_img_fold_S3)
-                    Upload_2_S3(BUCKET_NAME, file, csv_file, res_img_fold_S3)
+                Upload_2_S3(BUCKET_NAME, f, pic, res_img_fold_S3)
+                Upload_2_S3(BUCKET_NAME, img_name + '.mp4', vid_file, res_img_fold_S3)
+                Upload_2_S3(BUCKET_NAME, file, csv_file, res_img_fold_S3)
                 print('\n*************** DONE ****************\n')
                 return render_template('Pupil_Success.html', image_file=pic, video_file=vid_file, score=PUAL_SCORE)
             else:
@@ -197,7 +205,7 @@ def Upload_Process_Pupil():
 @app.route('/UploadFacial', methods=['GET', 'POST'])
 def UploadFacial():
     global face_fname
-    if 'user_email' in session or hard_login is True:
+    if 'user_email' in session:
         if request.method == 'POST':
             # Uploading Segment:
             email = session['user_email']
@@ -212,11 +220,10 @@ def UploadFacial():
             app.config['FACIAL_UPLOAD_FOLDER'] = FACIAL_UPLOAD_FOLDER
             pth = os.path.join(app.config['FACIAL_UPLOAD_FOLDER'], face_fname)
             f.save(os.path.join(app.config['FACIAL_UPLOAD_FOLDER'], face_fname))
-            if hard_login is False:
-                Upload_2_S3(BUCKET_NAME, face_fname, pth, FACIAL_UPLOAD_FOLDER_S3)
-                table_userData.put_item(Item={'user-email': email, 'user-name': fname_txtfield + ' ' + lname_txtfield,
-                                              'user-video-type': option_val, 'user-metric': 'Facial Pain',
-                                              's3-filepath': 's3://impact-benten/'+FACIAL_UPLOAD_FOLDER_S3+face_fname})
+            Upload_2_S3(BUCKET_NAME, face_fname, pth, FACIAL_UPLOAD_FOLDER_S3)
+            table_userData.put_item(Item={'user-email': email, 'user-name': fname_txtfield + ' ' + lname_txtfield,
+                                          'user-video-type': option_val, 'user-metric': 'Facial Pain',
+                                          's3-filepath': 's3://impact-benten/'+FACIAL_UPLOAD_FOLDER_S3+face_fname})
             # Processing Segment:
             os.system('python IMPACT_FACIAL_v1.0.py ' + str(face_fname))
             res_img_fold = os.path.join('static', 'Face_Output_Images')
