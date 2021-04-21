@@ -1,7 +1,7 @@
 # Proprietary: Benten Technologies, Inc.
 # Author: Pranav H. Deo
 # Copyright Content
-# Date: 04/19/2021
+# Date: 04/21/2021
 # Version: v1.5
 
 # Code Description:
@@ -122,7 +122,7 @@ while video.isOpened():
                     flag = 0
                     break
 
-            cv2.imshow('Frame', original_im)
+            # cv2.imshow('Frame', original_im)
             frame_array.append(original_im)
             flag = 1
 
