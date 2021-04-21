@@ -10,6 +10,7 @@ import {
   Image,
   PixelRatio,
   NativeModules,
+  TouchableOpacity,
 } from 'react-native';
 import Spinner from 'react-native-loading-spinner-overlay';
 import {RNCamera} from 'react-native-camera';
@@ -42,6 +43,7 @@ import {initiateVideoProcessingAPI} from '../../api/painAssessment';
 import {SCREEN_NAMES} from '../../constants/navigation';
 import DummyImageChart from '../../assets/images/dummyChartImage.png';
 import CustomButton from '../../components/shared/CustomButton';
+// import FocusDepthSliderModal from '../../components/FocusDepthSlider';
 
 const {width, height} = Dimensions.get('window');
 const {VideoCropper} = NativeModules;
@@ -59,6 +61,10 @@ const CAPTURE_MODE = {
   AUTO: 'auto',
   MANUAL: 'manual',
 };
+// const FOCUS_DEPTH_MODE = {
+// AUTOFOCUS_DEPTH_MODE:'auto focusDepth',
+// MANUAL_FOCUSDEPTH_MODE :' manual focusDepth'
+// }
 
 const SETTINGS = {
   ZOOM: 'zoom',
@@ -79,11 +85,12 @@ const PupillaryDilationScreen = ({navigation}) => {
   // const [zoom, setZoom] = useState(Platform.OS === "ios" ? 0.02 : 0.175)
   const [zoom, setZoom] = useState(0.1);
   // const [focusDepth, setFocusDepth] = useState(0.3)
-  const [focusDepth, setFocusDepth] = useState(0.1);
+  const [focusDepth, setFocusDepth] = useState(0.0);
   const [timer, setTimer] = useState('0');
   const [duration, setDuration] = useState('00:00');
   const [processing, setProcessing] = useState(false);
   const [captureMode, setCaptureMode] = useState(CAPTURE_MODE.AUTO);
+  // const [focusDepthMode,setFocusDepthMode] = useState(FOCUS_DEPTH_MODE.AUTOFOCUS_DEPTH_MODE)
   const [isCameraReady, setIsCameraReady] = useState(false);
   const [cameraType, setCameraType] = useState(RNCamera.Constants.Type.back);
   const [isRecording, setIsRecording] = useState(false);
@@ -97,14 +104,16 @@ const PupillaryDilationScreen = ({navigation}) => {
   const [flashOn, setFlashOn] = useState(false);
   const [isDarkBrownEyes, setIsDarkBrownEyes] = useState(false);
   const [processingTimer, setProcessingTimer] = useState('0');
-  const [showBrightnessSlider, setShowBrightnessSlider] = useState(false);
+  // const [showBrightnessSlider, setShowBrightnessSlider] = useState(false);
+  // const [focusDepthOn,setFocusDepthOn] = useState(false)
   const [foucsPoints, setFocusPoints] = useState({
     x: 0.5,
     y: 0.5,
     autoExposure: true,
   });
-  var pressOut;
-  var sliderOut;
+  // const [showFocusDepthSliderModal , setShowFocusDepthSliderModal ] = useState(false)
+
+  // var pressOut;
 
   useEffect(() => {
     setTimeout(() => checkStoragePermission(), 3000);
@@ -553,11 +562,11 @@ const PupillaryDilationScreen = ({navigation}) => {
             }}
             useNativeZoom={true}
             ratio={'16:9'}
-            autoFocus={
-              Platform.OS === 'ios'
-                ? RNCamera.Constants.AutoFocus.off
-                : RNCamera.Constants.AutoFocus.on
-            }
+            // autoFocus={
+            //   Platform.OS === 'ios'
+            //     ? RNCamera.Constants.AutoFocus.off
+            //     : RNCamera.Constants.AutoFocus.on
+            // }
             autoFocusPointOfInterest={foucsPoints || {}}
             defaultVideoQuality={RNCamera.Constants.VideoQuality['1080p']}
             onCameraReady={() => setIsCameraReady(true)}
@@ -568,27 +577,27 @@ const PupillaryDilationScreen = ({navigation}) => {
               handleStopRecording();
             }}
             zoom={zoom}
-            //focusDepth={focusDepth}
+            focusDepth={focusDepth}
             exposure={exposure < 0.15 ? 0.15 : exposure}
             flashMode={
               flashOn && isCameraReady
                 ? RNCamera.Constants.FlashMode.torch
                 : RNCamera.Constants.FlashMode.off
             }>
-            <CustomTouchableOpacity
+            <TouchableOpacity
               activeOpacity={1}
-              onPressOut={() => {
-                pressOut = setTimeout(() => {
-                  setShowBrightnessSlider(false);
-                }, 3000);
-              }}
+              // onPressOut={() => {
+              //   pressOut = setTimeout(() => {
+              //     setShowBrightnessSlider(false);
+              //   }, 3000);
+              // }}
+              // onPressIn={(evt) => {
+              // setSelectedSetting('');
+              // setShowBrightnessSlider(true);
+              // if (pressOut) {
+              //   clearTimeout(pressOut);
+              // }
               onPressIn={(evt) => {
-                setSelectedSetting('');
-                setShowBrightnessSlider(true);
-                if (pressOut) {
-                  clearTimeout(pressOut);
-                }
-
                 setFocusPoints({
                   x: parseFloat(1 - evt.nativeEvent.pageX / width),
                   y: parseFloat(1 - (evt.nativeEvent.pageY - 60) / width),
@@ -597,6 +606,7 @@ const PupillaryDilationScreen = ({navigation}) => {
                 console.log('-------x------', foucsPoints.x);
                 console.log('-------y------', foucsPoints.y);
               }}
+              // <View
               style={{
                 flex: 1,
               }}>
@@ -650,7 +660,8 @@ const PupillaryDilationScreen = ({navigation}) => {
                   </Text>
                 </View>
               )}
-            </CustomTouchableOpacity>
+              {/* </View> */}
+            </TouchableOpacity>
           </RNCamera>
         </View>
 
@@ -689,7 +700,7 @@ const PupillaryDilationScreen = ({navigation}) => {
                   }}
                   onPress={() => {
                     toggleSettings(SETTINGS.ZOOM);
-                    setShowBrightnessSlider(false);
+                    // setShowBrightnessSlider(false);
                   }}>
                   <Fontisto
                     name="zoom"
@@ -719,8 +730,11 @@ const PupillaryDilationScreen = ({navigation}) => {
                     alignItems: 'center',
                     justifyContent: 'center',
                   }}
-                  //   onPress={() => toggleSettings(SETTINGS.FOCUS_DEPTH)}
-                  onPress={() => {}}>
+                  onPress={() => {
+                    toggleSettings(SETTINGS.FOCUS_DEPTH);
+                    // setShowFocusDepthSliderModal(true)
+                    // setShowBrightnessSlider(false)
+                  }}>
                   <MaterialIcons
                     name="center-focus-strong"
                     size={18}
@@ -748,8 +762,10 @@ const PupillaryDilationScreen = ({navigation}) => {
                     alignItems: 'center',
                     justifyContent: 'center',
                   }}
-                  //   onPress={() => toggleSettings(SETTINGS.EXPOSURE)}
-                  onPress={() => {}}>
+                  onPress={() => {
+                    toggleSettings(SETTINGS.EXPOSURE);
+                    // setShowBrightnessSlider(false)
+                  }}>
                   <MaterialIcons
                     name="brightness-5"
                     size={18}
@@ -768,48 +784,55 @@ const PupillaryDilationScreen = ({navigation}) => {
                 flexWrap:'wrap',
               }}
             > */}
-            <View>
-              <Text
-                style={{
-                  marginBottom: deviceModel === 'iPhone 7 Plus' ? 10 : 14,
-                  fontSize: deviceModel === 'iPhone 7 Plus' ? 10 : 16,
-                  lineHeight: deviceModel === 'iPhone 7 Plus' ? 12 : 18,
-                  fontWeight: '400',
-                  color: COLORS.GRAY_90,
-                }}>
-                1. Find a well-lit environment.
-              </Text>
-              <Text
-                style={{
-                  marginBottom: deviceModel === 'iPhone 7 Plus' ? 10 : 14,
-                  fontSize: deviceModel === 'iPhone 7 Plus' ? 10 : 16,
-                  lineHeight: deviceModel === 'iPhone 7 Plus' ? 12 : 18,
-                  fontWeight: '400',
-                  color: COLORS.GRAY_90,
-                }}>
-                2. Position one eye within the circular frame.
-              </Text>
-              {/* <Text style={{ marginBottom: 14, fontSize: 16, fontWeight: '400', color: COLORS.GRAY_90 }}>3. Turn your device  horizontally if needed.</Text> */}
-              <Text
-                style={{
-                  marginBottom: deviceModel === 'iPhone 7 Plus' ? 10 : 14,
-                  fontSize: deviceModel === 'iPhone 7 Plus' ? 10 : 16,
-                  lineHeight: deviceModel === 'iPhone 7 Plus' ? 12 : 18,
-                  fontWeight: '400',
-                  color: COLORS.GRAY_90,
-                }}>
-                3. Get ready to not blink for 10 seconds.
-              </Text>
-              <Text
-                style={{
-                  marginBottom: deviceModel === 'iPhone 7 Plus' ? 10 : 14,
-                  fontSize: deviceModel === 'iPhone 7 Plus' ? 10 : 16,
-                  lineHeight: deviceModel === 'iPhone 7 Plus' ? 12 : 18,
-                  fontWeight: '400',
-                  color: COLORS.GRAY_90,
-                }}>
-                4. Record the eye for at least 10 seconds.
-              </Text>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}>
+              <View>
+                <Text
+                  style={{
+                    marginBottom: deviceModel === 'iPhone 7 Plus' ? 10 : 14,
+                    fontSize: deviceModel === 'iPhone 7 Plus' ? 10 : 16,
+                    lineHeight: deviceModel === 'iPhone 7 Plus' ? 12 : 18,
+                    fontWeight: '400',
+                    color: COLORS.GRAY_90,
+                  }}>
+                  1. Find a well-lit environment.
+                </Text>
+                <Text
+                  style={{
+                    marginBottom: deviceModel === 'iPhone 7 Plus' ? 10 : 14,
+                    fontSize: deviceModel === 'iPhone 7 Plus' ? 10 : 16,
+                    lineHeight: deviceModel === 'iPhone 7 Plus' ? 12 : 18,
+                    fontWeight: '400',
+                    color: COLORS.GRAY_90,
+                  }}>
+                  2. Position one eye within the circular frame.
+                </Text>
+                {/* <Text style={{ marginBottom: 14, fontSize: 16, fontWeight: '400', color: COLORS.GRAY_90 }}>3. Turn your device  horizontally if needed.</Text> */}
+                <Text
+                  style={{
+                    marginBottom: deviceModel === 'iPhone 7 Plus' ? 10 : 14,
+                    fontSize: deviceModel === 'iPhone 7 Plus' ? 10 : 16,
+                    lineHeight: deviceModel === 'iPhone 7 Plus' ? 12 : 18,
+                    fontWeight: '400',
+                    color: COLORS.GRAY_90,
+                  }}>
+                  3. Get ready to not blink for 10 seconds.
+                </Text>
+                <Text
+                  style={{
+                    marginBottom: deviceModel === 'iPhone 7 Plus' ? 10 : 14,
+                    fontSize: deviceModel === 'iPhone 7 Plus' ? 10 : 16,
+                    lineHeight: deviceModel === 'iPhone 7 Plus' ? 12 : 18,
+                    fontWeight: '400',
+                    color: COLORS.GRAY_90,
+                  }}>
+                  4. Record the eye for at least 10 seconds.
+                </Text>
+              </View>
             </View>
 
             <View
@@ -1184,45 +1207,48 @@ const PupillaryDilationScreen = ({navigation}) => {
           </View>
         )}
 
-        {((!isRecording && showBrightnessSlider) ||
-          (!isRecording && selectedSetting != '')) && (
-          <View
-            style={{
-              flexDirection: 'row',
-              position: 'absolute',
-              zindex: 1000,
-              //top: (width - 50 - 25),
-              top:
-                selectedSetting === SETTINGS.ZOOM
-                  ? width - 50 - 25
-                  : foucsPoints.y <= 0.05
-                  ? height * 0.45
-                  : foucsPoints.y >= 0.7
-                  ? 100
-                  : (height - foucsPoints.y * 1000) / 2,
-              left:
-                selectedSetting === SETTINGS.ZOOM
-                  ? 20
-                  : foucsPoints.x >= 0.8
-                  ? -50
-                  : (width - foucsPoints.x * 1000) / 1.8 + 60,
-              //    width: width-40,
-              //    left: 20, width: width - 40,
-              width:
-                selectedSetting === SETTINGS.ZOOM ? width - 40 : width * 0.4,
-              height: 50,
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderRadius: 10,
-              backgroundColor: `${COLORS.WHITE}70`,
-              transform: [
-                {
-                  rotate:
-                    selectedSetting === SETTINGS.ZOOM ? '360deg' : '270deg',
-                },
-              ],
-            }}>
-            {showBrightnessSlider && (
+        {
+          // ((!isRecording && showBrightnessSlider)
+          //  ||
+          !isRecording && selectedSetting != '' && (
+            <View
+              style={{
+                flexDirection: 'row',
+                position: 'absolute',
+                zindex: 1000,
+                top: width - 50 - 25,
+                // top:
+                //   selectedSetting !== ''
+                //     ? width - 50 - 25
+                //     : foucsPoints.y <= 0.2
+                //     ? height * 0.36
+                //     : foucsPoints.y >= 0.7
+                //     ? 100
+                //     : (height - foucsPoints.y * 1000) / 2,
+                // left:
+                //   selectedSetting !== ''
+                //     ? 20
+                //     : foucsPoints.x >= 0.7
+                //     ? 50
+                //     : (width - foucsPoints.x * 1000) / 1.8 + 60,
+                //    width: width-40,
+                left: 20,
+                width: width - 40,
+                // width:
+                //   selectedSetting !== '' ? width - 40 : width * 0.4,
+                height: 50,
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: 10,
+                backgroundColor: `${COLORS.WHITE}70`,
+                // transform: [
+                //   {
+                //     rotate:
+                //       selectedSetting !== ''  ? '360deg' : '270deg',
+                //   },
+                // ],
+              }}>
+              {/* {showBrightnessSlider && (
               <>
                 <Text
                   style={{
@@ -1252,47 +1278,75 @@ const PupillaryDilationScreen = ({navigation}) => {
                   maximumTrackTintColor={COLORS.BLACK}
                 />
               </>
-            )}
-            {selectedSetting === SETTINGS.ZOOM && (
-              <>
-                <Text style={{width: 40, textAlign: 'center'}}>{`${parseInt(
-                  zoom * 100,
-                )}%`}</Text>
-                <Slider
-                  //   style={{width: width - 120}}
-                  style={{
-                    width:
-                      selectedSetting === SETTINGS.ZOOM
-                        ? width - 120
-                        : width * 0.3,
-                  }}
-                  minimumValue={0}
-                  maximumValue={1}
-                  value={zoom}
-                  onValueChange={(value) => setZoom(value)}
-                  minimumTrackTintColor={COLORS.WHITE}
-                  maximumTrackTintColor={COLORS.BLACK}
-                />
-              </>
-            )}
-            {/* {selectedSetting === SETTINGS.FOCUS_DEPTH && (
-              <>
-                <Text style={{width: 40, textAlign: 'center'}}>{`${parseInt(
-                  focusDepth * 100,
-                )}%`}</Text>
-                <Slider
-                  style={{width: width - 120}}
-                  minimumValue={0}
-                  maximumValue={1}
-                  value={focusDepth}
-                  onValueChange={(value) => setFocusDepth(value)}
-                  minimumTrackTintColor={COLORS.WHITE}
-                  maximumTrackTintColor={COLORS.BLACK}
-                />
-              </>
             )} */}
-          </View>
-        )}
+              {selectedSetting === SETTINGS.ZOOM && (
+                <>
+                  <Text style={{width: 40, textAlign: 'center'}}>{`${parseInt(
+                    zoom * 100,
+                  )}%`}</Text>
+                  <Slider
+                    //   style={{width: width - 120}}
+                    style={{
+                      width:
+                        selectedSetting === SETTINGS.ZOOM
+                          ? width - 120
+                          : width * 0.3,
+                    }}
+                    minimumValue={0}
+                    maximumValue={1}
+                    value={zoom}
+                    onValueChange={(value) => setZoom(value)}
+                    minimumTrackTintColor={COLORS.WHITE}
+                    maximumTrackTintColor={COLORS.BLACK}
+                  />
+                </>
+              )}
+              {selectedSetting === SETTINGS.EXPOSURE && (
+                <>
+                  <Text style={{width: 40, textAlign: 'center'}}>{`${parseInt(
+                    zoom * 100,
+                  )}%`}</Text>
+                  <Slider
+                    style={{width: width - 120}}
+                    // style={{
+                    //   width:
+                    //     selectedSetting === SETTINGS.EXPOSURE
+                    //       ? width - 120
+                    //       : width * 0.3,
+                    // }}
+                    minimumValue={0}
+                    maximumValue={1}
+                    value={exposure}
+                    onValueChange={(value) => setExposure(value)}
+                    minimumTrackTintColor={COLORS.WHITE}
+                    maximumTrackTintColor={COLORS.BLACK}
+                  />
+                </>
+              )}
+              {selectedSetting === SETTINGS.FOCUS_DEPTH && (
+                <>
+                  <Text style={{width: 40, textAlign: 'center'}}>{`${parseInt(
+                    focusDepth * 100,
+                  )}%`}</Text>
+                  <Slider
+                    style={{
+                      width:
+                        selectedSetting === SETTINGS.FOCUS_DEPTH
+                          ? width - 120
+                          : width * 0.3,
+                    }}
+                    minimumValue={0}
+                    maximumValue={1}
+                    value={focusDepth}
+                    onValueChange={(value) => setFocusDepth(value)}
+                    minimumTrackTintColor={COLORS.WHITE}
+                    maximumTrackTintColor={COLORS.BLACK}
+                  />
+                </>
+              )}
+            </View>
+          )
+        }
 
         {isRecording && (
           <>
@@ -1561,6 +1615,14 @@ const PupillaryDilationScreen = ({navigation}) => {
         }`}
         textStyle={{color: COLORS.WHITE}}
       />
+      {/* <FocusDepthSliderModal 
+      open  ={showFocusDepthSliderModal}
+      onClose = {()=>{setShowFocusDepthSliderModal(false)}}
+      focusDepthMode ={focusDepthMode}
+      focusDepthModeData = {FOCUS_DEPTH_MODE}
+      setFocusDepthOn ={setFocusDepthOn}
+      setFocusDepthMode = {setFocusDepthMode}
+      /> */}
     </View>
   );
 };
