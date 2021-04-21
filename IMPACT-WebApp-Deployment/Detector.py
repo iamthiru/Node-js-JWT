@@ -1,7 +1,7 @@
 # Proprietary: Benten Technologies, Inc.
 # Author: Pranav H. Deo
 # Copyright Content
-# Date: 04/19/2021
+# Date: 04/21/2021
 
 # Module Description:
 # * Iris Detector
@@ -50,12 +50,12 @@ def Iris_Detection(or_im, im, frame_num, iris_thresh, pup_cen, iris_radii, iris_
     w, h = imge.shape
 
     _, thresh = cv2.threshold(imge, abs(int(iris_thresh)), 255, cv2.THRESH_BINARY)
-    cv2.imshow('Iris Threshold', thresh)
+    # cv2.imshow('Iris Threshold', thresh)
 
     # circles = cv2.HoughCircles(thresh, cv2.HOUGH_GRADIENT, 3, 800, param1=90, param2=30,
     # minRadius=int(max(pupil_radii) * 1.3), maxRadius=int(max(pupil_radii) * 5))
     circles = cv2.HoughCircles(thresh, cv2.HOUGH_GRADIENT, 3, 800, param1=90, param2=30,
-                               minRadius=int(min(w, h)/1.90), maxRadius=int(max(w, h)))
+                               minRadius=int(min(w, h)/1.88), maxRadius=int(max(w, h)))
 
     if circles is not None:
         circles = np.round(circles[0, :])
@@ -123,20 +123,20 @@ def Pupil_Detection(or_im, im, frame_num, Pupil_Thresh, pupil_radii, pupil_xpoin
     w, h = imge.shape
 
     _, thresh = cv2.threshold(imge, abs(int(Pupil_Thresh)), 255, cv2.THRESH_BINARY)
-    cv2.imshow('Pupil', thresh)
+    # cv2.imshow('Pupil', thresh)
     contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     flg = 0
 
     circles = cv2.HoughCircles(thresh, cv2.HOUGH_GRADIENT, 3, 300, param1=30, param2=10,
-                               minRadius=int(min(w, h) / 12), maxRadius=int(max(w, h) / 4))
+                               minRadius=int(min(w, h) / 4), maxRadius=int(max(w, h) / 4))
 
     # Contour Method for Pupil
     if contours is not None:
         for c in contours:
             contour_area = cv2.contourArea(c)
             x1, y1, w1, h1 = cv2.boundingRect(c)
-            LL_C_Area = 1000
-            UL_C_Area = 80000
+            LL_C_Area = (w * h) / 105
+            UL_C_Area = (w * h) / 2.5
             LL_val = 0.2
             UL_val = 2
 
@@ -212,7 +212,7 @@ def Threshold_Detect(Vid):
             # Histogram Equalize the Frame
             ima = Histogram_Equalization(ima)
             # Getting Pupil Threshold Value Dynamically
-            for var in range(15, 36):
+            for var in range(15, 55):
                 _, thresh = cv2.threshold(ima, var, 255, cv2.THRESH_BINARY)
                 contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
