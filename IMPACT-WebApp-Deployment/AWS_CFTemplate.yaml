@@ -1,7 +1,7 @@
 # Proprietary: Benten Technologies, Inc.
 # Author: Pranav H. Deo
 # Copyright Content
-# Date: 04/20/2021
+# Date: 04/22/2021
 
 # Content Description:
 # CloudFormation is a template with the help of which one can deploy their cloud architecture in minutes without
@@ -89,6 +89,26 @@ Parameters:
     MaxLength: 63
     AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
     ConstraintDescription: Must begin with a letter and contain only alphanumeric characters.
+
+  # ------------ S3 BUCKET ------------
+  MyBucketName:
+    Type: String
+    Description: AWS Bucket Name
+    Default: impact
+
+  # ------------ ACCOUNT & BILLING ------------
+  MyBillingThreshold:
+    Type: Number
+    Description: The max value in $$ for the Bill
+    Default: 10
+
+  AccHolderEmailID:
+    Type: String
+    Description: The Account Holder's Email Address
+    MinLength: 1
+    MaxLength: 100
+    AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
+
 # ----------------------------------------------------------------------------------------------------------------------
 # Resources Section
 # ----------------------------------------------------------------------------------------------------------------------
@@ -323,8 +343,8 @@ Resources:
       VPCZoneIdentifier:
         - !Ref 'ImpactPublicSubnet1'
       MinSize: "1"
-      MaxSize: "5"
-      DesiredCapacity: "3"
+      MaxSize: "3"
+      DesiredCapacity: "1"
       HealthCheckGracePeriod: 300
       LaunchTemplate:
         LaunchTemplateId: !Ref 'ImpactLaunchTemplate'
@@ -334,6 +354,8 @@ Resources:
           Metrics:
             - "GroupMinSize"
             - "GroupMaxSize"
+            - "GroupDesiredCapacity"
+            - "GroupTotalInstances"
       Tags:
         - Key: Name
           Value: IMPACT-EC2
@@ -348,8 +370,8 @@ Resources:
       VPCZoneIdentifier:
         - !Ref 'ImpactPublicSubnet2'
       MinSize: "1"
-      MaxSize: "5"
-      DesiredCapacity: "3"
+      MaxSize: "3"
+      DesiredCapacity: "1"
       HealthCheckGracePeriod: 300
       LaunchTemplate:
         LaunchTemplateId: !Ref 'ImpactLaunchTemplate'
@@ -359,6 +381,8 @@ Resources:
           Metrics:
             - "GroupMinSize"
             - "GroupMaxSize"
+            - "GroupDesiredCapacity"
+            - "GroupTotalInstances"
       Tags:
         - Key: Name
           Value: IMPACT-EC2
@@ -411,6 +435,68 @@ Resources:
           Key: Name
           Value: IMPACT-RDS
 
+# -------------------------------------------------- S3 Storage Bucket -------------------------------------------------
+  ImpactS3Bucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    Properties:
+      BucketName: !Ref 'MyBucketName'
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+      AccessControl: PublicReadWrite
+      VersioningConfiguration:
+        Status: Suspended
+
+  ImpactBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          -
+            Sid: S3FullAccess
+            Effect: Allow
+            Principal: '*'
+            Action: 's3:*'
+            Resource: !Join
+              - ''
+              - - 'arn:aws:s3:::'
+                - !Ref 'ImpactS3Bucket'
+                - /*
+      Bucket: !Ref 'ImpactS3Bucket'
+
+# ----------------------------------------------------- Billing Alarm --------------------------------------------------
+  ImpactBillingAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Properties:
+        ActionsEnabled: true
+        AlarmActions:
+          - !Ref 'MyAppTopic'
+        AlarmDescription: Billing Alarm for the Account
+        ComparisonOperator: GreaterThanOrEqualToThreshold
+        Dimensions:
+        - Name: Currency
+          Value: USD
+        EvaluationPeriods: 1
+        MetricName: EstimatedCharges
+        Namespace: "AWS/Billing"
+        OKActions:
+          - !Ref 'MyAppTopic'
+        Period: 3600
+        Statistic: Maximum
+        Threshold: !Ref 'MyBillingThreshold'
+
+  ImpactTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      DisplayName: !Sub "Billing Alert for ${AccountHolder} Account"
+      Subscription:
+        - Protocol: email
+          Endpoint: !Ref 'AccHolderEmailID'
+
 # ----------------------------------------------------------------------------------------------------------------------
 # Output Section
 # ----------------------------------------------------------------------------------------------------------------------
@@ -458,4 +544,16 @@ Outputs:
   ImpactRDS:
     Description: RDS-DB
     Value: !Ref 'ImpactDatabase'
+
+  ImpactBillingAlarm:
+    Description: Alarms for MyApp
+    Value: !Ref 'ImpactBillingAlarm'
+
+  AccountHolderEmailID:
+    Description: Account Holder Email
+    Value: !Ref 'AccHolderEmailID'
+
+  ImpactS3:
+    Description: S3 Resource
+    Value: !Ref 'ImpactS3Bucket'
 # ----------------------------------------------------------------------------------------------------------------------
