@@ -1,7 +1,7 @@
 # Proprietary: Benten Technologies, Inc.
 # Author: Pranav H. Deo
 # Copyright Content
-# Date: 04/21/2021
+# Date: 04/19/2021
 # Version: v1.5
 
 # Code Description:
@@ -122,7 +122,7 @@ while video.isOpened():
                     flag = 0
                     break
 
-            # cv2.imshow('Frame', original_im)
+            cv2.imshow('Frame', original_im)
             frame_array.append(original_im)
             flag = 1
 
@@ -157,7 +157,7 @@ if flag == 1 and token == 'Good':
     # Computing the PUAL Score for the data-points collected
     print('\n***************************** PUAL *****************************')
     new_DF = pd.read_csv('./static/Pupil_Output_Images/' + filename.split(".")[0] + '_Ratio_Dilation.csv', usecols=['Frame', 'Processed Ratio'])
-    PUAL_Score, Noise, Corrected_PUAL_Score = PUAL_Gen.Calculate_PUAL(filename, np.array(new_DF['Processed Ratio'])[0:256], fps)
+    PUAL_Score, Noise, Corrected_PUAL_Score = PUAL_Gen.Calculate_PUAL(filename, np.array(new_DF['Processed Ratio'])[0:512], fps)
     print('\n> PUAL: ', PUAL_Score, ' ; ', 'Noise: ', Noise, ' ; ', 'Corrected PUAL: ', Corrected_PUAL_Score)
 
 ########################################################################################################################
