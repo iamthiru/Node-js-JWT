@@ -50,12 +50,12 @@ def Iris_Detection(or_im, im, frame_num, iris_thresh, pup_cen, iris_radii, iris_
     w, h = imge.shape
 
     _, thresh = cv2.threshold(imge, abs(int(iris_thresh)), 255, cv2.THRESH_BINARY)
-    # cv2.imshow('Iris Threshold', thresh)
+    cv2.imshow('Iris Threshold', thresh)
 
     # circles = cv2.HoughCircles(thresh, cv2.HOUGH_GRADIENT, 3, 800, param1=90, param2=30,
     # minRadius=int(max(pupil_radii) * 1.3), maxRadius=int(max(pupil_radii) * 5))
     circles = cv2.HoughCircles(thresh, cv2.HOUGH_GRADIENT, 3, 800, param1=90, param2=30,
-                               minRadius=int(min(w, h)/1.88), maxRadius=int(max(w, h)))
+                               minRadius=int(min(w, h)/1.90), maxRadius=int(max(w, h)))
 
     if circles is not None:
         circles = np.round(circles[0, :])
@@ -64,9 +64,9 @@ def Iris_Detection(or_im, im, frame_num, iris_thresh, pup_cen, iris_radii, iris_
             if len(iris_radii) == 0 or len(iris_radii) < 15:
                 if len(frame_num) > 10:
                     r = Validator.Radius_Validity_Check(r, iris_radii, frame_num, 'iris')
-                cv2.circle(or_im, (int(pup_cen[0]), int(pup_cen[1])), int(r), (255, 0, 0), 1)
+                cv2.circle(or_im, (int(pup_cen[0])-20, int(pup_cen[1])), int(r), (255, 0, 0), 1)
                 iris_radii.append(r)
-                iris_xpoints.append(pup_cen[0])
+                iris_xpoints.append(pup_cen[0]-20)
                 iris_ypoints.append(pup_cen[1])
 
             else:
@@ -77,9 +77,9 @@ def Iris_Detection(or_im, im, frame_num, iris_thresh, pup_cen, iris_radii, iris_
                     if len(pup_cen) > 0:
                         if len(frame_num) > 10:
                             r = Validator.Radius_Validity_Check(r, iris_radii, frame_num, 'iris')
-                        cv2.circle(or_im, (int(pup_cen[0]), int(pup_cen[1])), int(r), (255, 0, 0), 1)
+                        cv2.circle(or_im, (int(pup_cen[0])-20, int(pup_cen[1])), int(r), (255, 0, 0), 1)
                         iris_radii.append(r)
-                        iris_xpoints.append(pup_cen[0])
+                        iris_xpoints.append(pup_cen[0]-20)
                         iris_ypoints.append(pup_cen[1])
                     else:
                         if len(frame_num) > 10:
@@ -99,10 +99,10 @@ def Iris_Detection(or_im, im, frame_num, iris_thresh, pup_cen, iris_radii, iris_
                         iris_xpoints.append(x)
                         iris_ypoints.append(y)
                     else:
-                        cv2.circle(or_im, (int(pup_cen[0]), int(pup_cen[1])), int(r), (255, 0, 0), 1)
+                        cv2.circle(or_im, (int(pup_cen[0])-20, int(pup_cen[1])), int(r), (255, 0, 0), 1)
                         # cv2.rectangle(im, (x_ll, y_ll), (x_ul, y_ul), (255, 0, 0), 1)
                         iris_radii.append(r)
-                        iris_xpoints.append(pup_cen[0])
+                        iris_xpoints.append(pup_cen[0]-20)
                         iris_ypoints.append(pup_cen[1])
 
             Iris_Dilation.append(r)
@@ -123,7 +123,7 @@ def Pupil_Detection(or_im, im, frame_num, Pupil_Thresh, pupil_radii, pupil_xpoin
     w, h = imge.shape
 
     _, thresh = cv2.threshold(imge, abs(int(Pupil_Thresh)), 255, cv2.THRESH_BINARY)
-    # cv2.imshow('Pupil', thresh)
+    cv2.imshow('Pupil', thresh)
     contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     flg = 0
 
@@ -135,7 +135,7 @@ def Pupil_Detection(or_im, im, frame_num, Pupil_Thresh, pupil_radii, pupil_xpoin
         for c in contours:
             contour_area = cv2.contourArea(c)
             x1, y1, w1, h1 = cv2.boundingRect(c)
-            LL_C_Area = (w * h) / 105
+            LL_C_Area = (w * h) / 110
             UL_C_Area = (w * h) / 2.5
             LL_val = 0.2
             UL_val = 2
@@ -237,9 +237,7 @@ def Threshold_Detect(Vid):
                         if 0.2 < (w1 / h1) < 2:
                             Iris_Thresh_Store.append(var)
 
-    # print('Pupil Threshold : ', Pupil_Thresh_Store)
     print('Pupil Threshold Value : ', np.mean(Pupil_Thresh_Store))
-    # print('Iris Threshold : ', Iris_Thresh_Store)
     print('Iris Threshold Value : ', np.mean(Iris_Thresh_Store))
     return np.mean(Pupil_Thresh_Store) - 9, np.mean(Iris_Thresh_Store)
 
