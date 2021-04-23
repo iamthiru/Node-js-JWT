@@ -2,4 +2,5 @@
 *.yaml
 .DS_Store
 __pycache__
+static/Pupil_Input_Videos/Test*
 venv
