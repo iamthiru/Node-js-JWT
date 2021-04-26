@@ -1,14 +1,14 @@
 # Proprietary: Benten Technologies, Inc.
 # Author: Pranav H. Deo
 # Copyright Content
-# Date: 04/22/2021
+# Date: 04/26/2021
 
 # Content Description:
 # CloudFormation is a template with the help of which one can deploy their cloud architecture in minutes without
 # manually provisioning it one at a time. It has the description of all the resources to deploy the resources.
 
 # Resources:
-# EC2, RDS, S3, IAMRole, ElasticIP
+# VPC, Subnets, Auto-Scaling-EC2, RDS, S3, IAMRole
 
 # ----------------------------------------------------------------------------------------------------------------------
 # AWS CloudFormation Template
@@ -55,7 +55,8 @@ Parameters:
   InstanceType:
     Description: EC2 Instance
     Type: String
-    Default: t3.xlarge
+    Default: t2.micro
+    # Default: t3.xlarge
 
   AmiId:
     Description: Ubuntu 20.04 LTS AMI Id
@@ -81,8 +82,17 @@ Parameters:
     AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
     ConstraintDescription: Must begin with a letter and contain only alphanumeric characters.
 
-  DBInstanceID:
-    Default: impacttest
+  DBInstanceID01:
+    Default: impactdb01
+    Description: My database instance
+    Type: String
+    MinLength: 1
+    MaxLength: 63
+    AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
+    ConstraintDescription: Must begin with a letter and contain only alphanumeric characters.
+
+  DBInstanceID02:
+    Default: impactdb02
     Description: My database instance
     Type: String
     MinLength: 1
@@ -94,7 +104,7 @@ Parameters:
   MyBucketName:
     Type: String
     Description: AWS Bucket Name
-    Default: impact
+    Default: impact-benten-test
 
   # ------------ ACCOUNT & BILLING ------------
   MyBillingThreshold:
@@ -102,12 +112,18 @@ Parameters:
     Description: The max value in $$ for the Bill
     Default: 10
 
+  AccountHolder:
+    Type: String
+    Description: The Account Holder Name
+    Default: TEST-USER
+    MinLength: 1
+    MaxLength: 63
+
   AccHolderEmailID:
     Type: String
     Description: The Account Holder's Email Address
     MinLength: 1
     MaxLength: 100
-    AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Resources Section
@@ -156,7 +172,7 @@ Resources:
       MapPublicIpOnLaunch: false
       Tags:
         - Key: Name
-          Value: IMPACT-PrivateSubnet-01
+          Value: IMPACT-PrivateSubnet-1
 
   ImpactPrivateSubnet2:
     Type: AWS::EC2::Subnet
@@ -167,7 +183,7 @@ Resources:
       MapPublicIpOnLaunch: false
       Tags:
         - Key: Name
-          Value: IMPACT-PrivateSubnet-02
+          Value: IMPACT-PrivateSubnet-2
 
 # --------------------------------------------- INTERNET GATEWAY & ROUTES ----------------------------------------------
   ImpactInternetGateway:
@@ -301,7 +317,7 @@ Resources:
             Ebs:
               VolumeType: io1
               Encrypted: false
-              Iops: 200
+              Iops: 100
               DeleteOnTermination: true
               VolumeSize: 20
         Monitoring:
@@ -344,7 +360,7 @@ Resources:
         - !Ref 'ImpactPublicSubnet1'
       MinSize: "1"
       MaxSize: "3"
-      DesiredCapacity: "1"
+      DesiredCapacity: "2"
       HealthCheckGracePeriod: 300
       LaunchTemplate:
         LaunchTemplateId: !Ref 'ImpactLaunchTemplate'
@@ -358,7 +374,7 @@ Resources:
             - "GroupTotalInstances"
       Tags:
         - Key: Name
-          Value: IMPACT-EC2
+          Value: IMPACT-ASG01-EC2-PubSub01
           PropagateAtLaunch: "true"
 
   ImpactASG02:
@@ -371,7 +387,7 @@ Resources:
         - !Ref 'ImpactPublicSubnet2'
       MinSize: "1"
       MaxSize: "3"
-      DesiredCapacity: "1"
+      DesiredCapacity: "2"
       HealthCheckGracePeriod: 300
       LaunchTemplate:
         LaunchTemplateId: !Ref 'ImpactLaunchTemplate'
@@ -385,7 +401,7 @@ Resources:
             - "GroupTotalInstances"
       Tags:
         - Key: Name
-          Value: IMPACT-EC2
+          Value: IMPACT-ASG02-EC2-PubSub02
           PropagateAtLaunch: "true"
 
 # ------------------------------------- RDS DB, SECURITY GROUPS & DB SUBNET GROUPS -------------------------------------
@@ -401,24 +417,35 @@ Resources:
         - Key: Name
           Value: IMPACT-RDS-SG
 
-  ImpactDBSubnetGroup:
+  ImpactDBSubnetGroup01:
     Type: AWS::RDS::DBSubnetGroup
     Properties:
-      DBSubnetGroupDescription: Subnet Group for RDS-MySQL database
+      DBSubnetGroupDescription: Subnet Group 01 for RDS-MySQL database
       SubnetIds:
         - !Ref 'ImpactPrivateSubnet1'
         - !Ref 'ImpactPrivateSubnet2'
       Tags:
         - Key: Name
-          Value: IMPACT-RDS-SubnetGroup
+          Value: IMPACT-RDS-SubnetGroup01
 
-  ImpactDatabase:
+  ImpactDBSubnetGroup02:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: Subnet Group 02 for RDS-MySQL database
+      SubnetIds:
+        - !Ref 'ImpactPrivateSubnet1'
+        - !Ref 'ImpactPrivateSubnet2'
+      Tags:
+        - Key: Name
+          Value: IMPACT-RDS-SubnetGroup02
+
+  ImpactDatabase01:
     Type: AWS::RDS::DBInstance
     Properties:
       DBName: !Ref 'DBName'
-      DBInstanceIdentifier: !Ref 'DBInstanceID'
+      DBInstanceIdentifier: !Ref 'DBInstanceID01'
       MultiAZ: false
-      DBSubnetGroupName: !Ref 'ImpactDBSubnetGroup'
+      DBSubnetGroupName: !Ref 'ImpactDBSubnetGroup01'
       PubliclyAccessible: true
       AllocatedStorage: '5'
       DBInstanceClass: db.t2.micro
@@ -426,19 +453,142 @@ Resources:
       StorageType: io1
       Port: 3306
       MonitoringInterval: '60'
-      MonitoringRoleArn: 'arn:aws:iam::aws:policy/service-role/AmazonRDSEnhancedMonitoringRole'
+      MonitoringRoleArn: 'arn:aws:iam::111330348485:role/rds-monitoring-role'
       MasterUsername: admin
       MasterUserPassword: admin123
-      DBSecurityGroups: [!Ref 'ImpactRDSSG']
+      DBSecurityGroups: [ !Ref 'ImpactRDSSG' ]
+      Tags:
+        - Key: Name
+          Value: IMPACT-RDS01
+
+  ImpactDatabase02:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBName: !Ref 'DBName'
+      DBInstanceIdentifier: !Ref 'DBInstanceID02'
+      MultiAZ: false
+      DBSubnetGroupName: !Ref 'ImpactDBSubnetGroup02'
+      PubliclyAccessible: true
+      AllocatedStorage: '5'
+      DBInstanceClass: db.t2.micro
+      Engine: MySQL
+      StorageType: io1
+      Port: 3306
+      MonitoringInterval: '60'
+      MonitoringRoleArn: 'arn:aws:iam::111330348485:role/rds-monitoring-role'
+      MasterUsername: admin
+      MasterUserPassword: admin123
+      DBSecurityGroups: [ !Ref 'ImpactRDSSG' ]
+      Tags:
+        - Key: Name
+          Value: IMPACT-RDS02
+
+# -------------------------------- Application Load Balancer, Target Groups & Listeners --------------------------------
+  ImpactALBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security Group for IMPACT ALB
+      GroupName: IMPACT-ALB-SG
       Tags:
         -
           Key: Name
-          Value: IMPACT-RDS
+          Value: IMPACT-ALB-SG
+      VpcId: !Ref 'ImpactVPC'
+      SecurityGroupIngress:
+        -
+          CidrIp: '0.0.0.0/0'
+          FromPort: 5000
+          IpProtocol: tcp
+          ToPort: 5000
+        -
+          CidrIp: '0.0.0.0/0'
+          FromPort: 80
+          IpProtocol: tcp
+          ToPort: 80
+
+  ImpactALBTG:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckIntervalSeconds: 30
+      HealthCheckPath: "/"
+      Port: 5000
+      Protocol: HTTP
+      HealthCheckPort: traffic-port
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 5
+      UnhealthyThresholdCount: 2
+      TargetType: instance
+      Matcher:
+        HttpCode: 200
+      HealthyThresholdCount: 5
+      VpcId: !Ref 'ImpactVPC'
+      Name: ImpactALBTG
+      HealthCheckEnabled: true
+      TargetGroupAttributes:
+        - Key: "stickiness.enabled"
+          Value: "false"
+        - Key: "deregistration_delay.timeout_seconds"
+          Value: "300"
+        - Key: "stickiness.type"
+          Value: "lb_cookie"
+        - Key: "stickiness.lb_cookie.duration_seconds"
+          Value: "86400"
+        - Key: "slow_start.duration_seconds"
+          Value: "0"
+        - Key: "load_balancing.algorithm.type"
+          Value: "round_robin"
+
+  ImpactALB:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: IMPACT-ALB
+      Scheme: internet-facing
+      Type: application
+      Subnets:
+        - !Ref 'ImpactPublicSubnet1'
+        - !Ref 'ImpactPublicSubnet2'
+      SecurityGroups:
+        - !Ref 'ImpactALBSecurityGroup'
+      IpAddressType: ipv4
+      Tags:
+        - Key: Name
+          Value: IMPACT-ALB
+      LoadBalancerAttributes:
+        - Key: "access_logs.s3.enabled"
+          Value: "false"
+        - Key: "idle_timeout.timeout_seconds"
+          Value: "60"
+        - Key: "deletion_protection.enabled"
+          Value: "false"
+        - Key: "routing.http2.enabled"
+          Value: "true"
+        - Key: "routing.http.drop_invalid_header_fields.enabled"
+          Value: "false"
+
+  ImpactHTTPListener01:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref 'ImpactALB'
+      Port: 5000
+      Protocol: HTTP
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref 'ImpactALBTG'
+
+  ImpactHTTPListener02:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref 'ImpactALB'
+      Port: 80
+      Protocol: HTTP
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref 'ImpactALBTG'
 
 # -------------------------------------------------- S3 Storage Bucket -------------------------------------------------
   ImpactS3Bucket:
     Type: AWS::S3::Bucket
-    DeletionPolicy: Retain
+    DeletionPolicy: Delete
     Properties:
       BucketName: !Ref 'MyBucketName'
       PublicAccessBlockConfiguration:
@@ -474,7 +624,7 @@ Resources:
       Properties:
         ActionsEnabled: true
         AlarmActions:
-          - !Ref 'MyAppTopic'
+          - !Ref 'ImpactTopic'
         AlarmDescription: Billing Alarm for the Account
         ComparisonOperator: GreaterThanOrEqualToThreshold
         Dimensions:
@@ -484,7 +634,7 @@ Resources:
         MetricName: EstimatedCharges
         Namespace: "AWS/Billing"
         OKActions:
-          - !Ref 'MyAppTopic'
+          - !Ref 'ImpactTopic'
         Period: 3600
         Statistic: Maximum
         Threshold: !Ref 'MyBillingThreshold'
@@ -541,9 +691,29 @@ Outputs:
     Description: Auto-Scaling Groups
     Value: !Ref 'ImpactASG02'
 
-  ImpactRDS:
-    Description: RDS-DB
-    Value: !Ref 'ImpactDatabase'
+  ImpactRDS01:
+    Description: RDS-DB 01
+    Value: !Ref 'ImpactDatabase01'
+
+  ImpactRDS02:
+    Description: RDS-DB 02
+    Value: !Ref 'ImpactDatabase02'
+
+  ALB:
+    Description: IMPACT Application Load Balancer
+    Value: !Ref 'ImpactALB'
+
+  ALBUrl:
+    Description: The URL of our IMPACT-ALB
+    Value: !GetAtt ImpactALB.DNSName
+
+  ALBTargetGroup:
+    Description: IMPACT-ALB-TG
+    Value: !Ref 'ImpactALBTG'
+
+  ALBSG:
+    Description: Security group for the ALB
+    Value: !Ref 'ImpactALBSecurityGroup'
 
   ImpactBillingAlarm:
     Description: Alarms for MyApp
