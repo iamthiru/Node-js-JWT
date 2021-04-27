@@ -55,8 +55,7 @@ Parameters:
   InstanceType:
     Description: EC2 Instance
     Type: String
-    Default: t2.micro
-    # Default: t3.xlarge
+    Default: t3.xlarge
 
   AmiId:
     Description: Ubuntu 20.04 LTS AMI Id
@@ -122,6 +121,7 @@ Parameters:
   AccHolderEmailID:
     Type: String
     Description: The Account Holder's Email Address
+    Default: testuser@xyz.com
     MinLength: 1
     MaxLength: 100
 
@@ -129,103 +129,36 @@ Parameters:
 # Resources Section
 # ----------------------------------------------------------------------------------------------------------------------
 Resources:
-# --------------------------------------- VPC, PUBLIC-PRIVATE SUBNETS & ASSOCIATION ------------------------------------
-  ImpactVPC:
-    Type: AWS::EC2::VPC
+# ------------------------------------------- NACL, In-Bound & Out-Bound Rules -----------------------------------------
+  InboundRule01:
+    Type: AWS::EC2::NetworkAclEntry
     Properties:
-      CidrBlock: !Ref 'VPCCIDR'
-      EnableDnsSupport: true
-      EnableDnsHostnames: true
-      InstanceTenancy: default
-      Tags:
-        - Key: Name
-          Value: IMPACT-VPC
+      NetworkAclId:
+        Fn::GetAtt:
+          - ImpactVPC
+          - DefaultNetworkAcl
+      RuleNumber: 105
+      Protocol: 6
+      RuleAction: allow
+      CidrBlock: 0.0.0.0/0
+      PortRange:
+        From: 5000
+        To: 5000
 
-  ImpactPublicSubnet1:
-    Type: AWS::EC2::Subnet
+  InboundRule02:
+    Type: AWS::EC2::NetworkAclEntry
     Properties:
-      VpcId: !Ref 'ImpactVPC'
-      AvailabilityZone: "us-east-1a"
-      CidrBlock: !Ref 'PublicSubnet1CIDR'
-      MapPublicIpOnLaunch: true
-      Tags:
-        - Key: Name
-          Value: IMPACT-PublicSubnet1
-
-  ImpactPublicSubnet2:
-    Type: AWS::EC2::Subnet
-    Properties:
-      VpcId: !Ref 'ImpactVPC'
-      AvailabilityZone: "us-east-1b"
-      CidrBlock: !Ref 'PublicSubnet2CIDR'
-      MapPublicIpOnLaunch: true
-      Tags:
-        - Key: Name
-          Value: IMPACT-PublicSubnet2
-
-  ImpactPrivateSubnet1:
-    Type: AWS::EC2::Subnet
-    Properties:
-      VpcId: !Ref 'ImpactVPC'
-      AvailabilityZone: "us-east-1c"
-      CidrBlock: !Ref 'PrivateSubnet1CIDR'
-      MapPublicIpOnLaunch: false
-      Tags:
-        - Key: Name
-          Value: IMPACT-PrivateSubnet-1
-
-  ImpactPrivateSubnet2:
-    Type: AWS::EC2::Subnet
-    Properties:
-      VpcId: !Ref 'ImpactVPC'
-      AvailabilityZone: "us-east-1d"
-      CidrBlock: !Ref 'PrivateSubnet2CIDR'
-      MapPublicIpOnLaunch: false
-      Tags:
-        - Key: Name
-          Value: IMPACT-PrivateSubnet-2
-
-# --------------------------------------------- INTERNET GATEWAY & ROUTES ----------------------------------------------
-  ImpactInternetGateway:
-    Type: AWS::EC2::InternetGateway
-    Properties:
-      Tags:
-        - Key: Name
-          Value: IMPACT-InternetGateway
-
-  ImpactVPCGatewayAtt:
-    Type: AWS::EC2::VPCGatewayAttachment
-    Properties:
-      InternetGatewayId: !Ref 'ImpactInternetGateway'
-      VpcId: !Ref 'ImpactVPC'
-
-  ImpactPublicRouteTable:
-    Type: AWS::EC2::RouteTable
-    Properties:
-      VpcId: !Ref 'ImpactVPC'
-      Tags:
-        - Key: Name
-          Value: IMPACT-RouteTable
-
-  ImpactPublicRoute:
-    Type: AWS::EC2::Route
-    DependsOn: ImpactVPCGatewayAtt
-    Properties:
-      RouteTableId: !Ref 'ImpactPublicRouteTable'
-      DestinationCidrBlock: 0.0.0.0/0
-      GatewayId: !Ref 'ImpactInternetGateway'
-
-  PublicSubnet1RouteTableAssociation:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      SubnetId: !Ref 'ImpactPublicSubnet1'
-      RouteTableId: !Ref 'ImpactPublicRouteTable'
-
-  PublicSubnet2RouteTableAssociation:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties:
-      SubnetId: !Ref 'ImpactPublicSubnet2'
-      RouteTableId: !Ref 'ImpactPublicRouteTable'
+      NetworkAclId:
+        Fn::GetAtt:
+          - ImpactVPC
+          - DefaultNetworkAcl
+      RuleNumber: 110
+      Protocol: 6
+      RuleAction: allow
+      CidrBlock: 0.0.0.0/0
+      PortRange:
+        From: 80
+        To: 80
 
 # ----------------------------------- WEB SECURITY GROUPS, IAM ROLE & INSTANCE PROFILE ---------------------------------
   WebServerSecurityGroup:
@@ -294,7 +227,106 @@ Resources:
     Properties:
       Path: '/'
       Roles:
-        - Ref: 'ImpactIAMRole'
+        -
+          Ref: 'ImpactIAMRole'
+
+# --------------------------------------- VPC, PUBLIC-PRIVATE SUBNETS & ASSOCIATION ------------------------------------
+  ImpactVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref 'VPCCIDR'
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      InstanceTenancy: default
+      Tags:
+        - Key: Name
+          Value: IMPACT-VPC
+
+  ImpactPublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref 'ImpactVPC'
+      AvailabilityZone: "us-east-1a"
+      CidrBlock: !Ref 'PublicSubnet1CIDR'
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: IMPACT-PublicSubnet-1
+
+  ImpactPublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref 'ImpactVPC'
+      AvailabilityZone: "us-east-1b"
+      CidrBlock: !Ref 'PublicSubnet2CIDR'
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: IMPACT-PublicSubnet-2
+
+  ImpactPrivateSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref 'ImpactVPC'
+      AvailabilityZone: "us-east-1c"
+      CidrBlock: !Ref 'PrivateSubnet1CIDR'
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: IMPACT-PrivateSubnet-1
+
+  ImpactPrivateSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref 'ImpactVPC'
+      AvailabilityZone: "us-east-1d"
+      CidrBlock: !Ref 'PrivateSubnet2CIDR'
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: IMPACT-PrivateSubnet-2
+
+# --------------------------------------------- INTERNET GATEWAY & ROUTES ----------------------------------------------
+  ImpactInternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: IMPACT-InternetGateway
+
+  ImpactVPCGatewayAtt:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref 'ImpactInternetGateway'
+      VpcId: !Ref 'ImpactVPC'
+
+  ImpactPublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref 'ImpactVPC'
+      Tags:
+        - Key: Name
+          Value: IMPACT-RouteTable
+
+  ImpactPublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: ImpactVPCGatewayAtt
+    Properties:
+      RouteTableId: !Ref 'ImpactPublicRouteTable'
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref 'ImpactInternetGateway'
+
+  PublicSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref 'ImpactPublicSubnet1'
+      RouteTableId: !Ref 'ImpactPublicRouteTable'
+
+  PublicSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref 'ImpactPublicSubnet2'
+      RouteTableId: !Ref 'ImpactPublicRouteTable'
 
 # --------------------------------------- LAUNCH TEMPLATE & AUTO-SCALING GROUPS ----------------------------------------
   ImpactLaunchTemplate:
@@ -317,7 +349,7 @@ Resources:
             Ebs:
               VolumeType: io1
               Encrypted: false
-              Iops: 100
+              Iops: 200
               DeleteOnTermination: true
               VolumeSize: 20
         Monitoring:
@@ -365,6 +397,8 @@ Resources:
       LaunchTemplate:
         LaunchTemplateId: !Ref 'ImpactLaunchTemplate'
         Version: !GetAtt ImpactLaunchTemplate.LatestVersionNumber
+      TargetGroupARNs:
+        - !Ref 'ImpactALBTG'
       MetricsCollection:
         - Granularity: "1Minute"
           Metrics:
@@ -392,6 +426,8 @@ Resources:
       LaunchTemplate:
         LaunchTemplateId: !Ref 'ImpactLaunchTemplate'
         Version: !GetAtt ImpactLaunchTemplate.LatestVersionNumber
+      TargetGroupARNs:
+        - !Ref 'ImpactALBTG'
       MetricsCollection:
         - Granularity: "1Minute"
           Metrics:
