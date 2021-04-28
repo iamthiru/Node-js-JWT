@@ -3,11 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <title>IMPACT: Pupil Results</title>
+    <link rel = "icon" href ="/static/Images/favicon.ico" />
     <style>
         .header {
           background-color: #f1f1f1;
           padding: 5px;
           text-align: center;
+        }
+
+        body {
+          margin: 0;
+          background: #72D4DC;
         }
 
         .navbar {
@@ -56,7 +62,7 @@
 
         .myimages {
         width: 700px;
-        height: 450px;
+        height: 350px;
         }
     </style>
 </head>
@@ -68,10 +74,15 @@
         <a href="{{url_for('FacialPain')}}" style="font-size: 20px">Facial-Pain</a>
         <a href="{{url_for('Logout')}}" style="font-size: 20px">Logout</a>
     </div>
+
+    <div class="header">
+        <h1> Pupillary Pain Results </h1>
+    </div>
+
     <table align="center">
         <tr>
             <td>
-                <video width="580" height="400" autoplay controls>
+                <video width="600" height="420" autoplay controls>
                     <source src="{{ video_file }}" type="video/mp4">
                 </video>
             </td>
