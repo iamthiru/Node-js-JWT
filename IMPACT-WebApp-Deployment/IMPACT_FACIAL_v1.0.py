@@ -13,7 +13,6 @@
 # The algorithm also computes a single video score based on a weighted sum formula (Based on actual mean of
 # the pain level scores).
 
-
 # UPDATES:
 # Added comments to explain all the functions in a detailed manner
 
@@ -151,13 +150,13 @@ def Compute_PSPI_AUs(opath, fpath, D):
 # Function to have a sliding window over the frame values to classify pain as one of the 4 bucket classes
 # NOTE: Any other mode of calculation (DL approaches) would come here in classifying the sequence of frames into buckets
 def Calculate_Pain_Labeler(opath, fpath, D, num_steps):
-    """ Sliding window for calculating pain levels """
+    # Sliding window for calculating pain levels
     video_csv = pd.read_csv(fpath)
 
     # Bucket threshold values here:
-    no_pain_UL = 5.18 # (Calculated by using Delaware Pain DB and computing scores on Neutral faces)
-    pain_1_UL = 6.78  # (BioVid Pain 1 and Pain 2 labels below)
-    pain_2_UL = 8.05  # (BioVid Pain 3 label below, Pain 4 label above)
+    no_pain_UL = 5.18   # (Calculated by using Delaware Pain DB and computing scores on Neutral faces)
+    pain_1_UL = 6.78    # (BioVid Pain 1 and Pain 2 labels below)
+    pain_2_UL = 8.05    # (BioVid Pain 3 label below, Pain 4 label above)
 
     start_ix = 0
     end_ix = num_steps
@@ -269,19 +268,19 @@ def Graph_Plot(opath, fname, fl, flag):
 # __MAIN__
 if __name__ == "__main__":
     in_path = ""
-    out_path = "./static/Face_Output_Images/"
+    out_path = "static/Face_Output_Images/"
     tag = 0
 
     if len(sys.argv) > 1:
         print("\n############################## IMPACT FACIAL ##############################")
         global filenm
         filenm = str(sys.argv[1])
-        in_path = "./static/Face_Input_Videos/" + filenm
+        in_path = "static/Face_Input_Videos/" + filenm
         tag = 1
     else:
         print("\n############################## IMPACT FACIAL ##############################")
         filenm = "face.mp4"
-        in_path = "./static/Face_Input_Videos/" + filenm
+        in_path = "static/Face_Input_Videos/" + filenm
 
     print("\n************* Video Capture Complete *************")
     print("> Extracting Features...")
