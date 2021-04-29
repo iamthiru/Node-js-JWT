@@ -3,27 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <title>IMPACT: Facial Results</title>
+    <link rel = "icon" href ="/static/Images/favicon.ico" />
     <style>
         .rcorners1 {
-          border-radius: 50px;
+          border-radius: 20px;
           background: #46E1FA;
           padding: 10px;
           width: 200px;
-          height: 35px;
+          height: 40px;
+          box-shadow: 10px 10px black;
         }
         .rcorners2 {
-          border-radius: 50px;
+          border-radius: 20px;
           background: #73AD21;
           padding: 10px;
           width: 200px;
-          height: 35px;
+          height: 40px;
+          box-shadow: 10px 10px black;
         }
         .rcorners3 {
-          border-radius: 50px;
+          border-radius: 20px;
           background: #FA6646;
           padding: 10px;
           width: 200px;
-          height: 35px;
+          height: 40px;
+          box-shadow: 10px 10px black;
+        }
+
+        body {
+          margin: 0;
+          background: #72D4DC;
         }
 
         .header {
@@ -70,8 +79,10 @@
         }
 
         .myimages {
-        width: 900px;
-        height: 650px;
+        border: 2px solid black;
+        border-radius: 20px;
+        width: 800px;
+        height: 500px;
         }
     </style>
 </head>
@@ -85,16 +96,16 @@
     </div>
 
     <div class="header">
-        <h1>Facial Results (PSPI)</h1>
+        <h1>Facial (PSPI) Pain Results</h1>
     </div>
 
-    <table align="center">
+    <table align="center" cellspacing="10px" cellpadding="40px">
         <tr>
             <td><img class="myimages" src="{{ image_file }}"></td>
             <td>
-                <h3 align="center" class="rcorners1">Low Score: {{ min_pain }}</h3>
-                <h3 align="center" class="rcorners2">Mean Score: {{ mean_pain }}</h3>
-                <h3 align="center" class="rcorners3">High Score: {{ max_pain }}</h3>
+                <h3 align="center" class="rcorners1">Low Score: {{ min_pain }}</h3><br>
+                <h3 align="center" class="rcorners2">Mean Score: {{ mean_pain }}</h3><br>
+                <h3 align="center" class="rcorners3">High Score: {{ max_pain }}</h3><br>
             </td>
         </tr>
     </table>
