@@ -2,12 +2,13 @@
 # Author: Pranav H. Deo
 # Copyright Content
 # Date: 04/29/2021
-# Version: v1.6
+# Version: v1.7
 
 # Code Description:
 # Web Simulation (Alpha Version) for Pupil and Facial Pain Analysis.
 
 # UPDATES:
+# Mobile APIs for Pupil and Facial integrated.
 # Login/Registration Changed from DynamoDB to RDS-MySQL.
 # User Data stored in DynamoDB.
 # User Session Integrated.
@@ -202,7 +203,7 @@ def Upload_Process_Pupil():
         return render_template('Login.html')
 
 
-@app.route('/UploadFacial', methods=['GET', 'POST'])
+@app.route('/Upload_Process_Facial', methods=['GET', 'POST'])
 def UploadFacial():
     global face_fname
     if 'user_email' in session:
@@ -283,6 +284,39 @@ def pupil_api(filename):
         print('PUAL : ', PUAL_SCORE)
         print('\n*************** PROCESS DONE ****************\n')
         return str(PUAL_SCORE)
+    else:
+        print('\n*************** TOKEN : BAD ****************\n')
+        return "Retake"
+
+
+@app.route('/mobile_facial_api/<filename>', methods=['GET', 'POST'])
+def facial_api(filename):
+    upload_folder_s3 = 'Facial_Data/Results-Output/'
+    download_folder_s3 = 'Facial_Data/Uploads-VideoFiles/'
+    FACIAL_UPLOAD_FOLDER = './static/Face_Input_Videos/'
+    Download_from_S3(BUCKET_NAME, download_folder_s3+filename, FACIAL_UPLOAD_FOLDER+filename)
+    os.system('python IMPACT_FACIAL_v1.0.py ' + str(filename))
+    token = os.path.exists('./static/Face_Output_Images/' + str(os.path.splitext(filename)[0]) + '.csv')
+    if token:
+        print('\n*************** TOKEN : GOOD ****************\n')
+        res_img_fold = os.path.join('static', 'Face_Output_Images')
+        res_img_fold_s3 = 'Facial_Data/Results-Output/'
+        app.config['FACIAL_OUTPUT_FOLDER'] = res_img_fold
+        img_name = str(os.path.splitext(filename)[0])
+        file = img_name + '_PSPI_AUs.csv'
+        csv_file = os.path.join(app.config['FACIAL_OUTPUT_FOLDER'], file)
+        df = pd.read_csv(csv_file)
+        pain_score = df['sum_AU_r']
+        max_pain_score = round(pain_score.max(), 2)
+        min_pain_score = round(pain_score.min(), 2)
+        mean_pain_score = round(sum(pain_score) / len(pain_score), 2)
+        f = img_name + '_Pain_Plot.png'
+        pic = os.path.join(app.config['FACIAL_OUTPUT_FOLDER'], f)
+        Upload_2_S3(BUCKET_NAME, f, pic, res_img_fold_s3)
+        Upload_2_S3(BUCKET_NAME, file, csv_file, res_img_fold_s3)
+        print('\n*************** PROCESS DONE ****************\n')
+        score_tuple = (max_pain_score, min_pain_score, mean_pain_score)
+        return str(score_tuple)
     else:
         print('\n*************** TOKEN : BAD ****************\n')
         return "Retake"
