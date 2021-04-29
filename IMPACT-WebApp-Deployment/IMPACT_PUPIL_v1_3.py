@@ -96,7 +96,7 @@ while video.isOpened():
             file_ext = filename.split(".")[-1]
             height, width, layers = frame.shape
             original_im = frame
-            im = Detector.Frame_Cropper(frame)
+            im = Detector.Iris_Frame_Cropper(frame)
             im = cv2.GaussianBlur(im, (5, 5), 0)
             im = cv2.bilateralFilter(im, 9, 75, 75)
             size = (width, height)
