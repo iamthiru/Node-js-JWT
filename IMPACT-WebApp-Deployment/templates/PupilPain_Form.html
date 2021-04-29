@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>IMPACT: Pupil Pain</title>
+    <link rel = "icon" href ="/static/Images/favicon.ico" />
     <style>
 
    .upload-btn-wrapper {
@@ -12,12 +13,13 @@
     }
 
     .btn {
+      color: blue;
       border: 2px solid black;
-      color: black;
       background-color: white;
       padding: 8px 20px;
       border-radius: 20px;
       font-size: 20px;
+      width: 105px;
     }
 
     .upload-btn-wrapper input[type=file] {
@@ -101,6 +103,7 @@
         margin-top: -1px;
         padding-bottom: 4px;
         border-radius: 10px;
+        font-size: 20px;
     }
     .buttonstyle:hover {background: white;background-position: 0px -501px;color: #000000; }
 
@@ -214,7 +217,7 @@
         <br>
         <br>
         <div class="upload-btn-wrapper">
-            <button class="btn">Choose File</button>
+            <input class="btn" value="Choose File">
             <input type="file" name="file" accept=".jpg, .png, .avi, .mp4, .MOV"/> Upload Video File!
         </div>
         <br>
