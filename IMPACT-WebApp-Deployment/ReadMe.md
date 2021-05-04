@@ -14,4 +14,4 @@
 
 ### Provisioning AWS Services Automatically using CloudFormation
 
-* Upload the document named IMPACT-CFTemplate.yaml to CloudFormation which will automatically provision all the resources for you.
+* Upload the document named AWS-CFTemplate.yaml to CloudFormation which will automatically provision all the resources for you.
