@@ -8,9 +8,9 @@
 
 ### Provisioning AWS Services Manually for IMPACT App Deployment
 
-* Step 1: Deploy an instance (Reference - LINK)
-* Step 2: Deploy an RDS instance (Reference - LINK)
-* Step 3: Creating an S3 Bucket for Storage (Reference - LINK)
+* Step 1: Deploy an instance [See](https://github.com/bententech/IMPACT/wiki/Video-Tutorials)
+* Step 2: Deploy an RDS instance [See](https://github.com/bententech/IMPACT/wiki/Video-Tutorials)
+* Step 3: Creating an S3 Bucket for Storage [See](https://github.com/bententech/IMPACT/wiki/Video-Tutorials)
 
 ### Provisioning AWS Services Automatically using CloudFormation
 
