@@ -81,9 +81,10 @@
         .myimages {
         border: 2px solid black;
         border-radius: 20px;
-        width: 800px;
-        height: 500px;
+        width: 600px;
+        height: 400px;
         }
+
     </style>
 </head>
 <body>
@@ -107,6 +108,38 @@
                 <h3 align="center" class="rcorners2">Mean Score: {{ mean_pain }}</h3><br>
                 <h3 align="center" class="rcorners3">High Score: {{ max_pain }}</h3><br>
             </td>
+        </tr>
+        <tr>
+            <table align="center" bgcolor="MediumSeaGreen" border-collapse="collapse" cellspacing="8px" cellpadding="5px" style="font-family: arial, sans-serif; border: 3px solid black;">
+                <tr>
+                    <td align="center" bgcolor="white" style="border: 2px solid black;"><b>Time(s)</b></td>
+                    <td align="center"><b>1</b></td>
+                    <td align="center"><b>2</b></td>
+                    <td align="center"><b>3</b></td>
+                    <td align="center"><b>4</b></td>
+                    <td align="center"><b>5</b></td>
+                    <td align="center"><b>6</b></td>
+                    <td align="center"><b>7</b></td>
+                    <td align="center"><b>8</b></td>
+                    <td align="center"><b>9</b></td>
+                    <td align="center"><b>10</b></td>
+                    <td align="center"><b>11</b></td>
+                </tr>
+                <tr>
+                    <td align="center" bgcolor="white" style="border: 2px solid black;"><b>Label</b></td>
+                    <td align="center"><b>{{ label[0] }}</b></td>
+                    <td align="center"><b>{{ label[1] }}</b></td>
+                    <td align="center"><b>{{ label[2] }}</b></td>
+                    <td align="center"><b>{{ label[3] }}</b></td>
+                    <td align="center"><b>{{ label[4] }}</b></td>
+                    <td align="center"><b>{{ label[5] }}</b></td>
+                    <td align="center"><b>{{ label[6] }}</b></td>
+                    <td align="center"><b>{{ label[7] }}</b></td>
+                    <td align="center"><b>{{ label[8] }}</b></td>
+                    <td align="center"><b>{{ label[9] }}</b></td>
+                    <td align="center"><b>{{ label[10] }}</b></td>
+                </tr>
+            </table>
         </tr>
     </table>
 </body>
