@@ -269,7 +269,7 @@ const PupillaryDilationScreen = ({navigation}) => {
       cropOffsetY:
         parseInt((screenWidth - (screenWidth + paddingValue) / 2) / 2) +
         offSetY +
-        (deviceModel === 'iPhone 7 Plus' ? 195 : 0),
+        (['iPhone 7 Plus', 'IN2025'].includes(deviceModel) ? 195 : 0),
     };
 
     if (Platform.OS === 'ios') {
