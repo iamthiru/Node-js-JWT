@@ -1,6 +1,7 @@
-# Ignore these files
+# Docker will ignore these files for the build
 .idea
 .DS_Store
 __pycache__
+static/Pupil_Input_Videos/Test*
 venv
 .git

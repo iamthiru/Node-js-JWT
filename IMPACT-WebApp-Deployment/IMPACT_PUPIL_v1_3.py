@@ -96,7 +96,7 @@ while video.isOpened():
             file_ext = filename.split(".")[-1]
             height, width, layers = frame.shape
             original_im = frame
-            im = Detector.Frame_Cropper(frame)
+            im = Detector.Iris_Frame_Cropper(frame)
             im = cv2.GaussianBlur(im, (5, 5), 0)
             im = cv2.bilateralFilter(im, 9, 75, 75)
             size = (width, height)
@@ -157,7 +157,7 @@ if flag == 1 and token == 'Good':
     # Computing the PUAL Score for the data-points collected
     print('\n***************************** PUAL *****************************')
     new_DF = pd.read_csv('./static/Pupil_Output_Images/' + filename.split(".")[0] + '_Ratio_Dilation.csv', usecols=['Frame', 'Processed Ratio'])
-    PUAL_Score, Noise, Corrected_PUAL_Score = PUAL_Gen.Calculate_PUAL(filename, np.array(new_DF['Processed Ratio'])[0:256], fps)
+    PUAL_Score, Noise, Corrected_PUAL_Score = PUAL_Gen.Calculate_PUAL(filename, np.array(new_DF['Processed Ratio'])[0:512], fps)
     print('\n> PUAL: ', PUAL_Score, ' ; ', 'Noise: ', Noise, ' ; ', 'Corrected PUAL: ', Corrected_PUAL_Score)
 
 ########################################################################################################################

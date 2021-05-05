@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>IMPACT: Facial Pain</title>
+    <link rel = "icon" href ="/static/Images/favicon.ico" />
     <style>
 
    .upload-btn-wrapper {
@@ -12,12 +13,13 @@
     }
 
     .btn {
+      color: blue;
       border: 2px solid black;
-      color: black;
       background-color: white;
       padding: 8px 20px;
       border-radius: 20px;
       font-size: 20px;
+      width: 105px;
     }
 
     .upload-btn-wrapper input[type=file] {
@@ -40,7 +42,7 @@
 
     .form-wrap{
         width: 700px;
-        height: 500px;
+        height: 450px;
         background: white;
         padding: 30px 80px;
         box-sizing: border-box;
@@ -91,8 +93,7 @@
       color: white;
     }
 
-    .buttonstyle
-    {
+    .buttonstyle{
         background: black;
         background-position: 0px -401px;
         border: solid 1px #000000;
@@ -101,6 +102,7 @@
         margin-top: -1px;
         padding-bottom: 4px;
         border-radius: 10px;
+        font-size: 20px;
     }
     .buttonstyle:hover {background: white;background-position: 0px -501px;color: #000000; }
 
@@ -178,42 +180,41 @@
     </div>
 
     <div class="header">
-        <h1> Facial Expressions of Pain </h1>
+        <h1> Facial Measurements of Pain </h1>
     </div>
 
-    <form action="/UploadFacial" method="post" enctype="multipart/form-data" class="form-wrap">
+    <form action="/Upload_Process_Facial" method="post" enctype="multipart/form-data" class="form-wrap">
         <h2 align="center">Facial Upload Form</h2>
         <p>
         <input type="text" name="firstname" placeholder="FIRST NAME" />
         <input type="text" name="lastname" placeholder="LAST NAME" />
         <br>
         <h3>Select Pain Type</h3>
-        <label class="container">Neutral Video
+        <label class="container">Neutral
           <input type="radio" name="radio" value="NeutralVideo">
           <span class="checkmark"></span>
         </label>
         &nbsp;
         &nbsp;
-        <label class="container">Pain Video
+        <label class="container">Pain
           <input type="radio" name="radio" value="PainVideo">
           <span class="checkmark"></span>
         </label>
         &nbsp;
         &nbsp;
-        <label class="container">Neutral & Pain Video
+        <label class="container">Neutral & Pain
           <input type="radio" name="radio" value="MixedVideo">
           <span class="checkmark"></span>
         </label>
         <br>
         <br>
         <br>
-        <br>
         <div class="upload-btn-wrapper">
-            <button class="btn">Choose File</button>
+            <input class="btn" value="Choose File">
             <input type="file" name="file" accept=".jpg, .png, .avi, .mp4, .MOV"/> Upload Your File Here!
         </div>
         <br><br>
-        <p><input class="buttonstyle" type="submit" value="UPLOAD" style="width:540px"></p>
+        <p><input class="buttonstyle" type="submit" value="UPLOAD & PROCESS" style="width:540px"></p>
     </form>
 
 </body>
