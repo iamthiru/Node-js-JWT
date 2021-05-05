@@ -1575,7 +1575,6 @@ const PupillaryDilationScreen = ({navigation}) => {
                 style={{
                   backgroundColor: COLORS.PRIMARY_MAIN,
                   borderRadius: 10,
-                  borderWidth: 2,
                   alignItems: 'center',
                   justifyContent: 'center',
                   height: 48,
