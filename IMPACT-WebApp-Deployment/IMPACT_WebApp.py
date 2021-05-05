@@ -1,8 +1,8 @@
 # Proprietary: Benten Technologies, Inc.
 # Author: Pranav H. Deo
 # Copyright Content
-# Date: 04/29/2021
-# Version: v1.7
+# Date: 05/05/2021
+# Version: v1.8
 
 # Code Description:
 # Web Simulation (Alpha Version) for Pupil and Facial Pain Analysis.
@@ -19,17 +19,19 @@
 # Bugs fixed for integration to Web scripts.
 # Pupil Output Video embedding feature for Pupil part.
 # Min, Mean and Max Scores removed for Pupil part.
-# Integrated New IMPACT_FACIAL_v1.0.py for script call.
+# Integrated New IMPACT_FACIAL_v1_0.py for script call.
 # Integrated New IMPACT_PUPIL_v1_3.py for script call.
 # Removed Pupil From Facial Detection.
 
 ##############################################################
 import os
 import yaml
+import time
 import boto3
 import pymysql
 from flask import *
 import pandas as pd
+import datetime as dt
 ##############################################################
 # --------------------- AMAZON-S3 -------------------------- #
 BUCKET_NAME = 'impact-benten'
@@ -165,7 +167,9 @@ def Upload_Process_Pupil():
             f = request.files['file']
             PUPIL_UPLOAD_FOLDER_S3 = 'Pupil_Data/Uploads-VideoFiles/'
             PUPIL_UPLOAD_FOLDER = './static/Pupil_Input_Videos/'
-            fname = eye_color_val + fname_txtfield + lname_txtfield + '.mp4'
+            ts = time.time()
+            st = dt.datetime.fromtimestamp(ts).strftime('%Y-%m-%d_%H:%M:%S')
+            fname = eye_color_val + fname_txtfield + lname_txtfield + str(st) + '.mp4'
             f.filename = fname
             app.config['PUPIL_UPLOAD_FOLDER'] = PUPIL_UPLOAD_FOLDER
             pth = os.path.join(app.config['PUPIL_UPLOAD_FOLDER'], fname)
@@ -216,7 +220,9 @@ def UploadFacial():
             f = request.files['file']
             FACIAL_UPLOAD_FOLDER_S3 = 'Facial_Data/Uploads-VideoFiles/'
             FACIAL_UPLOAD_FOLDER = './static/Face_Input_Videos/'
-            face_fname = fname_txtfield + lname_txtfield + '.avi'
+            ts = time.time()
+            st = dt.datetime.fromtimestamp(ts).strftime('%Y-%m-%d_%H:%M:%S')
+            face_fname = option_val + fname_txtfield + lname_txtfield + str(st) + '.avi'
             f.filename = face_fname
             app.config['FACIAL_UPLOAD_FOLDER'] = FACIAL_UPLOAD_FOLDER
             pth = os.path.join(app.config['FACIAL_UPLOAD_FOLDER'], face_fname)
@@ -226,7 +232,7 @@ def UploadFacial():
                                           'user-video-type': option_val, 'user-metric': 'Facial Pain',
                                           's3-filepath': 's3://impact-benten/'+FACIAL_UPLOAD_FOLDER_S3+face_fname})
             # Processing Segment:
-            os.system('python IMPACT_FACIAL_v1.0.py ' + str(face_fname))
+            os.system('python IMPACT_FACIAL_v1_0.py ' + str(face_fname))
             token = os.path.exists('./static/Face_Output_Images/' + str(os.path.splitext(face_fname)[0]) + '.csv')
             if token:
                 res_img_fold = os.path.join('static', 'Face_Output_Images')
@@ -241,12 +247,18 @@ def UploadFacial():
                 min_pain_score = round(pain_score.min(), 2)
                 mean_pain_score = round(sum(pain_score) / len(pain_score), 2)
                 f = img_name + '_Pain_Plot.png'
+                label_file_csv = os.path.join(app.config['FACIAL_OUTPUT_FOLDER'], img_name+'_LabelFile.csv')
+                bucket_df = pd.read_csv(label_file_csv)
+                time_sec = bucket_df['Time (sec)']
+                label_sec = bucket_df['Label']
                 pic = os.path.join(app.config['FACIAL_OUTPUT_FOLDER'], f)
                 Upload_2_S3(BUCKET_NAME, f, pic, res_img_fold_s3)
                 Upload_2_S3(BUCKET_NAME, file, csv_file, res_img_fold_s3)
+                Upload_2_S3(BUCKET_NAME, img_name+'_LabelFile.csv', label_file_csv, res_img_fold_s3)
                 print('\n*************** DONE ****************\n')
                 return render_template('Facial_Success.html', image_file=pic, max_pain=max_pain_score,
-                                       mean_pain=mean_pain_score, min_pain=min_pain_score)
+                                       mean_pain=mean_pain_score, min_pain=min_pain_score,
+                                       time=time_sec, label=label_sec)
             else:
                 print('\n*************** TOKEN : BAD ****************\n')
                 render_template('FacialPain_Form.html')
@@ -282,7 +294,6 @@ def pupil_api(filename):
         Upload_2_S3(BUCKET_NAME, img_name + '.mp4', vid_file, upload_folder_S3)
         Upload_2_S3(BUCKET_NAME, file, csv_file, upload_folder_S3)
         print('PUAL : ', PUAL_SCORE)
-        print('\n*************** PROCESS DONE ****************\n')
         return str(PUAL_SCORE)
     else:
         print('\n*************** TOKEN : BAD ****************\n')
@@ -294,8 +305,8 @@ def facial_api(filename):
     upload_folder_s3 = 'Facial_Data/Results-Output/'
     download_folder_s3 = 'Facial_Data/Uploads-VideoFiles/'
     FACIAL_UPLOAD_FOLDER = './static/Face_Input_Videos/'
-    Download_from_S3(BUCKET_NAME, download_folder_s3+filename, FACIAL_UPLOAD_FOLDER+filename)
-    os.system('python IMPACT_FACIAL_v1.0.py ' + str(filename))
+    Download_from_S3(BUCKET_NAME, download_folder_s3+filename, FACIAL_UPLOAD_FOLDER + filename)
+    os.system('python IMPACT_FACIAL_v1_0.py ' + str(filename))
     token = os.path.exists('./static/Face_Output_Images/' + str(os.path.splitext(filename)[0]) + '.csv')
     if token:
         print('\n*************** TOKEN : GOOD ****************\n')
@@ -312,11 +323,14 @@ def facial_api(filename):
         mean_pain_score = round(sum(pain_score) / len(pain_score), 2)
         f = img_name + '_Pain_Plot.png'
         pic = os.path.join(app.config['FACIAL_OUTPUT_FOLDER'], f)
+        label_file_csv = os.path.join(app.config['FACIAL_OUTPUT_FOLDER'], img_name + '_LabelFile.csv')
+        bucket_df = pd.read_csv(label_file_csv)
+        time_sec = bucket_df['Time (sec)']
+        label_sec = tuple(bucket_df['Label'])
         Upload_2_S3(BUCKET_NAME, f, pic, res_img_fold_s3)
         Upload_2_S3(BUCKET_NAME, file, csv_file, res_img_fold_s3)
-        print('\n*************** PROCESS DONE ****************\n')
-        score_tuple = (max_pain_score, min_pain_score, mean_pain_score)
-        return str(score_tuple)
+        Upload_2_S3(BUCKET_NAME, img_name + '_LabelFile.csv', label_file_csv, res_img_fold_s3)
+        return str(label_sec)
     else:
         print('\n*************** TOKEN : BAD ****************\n')
         return "Retake"
