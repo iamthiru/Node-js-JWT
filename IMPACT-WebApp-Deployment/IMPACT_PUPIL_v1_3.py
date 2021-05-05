@@ -122,7 +122,7 @@ while video.isOpened():
                     flag = 0
                     break
 
-            cv2.imshow('Frame', original_im)
+            # cv2.imshow('Frame', original_im)
             frame_array.append(original_im)
             flag = 1
 
