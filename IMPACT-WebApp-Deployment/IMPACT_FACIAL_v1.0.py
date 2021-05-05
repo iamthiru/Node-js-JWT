@@ -1,7 +1,7 @@
 # Proprietary: Benten Technologies, Inc.
 # Author: Pranav H. Deo, Jagadesh N.
 # Copyright Content
-# Date: 04/01/2021
+# Date: 05/05/2021
 # Version: v1.0
 
 # Code Description:
@@ -15,15 +15,24 @@
 
 # UPDATES:
 # Added comments to explain all the functions in a detailed manner
+# Added time tracking and module imports
 
-
+########################################################################################################################
+# PACKAGE IMPORTS
 import os
 import sys
 import cv2
+import time
 import subprocess
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+
+# MODULE IMPORTS
+import Data_Processing
+
+# INITIALIZATIONS:
+start_time = time.time()
 
 
 #######################################################################################################################
@@ -32,9 +41,8 @@ import matplotlib.pyplot as plt
 def OpenFace_API_Call(ipath, opath):
     print("> OpenFace Feature Extraction Command Executed !!")
     cmd = "OpenFace/build/bin/FeatureExtraction -f " + ipath + " -out_dir " + opath + " -aus"
-    print(cmd)
+    print("> Command : ", cmd)
     subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True).communicate()
-    print("# AUs Detected...")
 
 
 #######################################################################################################################
@@ -140,8 +148,8 @@ def Compute_PSPI_AUs(opath, fpath, D):
     Final_DF['sum_AU_r'] = sum_AU_r
 
     Final_DF.to_csv(opath + '/' + D + '_PSPI_AUs.csv', index=False)
-    print("     # Read Complete! Attempting to write CSV files...")
-    print("     # CSV written successfully !!")
+    # print("     # Read Complete! Attempting to write CSV files...")
+    print("# CSV written successfully !!")
 
 
 #######################################################################################################################
@@ -232,11 +240,11 @@ def Video_Labeler(label_list):
         if level == 'Pain Level 3':
             count_p3 += 1
 
-    print("The sliding window counter:    ")
-    print("No Pain count is:   ", count_np)
-    print("Pain 1 count is:    ", count_p1)
-    print("Pain 2 count is:    ", count_p2)
-    print("Pain 3 count is:    ", count_p3)
+    # print("The sliding window counter:    ")
+    # print("No Pain count is:   ", count_np)
+    # print("Pain 1 count is:    ", count_p1)
+    # print("Pain 2 count is:    ", count_p2)
+    # print("Pain 3 count is:    ", count_p3)
 
     score = (count_np * Pain_0 + count_p1 * Pain_1 + count_p2 * Pain_2 + count_p3 * Pain_3) / len(label_list)
     score = ((score - Pain_0) / (Pain_3 - Pain_0)) * 10
@@ -259,7 +267,7 @@ def Graph_Plot(opath, fname, fl, flag):
         plt.savefig(opath + fl + '_Pain_Plot.png')
     else:
         plt.savefig(opath + '_Pain_Plot.png')
-    print("     # Pain Plot Complete")
+    print("# Pain Plot Complete")
     plt.close()
 
 
@@ -302,4 +310,9 @@ if __name__ == "__main__":
         Graph_Plot(out_path, 'face_PSPI_AUs.csv', 'face', 0)
 
     print("\n############################## END OF EXECUTION ##############################")
-#######################################################################################################################
+########################################################################################################################
+
+# Compute Resources being used or utilized
+print('\n***************************************************************************')
+Data_Processing.Compute_Resources(start_time)
+########################################################################################################################

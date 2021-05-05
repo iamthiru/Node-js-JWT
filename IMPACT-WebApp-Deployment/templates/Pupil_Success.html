@@ -54,8 +54,8 @@
         }
 
         .container {
-          padding: 20px;
-          background-color: cyan;
+          padding: 10px;
+          background-color: #00cc00;
           box-shadow: 10px 10px black;
           border-radius: 16px;
         }
@@ -64,7 +64,7 @@
         border: 2px solid black;
         border-radius: 20px;
         width: 700px;
-        height: 350px;
+        height: 380px;
         }
     </style>
 </head>
@@ -81,10 +81,10 @@
         <h1> Pupil (PUAL) Results </h1>
     </div>
 
-    <table align="center" cellpadding="20px" cellspacing="10px">
+    <table align="center" cellpadding="10px" cellspacing="10px">
         <tr>
             <td>
-                <video width="600" height="420" autoplay controls>
+                <video width="620" height="480" autoplay controls>
                     <source src="{{ video_file }}" type="video/mp4">
                 </video>
             </td>
@@ -93,8 +93,6 @@
             </td>
         </tr>
     </table>
-    <br>
-    <br>
     <table align="center" class="container">
         <tr>
             <td align="center"><h2>PUAL SCORE: {{ score }}</h2></td>

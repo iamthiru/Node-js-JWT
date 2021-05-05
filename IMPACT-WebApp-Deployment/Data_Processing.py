@@ -1,7 +1,7 @@
 # Proprietary: Benten Technologies, Inc.
 # Author: Pranav H. Deo
 # Copyright Content
-# Date: 01/21/2021
+# Date: 05/05/2021
 
 # Module Description:
 # * Output Video Generator
@@ -56,9 +56,9 @@ def List_Processing(frame_num, Pupil_Dilation, Iris_Dilation):
         for x in range(0, amt):
             del Iris_Dilation[len(Iris_Dilation) - 1]
 
-    print('Frames : ', len(frame_num))
-    print('Iris Dilation : ', len(Iris_Dilation))
-    print('Pupil Dilation : ', len(Pupil_Dilation))
+    # print('Frames : ', len(frame_num))
+    # print('Iris Dilation : ', len(Iris_Dilation))
+    # print('Pupil Dilation : ', len(Pupil_Dilation))
 
     return Pupil_Dilation, Iris_Dilation
 
