@@ -8,31 +8,18 @@ import AntDesignIcon from 'react-native-vector-icons/AntDesign';
 import {COLORS} from '../../constants/colors';
 import styles from './styles';
 import {useNavigation, useRoute} from '@react-navigation/native';
-import CustomDropDown from '../../components/shared/CustomDropDown';
+import { useSelector,useDispatch} from 'react-redux'
 import CustomTextInput from '../../components/shared/CustomTextInput';
 import {SCREEN_NAMES} from '../../constants/navigation';
+import { PAIN_ASSESSMENT_DATA_ACTION } from '../../constants/actions';
 
-const dropDownData = [
-  {
-    key: '6:00 pm',
-    label: '6:00 pm',
-    value: '6:00 pm',
-  },
-  {
-    key: '5:00 pm',
-    label: '5:00 pm',
-    value: '5:00 pm',
-  },
-  {
-    key: '7:00 pm',
-    label: '7:00 pm',
-    value: '7:00 pm',
-  },
-];
+
+    
 
 const PainAssessment = ({route}) => {
-  const name = useRoute()?.params?.name;
-  const navigation = useNavigation();
+ const assessment_data = useSelector((state)=> state.painAssessmentData.patient_name)
+ const  dispatch = useDispatch()
+ const navigation = useNavigation();
   const {width, height} = useWindowDimensions();
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
@@ -45,17 +32,21 @@ const PainAssessment = ({route}) => {
     minutes: 0,
   });
 
-  useEffect(() => {
-    if (name) {
-      setPatient(name);
-    }
-  }, [name]);
+
 
   useEffect(() => {
     if (time) {
       timeFormat(time);
     }
   }, [time]);
+
+  useEffect(()=>{
+    if(assessment_data){
+      setPatient(assessment_data)
+    }
+  },[assessment_data])
+
+
 
   const timeFormat = (time) => {
     let getHours = time.getHours();
@@ -65,7 +56,7 @@ const PainAssessment = ({route}) => {
     let hoursFormat = getHours % 12;
     setFormattedTime({
       hours: Boolean(hoursFormat === 0) ? 12 : hoursFormat,
-      minutes: getMinutes,
+      minutes: Boolean(getMinutes<10)?'0'+getMinutes:getMinutes,
     });
   };
 

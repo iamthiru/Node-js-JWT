@@ -7,13 +7,15 @@ import CustomTouchableOpacity from '../shared/CustomTouchableOpacity';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import styles from './styles';
 import { SCREEN_NAMES } from '../../constants/navigation';
+import { useDispatch } from 'react-redux';
+import { PAIN_ASSESSMENT_DATA_ACTION } from '../../constants/actions';
 
 const {width, height} = Dimensions.get('window');
 
 const PatientDetailModal = ({open, onClose, patientData}) => {
 
     const navigation = useNavigation()
-
+    const  dispatch = useDispatch()
   const age =
     new Date().getFullYear() - new Date(patientData.dob).getFullYear();
   return (
@@ -56,6 +58,10 @@ const PatientDetailModal = ({open, onClose, patientData}) => {
         <View style={styles.buttonView}>
           <CustomButton
             onPress={() => {
+              dispatch({
+                type:PAIN_ASSESSMENT_DATA_ACTION.PAIN_ASSESSMENT_DATA,
+                payload:patientData.name
+              })
                 navigation.navigate(SCREEN_NAMES.PAINASSESSMENT,{
                     name:patientData.name
                 })
