@@ -73,7 +73,7 @@ const SETTINGS = {
 };
 
 const DEFAULT_DARK_BROWN_EXPOSURE = 0.8;
-const DEFAULT_OTHER_EXPOSURE = 0.0; //0.2
+const DEFAULT_OTHER_EXPOSURE = 0.6; //0.0; //0.2
 
 const PupillaryDilationScreen = ({navigation}) => {
   const deviceModel = DeviceInfo.getModel();
@@ -82,6 +82,7 @@ const PupillaryDilationScreen = ({navigation}) => {
   const [spinnerMessage, setSpinnerMessage] = useState('');
   const [selectedSetting, setSelectedSetting] = useState('');
   const [exposure, setExposure] = useState(DEFAULT_OTHER_EXPOSURE);
+  const [autoAdjust, setAutoAdjust] = useState(0.0);
   // const [zoom, setZoom] = useState(Platform.OS === "ios" ? 0.02 : 0.175)
   const [zoom, setZoom] = useState(0.1);
   // const [focusDepth, setFocusDepth] = useState(0.3)
@@ -534,6 +535,7 @@ const PupillaryDilationScreen = ({navigation}) => {
     } else {
       if (exposure !== DEFAULT_OTHER_EXPOSURE) {
         setExposure(DEFAULT_OTHER_EXPOSURE);
+        console.log('exp------', exposure);
       }
     }
   };
@@ -584,84 +586,182 @@ const PupillaryDilationScreen = ({navigation}) => {
                 ? RNCamera.Constants.FlashMode.torch
                 : RNCamera.Constants.FlashMode.off
             }>
-            <TouchableOpacity
-              activeOpacity={1}
-              // onPressOut={() => {
-              //   pressOut = setTimeout(() => {
-              //     setShowBrightnessSlider(false);
-              //   }, 3000);
-              // }}
-              // onPressIn={(evt) => {
-              // setSelectedSetting('');
-              // setShowBrightnessSlider(true);
-              // if (pressOut) {
-              //   clearTimeout(pressOut);
-              // }
-              onPressIn={(evt) => {
-                setFocusPoints({
-                  x: parseFloat(1 - evt.nativeEvent.pageX / width),
-                  y: parseFloat(1 - (evt.nativeEvent.pageY - 60) / width),
-                  autoExposure: true,
-                });
-                console.log('-------x------', foucsPoints.x);
-                console.log('-------y------', foucsPoints.y);
-              }}
-              // <View
-              style={{
-                flex: 1,
-              }}>
-              <View style={styles.frameTopLeft} pointerEvents="none"></View>
-              <View style={styles.frameTopRight} pointerEvents="none"></View>
-              <View style={styles.frameBottomLeft} pointerEvents="none"></View>
-              <View style={styles.frameBottomRight} pointerEvents="none"></View>
-              {eyeBorderType === EYE_BORDER_TYPE.RECTANGLE && (
-                <View style={styles.eyeBorderRect} pointerEvents="none"></View>
-              )}
-              {eyeBorderType === EYE_BORDER_TYPE.OVAL && (
-                <View style={styles.eyeBorderOval} pointerEvents="none"></View>
-              )}
-              {eyeBorderType === EYE_BORDER_TYPE.OVAL && (
+            {Platform.OS === 'ios' ? (
+              <TouchableOpacity
+                activeOpacity={1}
+                // onPressOut={() => {
+                //   pressOut = setTimeout(() => {
+                //     setShowBrightnessSlider(false);
+                //   }, 3000);
+                // }}
+                // onPressIn={(evt) => {
+                // setSelectedSetting('');
+                // setShowBrightnessSlider(true);
+                // if (pressOut) {
+                //   clearTimeout(pressOut);
+                // }
+                onPress={(evt) => {
+                 
+                  setFocusPoints({
+                    x: parseFloat(1 - evt.nativeEvent.pageX / width),
+                    y: parseFloat(1 - (evt.nativeEvent.pageY - 60) / width),
+                    autoExposure: true,
+                  });
+                  setTimeout(()=>{
+                  setExposure(autoAdjust);
+                  },3000)
+
+                }}
+                // <View
+                style={{
+                  flex: 1,
+                }}>
+                <View style={styles.frameTopLeft} pointerEvents="none"></View>
+                <View style={styles.frameTopRight} pointerEvents="none"></View>
                 <View
-                  style={styles.eyeBorderCircle}
+                  style={styles.frameBottomLeft}
                   pointerEvents="none"></View>
-              )}
-              {timer !== '0' && (
-                <View style={[styles.timerContainer]} pointerEvents="none">
-                  <Text style={styles.timerText}>{timer}</Text>
-                </View>
-              )}
-              {isRecording && (
                 <View
-                  style={{
-                    position: 'absolute',
-                    bottom: 0,
-                    width: width,
-                    height: 91,
-                    backgroundColor: 'rgba(9, 48, 76, 0.5)',
-                    alignItems: 'center',
-                    justifyContent: 'space-around',
-                  }}
-                  pointerEvents="none">
-                  <Text
+                  style={styles.frameBottomRight}
+                  pointerEvents="none"></View>
+                {eyeBorderType === EYE_BORDER_TYPE.RECTANGLE && (
+                  <View
+                    style={styles.eyeBorderRect}
+                    pointerEvents="none"></View>
+                )}
+                {eyeBorderType === EYE_BORDER_TYPE.OVAL && (
+                  <View
+                    style={styles.eyeBorderOval}
+                    pointerEvents="none"></View>
+                )}
+                {eyeBorderType === EYE_BORDER_TYPE.OVAL && (
+                  <View
+                    style={styles.eyeBorderCircle}
+                    pointerEvents="none"></View>
+                )}
+                {timer !== '0' && (
+                  <View style={[styles.timerContainer]} pointerEvents="none">
+                    <Text style={styles.timerText}>{timer}</Text>
+                  </View>
+                )}
+                {isRecording && (
+                  <View
                     style={{
-                      fontWeight: '700',
-                      fontSize: 16,
-                      color: COLORS.WHITE,
-                    }}>
-                    NO Blink
-                  </Text>
-                  <Text
+                      position: 'absolute',
+                      bottom: 0,
+                      width: width,
+                      height: 91,
+                      backgroundColor: 'rgba(9, 48, 76, 0.5)',
+                      alignItems: 'center',
+                      justifyContent: 'space-around',
+                    }}
+                    pointerEvents="none">
+                    <Text
+                      style={{
+                        fontWeight: '700',
+                        fontSize: 16,
+                        color: COLORS.WHITE,
+                      }}>
+                      NO Blink
+                    </Text>
+                    <Text
+                      style={{
+                        fontWeight: '700',
+                        fontSize: 16,
+                        color: COLORS.WHITE,
+                      }}>
+                      Record for at least 10 seconds
+                    </Text>
+                  </View>
+                )}
+                {/* </View> */}
+              </TouchableOpacity>
+            ) : (
+              <CustomTouchableOpacity
+                activeOpacity={1}
+                // onPressOut={() => {
+                //   pressOut = setTimeout(() => {
+                //     setShowBrightnessSlider(false);
+                //   }, 3000);
+                // }}
+                // onPressIn={(evt) => {
+                // setSelectedSetting('');
+                // setShowBrightnessSlider(true);
+                // if (pressOut) {
+                //   clearTimeout(pressOut);
+                // }
+                onPress={(evt) => {
+                  setFocusPoints({
+                    x: parseFloat(1 - evt.nativeEvent.pageX / width),
+                    y: parseFloat(1 - (evt.nativeEvent.pageY - 60) / width),
+                    autoExposure: true,
+                  });
+                }}
+                // <View
+                style={{
+                  flex: 1,
+                }}>
+                <View style={styles.frameTopLeft} pointerEvents="none"></View>
+                <View style={styles.frameTopRight} pointerEvents="none"></View>
+                <View
+                  style={styles.frameBottomLeft}
+                  pointerEvents="none"></View>
+                <View
+                  style={styles.frameBottomRight}
+                  pointerEvents="none"></View>
+                {eyeBorderType === EYE_BORDER_TYPE.RECTANGLE && (
+                  <View
+                    style={styles.eyeBorderRect}
+                    pointerEvents="none"></View>
+                )}
+                {eyeBorderType === EYE_BORDER_TYPE.OVAL && (
+                  <View
+                    style={styles.eyeBorderOval}
+                    pointerEvents="none"></View>
+                )}
+                {eyeBorderType === EYE_BORDER_TYPE.OVAL && (
+                  <View
+                    style={styles.eyeBorderCircle}
+                    pointerEvents="none"></View>
+                )}
+                {timer !== '0' && (
+                  <View style={[styles.timerContainer]} pointerEvents="none">
+                    <Text style={styles.timerText}>{timer}</Text>
+                  </View>
+                )}
+                {isRecording && (
+                  <View
                     style={{
-                      fontWeight: '700',
-                      fontSize: 16,
-                      color: COLORS.WHITE,
-                    }}>
-                    Record for at least 10 seconds
-                  </Text>
-                </View>
-              )}
-              {/* </View> */}
-            </TouchableOpacity>
+                      position: 'absolute',
+                      bottom: 0,
+                      width: width,
+                      height: 91,
+                      backgroundColor: 'rgba(9, 48, 76, 0.5)',
+                      alignItems: 'center',
+                      justifyContent: 'space-around',
+                    }}
+                    pointerEvents="none">
+                    <Text
+                      style={{
+                        fontWeight: '700',
+                        fontSize: 16,
+                        color: COLORS.WHITE,
+                      }}>
+                      NO Blink
+                    </Text>
+                    <Text
+                      style={{
+                        fontWeight: '700',
+                        fontSize: 16,
+                        color: COLORS.WHITE,
+                      }}>
+                      Record for at least 10 seconds
+                    </Text>
+                  </View>
+                )}
+                {/* </View> */}
+              </CustomTouchableOpacity>
+            )}
           </RNCamera>
         </View>
 
@@ -1304,7 +1404,7 @@ const PupillaryDilationScreen = ({navigation}) => {
               {selectedSetting === SETTINGS.EXPOSURE && (
                 <>
                   <Text style={{width: 40, textAlign: 'center'}}>{`${parseInt(
-                    zoom * 100,
+                    exposure * 100,
                   )}%`}</Text>
                   <Slider
                     style={{width: width - 120}}
@@ -1317,7 +1417,10 @@ const PupillaryDilationScreen = ({navigation}) => {
                     minimumValue={0}
                     maximumValue={1}
                     value={exposure}
-                    onValueChange={(value) => setExposure(value)}
+                    onValueChange={(value) => {
+                      setExposure(value);
+                      setAutoAdjust(value);
+                    }}
                     minimumTrackTintColor={COLORS.WHITE}
                     maximumTrackTintColor={COLORS.BLACK}
                   />
@@ -1470,9 +1573,8 @@ const PupillaryDilationScreen = ({navigation}) => {
               <CustomTouchableOpacity
                 disabled={processing}
                 style={{
-                  backgroundColor: COLORS.WHITE,
+                  backgroundColor: COLORS.PRIMARY_MAIN,
                   borderRadius: 10,
-                  borderColor: COLORS.PRIMARY_MAIN,
                   borderWidth: 2,
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -1485,7 +1587,7 @@ const PupillaryDilationScreen = ({navigation}) => {
                   style={{
                     fontSize: 14,
                     fontWeight: '700',
-                    color: COLORS.GRAY_90,
+                    color: COLORS.WHITE,
                     textAlign: 'center',
                   }}>
                   {'RETAKE'}
@@ -1532,7 +1634,8 @@ const PupillaryDilationScreen = ({navigation}) => {
                     color: COLORS.WHITE,
                     textAlign: 'center',
                   }}>
-                  {'NEXT'}
+                  {' '}
+                  b{'NEXT'}
                 </Text>
               </CustomTouchableOpacity>
             </>
