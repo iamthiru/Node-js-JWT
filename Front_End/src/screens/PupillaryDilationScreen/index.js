@@ -43,6 +43,7 @@ import {initiateVideoProcessingAPI} from '../../api/painAssessment';
 import {SCREEN_NAMES} from '../../constants/navigation';
 import DummyImageChart from '../../assets/images/dummyChartImage.png';
 import CustomButton from '../../components/shared/CustomButton';
+import { useNavigation } from '@react-navigation/native' 
 // import FocusDepthSliderModal from '../../components/FocusDepthSlider';
 
 const {width, height} = Dimensions.get('window');
@@ -76,6 +77,8 @@ const DEFAULT_DARK_BROWN_EXPOSURE = 0.8;
 const DEFAULT_OTHER_EXPOSURE = 0.6; //0.0; //0.2
 
 const PupillaryDilationScreen = ({navigation}) => {
+
+  cons
   const deviceModel = DeviceInfo.getModel();
   const [eyeBorderType, setEyeBorderType] = useState(EYE_BORDER_TYPE.OVAL);
   const [showSpinner, setShowSpinner] = useState(false);
@@ -427,6 +430,7 @@ const PupillaryDilationScreen = ({navigation}) => {
                 setShowSpinner(false);
                 setSpinnerMessage('');
                 clearProcessingTimer();
+
 
                 /* setTimeout(() => {
                                 let pngFileName = `${filename.substring(0, filename.lastIndexOf("."))}_Dilation_Plot.png`
@@ -1633,8 +1637,7 @@ const PupillaryDilationScreen = ({navigation}) => {
                     color: COLORS.WHITE,
                     textAlign: 'center',
                   }}>
-                  {' '}
-                  b{'NEXT'}
+                  {'NEXT'}
                 </Text>
               </CustomTouchableOpacity>
             </>

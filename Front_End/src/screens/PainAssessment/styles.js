@@ -156,6 +156,11 @@ const styles = StyleSheet.create({
     marginHorizontal: 40,
     marginTop: 10,
   },
+  time: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginHorizontal: 45,
+  },
   dateLabel: {
     fontSize: 16,
     lineHeight: 24,

@@ -32,19 +32,43 @@ const dropDownData = [
 
 const PainAssessment = ({route}) => {
   const name = useRoute()?.params?.name;
-
   const navigation = useNavigation();
   const {width, height} = useWindowDimensions();
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
   const [patient, setPatient] = useState('');
-  const [time, setTime] = useState('6:00 pm');
+  const [time, setTime] = useState(null);
+  const [showTimer, setShowTimer] = useState(false);
+  const [AmOrPm, setAmOrPm] = useState('');
+  const [formattedTime, setFormattedTime] = useState({
+    hours: 0,
+    minutes: 0,
+  });
 
   useEffect(() => {
     if (name) {
       setPatient(name);
     }
   }, [name]);
+
+  useEffect(() => {
+    if (time) {
+      timeFormat(time);
+    }
+  }, [time]);
+
+  const timeFormat = (time) => {
+    let getHours = time.getHours();
+    let getMinutes = time.getMinutes();
+    let amORpm = getHours > 12 ? 'PM' : 'AM';
+    setAmOrPm(amORpm);
+    let hoursFormat = getHours % 12;
+    setFormattedTime({
+      hours: Boolean(hoursFormat === 0) ? 12 : hoursFormat,
+      minutes: getMinutes,
+    });
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.mainView}>
@@ -111,17 +135,24 @@ const PainAssessment = ({route}) => {
 
         <View style={styles.dropView}>
           <Text style={styles.patientText}>Assessment Time</Text>
-          <CustomDropDown
-            TextStylle={styles.dropDownTextStyle}
-            caretdown="caretdown"
-            arrow={false}
-            items={dropDownData}
-            labelStyle={styles.dropDownLabel}
-            value={time}
-            arrowSize={14}
-            onChangeValue={(item) => setTime(item.value)}
-            containerStyle={styles.dropDownContainer}
-          />
+          <View style={styles.time}>
+            <CustomTouchableOpacity
+              onPress={() => {
+                setShowTimer(true);
+              }}
+              style={styles.dataTextInput}>
+              <Text style={styles.dateLabel}>
+                {time
+                  ? `${formattedTime.hours} : ${formattedTime.minutes}  ${AmOrPm}`
+                  : '6:00 PM'}
+              </Text>
+              <AntDesignIcon
+                name={'caretdown'}
+                size={15}
+                color={COLORS.GRAY_90}
+              />
+            </CustomTouchableOpacity>
+          </View>
         </View>
         <View style={styles.labelsView}>
           <Text style={styles.labelStyle}>
@@ -137,6 +168,7 @@ const PainAssessment = ({route}) => {
         </View>
         <View style={styles.buttonView}>
           <CustomButton
+            disabled={Boolean(patient === '')}
             onPress={() => {
               navigation.navigate(SCREEN_NAMES.PAIN_ASSESSMENT);
             }}
@@ -166,6 +198,27 @@ const PainAssessment = ({route}) => {
             />
           </View>
         </ReactNativeModal>
+        <ReactNativeModal
+          isVisible={showTimer && Platform.OS === 'ios'}
+          onDismiss={() => setShowTimer(false)}
+          onBackdropPress={() => setShowTimer(false)}
+          animationIn="zoomIn"
+          animationOut="zoomOut">
+          <View style={styles.datePickerView}>
+            <DateTimePicker
+              style={{width: '100%'}}
+              value={time || new Date()}
+              mode={'time'}
+              maximumDate={new Date()}
+              display="spinner"
+              onChange={(event, value) => {
+                if (showTimer) {
+                  setTime(value);
+                }
+              }}
+            />
+          </View>
+        </ReactNativeModal>
         {Boolean(showDatePicker && Platform.OS === 'android') && (
           <DateTimePicker
             value={selectedDate || new Date()}
@@ -176,6 +229,21 @@ const PainAssessment = ({route}) => {
               if (showDatePicker) {
                 setShowDatePicker(false);
                 setSelectedDate(value);
+              }
+            }}
+          />
+        )}
+        {Boolean(showTimer && Platform.OS === 'android') && (
+          <DateTimePicker
+            value={time || new Date()}
+            mode={'time'}
+            maximumDate={new Date()}
+            display="spinner"
+            onChange={(event, value) => {
+              console.log('vvvvvv....', value);
+              if (showTimer) {
+                setShowTimer(false);
+                setTime(value);
               }
             }}
           />

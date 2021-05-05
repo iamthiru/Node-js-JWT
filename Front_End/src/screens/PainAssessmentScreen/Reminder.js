@@ -15,6 +15,8 @@ import CustomRadioButton from '../../components/shared/CustomRadioButton';
 import CustomButton from '../../components/shared/CustomButton';
 import { getStatusBarHeight } from 'react-native-status-bar-height';
 import { formatAMPM } from '../../utils/date';
+import {useNavigation} from '@react-navigation/native'
+import { SCREEN_NAMES } from '../../constants/navigation';
 
 const { width, height } = Dimensions.get("window");
 
@@ -26,6 +28,7 @@ const Reminder = ({ gotoNext, gotoPrevious }) => {
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [selectedTime, setSelectedTime] = useState(new Date());
     const [needReminder, setNeedReminder] = useState(true);
+    const navigation = useNavigation()
 
     const handlePrevious = () => {
         gotoPrevious();
@@ -89,7 +92,10 @@ const Reminder = ({ gotoNext, gotoPrevious }) => {
                     iconLeft={<AntDesignIcon name={"arrowleft"} size={16} color={COLORS.GRAY_90} />}
                 />
                 <CustomButton
-                    onPress={() => handleContinue()}
+                    // onPress={() => handleContinue()}
+                    onPress ={()=>{
+                        navigation.navigate(SCREEN_NAMES.PUPILLARY_DILATION)
+                    }}
                     title="Continue"
                     textStyle={{ color: COLORS.GRAY_90 }}
                     style={{ width: ((width - 16 - 16 - 75) / 2), backgroundColor: COLORS.SECONDARY_MAIN, borderColor: COLORS.PRIMARY_MAIN, borderWidth: 1 }}
