@@ -162,9 +162,9 @@ def Calculate_Pain_Labeler(opath, fpath, D, num_steps):
     video_csv = pd.read_csv(fpath)
 
     # Bucket threshold values here:
-    no_pain_UL = 5.18   # (Calculated by using Delaware Pain DB and computing scores on Neutral faces)
-    pain_1_UL = 6.78    # (BioVid Pain 1 and Pain 2 labels below)
-    pain_2_UL = 8.05    # (BioVid Pain 3 label below, Pain 4 label above)
+    no_pain_UL = 5.18  # (Calculated by using Delaware Pain DB and computing scores on Neutral faces)
+    pain_1_UL = 6.78  # (BioVid Pain 1 and Pain 2 labels below)
+    pain_2_UL = 8.05  # (BioVid Pain 3 label below, Pain 4 label above)
 
     start_ix = 0
     end_ix = num_steps
@@ -208,7 +208,8 @@ def Calculate_Pain_Labeler(opath, fpath, D, num_steps):
         label_csv = pd.DataFrame(Word_Label)
         label_csv.columns = {'Label'}
         label_csv['Time (sec)'] = range(1, len(Word_Label) + 1)
-        label_csv = label_csv[['Time (sec)', 'Label']]
+        label_csv['Video Score'] = 0
+        label_csv = label_csv[['Time (sec)', 'Label', 'Video Score']]
         label_csv.to_csv(opath + '/' + D + '_LabelFile.csv', index=False)
 
     return Word_Label
@@ -218,7 +219,7 @@ def Calculate_Pain_Labeler(opath, fpath, D, num_steps):
 
 # Video Labeler: Used to read the csv file and generate a new file with high level second and pain scores.
 # Also used to compute a video score using a weighted formula.
-def Video_Labeler(label_list):
+def Video_Labeler(opath, D, label_list):
     # Value of each level (Mean of the pain levels as calcuated using BioVid Dataset):
     Pain_0 = 5.18
     Pain_1 = 6.44
@@ -248,6 +249,9 @@ def Video_Labeler(label_list):
 
     score = (count_np * Pain_0 + count_p1 * Pain_1 + count_p2 * Pain_2 + count_p3 * Pain_3) / len(label_list)
     score = ((score - Pain_0) / (Pain_3 - Pain_0)) * 10
+    label_file = pd.read_csv(opath + '/' + D + '_LabelFile.csv')
+    label_file['Video Score'] = score
+    label_file.to_csv(opath + '/' + D + '_LabelFile.csv', index=False)
     print("Final score for the video is : ", score)
     return score
 
@@ -300,13 +304,13 @@ if __name__ == "__main__":
         Compute_PSPI_AUs(out_path, out_path + os.path.splitext(filenm)[0] + '.csv', os.path.splitext(filenm)[0])
         video_label_list = Calculate_Pain_Labeler(out_path, out_path + os.path.splitext(filenm)[0] + '_PSPI_AUs.csv',
                                                   os.path.splitext(filenm)[0], int(video_fps))
-        final_video_label = Video_Labeler(video_label_list)
+        final_video_label = Video_Labeler(out_path, os.path.splitext(filenm)[0], video_label_list)
         Graph_Plot(out_path, os.path.splitext(filenm)[0] + '_PSPI_AUs.csv', os.path.splitext(filenm)[0], 0)
     else:
         OpenFace_API_Call(in_path, out_path)
         Compute_PSPI_AUs(out_path, out_path + 'face.csv', 'face')
         video_label_list = Calculate_Pain_Labeler(out_path, out_path + 'face_PSPI_AUs.csv', 'face', int(video_fps))
-        final_video_label = Video_Labeler(video_label_list)
+        final_video_label = Video_Labeler(out_path, os.path.splitext(filenm)[0], video_label_list)
         Graph_Plot(out_path, 'face_PSPI_AUs.csv', 'face', 0)
 
     print("\n############################## END OF EXECUTION ##############################")
