@@ -32,7 +32,9 @@ const AssignPatient = () => {
   const [patientData,setPatientData] = useState({})
   const painAssessment = true
   return (
-    <View style={styles.assignPatientMainView}>
+    <View style={[styles.assignPatientMainView,{
+      paddingTop:Boolean(Platform.OS === 'ios') ?0:Boolean(openNewPatient)?70:50
+    }]}>
       {Platform.OS === 'android' && (
         <StatusBar
           backgroundColor={'transparent'}

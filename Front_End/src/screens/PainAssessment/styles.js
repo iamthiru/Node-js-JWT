@@ -1,4 +1,4 @@
-import {Dimensions, StyleSheet} from 'react-native';
+import {Dimensions, StyleSheet,Platform} from 'react-native';
 import {COLORS} from '../../constants/colors';
 
 const {width, height} = Dimensions.get('window');
@@ -33,6 +33,8 @@ const styles = StyleSheet.create({
   },
   mainView: {
     width: width,
+    height:height,
+
   },
   patientText: {
     fontSize: 16,
@@ -113,7 +115,6 @@ const styles = StyleSheet.create({
   },
   labelsView: {
     marginTop: 30,
-    width: width * 0.8,
     paddingLeft: 40,
     justifyContent: 'flex-start',
   },
@@ -134,9 +135,12 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   input: {
-    width: width * 0.32,
+    width: width * 0.36,
     height: 30,
+    fontSize: 14,
     borderWidth: 0,
+    textAlignVertical: 'center',
+    padding: 0,
   },
   container: {
     borderRadius: 5,
@@ -159,7 +163,7 @@ const styles = StyleSheet.create({
   time: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginHorizontal: 45,
+   
   },
   dateLabel: {
     fontSize: 16,

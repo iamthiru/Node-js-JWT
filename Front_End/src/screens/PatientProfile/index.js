@@ -60,7 +60,10 @@ const PatientProfile = ({navigation}) => {
 
 
   return (
-    <View style={styles.body}>
+    <View style={[styles.body,
+    {
+      paddingTop:Boolean(Platform.OS === 'ios') ? 0:50
+    }]}>
       {Platform.OS === 'android' && (
         <StatusBar
           backgroundColor={'transparent'}
