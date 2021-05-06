@@ -1,7 +1,7 @@
 # Proprietary: Benten Technologies, Inc.
 # Author: Pranav H. Deo
 # Copyright Content
-# Date: 05/05/2021
+# Date: 05/06/2021
 # Version: v1.8
 
 # Code Description:
@@ -175,9 +175,10 @@ def Upload_Process_Pupil():
             pth = os.path.join(app.config['PUPIL_UPLOAD_FOLDER'], fname)
             f.save(os.path.join(app.config['PUPIL_UPLOAD_FOLDER'], fname))
             Upload_2_S3(BUCKET_NAME, fname, pth, PUPIL_UPLOAD_FOLDER_S3)
-            table_userData.put_item(Item={'user-email': email, 'user-name': fname_txtfield+' '+lname_txtfield,
+            table_userData.put_item(Item={'timestamp': str(st), 'Request': 'Website', 'user-email': email,
+                                          'user-name': fname_txtfield+' '+lname_txtfield,
                                           'user-eyecolor': eye_color_val,  'user-metric': 'Pupil Pain',
-                                          's3-filepath': 's3://impact-benten/'+PUPIL_UPLOAD_FOLDER_S3+fname})
+                                          's3-filepath': 's3://impact-benten/' + PUPIL_UPLOAD_FOLDER_S3 + fname})
             # Processing Segment:
             os.system('python IMPACT_PUPIL_v1_3.py ' + str(fname) + ' Color')
             token = os.path.exists('./static/Pupil_Output_Images/' + 'PUAL_' + str(os.path.splitext(fname)[0]) + '.csv')
@@ -228,9 +229,10 @@ def UploadFacial():
             pth = os.path.join(app.config['FACIAL_UPLOAD_FOLDER'], face_fname)
             f.save(os.path.join(app.config['FACIAL_UPLOAD_FOLDER'], face_fname))
             Upload_2_S3(BUCKET_NAME, face_fname, pth, FACIAL_UPLOAD_FOLDER_S3)
-            table_userData.put_item(Item={'user-email': email, 'user-name': fname_txtfield + ' ' + lname_txtfield,
+            table_userData.put_item(Item={'timestamp': str(st), 'Request': 'Website', 'user-email': email,
+                                          'user-name': fname_txtfield + ' ' + lname_txtfield,
                                           'user-video-type': option_val, 'user-metric': 'Facial Pain',
-                                          's3-filepath': 's3://impact-benten/'+FACIAL_UPLOAD_FOLDER_S3+face_fname})
+                                          's3-filepath': 's3://impact-benten/' + FACIAL_UPLOAD_FOLDER_S3 + face_fname})
             # Processing Segment:
             os.system('python IMPACT_FACIAL_v1_0.py ' + str(face_fname))
             token = os.path.exists('./static/Face_Output_Images/' + str(os.path.splitext(face_fname)[0]) + '.csv')
@@ -250,7 +252,12 @@ def UploadFacial():
                 label_file_csv = os.path.join(app.config['FACIAL_OUTPUT_FOLDER'], img_name+'_LabelFile.csv')
                 bucket_df = pd.read_csv(label_file_csv)
                 time_sec = bucket_df['Time (sec)']
-                label_sec = bucket_df['Label']
+                label_sec = list(bucket_df['Label'])
+                video_score = round(float(bucket_df['Video Score'][0]), 2)
+                label_sec.append(str(min_pain_score))
+                label_sec.append(str(mean_pain_score))
+                label_sec.append(str(max_pain_score))
+                label_sec.append(str(video_score))
                 pic = os.path.join(app.config['FACIAL_OUTPUT_FOLDER'], f)
                 Upload_2_S3(BUCKET_NAME, f, pic, res_img_fold_s3)
                 Upload_2_S3(BUCKET_NAME, file, csv_file, res_img_fold_s3)
@@ -268,10 +275,12 @@ def UploadFacial():
 
 @app.route('/mobile_pupil_api/<filename>', methods=['GET', 'POST'])
 def pupil_api(filename):
-    upload_folder_S3 = 'Pupil_Data/Results-Output/'
-    download_folder_S3 = 'Pupil_Data/Uploads-VideoFiles/'
+    upload_folder_s3 = 'Pupil_Data/Results-Output/'
+    download_folder_s3 = 'Pupil_Data/Uploads-VideoFiles/'
     PUPIL_UPLOAD_FOLDER = './static/Pupil_Input_Videos/'
-    Download_from_S3(BUCKET_NAME, download_folder_S3+filename, PUPIL_UPLOAD_FOLDER+filename)
+    Download_from_S3(BUCKET_NAME, download_folder_s3+filename, PUPIL_UPLOAD_FOLDER+filename)
+    ts = time.time()
+    st = dt.datetime.fromtimestamp(ts).strftime('%Y-%m-%d_%H:%M:%S')
     os.system('python IMPACT_PUPIL_v1_3.py ' + str(filename) + ' Color')
     token = os.path.exists('./static/Pupil_Output_Images/' + 'PUAL_' + str(os.path.splitext(filename)[0]) + '.csv')
     if token:
@@ -290,9 +299,11 @@ def pupil_api(filename):
         f = img_name + '_Dilation_Plot.png'
         vid_file = os.path.join(app.config['PUPIL_VID_OUT_FOLDER'], img_name + '.mp4')
         pic = os.path.join(app.config['PUPIL_OUTPUT_FOLDER'], f)
-        Upload_2_S3(BUCKET_NAME, f, pic, upload_folder_S3)
-        Upload_2_S3(BUCKET_NAME, img_name + '.mp4', vid_file, upload_folder_S3)
-        Upload_2_S3(BUCKET_NAME, file, csv_file, upload_folder_S3)
+        Upload_2_S3(BUCKET_NAME, f, pic, upload_folder_s3)
+        Upload_2_S3(BUCKET_NAME, img_name + '.mp4', vid_file, upload_folder_s3)
+        Upload_2_S3(BUCKET_NAME, file, csv_file, upload_folder_s3)
+        table_userData.put_item(Item={'timestamp': str(st), 'Request': 'API', 'user-metric': 'Pupil Pain',
+                                      's3-filepath': 's3://impact-benten/' + download_folder_s3 + filename})
         print('PUAL : ', PUAL_SCORE)
         return str(PUAL_SCORE)
     else:
@@ -306,12 +317,14 @@ def facial_api(filename):
     download_folder_s3 = 'Facial_Data/Uploads-VideoFiles/'
     FACIAL_UPLOAD_FOLDER = './static/Face_Input_Videos/'
     Download_from_S3(BUCKET_NAME, download_folder_s3+filename, FACIAL_UPLOAD_FOLDER + filename)
+    ts = time.time()
+    st = dt.datetime.fromtimestamp(ts).strftime('%Y-%m-%d_%H:%M:%S')
     os.system('python IMPACT_FACIAL_v1_0.py ' + str(filename))
     token = os.path.exists('./static/Face_Output_Images/' + str(os.path.splitext(filename)[0]) + '.csv')
     if token:
         print('\n*************** TOKEN : GOOD ****************\n')
         res_img_fold = os.path.join('static', 'Face_Output_Images')
-        res_img_fold_s3 = 'Facial_Data/Results-Output/'
+        res_img_fold_s3 = upload_folder_s3
         app.config['FACIAL_OUTPUT_FOLDER'] = res_img_fold
         img_name = str(os.path.splitext(filename)[0])
         file = img_name + '_PSPI_AUs.csv'
@@ -325,26 +338,22 @@ def facial_api(filename):
         pic = os.path.join(app.config['FACIAL_OUTPUT_FOLDER'], f)
         label_file_csv = os.path.join(app.config['FACIAL_OUTPUT_FOLDER'], img_name + '_LabelFile.csv')
         bucket_df = pd.read_csv(label_file_csv)
-        time_sec = bucket_df['Time (sec)']
-        label_sec = tuple(bucket_df['Label'])
+        # time_sec = bucket_df['Time (sec)']
+        label_sec = list(bucket_df['Label'])
+        video_score = round(float(bucket_df['Video Score'][0]), 3)
+        label_sec.append(str(min_pain_score))
+        label_sec.append(str(mean_pain_score))
+        label_sec.append(str(max_pain_score))
+        label_sec.append(str(video_score))
         Upload_2_S3(BUCKET_NAME, f, pic, res_img_fold_s3)
         Upload_2_S3(BUCKET_NAME, file, csv_file, res_img_fold_s3)
         Upload_2_S3(BUCKET_NAME, img_name + '_LabelFile.csv', label_file_csv, res_img_fold_s3)
+        table_userData.put_item(Item={'timestamp': str(st), 'Request': 'API', 'user-metric': 'Facial Pain',
+                                      's3-filepath': 's3://impact-benten/' + download_folder_s3 + filename})
         return str(label_sec)
     else:
         print('\n*************** TOKEN : BAD ****************\n')
         return "Retake"
-
-
-def write_to_txt(fnametxt, lnametxt, v, fln, flag, vid_type):
-    if flag == 1:
-        F = open('./static/Pupil_Output_Images/' + v + fnametxt + lnametxt + ".txt", "a+")
-        F.write("Patient Name : " + fnametxt + " " + lnametxt + "\nEye Color : " + v + "\nVideo File-Name : " + fln + "\nVideo Type : " + vid_type +"\n\n")
-    elif flag == 2:
-        F = open('./static/Face_Output_Images/' + fnametxt + "_" + lnametxt + ".txt", "a+")
-        F.write("Patient Name : " + fnametxt + " " + lnametxt + "\nVideo Type : " + v + "\nVideo File-Name : " + fln + "\nVideo Code : " + vid_type +"\n\n")
-    F.close()
-    return
 
 
 def Upload_2_S3(buck, f, fp, s3_to_path):
