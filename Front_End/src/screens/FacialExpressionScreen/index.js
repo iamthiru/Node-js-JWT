@@ -27,12 +27,18 @@ import EyeBoundary from './EyeBoundary';
 import {COLORS} from '../../constants/colors';
 import {SCREEN_NAMES} from '../../constants/navigation';
 import CustomButton from '../../components/shared/CustomButton';
+import S3 from 'aws-sdk/clients/s3';
+import fs from 'react-native-fs';
+import {decode, encode} from 'base64-arraybuffer';
+import { ACCESS_ID, ACCESS_KEY, BUCKET_FOLDER_FOR_PUPIL, BUCKET_NAME } from '../../constants/aws';
+import { initiateFacialExpressionVideoProcessingAPI } from '../../api/painAssessment';
 
 const {width, height} = Dimensions.get('window');
 const {VideoCropper} = NativeModules;
 
 let camera = null;
 let intervalId = null;
+let processingIntervalId = null;
 
 const EYE_BORDER_TYPE = {
   OVAL: 'oval',
@@ -70,6 +76,9 @@ const FacialExpressionScreen = ({navigation}) => {
   const [exposure, setExposure] = useState(0.0);
   const [zoom, setZoom] = useState(Platform.OS === 'ios' ? 0.1 : 0.175);
   const [focusDepth, setFocusDepth] = useState(0.0);
+  const [processingTimer, setProcessingTimer] = useState('0');
+  const [resultReady, setResultReady] = useState(false);
+  const [resultValue, setResultValue] = useState('');
   // const [showBrightnessSlider, setShowBrightnessSlider] = useState(false);
   const [spinnerState, setShowSpinner] = useState({
     open: false,
@@ -197,6 +206,19 @@ const FacialExpressionScreen = ({navigation}) => {
     }
   };
 
+  const startProcessingTimer = () => {
+    let timerValue = 0;
+    processingIntervalId = setInterval(() => {
+      timerValue += 1;
+      setProcessingTimer(timerValue.toString());
+    }, 1000);
+  };
+
+  const clearProcessingTimer = () => {
+    setProcessingTimer('0');
+    clearInterval(processingIntervalId);
+  };
+
   const onStartRecordingPress = () => {
     setProcessing(true);
     let timerValue = 3;
@@ -219,11 +241,13 @@ const FacialExpressionScreen = ({navigation}) => {
       return;
     }
 
+    const recordOptions = {
+      mute: true,
+      quality: RNCamera.Constants.VideoQuality['1080p'],
+    };
+
     camera
-      .recordAsync({
-        mute: true,
-        quality: RNCamera.Constants.VideoQuality['1080p'],
-      })
+      .recordAsync(recordOptions)
       .then((data) => {
         console.log('videoData: ', data);
 
@@ -231,6 +255,7 @@ const FacialExpressionScreen = ({navigation}) => {
           open: true,
           message: 'Cropping...',
         });
+        startProcessingTimer();
         cropVideo(
           data.uri,
           (croppedVideoPath) => {
@@ -252,6 +277,7 @@ const FacialExpressionScreen = ({navigation}) => {
                     open: false,
                     message: '',
                   });
+                  clearProcessingTimer();
                   setIsRecording(false);
                   setVideoURL(resultPath);
                 } else {
@@ -259,6 +285,7 @@ const FacialExpressionScreen = ({navigation}) => {
                     open: false,
                     message: '',
                   });
+                  clearProcessingTimer();
                   setIsRecording(false);
                   setVideoURL(resultPath);
                 }
@@ -269,6 +296,7 @@ const FacialExpressionScreen = ({navigation}) => {
                   open: false,
                   message: '',
                 });
+                clearProcessingTimer();
                 setIsRecording(false);
                 setVideoURL(croppedVideoPath);
               });
@@ -278,6 +306,7 @@ const FacialExpressionScreen = ({navigation}) => {
               open: false,
               message: '',
             });
+            clearProcessingTimer();
             setIsRecording(false);
             setVideoURL(error.originalPath);
           },
@@ -366,7 +395,7 @@ const FacialExpressionScreen = ({navigation}) => {
     clearInterval(intervalId);
   };
 
-  const onConfirmPress = () => {
+  const onDownloadPress = () => {
     if (false && Platform.OS === 'ios') {
       const filename = `VID_${Date.now().toString()}`;
       MovToMp4.convertMovToMp4(videoURL, filename).then(function (results) {
@@ -392,6 +421,113 @@ const FacialExpressionScreen = ({navigation}) => {
         });
     }
     // navigation.navigate(SCREEN_NAMES.HOME_OLD)
+  };
+
+  const onUploadPress = async () => {
+    setShowSpinner({
+      open: true,
+      message: 'Uploading...',
+    });
+    startProcessingTimer();
+
+    try {
+      const s3bucket = new S3({
+        accessKeyId: ACCESS_ID,
+        secretAccessKey: ACCESS_KEY,
+        Bucket: BUCKET_NAME,
+        signatureVersion: 'v4',
+      });
+
+      const filename = `VID_${Date.now().toString()}.mp4`;
+      let contentType = 'video/mp4';
+      let contentDeposition = 'inline;filename="' + filename + '"';
+      const base64 = await fs.readFile(videoURL, 'base64');
+      const arrayBuffer = decode(base64);
+
+      s3bucket.createBucket(() => {
+        const params = {
+          Bucket: BUCKET_NAME,
+          Key: `${BUCKET_FOLDER_FOR_PUPIL}${filename}`,
+          Body: arrayBuffer,
+          ContentDisposition: contentDeposition,
+          ContentType: contentType,
+          ACL: 'public-read',
+        };
+        s3bucket.upload(params, (err, data) => {
+          if (err) {
+            console.log('error in callback', err);
+            Alert.alert('Error', 'Error in uploading the video');
+            setShowSpinner({
+              open: false,
+              message: '',
+            });
+            clearProcessingTimer();
+            resetStates();
+          } else {
+            console.log('success', data);
+            console.log('Respomse URL : ' + data.Location);
+
+            setShowSpinner({
+              open: true,
+              message: 'Processing...',
+            });
+            initiateFacialExpressionVideoProcessingAPI(filename)
+              .then((result) => {
+                console.log('initiateFacialExpressionVideoProcessingAPI: ', result);
+                if (result && result.data === 'Retake') {
+                  Alert.alert('Error', 'Please retake the video');
+                  // setResultReady(true);
+                  // setShowProcessedResult(true);
+                  setShowSpinner({
+                    open: false,
+                    message: '',
+                  });
+                  clearProcessingTimer();
+                  resetStates('');
+                  return;
+                }
+
+                setResultValue(result.data);
+                setResultReady(true);
+                setShowSpinner({
+                  open: false,
+                  message: '',
+                });
+                clearProcessingTimer();
+
+
+                /* setTimeout(() => {
+                                let pngFileName = `${filename.substring(0, filename.lastIndexOf("."))}_Dilation_Plot.png`
+                                setDownloadFileName(pngFileName);
+                                setResultReady(true);
+                                setShowSpinner(false);
+                                setSpinnerMessage("");
+                                clearProcessingTimer();
+                            }, 100); */
+              })
+              .catch((err) => {
+                Alert.alert('Error', 'Error in processing the video');
+                setShowSpinner({
+                  open: false,
+                  message: '',
+                });
+                // setResultReady(true);
+                // setShowProcessedResult(true);
+                clearProcessingTimer();
+                resetStates('');
+              });
+          }
+        });
+      });
+    } catch (err) {
+      Alert.alert('Error', 'Error in uploading the video');
+      setShowSpinner({
+        open: false,
+        message: '',
+      });
+      clearProcessingTimer();
+      resetStates();
+    }
   };
 
   const onRetakePress = () => {
@@ -1022,53 +1158,114 @@ const FacialExpressionScreen = ({navigation}) => {
             alignItems: 'center',
             paddingTop: 30,
           }}>
-          <CustomTouchableOpacity
-            disabled={processing}
-            style={{
-              backgroundColor: COLORS.PRIMARY_MAIN,
-              borderRadius: 10,
-              alignItems: 'center',
-              justifyContent: 'center',
-              height: 48,
-              width: width - 80,
-              paddingHorizontal: 28,
-              marginBottom: 12,
-            }}
-            onPress={onConfirmPress}>
+          {!resultReady && <>
+            <CustomTouchableOpacity
+              disabled={processing}
+              style={{
+                backgroundColor: COLORS.PRIMARY_MAIN,
+                borderRadius: 10,
+                alignItems: 'center',
+                justifyContent: 'center',
+                height: 48,
+                width: width - 80,
+                paddingHorizontal: 28,
+                marginBottom: 12,
+              }}
+              onPress={onDownloadPress}>
+              <Text
+                style={{
+                  fontSize: 14,
+                  fontWeight: '700',
+                  color: COLORS.WHITE,
+                  textAlign: 'center',
+                }}>
+                {'DOWNLOAD'}
+              </Text>
+            </CustomTouchableOpacity>
+            <CustomTouchableOpacity
+              disabled={processing}
+              style={{
+                backgroundColor: COLORS.PRIMARY_MAIN,
+                borderRadius: 10,
+                alignItems: 'center',
+                justifyContent: 'center',
+                height: 48,
+                width: width - 80,
+                paddingHorizontal: 28,
+                marginBottom: 12,
+              }}
+              onPress={onUploadPress}>
+              <Text
+                style={{
+                  fontSize: 14,
+                  fontWeight: '700',
+                  color: COLORS.WHITE,
+                  textAlign: 'center',
+                }}>
+                {'CONFIRM'}
+              </Text>
+            </CustomTouchableOpacity>
+            <CustomTouchableOpacity
+              disabled={processing}
+              style={{
+                backgroundColor: COLORS.WHITE,
+                borderRadius: 10,
+                borderColor: COLORS.PRIMARY_MAIN,
+                borderWidth: 2,
+                alignItems: 'center',
+                justifyContent: 'center',
+                height: 48,
+                width: width - 80,
+                paddingHorizontal: 28,
+              }}
+              onPress={onRetakePress}>
+              <Text
+                style={{
+                  fontSize: 14,
+                  fontWeight: '700',
+                  color: COLORS.GRAY_90,
+                  textAlign: 'center',
+                }}>
+                {'RETAKE'}
+              </Text>
+            </CustomTouchableOpacity>
+          </>}
+
+          {resultReady && <>
             <Text
               style={{
-                fontSize: 14,
-                fontWeight: '700',
-                color: COLORS.WHITE,
-                textAlign: 'center',
-              }}>
-              {'CONFIRM'}
-            </Text>
-          </CustomTouchableOpacity>
-          <CustomTouchableOpacity
-            disabled={processing}
-            style={{
-              backgroundColor: COLORS.WHITE,
-              borderRadius: 10,
-              borderColor: COLORS.PRIMARY_MAIN,
-              borderWidth: 2,
-              alignItems: 'center',
-              justifyContent: 'center',
-              height: 48,
-              width: width - 80,
-              paddingHorizontal: 28,
-            }}
-            onPress={onRetakePress}>
-            <Text
-              style={{
-                fontSize: 14,
+                fontSize: 16,
                 fontWeight: '700',
                 color: COLORS.GRAY_90,
                 textAlign: 'center',
-              }}>
-              {'RETAKE'}
-            </Text>
-          </CustomTouchableOpacity>
+                marginBottom: 15,
+              }}>{`RESULT: ${resultValue}`}</Text>
+            <CustomTouchableOpacity
+              disabled={processing}
+              style={{
+                backgroundColor: COLORS.PRIMARY_MAIN,
+                borderRadius: 10,
+                alignItems: 'center',
+                justifyContent: 'center',
+                height: 48,
+                width: width - 80,
+                paddingHorizontal: 28,
+                marginBottom: 12,
+              }}
+              onPress={() =>
+                navigation.navigate(SCREEN_NAMES.HOME)
+              }>
+              <Text
+                style={{
+                  fontSize: 14,
+                  fontWeight: '700',
+                  color: COLORS.WHITE,
+                  textAlign: 'center',
+                }}>
+                {'FINISH'}
+              </Text>
+            </CustomTouchableOpacity>
+          </>}
         </View>
       </>
     );
@@ -1081,6 +1278,9 @@ const FacialExpressionScreen = ({navigation}) => {
       <Spinner
         visible={spinnerState.open}
         textContent={spinnerState.message}
+        textContent={`${spinnerState.message} ${
+          processingTimer !== '0' ? `${processingTimer} secs` : ''
+        }`}
         textStyle={{color: COLORS.WHITE}}
       />
     </View>

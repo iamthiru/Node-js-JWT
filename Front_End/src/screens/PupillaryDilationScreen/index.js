@@ -39,7 +39,7 @@ import {
   BUCKET_FOLDER_FOR_PUPIL_RESULT,
   BUCKET_NAME,
 } from '../../constants/aws';
-import {initiateVideoProcessingAPI} from '../../api/painAssessment';
+import {initiatePupilVideoProcessingAPI} from '../../api/painAssessment';
 import {SCREEN_NAMES} from '../../constants/navigation';
 import DummyImageChart from '../../assets/images/dummyChartImage.png';
 import CustomButton from '../../components/shared/CustomButton';
@@ -78,7 +78,6 @@ const DEFAULT_OTHER_EXPOSURE = 0.6; //0.0; //0.2
 
 const PupillaryDilationScreen = ({navigation}) => {
 
-  cons
   const deviceModel = DeviceInfo.getModel();
   const [eyeBorderType, setEyeBorderType] = useState(EYE_BORDER_TYPE.OVAL);
   const [showSpinner, setShowSpinner] = useState(false);
@@ -411,9 +410,9 @@ const PupillaryDilationScreen = ({navigation}) => {
             console.log('Respomse URL : ' + data.Location);
 
             setSpinnerMessage('Processing...');
-            initiateVideoProcessingAPI(filename)
+            initiatePupilVideoProcessingAPI(filename)
               .then((result) => {
-                console.log('initiateVideoProcessingAPI: ', result);
+                console.log('initiatePupilVideoProcessingAPI: ', result);
                 if (result && result.data === 'Retake') {
                   Alert.alert('Error', 'Please retake the video');
                   // setResultReady(true);
