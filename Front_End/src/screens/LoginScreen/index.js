@@ -5,7 +5,8 @@ import {
     ScrollView,
     Text,
     Dimensions,
-    KeyboardAvoidingView
+    KeyboardAvoidingView,
+    Alert
 } from 'react-native';
 import Spinner from 'react-native-loading-spinner-overlay';
 import { updateAuthData } from '../../actions/user';
@@ -17,6 +18,7 @@ import CustomTouchableOpacity from '../../components/shared/CustomTouchableOpaci
 import { COLORS } from '../../constants/colors';
 import { SCREEN_NAMES } from '../../constants/navigation';
 import styles from './styles';
+import { loginAPI } from '../../api/auth';
 
 const { width, height } = Dimensions.get("window");
 
@@ -32,11 +34,19 @@ const LoginScreen = ({ navigation }) => {
     
     const handleSignIn = () => {
         setIsLoggingIn(true);
-        setTimeout(() => {
-            updateAuthData({ authToken: "DUMMY_TOKEN", userId: 123 })
-            signIn({ authToken: "DUMMY_TOKEN", userId: 123 });
+        loginAPI({ email: email, password: password }).then(res => {
+            if (res.data.isError) {
+                Alert.alert("Invalid Login", "Please enter correct username and password", [{ text: "Ok", onPress: () => { } }], { cancelable: false });
+                setIsLoggingIn(false);
+                return;
+            }
+            updateAuthData({ authToken: res.data.result.token, userId: res.data.result.id })
+            signIn({ authToken: res.data.result.token, userId: res.data.result.id });
             setIsLoggingIn(false);
-        }, 3000)
+        }).catch(err => {
+            Alert.alert("Invalid Login", "Please enter correct username and password", [{ text: "Ok", onPress: () => { } }], { cancelable: false });
+            setIsLoggingIn(false);
+        })
     }
 
     const navigateToScreen = (screenName) => {

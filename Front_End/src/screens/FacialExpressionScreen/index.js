@@ -30,7 +30,7 @@ import CustomButton from '../../components/shared/CustomButton';
 import S3 from 'aws-sdk/clients/s3';
 import fs from 'react-native-fs';
 import {decode, encode} from 'base64-arraybuffer';
-import { ACCESS_ID, ACCESS_KEY, BUCKET_FOLDER_FOR_PUPIL, BUCKET_NAME } from '../../constants/aws';
+import { ACCESS_ID, ACCESS_KEY, BUCKET_FOLDER_FOR_FACE, BUCKET_NAME } from '../../constants/aws';
 import { initiateFacialExpressionVideoProcessingAPI } from '../../api/painAssessment';
 
 const {width, height} = Dimensions.get('window');
@@ -447,7 +447,7 @@ const FacialExpressionScreen = ({navigation}) => {
       s3bucket.createBucket(() => {
         const params = {
           Bucket: BUCKET_NAME,
-          Key: `${BUCKET_FOLDER_FOR_PUPIL}${filename}`,
+          Key: `${BUCKET_FOLDER_FOR_FACE}${filename}`,
           Body: arrayBuffer,
           ContentDisposition: contentDeposition,
           ContentType: contentType,
@@ -507,6 +507,7 @@ const FacialExpressionScreen = ({navigation}) => {
               })
               .catch((err) => {
                 Alert.alert('Error', 'Error in processing the video');
+                console.log("Err:", err)
                 setShowSpinner({
                   open: false,
                   message: '',
@@ -1253,7 +1254,7 @@ const FacialExpressionScreen = ({navigation}) => {
                 marginBottom: 12,
               }}
               onPress={() =>
-                navigation.navigate(SCREEN_NAMES.HOME)
+                navigation.navigate(SCREEN_NAMES.HOME_OLD)
               }>
               <Text
                 style={{

@@ -10,29 +10,34 @@ module.exports = {
     getAll
 };
 
-async function authenticate({ username, password }) {
-    const SQL = `SELECT * from users where username = '${username}' and password = '${password}'`;
+async function authenticate({ email, password }) {
+    const SQL = `SELECT * from users where email = '${email}' and password = '${password}'`;
     return new Promise((resolve, reject) => {
         pool.query(SQL, (err, result) => {
             if (err) {
                 console.log(err);
                 resolve({
                     isError: true,
-                    errpr: err,
+                    error: err,
                 })
             } else {
-                if (result.length < 0) throw 'Username or password is incorrect';
+                if (result.length <= 0) {
+                    resolve({
+                        isError: true,
+                        error: { message: 'Email or password is incorrect' },
+                    })
+                } else {
+                    // create a jwt token that is valid for 7 days
+                    const token = jwt.sign({ sub: result[0].id }, config.secret, { expiresIn: '7d' });
 
-                // create a jwt token that is valid for 7 days
-                const token = jwt.sign({ sub: result[0].id }, config.secret, { expiresIn: '7d' });
-
-                resolve({
-                    isError: false,
-                    result: {
-                        ...omitPassword(result[0]),
-                        token
-                    }
-                })
+                    resolve({
+                        isError: false,
+                        result: {
+                            ...omitPassword(result[0]),
+                            token
+                        }
+                    })
+                }
             }
         });
     });
