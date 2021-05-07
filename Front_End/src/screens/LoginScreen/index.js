@@ -34,7 +34,7 @@ const LoginScreen = ({ navigation }) => {
     
     const handleSignIn = () => {
         setIsLoggingIn(true);
-        loginAPI({ email: email, password: password }).then(res => {
+        /* loginAPI({ email: email, password: password }).then(res => {
             if (res.data.isError) {
                 Alert.alert("Invalid Login", "Please enter correct username and password", [{ text: "Ok", onPress: () => { } }], { cancelable: false });
                 setIsLoggingIn(false);
@@ -46,7 +46,12 @@ const LoginScreen = ({ navigation }) => {
         }).catch(err => {
             Alert.alert("Invalid Login", "Please enter correct username and password", [{ text: "Ok", onPress: () => { } }], { cancelable: false });
             setIsLoggingIn(false);
-        })
+        }) */
+        setTimeout(() => {
+            updateAuthData({ authToken: "DUMMY_TOKEN", userId: 123 })
+            signIn({ authToken: "DUMMY_TOKEN", userId: 123 });
+            setIsLoggingIn(false);
+        }, 3000)
     }
 
     const navigateToScreen = (screenName) => {
