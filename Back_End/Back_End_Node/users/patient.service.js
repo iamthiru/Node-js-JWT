@@ -7,8 +7,8 @@ module.exports = {
 
 
 async function addNewPatient(data) {
-    const SQL = `INSERT INTO patient(first_name,last_name,dob,gender,medical_record_no,createdBy) VALUE(?,?,?,?,?,?)`;
-    params = [data.firstName, data.lastName, data.dob, data.gender, data.medicalRecordNo, data.createdBy]
+    const SQL = `INSERT INTO patient(first_name,last_name,dob,eyeColor,gender,medical_record_no,createdBy) VALUE(?,?,?,?,?,?,?)`;
+    params = [data.firstName, data.lastName, data.dob, data.eyeColor, data.gender, data.medicalRecordNo, data.createdBy]
     return new Promise((resolve, reject) => {
         pool.query(SQL, params, (err, result) => {
             if (err) {
