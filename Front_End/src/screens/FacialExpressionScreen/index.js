@@ -74,7 +74,7 @@ const FacialExpressionScreen = ({navigation}) => {
   const [fps, setFps] = useState(60);
   const [flashOn, setFlashOn] = useState(false);
   const [exposure, setExposure] = useState(0.0);
-  const [zoom, setZoom] = useState(Platform.OS === 'ios' ? 0.1 : 0.175);
+  const [zoom, setZoom] = useState(0);
   const [focusDepth, setFocusDepth] = useState(0.0);
   const [processingTimer, setProcessingTimer] = useState('0');
   const [resultReady, setResultReady] = useState(false);
@@ -413,11 +413,11 @@ const FacialExpressionScreen = ({navigation}) => {
       CameraRoll.save(videoURL, {type: 'video'})
         .then((res) => {
           Alert.alert('Success', 'Video has been saved successfully!');
-          resetStates();
+          // resetStates();
         })
         .catch((err) => {
           Alert.alert('Error', 'Download Failed!');
-          resetStates();
+          // resetStates();
         });
     }
     // navigation.navigate(SCREEN_NAMES.HOME_OLD)
@@ -1152,12 +1152,14 @@ const FacialExpressionScreen = ({navigation}) => {
             }}
           />
         </View>
-        <View
+        <ScrollView
           style={{
             width: width,
-            justifyContent: 'center',
-            alignItems: 'center',
             paddingTop: 30,
+          }} 
+          contentContainerStyle={{ 
+            justifyContent: 'center',
+            alignItems: 'center'
           }}>
           {!resultReady && <>
             <CustomTouchableOpacity
@@ -1209,22 +1211,21 @@ const FacialExpressionScreen = ({navigation}) => {
             <CustomTouchableOpacity
               disabled={processing}
               style={{
-                backgroundColor: COLORS.WHITE,
+                backgroundColor: COLORS.PRIMARY_MAIN,
                 borderRadius: 10,
-                borderColor: COLORS.PRIMARY_MAIN,
-                borderWidth: 2,
                 alignItems: 'center',
                 justifyContent: 'center',
                 height: 48,
                 width: width - 80,
                 paddingHorizontal: 28,
+                marginBottom: 50
               }}
               onPress={onRetakePress}>
               <Text
                 style={{
                   fontSize: 14,
                   fontWeight: '700',
-                  color: COLORS.GRAY_90,
+                  color: COLORS.WHITE,
                   textAlign: 'center',
                 }}>
                 {'RETAKE'}
@@ -1267,7 +1268,7 @@ const FacialExpressionScreen = ({navigation}) => {
               </Text>
             </CustomTouchableOpacity>
           </>}
-        </View>
+        </ScrollView>
       </>
     );
   };

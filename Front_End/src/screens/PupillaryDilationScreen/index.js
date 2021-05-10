@@ -1518,12 +1518,14 @@ const PupillaryDilationScreen = ({navigation}) => {
             }}
           />
         </View>
-        <View
+        <ScrollView
           style={{
             width: width,
-            justifyContent: 'center',
-            alignItems: 'center',
             paddingTop: 30,
+          }}
+          contentContainerStyle={{ 
+            justifyContent: 'center',
+            alignItems: 'center'
           }}>
           {!resultReady && (
             <>
@@ -1583,6 +1585,7 @@ const PupillaryDilationScreen = ({navigation}) => {
                   height: 48,
                   width: width - 80,
                   paddingHorizontal: 28,
+                  marginBottom: 50
                 }}
                 onPress={onRetakePress}>
                 <Text
@@ -1641,7 +1644,7 @@ const PupillaryDilationScreen = ({navigation}) => {
               </CustomTouchableOpacity>
             </>
           )}
-        </View>
+        </ScrollView>
       </>
     );
   };
