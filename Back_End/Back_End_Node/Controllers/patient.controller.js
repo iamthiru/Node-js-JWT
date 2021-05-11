@@ -7,6 +7,7 @@ const patientService = require('../users/patient.service');
 router.post('/add', addPatient);
 router.get('/getPatientList', getPatienList);
 router.post('/createAssessment', newAssessment);
+router.post('/assessmentList',getAssessment);
 
 module.exports = router;
 
@@ -27,3 +28,10 @@ function newAssessment(req, res, next) {
         .then(data => res.json(data))
         .catch(next);
 }
+
+function getAssessment(req,res,next){
+    patientService.getAssessmentByPatientId(req.body)
+        .then(data=> res.json(data))
+        .catch(next);
+}
+
