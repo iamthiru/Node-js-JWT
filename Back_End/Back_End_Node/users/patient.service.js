@@ -4,7 +4,9 @@ module.exports = {
     addNewPatient,
     getAllPatientList,
     createAssessment,
-    getAssessmentByPatientId
+    getAssessmentByPatientId,
+    getLookUp,
+    getLookUpTypeList
 };
 
 
@@ -115,7 +117,7 @@ async function createAssessment(data) {
 }
 
 async function getAssessmentByPatientId(data){
-    const SQL =`SELECT * from assessment WHERE patient_id ='${data.patientId}'`;
+    const SQL =`SELECT * from assessment left join reminder on assessment.patient_id = reminder.patient_id WHERE assessment.patient_id ='${data.patientId}'`;
     const assessment = await new Promise((resolve, reject) => {
         pool.query(SQL, (err, result) => {
             if (err) {
@@ -135,6 +137,49 @@ async function getAssessmentByPatientId(data){
     return assessment;
 
 }
+
+async function getLookUp(){
+    const SQL = `SELECT id,lookupTypeId,displayValue,categoryId from lookup where isDeleted = 0`;
+    const lookup = await new Promise((resolve, reject) => {
+        pool.query(SQL, (err, result) => {
+            if (err) {
+                console.log(err);
+                resolve({
+                    isError: true,
+                    error: err,
+                })
+            } else {
+                resolve({
+                    isError: false,
+                    result: result
+                })
+            }
+        })
+    })
+    return lookup;
+}
+
+async function getLookUpTypeList(){
+    const SQL = `SELECT id,lookupType,descripion,parentLookupTypeId from lookuptype where isDeleted = 0`;
+    const lookup = await new Promise((resolve, reject) => {
+        pool.query(SQL, (err, result) => {
+            if (err) {
+                console.log(err);
+                resolve({
+                    isError: true,
+                    error: err,
+                })
+            } else {
+                resolve({
+                    isError: false,
+                    result: result
+                })
+            }
+        })
+    })
+    return lookup;
+}
+
 
 
 

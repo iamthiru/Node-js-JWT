@@ -7,7 +7,9 @@ const patientService = require('../users/patient.service');
 router.post('/add', addPatient);
 router.get('/getPatientList', getPatienList);
 router.post('/createAssessment', newAssessment);
-router.post('/assessmentList',getAssessment);
+router.get('/assessmentList',getAssessment);
+router.get('/lookupData',getlookupData);
+router.get('/getLookupType',getLookupType)
 
 module.exports = router;
 
@@ -30,8 +32,21 @@ function newAssessment(req, res, next) {
 }
 
 function getAssessment(req,res,next){
+    console.log(req.body);
     patientService.getAssessmentByPatientId(req.body)
         .then(data=> res.json(data))
+        .catch(next);
+}
+
+function getlookupData(req,res,next){
+    patientService.getLookUp()
+        .then(data => res.json(data))
+        .catch(next);
+}
+
+function getLookupType(req,res,next){
+    patientService.getLookUpTypeList()
+        .then(data => res.json(data))
         .catch(next);
 }
 
