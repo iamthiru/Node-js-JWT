@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const patientService = require('../users/patient.service');
+const patientService = require('../services/patient.service');
 
 
 // routes
@@ -8,8 +8,12 @@ router.post('/add', addPatient);
 router.get('/getPatientList', getPatienList);
 router.post('/createAssessment', newAssessment);
 router.get('/assessmentList',getAssessment);
-router.get('/lookupData',getlookupData);
-router.get('/getLookupType',getLookupType)
+router.get('/lookupData',getLookupData);
+router.get('/getLookupType',getLookupType);
+router.post('/createMedication',createMedication);
+router.get('/medicationList/:patientId',getMedicationList);
+router.get('/lastMedicationAndAssessment/:patientId',getPatientLastAssessmentAndMedication)
+
 
 module.exports = router;
 
@@ -38,7 +42,7 @@ function getAssessment(req,res,next){
         .catch(next);
 }
 
-function getlookupData(req,res,next){
+function getLookupData(req,res,next){
     patientService.getLookUp()
         .then(data => res.json(data))
         .catch(next);
@@ -50,3 +54,21 @@ function getLookupType(req,res,next){
         .catch(next);
 }
 
+function createMedication(req,res,next){
+    patientService.createMedication(req.body)
+        .then(data => res.json(data))
+        .catch(next);
+
+}
+
+function getMedicationList(req,res,next){
+    patientService.getMedicationList(req.params.patientId)
+        .then(data => res.json(data))
+        .catch(next);
+}
+
+function getPatientLastAssessmentAndMedication(req,res,next){
+    patientService.getPatientLastAssessmentAndMedication(req.params.patientId)
+        .then(data => res.json(data))
+        .catch(next);
+}
