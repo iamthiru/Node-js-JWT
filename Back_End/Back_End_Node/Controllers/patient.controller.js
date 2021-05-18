@@ -37,7 +37,7 @@ function newAssessment(req, res, next) {
 
 function getAssessment(req,res,next){
     console.log(req.body);
-    patientService.getAssessmentByPatientId(req.body)
+    patientService.getAssessmentByPatientId()
         .then(data=> res.json(data))
         .catch(next);
 }
