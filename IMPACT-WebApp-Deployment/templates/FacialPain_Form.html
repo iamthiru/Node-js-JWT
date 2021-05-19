@@ -46,8 +46,8 @@
         background: white;
         padding: 30px 80px;
         box-sizing: border-box;
-        border-radius: 25px;
-        box-shadow: 8px 8px 20px #000000;
+        border-radius: 10px;
+        box-shadow: 50px 50px 50px #000000;
         position: fixed;
         left: 50%;
         top: 56%;
@@ -56,7 +56,7 @@
 
     body {
       margin: 0;
-      background: #72D4DC;
+      background: #474e5d;
     }
 
     /* Style the header */
@@ -176,7 +176,9 @@
         <a href="{{url_for('HomePage')}}" style="font-size: 20px">Home</a>
         <a href="{{url_for('PupilPain')}}" style="font-size: 20px">Pupil-Pain</a>
         <a href="{{url_for('FacialPain')}}" style="font-size: 20px">Facial-Pain</a>
-        <a href="{{url_for('Logout')}}" style="font-size: 20px">Logout</a>
+        <a href="{{url_for('PatientRecords')}}" style="font-size: 20px">Patient-Records</a>
+        <a href="{{url_for('Logout')}}" style="font-size: 20px; float: right;">Logout</a>
+        <a href="{{url_for('HomePage')}}" style="font-size: 20px; float: right;">Hello, {{ user }}</a>
     </div>
 
     <div class="header">
