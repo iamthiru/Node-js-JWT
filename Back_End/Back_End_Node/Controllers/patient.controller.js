@@ -12,7 +12,7 @@ router.get('/lookupData',getLookupData);
 router.get('/getLookupType',getLookupType);
 router.post('/createMedication',createMedication);
 router.get('/medicationList/:patientId',getMedicationList);
-router.get('/lastMedicationAndAssessment/:patientId',getPatientLastAssessmentAndMedication)
+router.get('/lastMedicationAndAssessment/:patientId',getPatientLastAssessmentAndMedication);
 
 
 module.exports = router;

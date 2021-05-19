@@ -10,7 +10,6 @@ module.exports = {
     createMedication,
     getMedicationList,
     getPatientLastAssessmentAndMedication,
-    getMilliSeconds
 };
 
 
@@ -301,14 +300,17 @@ async function getPatientLastAssessmentAndMedication(patientId) {
             }
         })
     });
-    var assessment_date = assessment && assessment.result[0] ? assessment.result[0].assessment_datetime : ' ';
-    assessment.result[0].assessment_datetime = new Date(assessment_date);
-    var reminderDate = assessment && assessment.result[0] ? assessment.result[0].reminder_datetime : ' ';
-    assessment.result[0].reminder_datetime = new Date(reminderDate);
-    var createdAt = assessment && assessment.result[0] ? assessment.result[0].createdAt : ' ';
-    assessment.result[0].createdAt = new Date(createdAt);
-    medication.result[0].createdAt = new Date(medication.result[0].createdAt);
-
+    if(assessment.result.length !=0){
+        var assessment_date = assessment && assessment.result[0] ? assessment.result[0].assessment_datetime : ' ';
+        assessment.result[0].assessment_datetime = new Date(assessment_date);
+        var reminderDate = assessment && assessment.result[0] ? assessment.result[0].reminder_datetime : ' ';
+        assessment.result[0].reminder_datetime = new Date(reminderDate);
+        var createdAt = assessment && assessment.result[0] ? assessment.result[0].createdAt : ' ';
+        assessment.result[0].createdAt = new Date(createdAt);
+    }
+    if(medication.result.length !=0){
+        medication.result[0].createdAt = new Date(medication.result[0].createdAt);
+    }
     let data = {
         assessment: assessment && assessment.result[0] ? assessment.result[0] : {},
         medication: medication && medication.result[0] ? medication.result[0] : {}
@@ -318,12 +320,5 @@ async function getPatientLastAssessmentAndMedication(patientId) {
         isError: false,
         result: data,
     }
-}
-
-async function getMilliSeconds(date) {
-    const timestamp = new Date(date);
-    const milliseconds = timestamp.getTime();
-    const newdate = new Date(milliseconds);
-    return { milliseconds, newdate };
 }
 
