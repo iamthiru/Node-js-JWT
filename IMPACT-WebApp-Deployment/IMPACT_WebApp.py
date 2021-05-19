@@ -1,8 +1,8 @@
 # Proprietary: Benten Technologies, Inc.
 # Author: Pranav H. Deo
 # Copyright Content
-# Date: 05/06/2021
-# Version: v1.8
+# Date: 05/19/2021
+# Version: v1.9
 
 # Code Description:
 # Web Simulation (Alpha Version) for Pupil and Facial Pain Analysis.
@@ -29,9 +29,12 @@ import yaml
 import time
 import boto3
 import pymysql
+import string
 from flask import *
+import random as rnd
 import pandas as pd
 import datetime as dt
+
 ##############################################################
 # --------------------- AMAZON-S3 -------------------------- #
 BUCKET_NAME = 'impact-benten'
@@ -61,12 +64,16 @@ app.secret_key = 'ImpactProjectDevelopment'
 option_val = ""
 fname = ""
 face_fname = ""
+patient_ID = ""
+user = ""
+
 ##############################################################
 
 
 @app.route('/')
 @app.route('/Login', methods=['GET', 'POST'])
 def Login():
+    global user
     session.pop('user_email', None)
     if request.method == 'POST':
         email = request.form['email']
@@ -84,7 +91,8 @@ def Login():
         if cursor.fetchone() is not None:
             session['user_email'] = email
             cursor.close()
-            return render_template('HomePage.html')
+            user = email.split("@")[0]
+            return render_template('HomePage.html', user=user)
         else:
             cursor.close()
             return render_template('Register.html')
@@ -115,10 +123,31 @@ def Register():
     return render_template('Register.html')
 
 
+@app.route('/PatientRecords', methods=['GET', 'POST'])
+def PatientRecords():
+    global user
+    if 'user_email' in session:
+        if request.method == 'POST':
+            pat_id = request.form['PatientID']
+            links = FetchS3BucketObj(pat_id)
+            if len(links) == 0:
+                return render_template('PatientRecords.html', user=user)
+            else:
+                pupil_link = links[0]
+                facial_link = links[1]
+                return render_template('ShowRecord.html', user=user, pat_id=pat_id,
+                                       facial_link=facial_link, pupil_link=pupil_link)
+        return render_template('PatientRecords.html', user=user)
+    else:
+        session.pop('user_email', None)
+        return render_template('Login.html')
+
+
 @app.route('/HomePage')
 def HomePage():
+    global user
     if 'user_email' in session:
-        return render_template('HomePage.html')
+        return render_template('HomePage.html', user=user)
     else:
         session.pop('user_email', None)
         return render_template('Login.html')
@@ -126,16 +155,18 @@ def HomePage():
 
 @app.route('/FacialPain')
 def FacialPain():
+    global user
     if 'user_email' in session:
-        return render_template('FacialPain_Form.html')
+        return render_template('FacialPain_Form.html', user=user)
     else:
         return render_template('Login.html')
 
 
 @app.route('/PupilPain')
 def PupilPain():
+    global user
     if 'user_email' in session:
-        return render_template('PupilPain_Form.html')
+        return render_template('PupilPain_Form.html', user=user)
     else:
         return render_template('Login.html')
 
@@ -157,6 +188,7 @@ def Upload():
 @app.route('/Upload_Process_Pupil', methods=['GET', 'POST'])
 def Upload_Process_Pupil():
     global fname
+    global user
     if 'user_email' in session:
         if request.method == 'POST':
             # Uploading Segment:
@@ -169,15 +201,17 @@ def Upload_Process_Pupil():
             PUPIL_UPLOAD_FOLDER = './static/Pupil_Input_Videos/'
             ts = time.time()
             st = dt.datetime.fromtimestamp(ts).strftime('%Y-%m-%d_%H:%M:%S')
-            fname = eye_color_val + fname_txtfield + lname_txtfield + str(st) + '.mp4'
+            # pat_id = ''.join(rnd.choices(string.ascii_uppercase + string.digits, k=12))
+            # fname = eye_color_val + fname_txtfield + lname_txtfield + str(st) + '.mp4'
+            fname = eye_color_val + '_' + fname_txtfield + lname_txtfield + '.mp4'
             f.filename = fname
             app.config['PUPIL_UPLOAD_FOLDER'] = PUPIL_UPLOAD_FOLDER
             pth = os.path.join(app.config['PUPIL_UPLOAD_FOLDER'], fname)
             f.save(os.path.join(app.config['PUPIL_UPLOAD_FOLDER'], fname))
             Upload_2_S3(BUCKET_NAME, fname, pth, PUPIL_UPLOAD_FOLDER_S3)
             table_userData.put_item(Item={'timestamp': str(st), 'Request': 'Website', 'user-email': email,
-                                          'user-name': fname_txtfield+' '+lname_txtfield,
-                                          'user-eyecolor': eye_color_val,  'user-metric': 'Pupil Pain',
+                                          'user-name': fname_txtfield + ' ' + lname_txtfield,
+                                          'user-eyecolor': eye_color_val, 'user-metric': 'Pupil Pain',
                                           's3-filepath': 's3://impact-benten/' + PUPIL_UPLOAD_FOLDER_S3 + fname})
             # Processing Segment:
             os.system('python IMPACT_PUPIL_v1_3.py ' + str(fname) + ' Color')
@@ -200,10 +234,11 @@ def Upload_Process_Pupil():
                 Upload_2_S3(BUCKET_NAME, img_name + '.mp4', vid_file, res_img_fold_s3)
                 Upload_2_S3(BUCKET_NAME, file, csv_file, res_img_fold_s3)
                 print('\n*************** DONE ****************\n')
-                return render_template('Pupil_Success.html', image_file=pic, video_file=vid_file, score=PUAL_SCORE)
+                return render_template('Pupil_Success.html', user=user, image_file=pic,
+                                       video_file=vid_file, score=PUAL_SCORE)
             else:
                 print('\n*************** TOKEN : BAD ****************\n')
-                return render_template('PupilPain_Form.html')
+                return render_template('PupilPain_Form.html', user=user)
     else:
         return render_template('Login.html')
 
@@ -211,6 +246,7 @@ def Upload_Process_Pupil():
 @app.route('/Upload_Process_Facial', methods=['GET', 'POST'])
 def UploadFacial():
     global face_fname
+    global user
     if 'user_email' in session:
         if request.method == 'POST':
             # Uploading Segment:
@@ -223,7 +259,9 @@ def UploadFacial():
             FACIAL_UPLOAD_FOLDER = './static/Face_Input_Videos/'
             ts = time.time()
             st = dt.datetime.fromtimestamp(ts).strftime('%Y-%m-%d_%H:%M:%S')
-            face_fname = option_val + fname_txtfield + lname_txtfield + str(st) + '.avi'
+            # pat_id = ''.join(rnd.choices(string.ascii_uppercase + string.digits, k=12))
+            # face_fname = option_val + fname_txtfield + lname_txtfield + str(st) + '.avi'
+            face_fname = option_val + '_' + fname_txtfield + lname_txtfield + '.avi'
             f.filename = face_fname
             app.config['FACIAL_UPLOAD_FOLDER'] = FACIAL_UPLOAD_FOLDER
             pth = os.path.join(app.config['FACIAL_UPLOAD_FOLDER'], face_fname)
@@ -249,7 +287,7 @@ def UploadFacial():
                 min_pain_score = round(pain_score.min(), 2)
                 mean_pain_score = round(sum(pain_score) / len(pain_score), 2)
                 f = img_name + '_Pain_Plot.png'
-                label_file_csv = os.path.join(app.config['FACIAL_OUTPUT_FOLDER'], img_name+'_LabelFile.csv')
+                label_file_csv = os.path.join(app.config['FACIAL_OUTPUT_FOLDER'], img_name + '_LabelFile.csv')
                 bucket_df = pd.read_csv(label_file_csv)
                 time_sec = bucket_df['Time (sec)']
                 label_sec = list(bucket_df['Label'])
@@ -261,14 +299,14 @@ def UploadFacial():
                 pic = os.path.join(app.config['FACIAL_OUTPUT_FOLDER'], f)
                 Upload_2_S3(BUCKET_NAME, f, pic, res_img_fold_s3)
                 Upload_2_S3(BUCKET_NAME, file, csv_file, res_img_fold_s3)
-                Upload_2_S3(BUCKET_NAME, img_name+'_LabelFile.csv', label_file_csv, res_img_fold_s3)
+                Upload_2_S3(BUCKET_NAME, img_name + '_LabelFile.csv', label_file_csv, res_img_fold_s3)
                 print('\n*************** DONE ****************\n')
-                return render_template('Facial_Success.html', image_file=pic, max_pain=max_pain_score,
+                return render_template('Facial_Success.html', user=user, image_file=pic, max_pain=max_pain_score,
                                        mean_pain=mean_pain_score, min_pain=min_pain_score,
                                        time=time_sec, label=label_sec)
             else:
                 print('\n*************** TOKEN : BAD ****************\n')
-                render_template('FacialPain_Form.html')
+                render_template('FacialPain_Form.html', user=user)
     else:
         return render_template('Login.html')
 
@@ -278,7 +316,7 @@ def pupil_api(filename):
     upload_folder_s3 = 'Pupil_Data/Results-Output/'
     download_folder_s3 = 'Pupil_Data/Uploads-VideoFiles/'
     PUPIL_UPLOAD_FOLDER = './static/Pupil_Input_Videos/'
-    Download_from_S3(BUCKET_NAME, download_folder_s3+filename, PUPIL_UPLOAD_FOLDER+filename)
+    Download_from_S3(BUCKET_NAME, download_folder_s3 + filename, PUPIL_UPLOAD_FOLDER + filename)
     ts = time.time()
     st = dt.datetime.fromtimestamp(ts).strftime('%Y-%m-%d_%H:%M:%S')
     os.system('python IMPACT_PUPIL_v1_3.py ' + str(filename) + ' Color')
@@ -316,7 +354,7 @@ def facial_api(filename):
     upload_folder_s3 = 'Facial_Data/Results-Output/'
     download_folder_s3 = 'Facial_Data/Uploads-VideoFiles/'
     FACIAL_UPLOAD_FOLDER = './static/Face_Input_Videos/'
-    Download_from_S3(BUCKET_NAME, download_folder_s3+filename, FACIAL_UPLOAD_FOLDER + filename)
+    Download_from_S3(BUCKET_NAME, download_folder_s3 + filename, FACIAL_UPLOAD_FOLDER + filename)
     ts = time.time()
     st = dt.datetime.fromtimestamp(ts).strftime('%Y-%m-%d_%H:%M:%S')
     os.system('python IMPACT_FACIAL_v1_0.py ' + str(filename))
@@ -360,7 +398,7 @@ def Upload_2_S3(buck, f, fp, s3_to_path):
     # s3 = boto3.resource('s3')
     s3 = boto3.resource('s3', aws_access_key_id=key_db['AWSAccessKeyId'], aws_secret_access_key=key_db['AWSSecretKey'])
     bucket = s3.Bucket(buck)
-    bucket.upload_file(Filename=fp, Key=s3_to_path+str(f), ExtraArgs={'ACL': 'public-read'})
+    bucket.upload_file(Filename=fp, Key=s3_to_path + str(f), ExtraArgs={'ACL': 'public-read'})
     return 'Upload Done'
 
 
@@ -369,6 +407,27 @@ def Download_from_S3(buck, KEY, Local_fp):
     s3 = boto3.resource('s3', aws_access_key_id=key_db['AWSAccessKeyId'], aws_secret_access_key=key_db['AWSSecretKey'])
     s3.Bucket(buck).download_file(KEY, Local_fp)
     return 'Download Done'
+
+
+def FetchS3BucketObj(patient_id):
+    s3 = boto3.resource('s3', aws_access_key_id=key_db['AWSAccessKeyId'], aws_secret_access_key=key_db['AWSSecretKey'])
+    my_bucket = s3.Bucket(BUCKET_NAME)
+    Links = []
+    for file in my_bucket.objects.filter(Prefix='Pupil_Data/Results-Output/'):
+        filename = file.key
+        if filename.find(patient_id) != -1:
+            if filename.find('_Dilation_Plot.png') != -1:
+                pupil_url = f'https://{BUCKET_NAME}.s3.amazonaws.com/' + filename
+                Links.append(pupil_url)
+
+    for file in my_bucket.objects.filter(Prefix='Facial_Data/Results-Output/'):
+        filename = file.key
+        if filename.find(patient_id) != -1:
+            if filename.find('_Pain_Plot.png') != -1:
+                facial_url = f'https://{BUCKET_NAME}.s3.amazonaws.com/' + filename
+                Links.append(facial_url)
+
+    return Links
 
 
 if __name__ == '__main__':
