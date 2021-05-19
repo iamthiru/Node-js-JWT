@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>IMPACT: Facial Processing</title>
-    <style>
+    <link rel = "icon" href ="/static/Images/favicon.ico" />
+<style>
     /* Style the header */
     .header {
       background-color: #f1f1f1;
@@ -49,7 +50,7 @@
         padding-bottom: 2px;
     }
     .buttonstyle:hover {background: white;background-position: 0px -501px;color: #000000; }
-    </style>
+</style>
 </head>
 <body>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -57,7 +58,9 @@
         <a href="{{url_for('HomePage')}}" style="font-size: 20px">Home</a>
         <a href="{{url_for('PupilPain')}}" style="font-size: 20px">Pupil-Pain</a>
         <a href="{{url_for('FacialPain')}}" style="font-size: 20px">Facial-Pain</a>
-        <a href="{{url_for('Logout')}}" style="font-size: 20px">Logout</a>
+        <a href="{{url_for('PatientRecords')}}" style="font-size: 20px">Patient-Records</a>
+        <a href="{{url_for('Logout')}}" style="font-size: 20px; float: right;">Logout</a>
+        <a href="{{url_for('HomePage')}}" style="font-size: 20px; float: right;">Hello, {{ user }}</a>
     </div>
 
     <div class="header">
