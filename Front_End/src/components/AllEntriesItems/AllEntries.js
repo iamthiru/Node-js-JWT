@@ -4,15 +4,19 @@ import CustomTouchableOpacity from '../shared/CustomTouchableOpacity';
 import {COLORS} from '../../constants/colors';
 import AntDesignIcon from 'react-native-vector-icons/AntDesign';
 import styles from '../../screens/PatientProfile/styles';
+import { formatAMPM } from '../../utils/date';
 
 const AllEntries = ({data}) => {
+
+  const date = new Date((data.assessment_datetime))
+  const dateFormat = `${date.toDateString()} ${formatAMPM(date)}`
   return (
     <View style={styles.allEntriesContainer}>
       <View
         style={{
           paddingLeft: 10,
         }}>
-        <Text style={{color: COLORS.GRAY_90}}>{data.time}</Text>
+        <Text style={{color: COLORS.GRAY_90}}>{dateFormat}</Text>
       </View>
       <View
         style={{
@@ -27,7 +31,7 @@ const AllEntries = ({data}) => {
               style={{
                 color: COLORS.WHITE,
               }}>
-              {data.buttonLabel}
+              {data.total_score}
             </Text>
           </View>
         </CustomTouchableOpacity>

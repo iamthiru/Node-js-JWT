@@ -44,7 +44,9 @@ import {SCREEN_NAMES} from '../../constants/navigation';
 import DummyImageChart from '../../assets/images/dummyChartImage.png';
 import CustomButton from '../../components/shared/CustomButton';
 import { useNavigation } from '@react-navigation/native' 
+import {useSelector,useDispatch} from 'react-redux' 
 // import FocusDepthSliderModal from '../../components/FocusDepthSlider';
+import {CREATE_ASSESSMENT_ACTION} from '../../constants/actions'
 
 const {width, height} = Dimensions.get('window');
 const {VideoCropper} = NativeModules;
@@ -76,7 +78,10 @@ const SETTINGS = {
 const DEFAULT_DARK_BROWN_EXPOSURE = 0.8;
 const DEFAULT_OTHER_EXPOSURE = 0.6; //0.0; //0.2
 
+const MIN_HEIGHT = Dimensions.get('window').height ;
+
 const PupillaryDilationScreen = ({navigation}) => {
+
 
   const deviceModel = DeviceInfo.getModel();
   const [eyeBorderType, setEyeBorderType] = useState(EYE_BORDER_TYPE.OVAL);
@@ -114,6 +119,8 @@ const PupillaryDilationScreen = ({navigation}) => {
     y: 0.5,
     autoExposure: true,
   });
+  
+  const dispatch =useDispatch()
   // const [showFocusDepthSliderModal , setShowFocusDepthSliderModal ] = useState(false)
 
   // var pressOut;
@@ -423,6 +430,12 @@ const PupillaryDilationScreen = ({navigation}) => {
                   resetStates('');
                   return;
                 }
+                  //  dispatch({
+                  //    type:CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
+                  //    payload:{
+                  //     pupillary_dilation:'1.5642'
+                  //    }
+                  //  })
 
                 setResultValue(result.data);
                 setResultReady(true);
@@ -896,9 +909,9 @@ const PupillaryDilationScreen = ({navigation}) => {
               <View>
                 <Text
                   style={{
-                    marginBottom: deviceModel === 'iPhone 7 Plus' ? 10 : 14,
-                    fontSize: deviceModel === 'iPhone 7 Plus' ? 10 : 16,
-                    lineHeight: deviceModel === 'iPhone 7 Plus' ? 12 : 18,
+                    marginBottom: Boolean(MIN_HEIGHT === 736) ? 10 : 14,
+                    fontSize: Boolean(MIN_HEIGHT === 736) ? 10 : 16,
+                    lineHeight: Boolean(MIN_HEIGHT === 736) ? 12 : 18,
                     fontWeight: '400',
                     color: COLORS.GRAY_90,
                   }}>
@@ -906,9 +919,9 @@ const PupillaryDilationScreen = ({navigation}) => {
                 </Text>
                 <Text
                   style={{
-                    marginBottom: deviceModel === 'iPhone 7 Plus' ? 10 : 14,
-                    fontSize: deviceModel === 'iPhone 7 Plus' ? 10 : 16,
-                    lineHeight: deviceModel === 'iPhone 7 Plus' ? 12 : 18,
+                    marginBottom: Boolean(MIN_HEIGHT === 736) ? 10 : 14,
+                    fontSize: Boolean(MIN_HEIGHT === 736) ? 10 : 16,
+                    lineHeight: Boolean(MIN_HEIGHT === 736) ? 12 : 18,
                     fontWeight: '400',
                     color: COLORS.GRAY_90,
                   }}>
@@ -917,9 +930,9 @@ const PupillaryDilationScreen = ({navigation}) => {
                 {/* <Text style={{ marginBottom: 14, fontSize: 16, fontWeight: '400', color: COLORS.GRAY_90 }}>3. Turn your device  horizontally if needed.</Text> */}
                 <Text
                   style={{
-                    marginBottom: deviceModel === 'iPhone 7 Plus' ? 10 : 14,
-                    fontSize: deviceModel === 'iPhone 7 Plus' ? 10 : 16,
-                    lineHeight: deviceModel === 'iPhone 7 Plus' ? 12 : 18,
+                    marginBottom: Boolean(MIN_HEIGHT === 736) ? 10 : 14,
+                    fontSize: Boolean(MIN_HEIGHT === 736) ? 10 : 16,
+                    lineHeight: Boolean(MIN_HEIGHT === 736) ? 12 : 18,
                     fontWeight: '400',
                     color: COLORS.GRAY_90,
                   }}>
@@ -927,15 +940,34 @@ const PupillaryDilationScreen = ({navigation}) => {
                 </Text>
                 <Text
                   style={{
-                    marginBottom: deviceModel === 'iPhone 7 Plus' ? 10 : 14,
-                    fontSize: deviceModel === 'iPhone 7 Plus' ? 10 : 16,
-                    lineHeight: deviceModel === 'iPhone 7 Plus' ? 12 : 18,
+                    marginBottom: Boolean(MIN_HEIGHT === 736) ? 10 : 14,
+                    fontSize: Boolean(MIN_HEIGHT === 736) ? 10 : 16,
+                    lineHeight: Boolean(MIN_HEIGHT === 736) ? 12 : 18,
                     fontWeight: '400',
                     color: COLORS.GRAY_90,
                   }}>
                   4. Record the eye for at least 10 seconds.
                 </Text>
               </View>
+              <CustomTouchableOpacity 
+              onPress ={()=>{
+                navigation.navigate(SCREEN_NAMES.FACIAL_EXPRESSION)
+                dispatch({
+                  type:CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
+                  payload:{
+                    pupillary_dilation:1.5460
+                  }
+                })
+              }}
+              style ={{
+                borderWidth:1
+              }}>
+                <Text style ={{
+                  fontSize:25,
+                  color:'red',
+                  textAlign:'center'
+                }}>go to </Text>
+              </CustomTouchableOpacity>
             </View>
 
             <View
@@ -947,7 +979,7 @@ const PupillaryDilationScreen = ({navigation}) => {
               }}>
               <View
                 style={{
-                  height: deviceModel === 'iPhone 7 Plus' ? 20 : 30,
+                  height: Boolean(MIN_HEIGHT === 736) ? 20 : 30,
                   marginBottom: 10,
                   flexDirection: 'row',
                   justifyContent: 'flex-start',
@@ -958,7 +990,7 @@ const PupillaryDilationScreen = ({navigation}) => {
                   style={{
                     fontWeight: '700',
                     color: COLORS.GRAY_90,
-                    fontSize: deviceModel === 'iPhone 7 Plus' ? 10 : 14,
+                    fontSize: Boolean(MIN_HEIGHT === 736) ? 10 : 14,
                     lineHeight: deviceModel === 'iPhone 7 Plus ' ? 12 : 17,
                   }}>
                   {'Eye Color: '}
@@ -967,9 +999,9 @@ const PupillaryDilationScreen = ({navigation}) => {
                   style={{
                     flexDirection: 'row',
                     backgroundColor: `${COLORS.PRIMARY_MAIN}50`,
-                    width: deviceModel === 'iPhone 7 Plus' ? 200 : 240,
+                    width: Boolean(MIN_HEIGHT === 736) ? 200 : 240,
                     justifyContent: 'space-between',
-                    height: deviceModel === 'iPhone 7 Plus' ? 20 : 30,
+                    height: Boolean(MIN_HEIGHT === 736) ? 20 : 30,
                     alignItems: 'center',
                     borderRadius: 10,
                     alignSelf: 'center',
@@ -979,8 +1011,8 @@ const PupillaryDilationScreen = ({navigation}) => {
                       backgroundColor: isDarkBrownEyes
                         ? COLORS.SECONDARY_MAIN
                         : `${COLORS.GRAY_40}`,
-                      width: deviceModel === 'iPhone 7 Plus' ? 100 : 120,
-                      height: deviceModel === 'iPhone 7 Plus' ? 20 : 30,
+                      width: Boolean(MIN_HEIGHT === 736) ? 100 : 120,
+                      height: Boolean(MIN_HEIGHT === 736) ? 20 : 30,
                       borderTopLeftRadius: 10,
                       borderBottomLeftRadius: 10,
                       alignItems: 'center',
@@ -992,7 +1024,7 @@ const PupillaryDilationScreen = ({navigation}) => {
                       style={{
                         color: isDarkBrownEyes ? COLORS.GRAY_90 : COLORS.WHITE,
                         fontWeight: '700',
-                        fontSize: deviceModel === 'iPhone 7 Plus' ? 10 : 14,
+                        fontSize: Boolean(MIN_HEIGHT === 736) ? 10 : 14,
                         lineHeight: deviceModel === 'iPhone 7 Plus ' ? 12 : 17,
                         textTransform: 'uppercase',
                       }}>
@@ -1004,8 +1036,8 @@ const PupillaryDilationScreen = ({navigation}) => {
                       backgroundColor: isDarkBrownEyes
                         ? `${COLORS.GRAY_40}`
                         : COLORS.SECONDARY_MAIN,
-                      width: deviceModel === 'iPhone 7 Plus' ? 100 : 120,
-                      height: deviceModel === 'iPhone 7 Plus' ? 20 : 30,
+                      width: Boolean(MIN_HEIGHT === 736) ? 100 : 120,
+                      height: Boolean(MIN_HEIGHT === 736) ? 20 : 30,
                       borderTopRightRadius: 10,
                       borderBottomRightRadius: 10,
                       alignItems: 'center',
@@ -1017,7 +1049,7 @@ const PupillaryDilationScreen = ({navigation}) => {
                       style={{
                         color: !isDarkBrownEyes ? COLORS.GRAY_90 : COLORS.WHITE,
                         fontWeight: '700',
-                        fontSize: deviceModel === 'iPhone 7 Plus' ? 10 : 14,
+                        fontSize: Boolean(MIN_HEIGHT === 736) ? 10 : 14,
                         lineHeight: deviceModel === 'iPhone 7 Plus ' ? 12 : 17,
                         lineHeight: 17,
                         textTransform: 'uppercase',
@@ -1030,7 +1062,7 @@ const PupillaryDilationScreen = ({navigation}) => {
 
               <View
                 style={{
-                  height: deviceModel === 'iPhone 7 Plus' ? 20 : 30,
+                  height: Boolean(MIN_HEIGHT === 736) ? 20 : 30,
                   marginBottom: 30,
                 }}>
                 <View
@@ -1038,7 +1070,7 @@ const PupillaryDilationScreen = ({navigation}) => {
                     flexDirection: 'row',
                     backgroundColor: `${COLORS.PRIMARY_MAIN}50`,
                     // justifyContent: 'space-between',
-                    height: deviceModel === 'iPhone 7 Plus' ? 20 : 30,
+                    height: Boolean(MIN_HEIGHT === 736) ? 20 : 30,
                     alignItems: 'center',
                     borderRadius: 10,
                     marginLeft: width > 600 ? 10 : 30,
@@ -1050,7 +1082,7 @@ const PupillaryDilationScreen = ({navigation}) => {
                           ? COLORS.SECONDARY_MAIN
                           : `${COLORS.GRAY_40}`,
                       width: 100,
-                      height: deviceModel === 'iPhone 7 Plus' ? 20 : 30,
+                      height: Boolean(MIN_HEIGHT === 736) ? 20 : 30,
                       borderTopLeftRadius: 10,
                       borderBottomLeftRadius: 10,
                       alignItems: 'center',
@@ -1065,7 +1097,7 @@ const PupillaryDilationScreen = ({navigation}) => {
                             ? COLORS.GRAY_90
                             : COLORS.WHITE,
                         fontWeight: '700',
-                        fontSize: deviceModel === 'iPhone 7 Plus' ? 10 : 14,
+                        fontSize: Boolean(MIN_HEIGHT === 736) ? 10 : 14,
                         lineHeight: deviceModel === 'iPhone 7 Plus ' ? 12 : 17,
                         textTransform: 'uppercase',
                       }}>
@@ -1079,7 +1111,7 @@ const PupillaryDilationScreen = ({navigation}) => {
                           ? COLORS.SECONDARY_MAIN
                           : `${COLORS.GRAY_40}`,
                       width: 100,
-                      height: deviceModel === 'iPhone 7 Plus' ? 20 : 30,
+                      height: Boolean(MIN_HEIGHT === 736) ? 20 : 30,
                       borderTopRightRadius: 10,
                       borderBottomRightRadius: 10,
                       alignItems: 'center',
@@ -1094,7 +1126,7 @@ const PupillaryDilationScreen = ({navigation}) => {
                             ? COLORS.GRAY_90
                             : COLORS.WHITE,
                         fontWeight: '700',
-                        fontSize: deviceModel === 'iPhone 7 Plus' ? 10 : 14,
+                        fontSize: Boolean(MIN_HEIGHT === 736) ? 10 : 14,
                         lineHeight: deviceModel === 'iPhone 7 Plus ' ? 12 : 17,
                         textTransform: 'uppercase',
                       }}>
@@ -1289,7 +1321,7 @@ const PupillaryDilationScreen = ({navigation}) => {
                 disabled={processing}
                 style={{
                   width: width * 0.5,
-                  height: deviceModel === 'iPhone 7 Plus' ? 40 : 50,
+                  height: Boolean(MIN_HEIGHT === 736) ? 40 : 50,
                   backgroundColor: processing
                     ? COLORS.GRAY_40
                     : COLORS.PRIMARY_MAIN,

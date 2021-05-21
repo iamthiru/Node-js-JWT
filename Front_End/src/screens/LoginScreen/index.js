@@ -34,28 +34,31 @@ const LoginScreen = ({ navigation }) => {
     
     const handleSignIn = () => {
         setIsLoggingIn(true);
-        /* loginAPI({ email: email, password: password }).then(res => {
+         loginAPI({ email: email, password: password }).then(res => {
+             console.log(res);
             if (res.data.isError) {
                 Alert.alert("Invalid Login", "Please enter correct username and password", [{ text: "Ok", onPress: () => { } }], { cancelable: false });
                 setIsLoggingIn(false);
                 return;
             }
-            updateAuthData({ authToken: res.data.result.token, userId: res.data.result.id })
-            signIn({ authToken: res.data.result.token, userId: res.data.result.id });
+            updateAuthData({ 
+                authToken: res.data.result.token,
+                 userId: res.data.result.id,
+                 userName:res.data.result.first_name
+                 })
+            signIn({ authToken: res.data.result.token, userId: res.data.result.id,userName:res.data.result.first_name });
             setIsLoggingIn(false);
         }).catch(err => {
+            console.log(err);
             Alert.alert("Invalid Login", "Please enter correct username and password", [{ text: "Ok", onPress: () => { } }], { cancelable: false });
             setIsLoggingIn(false);
-        }) */
-        setTimeout(() => {
-            updateAuthData({ authToken: "DUMMY_TOKEN", userId: 123 })
-            signIn({ authToken: "DUMMY_TOKEN", userId: 123 });
-            setIsLoggingIn(false);
-        }, 3000)
+        }) 
+
     }
 
     const navigateToScreen = (screenName) => {
         navigation.navigate(screenName);
+
     };
 
     return (
@@ -67,7 +70,6 @@ const LoginScreen = ({ navigation }) => {
 
                     <CustomTextInput placeholder="Enter Your Work Email" value={email} onChangeText={value => setEmail(value)} inputStyle={{ width: width - 60 }} />
                     <CustomTextInput placeholder="Password" value={password} secureTextEntry={true} onChangeText={value => setPassword(value)} containerStyle={{ paddingBottom: 0 }} inputStyle={{ width: width - 60 }} />
-
                     <CustomCheckBox
                         label={"Remember this device"}
                         value={rememberDevice}

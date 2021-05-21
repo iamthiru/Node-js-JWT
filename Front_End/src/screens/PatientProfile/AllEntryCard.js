@@ -18,13 +18,13 @@ const data = [
   },
   {
     key: 2,
-    value: 'Alphabetical',
-    label: 'Alphabetical',
+    value: 'All',
+    label: 'All',
   },
 ];
 
 
-const AllEntryCard = ({entriesData}) => {
+const AllEntryCard = ({allEntries}) => {
   const [sortedValue, setSortedValue] = useState('Most Recent');
   const {width, height} = useWindowDimensions();
 
@@ -55,15 +55,30 @@ const AllEntryCard = ({entriesData}) => {
           containerStyle={styles.containerStyle}
         />
       </View>
-      <View style={styles.allEntryTimeText}>
+     
+      {
+        Boolean(allEntries?.length) ?
+        <>
+       <View style={styles.allEntryTimeText}>
         <Text style={{paddingLeft: 10}}>Time</Text>
         <Text style={{paddingLeft: 20}}>IMPACT Score</Text>
-      </View>
+      </View> 
       <AllEntryItemsData
-        entriesData={entriesData}
         width={width}
         height={height}
+        allEntries ={allEntries}
+        sortedValue ={sortedValue}
       />
+      </>
+      :
+      <Text style ={{
+        fontSize:20,
+        textAlign:'center',
+        color:COLORS.PRIMARY_MAIN,
+        paddingTop:20,
+        paddingBottom:20
+      }}>No Entries</Text>
+}
     </View>
   );
 };

@@ -18,12 +18,12 @@ import {useNavigation, useRoute} from '@react-navigation/native';
 import {useSelector, useDispatch} from 'react-redux';
 import CustomTextInput from '../../components/shared/CustomTextInput';
 import {SCREEN_NAMES} from '../../constants/navigation';
-import {PAIN_ASSESSMENT_DATA_ACTION} from '../../constants/actions';
+import {PATIENT_NAME_ACTION} from '../../constants/actions';
 
 const PainAssessment = ({route}) => {
-  const assessment_data = useSelector(
-    (state) => state.painAssessmentData.patient_name,
-  );
+  
+  const patientData = useSelector((state) => state.patientName.patient);
+
   const dispatch = useDispatch();
   const navigation = useNavigation();
   const {width, height} = useWindowDimensions();
@@ -39,6 +39,10 @@ const PainAssessment = ({route}) => {
     hours: 0,
     minutes: 0,
   });
+  const [assementDate, setAssessmentDate] = useState({});
+  const selectedAssessmentData = useSelector((state) => state.createAsseement);
+
+
 
   useEffect(() => {
     if (time) {
@@ -47,10 +51,10 @@ const PainAssessment = ({route}) => {
   }, [time]);
 
   useEffect(() => {
-    if (assessment_data) {
-      setPatient(assessment_data);
+    if (patientData ) {
+      setPatient(patientData.patient_name);
     }
-  }, [assessment_data]);
+  }, [patientData]);
 
   const timeFormat = (time) => {
     let getHours = time.getHours();
@@ -70,7 +74,11 @@ const PainAssessment = ({route}) => {
         style={[
           styles.mainView,
           {
-            paddingTop: Boolean(Platform.OS === 'ios') ? 0 : 50,
+            paddingTop: Boolean(Platform.OS === 'ios')
+              ? height <= 736
+                ? 20
+                : 0
+              : 50,
           },
         ]}>
         <View style={styles.headerStyle}>
@@ -79,9 +87,9 @@ const PainAssessment = ({route}) => {
             onPress={() => {
               navigation.goBack();
               dispatch({
-                type:PAIN_ASSESSMENT_DATA_ACTION.PAIN_ASSESSMENT_DATA,
-                payload:''
-              })
+                type: PATIENT_NAME_ACTION.PATIENT,
+                payload:null,
+              });
             }}
             color={COLORS.GRAY_90}
             style={styles.arrowLeft}
@@ -256,7 +264,14 @@ const PainAssessment = ({route}) => {
               }}
               title="Start"
               textStyle={styles.buttonTextStyle}
-              style={styles.startButton}
+              style={[
+                styles.startButton,
+                {
+                  backgroundColor: Boolean(patient === '')
+                    ? COLORS.SECONDARY_LIGHTER
+                    : COLORS.SECONDARY_MAIN,
+                },
+              ]}
             />
           </View>
         ) : (
@@ -280,7 +295,7 @@ const PainAssessment = ({route}) => {
               }}
               disabled={Boolean(patient === '')}
               onPress={() => {
-                navigation.navigate(SCREEN_NAMES.PAIN_ASSESSMENT);
+                navigation.navigate(SCREEN_NAMES.PAIN_ASSESSMENT,assementDate);
               }}>
               <Text
                 style={{
@@ -308,6 +323,10 @@ const PainAssessment = ({route}) => {
               onChange={(event, value) => {
                 if (showDatePicker) {
                   setSelectedDate(value);
+                  setAssessmentDate({
+                    ...assementDate,
+                    date: selectedDate,
+                  });
                 }
               }}
             />
@@ -329,6 +348,10 @@ const PainAssessment = ({route}) => {
               onChange={(event, value) => {
                 if (showTimer) {
                   setTime(value);
+                  setAssessmentDate({
+                    ...assementDate,
+                    time: time,
+                  });
                 }
               }}
             />
@@ -344,6 +367,10 @@ const PainAssessment = ({route}) => {
               if (showDatePickerAndroid) {
                 setShowDatePickerAndroid(false);
                 setSelectedDate(value);
+                setAssessmentDate({
+                  ...assementDate,
+                  date: selectedDate,
+                });
               }
             }}
           />
@@ -358,6 +385,10 @@ const PainAssessment = ({route}) => {
               if (showTimerAndroid) {
                 setTimerAndroid(false);
                 setTime(value);
+                setAssessmentDate({
+                  ...assementDate,
+                  time: time,
+                });
               }
             }}
           />

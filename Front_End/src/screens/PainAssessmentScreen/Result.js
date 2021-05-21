@@ -13,6 +13,8 @@ import AntDesignIcon from 'react-native-vector-icons/AntDesign';
 import { COLORS } from '../../constants/colors';
 import { formatAMPM } from '../../utils/date';
 
+import {useSelector} from 'react-redux'
+
 const { width, height } = Dimensions.get("window");
 
 
@@ -21,7 +23,8 @@ const Result = (props) => {
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [showTimePicker, setShowTimePicker] = useState(false);
     const [selectedDate, setSelectedDate] = useState(new Date());
-    const [selectedTime, setSelectedTime] = useState(new Date());
+    const [selectedTime, setSelectedTime] = useState(new Date()); 
+
 
     const hideDateTimePickers = () => {
         setShowDatePicker(false); 

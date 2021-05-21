@@ -11,7 +11,7 @@ import styles from './styles';
 
 const PatientList = ({navigation}) => {
   const [searchString, setSearchString] = useState('');
-  const [sortBy, setSortedBy] = useState('lastName');
+  const [sortBy, setSortedBy] = useState('last_name');
   const [openNewPatient, setOpenNewPatient] = useState(false);
 
   return (

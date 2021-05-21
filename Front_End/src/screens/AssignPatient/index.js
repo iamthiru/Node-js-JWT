@@ -20,11 +20,13 @@ import assignPatientStyles from './styles';
 import {sortByListOptions} from '../../constants/AssignPatientConstants';
 import NewPatientPopUp from '../HomeScreen/NewPatientPopUp';
 import PatientDetailModal from '../../components/PatientDetailsModal';
+import {useSelector} from 'react-redux'
 
 const AssignPatient = () => {
+
   const {width, height} = useWindowDimensions();
   const [searchString, setSearchString] = useState('');
-  const [sortBy, setSortedBy] = useState('lastName');
+  const [sortBy, setSortedBy] = useState('last_name');
   const navigation = useNavigation();
   const styles = assignPatientStyles({width, height, COLORS, Platform});
   const [openNewPatient, setOpenNewPatient] = useState(false);
@@ -33,7 +35,8 @@ const AssignPatient = () => {
   const painAssessment = true
   return (
     <View style={[styles.assignPatientMainView,{
-      paddingTop:Boolean(Platform.OS === 'ios') ?0:Boolean(openNewPatient)?70:50
+      // paddingTop:Boolean(Platform.OS === 'ios') ?0:Boolean(openNewPatient)?70:50
+      paddingTop: Boolean(Platform.OS === 'ios') ? height<=736 ?20:0:Boolean(openNewPatient)?70:50,
     }]}>
       {Platform.OS === 'android' && (
         <StatusBar

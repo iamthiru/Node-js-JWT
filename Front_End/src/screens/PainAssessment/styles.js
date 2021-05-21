@@ -16,7 +16,6 @@ const styles = StyleSheet.create({
   },
   startButton: {
     width: width * 0.6,
-    backgroundColor: COLORS.SECONDARY_MAIN,
     borderColor: COLORS.PRIMARY_MAIN,
     borderWidth: 1,
     justifyContent: 'center',
@@ -34,6 +33,7 @@ const styles = StyleSheet.create({
   mainView: {
     width: width,
     height:height,
+
 
   },
   patientText: {
