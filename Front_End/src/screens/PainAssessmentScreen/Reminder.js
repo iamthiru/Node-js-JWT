@@ -14,7 +14,6 @@ import {SCREEN_NAMES} from '../../constants/navigation';
 import {useDispatch, useSelector} from 'react-redux';
 import {
   CREATE_ASSESSMENT_ACTION,
-  PAIN_ASSESSMENT_DATA_ACTION,
 } from '../../constants/actions';
 
 const {width, height} = Dimensions.get('window');
@@ -55,7 +54,6 @@ useEffect(()=>{
 
   const handleContinue = () => {
     navigation.navigate(SCREEN_NAMES.PUPILLARY_DILATION);
-    console.log('---date-----',new Date())
     if (needReminder) {
       dispatch({
         type: CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,

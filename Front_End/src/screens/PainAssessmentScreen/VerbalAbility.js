@@ -11,7 +11,6 @@ import {getStatusBarHeight} from 'react-native-status-bar-height';
 import {useDispatch, useSelector} from 'react-redux';
 import {
   CREATE_ASSESSMENT_ACTION,
-  PAIN_ASSESSMENT_DATA_ACTION,
 } from '../../constants/actions';
 
 const {width, height} = Dimensions.get('window');

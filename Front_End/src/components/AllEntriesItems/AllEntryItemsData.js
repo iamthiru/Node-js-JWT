@@ -34,7 +34,7 @@ const AllEntryItemsData = ({
         marginBottom: 30
       }}
       nestedScrollEnabled
-      keyExtractor = {(item) =>item.key}
+      keyExtractor = {(item) =>item?.id.toString()}
       renderItem ={({item}) =>{
         return (
           <AllEntries

@@ -23,7 +23,6 @@ import NoEntryCard from './NoEntryCard';
 import LatestEntryCard from './LatestEntryCard';
 import SummaryChart from './SummaryChart';
 import AllEntryCard from './AllEntryCard';
-import {ALLENTRIES_DATA} from '../../constants/PatientProfile/allEntries';
 import {useDispatch, useSelector} from 'react-redux';
 import {
   ALL_ASSESSMENTS_LIST_ACTION,
@@ -34,7 +33,6 @@ import {
 import medicationListAPI from '../../api/medicationList';
 import lastMedicationAssessmentAPI from '../../api/lastMedicationAssessment';
 import assessmentListAPI from '../../api/assessmentList';
-import {formatAMPM} from '../../utils/date';
 import { getPatientListAPI } from '../../api/patientsData';
 
 const {width, height} = Dimensions.get('window');
@@ -211,19 +209,9 @@ const PatientProfile = ({navigation}) => {
       )}
       <View style={styles.headingContainer}>
         <View
-          style={{
-            height: 50,
-            width: width,
-            marginHorizontal: 10,
-            justifyContent: 'center',
-            marginBottom: 10,
-          }}>
+          style={styles.patient_main_view}>
           <View
-            style={{
-              position: 'absolute',
-              top: 12,
-              zIndex: 1,
-            }}>
+            style={styles.main_view_position}>
             <CustomTouchableOpacity
               onPress={() => {
                 navigation.goBack();
@@ -236,13 +224,7 @@ const PatientProfile = ({navigation}) => {
             </CustomTouchableOpacity>
           </View>
           <Text
-            style={{
-              textAlign: 'center',
-              color: COLORS.PRIMARY_MAIN,
-              fontSize: 24,
-              lineHeight: 30,
-              fontWeight: '400',
-            }}>
+            style={styles.patientProfileText}>
             Patient Profile
           </Text>
         </View>
@@ -257,11 +239,7 @@ const PatientProfile = ({navigation}) => {
          setNewPatientPopUp= {setNewPatientPopUp}
          />
         <View
-          style={{
-            paddingVertical: 20,
-            width: width,
-            alignItems: 'center',
-          }}>
+          style={styles.profileButtonsView}>
           <CustomButton
             onPress={() => {
               navigation.navigate(SCREEN_NAMES.PAINASSESSMENT);
@@ -318,8 +296,6 @@ const PatientProfile = ({navigation}) => {
         ) : (
           <>
             <LatestEntryCard
-              latestEntryData={latestEntryData}
-              data={latestMedicationData}
               last_assessment={last_assessment}
               last_medication={last_medication}
             />
@@ -352,13 +328,7 @@ const PatientProfile = ({navigation}) => {
               patientReport={reportData}
             />
             :
-            <Text style ={{
-              fontSize:25,
-              textAlign:'center',
-              paddingVertical:20,
-              fontWeight:'600',
-              color:COLORS.PRIMARY_MAIN
-            }}>
+            <Text style ={styles.noDataFound}>
               No Data Found
             </Text>
           }

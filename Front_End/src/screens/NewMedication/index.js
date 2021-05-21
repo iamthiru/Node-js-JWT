@@ -1,5 +1,5 @@
 import {useNavigation} from '@react-navigation/core';
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useMemo, useState} from 'react';
 import {
   Alert,
   Platform,
@@ -11,16 +11,13 @@ import {
   View,
 } from 'react-native';
 import AntDesignIcon from 'react-native-vector-icons/AntDesign';
-
 import CustomTouchableOpacity from '../../components/shared/CustomTouchableOpacity';
 import CustomDropDown from '../../components/shared/CustomDropDown';
 import {COLORS} from '../../constants/colors';
 import {SCREEN_NAMES} from '../../constants/navigation';
 import CustomButton from '../../components/shared/CustomButton';
-import {MEDICATION_CLASS, MEDICATION_NAME, UNITS, FREQUENCY} from './constants';
 import CustomTextInput from '../../components/shared/CustomTextInput';
 import {useSelector, useDispatch} from 'react-redux';
-import {LookoutVision} from 'aws-sdk';
 import createMedicationAPI from '../../api/createMedication';
 import {CREATE_MEDICATION_ACTION} from '../../constants/actions';
 
@@ -39,28 +36,29 @@ const NewMedication = () => {
   const [errosState, setErrorState] = useState([]);
   const [medicationClassData, setMedicationClassData] = useState({});
 
-  // const lookup_type = useSelector((state) => state.lookupType.lookup_type);
   const dispatch = useDispatch();
   const lookup_data = useSelector((state) => state.lookupData.lookup_data);
   const patientData = useSelector((state) => state.patientName.patient);
   const token = useSelector((state) => state.user.authToken);
   const userId = useSelector((state) => state.user.loggedInUserId);
-console.log('----patient Dta----',patientData)
 
-  const medication = lookup_data.find((item) => {
-    return item.name === 'MedicationClass';
-  })?.lookup_data;
+  const medication = useMemo(()=>{
+    return  lookup_data?.find((item)=>{
+      return item?.name === 'MedicationClass'
+    })?.lookup_data || []
+  },[lookup_data])
 
+  const frequency_data = useMemo(()=>{
+    return lookup_data?.find((item)=>{
+      return item?.name ==='Frequency'
+    })?.lookup_data || []
+  },lookup_data)
 
-  const frequency_data = lookup_data.find((item) => {
-    return item.name === 'Frequency';
-  })?.lookup_data;
-
-
-  const doseage = lookup_data.find((item) => {
-    return item.name === 'Dose';
-  })?.lookup_data;
-
+  const dosage = useMemo(()=>{
+    return lookup_data?.find((item)=>{
+      return item?.name === 'Dose'
+    })?.lookup_data|| []
+  },[lookup_data])
 
   const validate = useCallback(() => {
     if (errosState?.length) {
@@ -106,7 +104,7 @@ console.log('----patient Dta----',patientData)
           Alert.alert('invalid data', res);
           return;
         }
-        console.log('-------medication data------', res);
+        console.log('-------  medication created successfully------', res);
         dispatch({
           type: CREATE_MEDICATION_ACTION.CREATE_MEDICATION,
           payload: {
@@ -180,7 +178,7 @@ console.log('----patient Dta----',patientData)
         <View
           style={{
             flex: 1,
-            width: window.width,
+            width: window.widt0h,
             justifyContent: 'center',
             alignItems: 'flex-start',
             backgroundColor: COLORS.WHITE,
@@ -198,7 +196,7 @@ console.log('----patient Dta----',patientData)
               }}>
               <Text
                 style={{
-                  fontSize: 12,
+                fontSize: 12,
                   lineHeight: 14,
                   color: COLORS.GRAY_80,
                   fontWeight: '600',
@@ -228,10 +226,8 @@ console.log('----patient Dta----',patientData)
             </View>
 
             <CustomDropDown
-              // items={MEDICATION_CLASS}
               items={medication}
               medicationClass={true}
-              // medicationType={true}
               value={medicationClass}
               onChangeValue={(item) => {
                 setMedicationClass(item.name);
@@ -264,10 +260,6 @@ console.log('----patient Dta----',patientData)
               </Text>
             </View>
             <CustomDropDown
-              // items={MEDICATION_NAME.filter((item) => {
-              //   return item.class === (medicationClass || 'other');
-              // })}
-
               items={medicationClassData?.lookup_data || []}
               value={medicationName}
               onChangeValue={(item) => {
@@ -278,7 +270,6 @@ console.log('----patient Dta----',patientData)
                   setShowMedicationInput(false);
                 }
                 setMedicationData(item);
-                console.log('-----medication----', item);
                 setMedicationName(item.label);
               }}
               containerStyle={{
@@ -353,7 +344,7 @@ console.log('----patient Dta----',patientData)
               />
 
               <CustomDropDown
-                items={doseage}
+                items={dosage}
                 onChangeValue={(item) => {
                   setUnit(item.value);
                 }}

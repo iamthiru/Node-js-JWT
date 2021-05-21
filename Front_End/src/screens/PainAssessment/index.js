@@ -41,8 +41,6 @@ const PainAssessment = ({route}) => {
   const [assementDate, setAssessmentDate] = useState({});
   const selectedAssessmentData = useSelector((state) => state.createAsseement);
 
-
-
   useEffect(() => {
     if (time) {
       timeFormat(time);
@@ -50,7 +48,7 @@ const PainAssessment = ({route}) => {
   }, [time]);
 
   useEffect(() => {
-    if (patientData ) {
+    if (patientData) {
       setPatient(patientData.patient_name);
     }
   }, [patientData]);
@@ -87,7 +85,7 @@ const PainAssessment = ({route}) => {
               navigation.goBack();
               dispatch({
                 type: PATIENT_NAME_ACTION.PATIENT,
-                payload:null,
+                payload: null,
               });
             }}
             color={COLORS.GRAY_90}
@@ -110,27 +108,11 @@ const PainAssessment = ({route}) => {
                 />
               ) : (
                 <TouchableOpacity
-                  style={{
-                    width: width * 0.4,
-                    backgroundColor: COLORS.SECONDARY_MAIN,
-                    borderColor: COLORS.PRIMARY_MAIN,
-                    borderWidth: 1.8,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    height: 30,
-                    borderRadius: 5,
-                  }}
+                  style={styles.addPatientTouch}
                   onPress={() => {
                     navigation.navigate(SCREEN_NAMES.ASSIGN_PATIENT);
                   }}>
-                  <Text
-                    style={{
-                      color: COLORS.GRAY_90,
-                      textAlign: 'center',
-                      paddingHorizontal: 5,
-                    }}>
-                    Add Patient
-                  </Text>
+                  <Text style={styles.addPatientText}>Add Patient</Text>
                 </TouchableOpacity>
               )
             ) : (
@@ -274,35 +256,14 @@ const PainAssessment = ({route}) => {
             />
           </View>
         ) : (
-          <View
-            style={{
-              width: width,
-              justifyContent: 'center',
-              alignItems: 'center',
-              paddingTop: 50,
-            }}>
+          <View style={styles.satrtButtonView}>
             <TouchableOpacity
-              style={{
-                backgroundColor: COLORS.SECONDARY_MAIN,
-                width: width * 0.6,
-                height: 50,
-                justifyContent: 'center',
-                alignItems: 'center',
-                borderColor: COLORS.PRIMARY_MAIN,
-                borderWidth: 2,
-                borderRadius: 5,
-              }}
+              style={styles.startButtonTouch}
               disabled={Boolean(patient === '')}
               onPress={() => {
-                navigation.navigate(SCREEN_NAMES.PAIN_ASSESSMENT,assementDate);
+                navigation.navigate(SCREEN_NAMES.PAIN_ASSESSMENT, assementDate);
               }}>
-              <Text
-                style={{
-                  color: COLORS.GRAY_90,
-                  fontWeight: '600',
-                }}>
-                START
-              </Text>
+              <Text style={styles.startText}>START</Text>
             </TouchableOpacity>
           </View>
         )}

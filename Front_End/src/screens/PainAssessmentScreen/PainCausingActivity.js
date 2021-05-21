@@ -7,12 +7,11 @@ import CustomButton from '../../components/shared/CustomButton';
 import {getStatusBarHeight} from 'react-native-status-bar-height';
 import CustomCheckBox from '../../components/shared/CustomCheckBox';
 import {useDispatch, useSelector} from 'react-redux';
-import {CREATE_ASSESSMENT_ACTION, PAIN_ASSESSMENT_DATA_ACTION} from '../../constants/actions';
+import {CREATE_ASSESSMENT_ACTION} from '../../constants/actions';
 
 const {width, height} = Dimensions.get('window');
 
 const PainCausingActivity = ({gotoNext, gotoPrevious}) => {
-
   const [selectedActivities, setSelectedActivities] = useState([]);
   const dispatch = useDispatch();
   const painCausingActivity = useSelector(
@@ -31,13 +30,11 @@ const PainCausingActivity = ({gotoNext, gotoPrevious}) => {
     }
   }, [painCausingActivity]);
 
-  useEffect(()=>{
-    if(selectedAssessmentData?.painImapctName){
-      setSelectedActivities(selectedAssessmentData?.painImapctName)
+  useEffect(() => {
+    if (selectedAssessmentData?.painImapctName) {
+      setSelectedActivities(selectedAssessmentData?.painImapctName);
     }
-  },[selectedAssessmentData?.painImapctName])
-
-
+  }, [selectedAssessmentData?.painImapctName]);
 
   const handlePrevious = () => {
     gotoPrevious();
@@ -107,26 +104,24 @@ const PainCausingActivity = ({gotoNext, gotoPrevious}) => {
                 onValueChange={(value) => {
                   if (value) {
                     setSelectedActivities([...selectedActivities, item.label]);
-  
-                   dispatch({
-                    type:CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
-                    payload:{
-                      painImpactId:item.value,
-                      painImapctName:item.label
 
-                    }
-                  })
+                    dispatch({
+                      type: CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
+                      payload: {
+                        painImpactId: item.value,
+                        painImapctName: item.label,
+                      },
+                    });
                   } else {
                     let qualities = [...selectedActivities];
                     qualities.splice(qualities.indexOf(item.label), 1);
                     setSelectedActivities(qualities);
                     dispatch({
-                      type:CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
-                      payload:{
-                        painImpactId:item.value
-
-                      }
-                    })
+                      type: CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
+                      payload: {
+                        painImpactId: item.value,
+                      },
+                    });
                   }
                 }}
                 containerStyle={{

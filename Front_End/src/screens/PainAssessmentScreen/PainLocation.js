@@ -1,25 +1,18 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {View, Text, Dimensions, Platform, ScrollView} from 'react-native';
 import AntDesignIcon from 'react-native-vector-icons/AntDesign';
 import {COLORS} from '../../constants/colors';
 import CustomButton from '../../components/shared/CustomButton';
 import {getStatusBarHeight} from 'react-native-status-bar-height';
-import {PAIN_LOCATIONS} from '../../constants/painAssessment';
-import CustomDropDown from '../../components/shared/CustomDropDown';
 import {useDispatch, useSelector} from 'react-redux';
-import {PAIN_ASSESSMENT_DATA_ACTION} from '../../constants/actions';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import PainLocationModal from '../../components/PainLocationComponents/PainLocationModal';
 import CustomTextInput from '../../components/shared/CustomTextInput';
 
 const {width, height} = Dimensions.get('window');
 
-const PainLocation = ({
-  gotoNext,
-   gotoPrevious,
-  }) => {
-  const [painLocation, setPainLocation] = useState(''); 
-  const [painLocationId,setPainLocationId]= useState(0)
+const PainLocation = ({gotoNext, gotoPrevious}) => {
+  const [painLocation, setPainLocation] = useState('');
+  const [painLocationId, setPainLocationId] = useState(0);
   const [showFrontButton, setShowFrontButton] = useState(true);
   const [showFrontImage, setShowFrontImage] = useState(true);
   const [openModal, setOpenModal] = useState(false);
@@ -28,20 +21,13 @@ const PainLocation = ({
     (state) => state.painAssessmentData.painLocation,
   );
 
-
-  
-
-  
-
   const handlePrevious = () => {
     gotoPrevious();
   };
 
   const handleContinue = () => {
     gotoNext();
-
   };
-  
 
   return (
     <>
@@ -76,16 +62,6 @@ const PainLocation = ({
               {'What is the location of the pain?'}
             </Text>
           </View>
-          {/* <CustomDropDown
-            items={PAIN_LOCATIONS}
-            value={painLocation}
-            onChangeValue={(item) =>
-              setPainLocation(
-                item && item.value ? item.value : PAIN_LOCATIONS[0].value,
-              )
-            }
-            containerStyle={{marginBottom: 44}}
-          /> */}
           <CustomTextInput placeholder="Pain Location" value={painLocation} />
 
           <CustomButton
@@ -115,7 +91,7 @@ const PainLocation = ({
         onClose={() => {
           setOpenModal(false);
         }}
-        setPainLocationId ={setPainLocationId}
+        setPainLocationId={setPainLocationId}
       />
 
       <View

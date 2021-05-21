@@ -4,7 +4,7 @@ const dbConfig = {
     connectionLimit: 10,
     host: "localhost",
     user: "root",
-    password: "rootroot",
+    password: "Softsuave@123",
     database: "impact_dev",
 };
 

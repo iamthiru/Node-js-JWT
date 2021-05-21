@@ -16,7 +16,7 @@ import ScoreSlider from '../../components/shared/ScoreSlider';
 import { VERBAL_ABILITY } from '../../constants/painAssessment';
 import { getPainScoreImage, getPainScoreDescription } from '../../helpers/painAssessment';
 import {useDispatch,useSelector} from 'react-redux'
-import { CREATE_ASSESSMENT_ACTION, PAIN_ASSESSMENT_DATA_ACTION } from '../../constants/actions';
+import { CREATE_ASSESSMENT_ACTION} from '../../constants/actions';
 
 const { width, height } = Dimensions.get("window");
 

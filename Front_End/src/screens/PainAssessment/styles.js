@@ -1,4 +1,4 @@
-import {Dimensions, StyleSheet,Platform} from 'react-native';
+import {Dimensions, StyleSheet, Platform} from 'react-native';
 import {COLORS} from '../../constants/colors';
 
 const {width, height} = Dimensions.get('window');
@@ -32,9 +32,7 @@ const styles = StyleSheet.create({
   },
   mainView: {
     width: width,
-    height:height,
-
-
+    height: height,
   },
   patientText: {
     fontSize: 16,
@@ -163,27 +161,61 @@ const styles = StyleSheet.create({
   time: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-   
   },
   dateLabel: {
     fontSize: 16,
     lineHeight: 24,
     color: COLORS.GRAY_90,
   },
-  safeArea:{
+  safeArea: {
     height: 90,
     backgroundColor: COLORS.PRIMARY_MAIN,
   },
-  arrowLeft:{
+  arrowLeft: {
     fontSize: 25,
     color: COLORS.WHITE,
   },
-  heading:{
+  heading: {
     fontSize: 24,
     lineHeight: 29,
     fontWeight: '400',
     color: COLORS.WHITE,
     paddingLeft: 60,
-  }
+  },
+  addPatientTouch: {
+    width: width * 0.4,
+    backgroundColor: COLORS.SECONDARY_MAIN,
+    borderColor: COLORS.PRIMARY_MAIN,
+    borderWidth: 1.8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 30,
+    borderRadius: 5,
+  },
+  addPatientText: {
+    color: COLORS.GRAY_90,
+    textAlign: 'center',
+    paddingHorizontal: 5,
+  },
+  satrtButtonView: {
+    width: width,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingTop: 50,
+  },
+  startButtonTouch: {
+    backgroundColor: COLORS.SECONDARY_MAIN,
+    width: width * 0.6,
+    height: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderColor: COLORS.PRIMARY_MAIN,
+    borderWidth: 2,
+    borderRadius: 5,
+  },
+  startText: {
+    color: COLORS.GRAY_90,
+    fontWeight: '600',
+  },
 });
 export default styles;

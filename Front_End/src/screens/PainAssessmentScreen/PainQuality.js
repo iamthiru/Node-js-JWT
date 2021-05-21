@@ -5,34 +5,32 @@ import AntDesignIcon from 'react-native-vector-icons/AntDesign';
 import {COLORS} from '../../constants/colors';
 import CustomButton from '../../components/shared/CustomButton';
 import {getStatusBarHeight} from 'react-native-status-bar-height';
-import {PAIN_QUALITIES} from '../../constants/painAssessment';
 import CustomCheckBox from '../../components/shared/CustomCheckBox';
 import {useDispatch, useSelector} from 'react-redux';
-import {CREATE_ASSESSMENT_ACTION, PAIN_ASSESSMENT_DATA_ACTION} from '../../constants/actions';
+import {CREATE_ASSESSMENT_ACTION} from '../../constants/actions';
 
 const {width, height} = Dimensions.get('window');
 
-const PainQuality = ({gotoNext, gotoPrevious,}) => {
+const PainQuality = ({gotoNext, gotoPrevious}) => {
   const [selectedPainQualities, setSelectedPainQualities] = useState([]);
-  const [painQualityId,setPainQualityId] = useState('')
   const painQuality = useSelector(
     (state) => state.painAssessmentData.selectedPainQualities,
   );
   const selectedAssessmentData = useSelector((state) => state.createAsseement);
-  
+
   const pain_qualities = useSelector((state) => state.lookupData.lookup_data);
 
   const quality_data = pain_qualities.find((item) => {
     return item.name === 'PainQuality';
   })?.lookup_data;
 
-  useEffect(()=>{
-    if(selectedAssessmentData?.pain_activity_name){
-      setSelectedPainQualities([ selectedAssessmentData?.pain_activity_name])
+  useEffect(() => {
+    if (selectedAssessmentData?.pain_activity_name) {
+      setSelectedPainQualities([selectedAssessmentData?.pain_activity_name]);
     }
-  },[selectedAssessmentData?.pain_activity_id])
+  }, [selectedAssessmentData?.pain_activity_id]);
 
-const dispatch = useDispatch()
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if (painQuality && painQuality.length) {
@@ -105,35 +103,34 @@ const dispatch = useDispatch()
                 key={index}
                 label={item.label}
                 value={selectedPainQualities.includes(item.label)}
-              onValueChange={(label) => {
-                console.log('------',item)
+                onValueChange={(label) => {
+                  console.log('------', item);
                   if (label) {
                     setSelectedPainQualities([
                       ...selectedPainQualities,
                       item.label,
-                    ])
-      
+                    ]);
+
                     dispatch({
-                      type:CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
-                      payload:{
-                        pain_activity_id:item.value,
-                        pain_activity_name:item.label
-                      }
-                    })
-                    ;
+                      type: CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
+                      payload: {
+                        pain_activity_id: item.value,
+                        pain_activity_name: item.label,
+                      },
+                    });
                   } else {
                     let qualities = [...selectedPainQualities];
                     qualities.splice(qualities.indexOf(item.label), 1);
                     setSelectedPainQualities(qualities);
-                    console.log('------',item)
-                   
+                    console.log('------', item);
+
                     dispatch({
-                      type:CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
-                      payload:{
-                        pain_activity_id:item.value,
-                        pain_activity_name:item.label
-                      }
-                    })
+                      type: CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
+                      payload: {
+                        pain_activity_id: item.value,
+                        pain_activity_name: item.label,
+                      },
+                    });
                   }
                 }}
                 containerStyle={{

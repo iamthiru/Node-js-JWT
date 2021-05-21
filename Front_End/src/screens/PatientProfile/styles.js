@@ -192,12 +192,100 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     lineHeight: 28,
   },
-  dropDownLabel:{
-    fontSize: 12, 
-lineHeight: 24, 
-color: COLORS.GRAY_90, 
-marginHorizontal: 5,
-  }
+  dropDownLabel: {
+    fontSize: 12,
+    lineHeight: 24,
+    color: COLORS.GRAY_90,
+    marginHorizontal: 5,
+  },
+  patient_main_view: {
+    height: 50,
+    width: width,
+    marginHorizontal: 10,
+    justifyContent: 'center',
+    marginBottom: 10,
+  },
+  main_view_position: {
+    position: 'absolute',
+    top: 12,
+    zIndex: 1,
+  },
+  patientProfileText: {
+    textAlign: 'center',
+    color: COLORS.PRIMARY_MAIN,
+    fontSize: 24,
+    lineHeight: 30,
+    fontWeight: '400',
+  },
+  profileButtonsView: {
+    paddingVertical: 20,
+    width: width,
+    alignItems: 'center',
+  },
+  noDataFound: {
+    fontSize: 25,
+    textAlign: 'center',
+    paddingVertical: 20,
+    fontWeight: '600',
+    color: COLORS.PRIMARY_MAIN,
+  },
+  patientDetailCardMainView: {
+    width: width,
+    paddingHorizontal: 30,
+    paddingBottom: 20,
+    backgroundColor: COLORS.WHITE,
+    borderBottomColor: COLORS.BLACK,
+    borderBottomWidth: 1,
+  },
+  patientName: {
+    color: COLORS.PRIMARY_DARKER,
+    fontSize: 20,
+    lineHeight: 32,
+    fontWeight: '700',
+  },
+  patientAge: {
+    color: COLORS.PRIMARY_DARKER,
+    fontSize: 16,
+    lineHeight: 32,
+    fontWeight: '400',
+  },
+  medicalNumber: {
+    color: COLORS.PRIMARY_DARKER,
+    fontSize: 16,
+    lineHeight: 32,
+    fontWeight: '400',
+  },
+  editButton: {
+    position: 'absolute',
+    top: 10,
+    right: 30,
+  },
+  editButtonTouch: {
+    borderBottomColor: COLORS.PRIMARY_MAIN,
+    borderBottomWidth: 1,
+    alignItems: 'center',
+  },
+  summaryChatText: {
+    fontSize: 20,
+    lineHeight: 28,
+    fontWeight: '700',
+    color: COLORS.PRIMARY_MAIN,
+  },
+  summaryChat_mainView: {
+    width: width - 30,
+    marginHorizontal: 15,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    zIndex: 1,
+    marginTop: 10,
+  },
+  noEntryText: {
+    fontSize: 20,
+    textAlign: 'center',
+    color: COLORS.PRIMARY_MAIN,
+    paddingTop: 20,
+    paddingBottom: 20,
+  },
 });
 
 export default styles;

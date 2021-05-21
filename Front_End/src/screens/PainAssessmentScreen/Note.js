@@ -8,11 +8,11 @@ import {getStatusBarHeight} from 'react-native-status-bar-height';
 import CustomTextArea from '../../components/shared/CustomTextArea';
 import SpeechToText from '../../components/shared/SpeechToText';
 import {useDispatch, useSelector} from 'react-redux';
-import {CREATE_ASSESSMENT_ACTION, PAIN_ASSESSMENT_DATA_ACTION} from '../../constants/actions';
+import {CREATE_ASSESSMENT_ACTION} from '../../constants/actions';
 
 const {width, height} = Dimensions.get('window');
 
-const Note = ({gotoNext, gotoPrevious,allData,setAllData}) => {
+const Note = ({gotoNext, gotoPrevious}) => {
   const [notes, setNotes] = useState('');
   const dispatch = useDispatch();
   const notesSpeech = useSelector((state) => state.painAssessmentData.notes);

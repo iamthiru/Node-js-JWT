@@ -237,8 +237,10 @@ const HomeScreen = ({navigation}) => {
             <FlatList
              
               data = {recentPatients}
+              keyExtractor ={(item)=>item.id.toString()}
               renderItem={({item, index}) => {
-                return <PatientListItem  index ={index+''} item={item} />;
+                return <PatientListItem  
+                item={item} />;
               }}
             />
           </View>

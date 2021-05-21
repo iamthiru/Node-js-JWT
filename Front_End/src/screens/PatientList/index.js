@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {View, Text, SafeAreaView, Dimensions} from 'react-native';
+import {View, Text, SafeAreaView} from 'react-native';
 import Footer from '../../components/Footer';
 import CustomDropDown from '../../components/shared/CustomDropDown';
 import CustomTextInput from '../../components/shared/CustomTextInput';

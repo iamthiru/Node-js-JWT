@@ -71,13 +71,7 @@ const AllEntryCard = ({allEntries}) => {
       />
       </>
       :
-      <Text style ={{
-        fontSize:20,
-        textAlign:'center',
-        color:COLORS.PRIMARY_MAIN,
-        paddingTop:20,
-        paddingBottom:20
-      }}>No Entries</Text>
+      <Text style ={styles.noEntryText}>No Entries</Text>
 }
     </View>
   );

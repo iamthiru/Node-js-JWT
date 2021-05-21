@@ -7,8 +7,6 @@ import {useSelector} from 'react-redux';
 import {formatAMPM} from '../../utils/date';
 
 const LatestEntryCard = ({
-  latestEntryData,
-  data,
   last_assessment,
   last_medication,
 }) => {
@@ -16,16 +14,12 @@ const LatestEntryCard = ({
 
   const all_assessment_data = last_assessment?.assessment;
   const all_medication_data = last_assessment?.medication;
-
-
-
-
-  const create_date = new Date(last_assessment?.createdAt);
   const lookup_data = useSelector((state) => state.lookupData.lookup_data);
   const date = all_assessment_data?.assessment_datetime;
   const dateFormat = new Date(date);
 
   const medicationList = useMemo(()=>{
+
     return lookup_data.find((item)=>{
       return item.name === 'MedicationClass'
     })?.lookup_data?.find((item )=>{
@@ -33,6 +27,7 @@ const LatestEntryCard = ({
     })?.lookup_data?.find((item)=>{
       return item.id === all_medication_data?.medication_id
     })
+    
   },[lookup_data,all_medication_data])
 
   const dosage= useMemo(()=>{

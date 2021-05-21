@@ -13,7 +13,6 @@ import SummaryChartReport from '../../components/SummaryChatReport';
 
 import { COLORS } from '../../constants/colors';
 import styles from './styles'
-import {useSelector} from 'react-redux'
 const { width, height } = Dimensions.get("window");
 
 const chartConfig = {
@@ -59,7 +58,7 @@ const SummaryChart = ({
 
     const all_assessment_data =last_assessment?.assessment
     const all_medication_data = last_assessment?.medication
-  const all_assessment_list = useSelector((state)=>state.allAssessmentList)
+
 
 
 
@@ -120,25 +119,13 @@ const SummaryChart = ({
                 }}
             >
                 <Text
-                    style={{
-                        fontSize: 20,
-                        lineHeight: 28,
-                        fontWeight: '700',
-                        color: COLORS.PRIMARY_MAIN
-                    }}
+                    style={styles.summaryChatText}
                 >
                     Summary Chart
                 </Text>
             </View>
             <View
-                style={{
-                    width: width - 30,
-                    marginHorizontal: 15,
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    zIndex: 1,
-                    marginTop: 10
-                }}
+                style={styles.summaryChat_mainView}
             >
                 {Boolean(TIME_FILTER_OPTIONS?.length) &&
                     TIME_FILTER_OPTIONS.map((timeOption, index) => {
