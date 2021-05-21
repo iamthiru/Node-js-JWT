@@ -21,7 +21,6 @@ import {SCREEN_NAMES} from '../../constants/navigation';
 import {PATIENT_NAME_ACTION} from '../../constants/actions';
 
 const PainAssessment = ({route}) => {
-  
   const patientData = useSelector((state) => state.patientName.patient);
 
   const dispatch = useDispatch();

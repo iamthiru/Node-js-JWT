@@ -9,37 +9,36 @@ import CustomTextInput from '../../components/shared/CustomTextInput';
 import {VERBAL_ABILITY} from '../../constants/painAssessment';
 import {getStatusBarHeight} from 'react-native-status-bar-height';
 import {useDispatch, useSelector} from 'react-redux';
-import {CREATE_ASSESSMENT_ACTION, PAIN_ASSESSMENT_DATA_ACTION} from '../../constants/actions';
+import {
+  CREATE_ASSESSMENT_ACTION,
+  PAIN_ASSESSMENT_DATA_ACTION,
+} from '../../constants/actions';
 
 const {width, height} = Dimensions.get('window');
 
-const VerbalAbility = ({
-  gotoNext,
-  verbalAbility,
-  setVerbalAbility,
-
-}) => {
+const VerbalAbility = ({gotoNext, verbalAbility, setVerbalAbility}) => {
   const patientData = useSelector((state) => state.patientName.patient);
   const selectedAssessmentData = useSelector((state) => state.createAsseement);
-  useEffect(()=>{
-    if(selectedAssessmentData && selectedAssessmentData?.type){
-      setVerbalAbility(selectedAssessmentData?.type)
+  useEffect(() => {
+    if (selectedAssessmentData && selectedAssessmentData?.type) {
+      setVerbalAbility(selectedAssessmentData?.type);
     }
-  },[selectedAssessmentData?.type])
+  }, [selectedAssessmentData?.type]);
 
   const [otherText, setOtherText] = useState('');
   const dispatch = useDispatch();
 
   const handleContinue = () => {
     gotoNext();
-    if(verbalAbility){
-    dispatch({
-      type:CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
-      payload:{
-        type: verbalAbility,
-        patient_id: patientData.patient_id,
-      }
-    })
+    if (verbalAbility) {
+      dispatch({
+        type: CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
+        payload: {
+          type: verbalAbility,
+          patient_id: patientData?.patient_id,
+          patient_name: patientData?.patient_name,
+        },
+      });
     }
   };
 

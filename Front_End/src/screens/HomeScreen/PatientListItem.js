@@ -7,43 +7,17 @@ import CustomTouchableOpacity from '../../components/shared/CustomTouchableOpaci
 import {COLORS} from '../../constants/colors';
 import {SCREEN_NAMES} from '../../constants/navigation';
 import styles from './styles';
+import {formatAMPM} from '../../utils/date';
 
-
-const PatientListItem = ({item,index}) => {
-
-
+const PatientListItem = ({item, index}) => {
   const navigation = useNavigation();
-  const [AmOrPm, setAmOrPm] = useState('');
-  const [formattedTime, setFormattedTime] = useState({
-    hours: 0,
-    minutes: 0,
-  });
-
-
-  useEffect(() => {
-    if (item.createdAt) {
-      timeFormat(item.createdAt);
-    }
-  }, [item?.createdAt]);
-
-  const timeFormat = (time) => {
-    let timer = new Date(time);
-    let getHours = timer.getHours();
-    let getMinutes = timer.getMinutes();
-    let amORpm = getHours > 12 ? 'PM' : 'AM';
-    setAmOrPm(amORpm);
-    let hoursFormat = getHours % 12;
-    setFormattedTime({
-      hours: Boolean(hoursFormat === 0) ? 12 : hoursFormat,
-      minutes: Boolean(getMinutes < 10) ? '0' + getMinutes : getMinutes,
-    });
-  };
 
   return (
     <CustomTouchableOpacity
+    key ={index}
       style={styles.patientItemContainer}
       onPress={() => {
-        navigation.navigate(SCREEN_NAMES.PATIENT_PROFILE,{item});
+        navigation.navigate(SCREEN_NAMES.PATIENT_PROFILE, {item});
       }}>
       <Text
         style={[
@@ -65,7 +39,7 @@ const PatientListItem = ({item,index}) => {
               width: undefined,
             },
           ]}>
-          {`${formattedTime.hours} : ${formattedTime.minutes}  ${AmOrPm}`}
+          {`${formatAMPM(new Date(item.createdAt))}`}
         </Text>
         <AntDesignIcon name={'arrowright'} size={20} color={COLORS.GRAY_90} />
       </View>

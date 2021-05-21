@@ -98,7 +98,6 @@ const FacialExpressionScreen = ({navigation}) => {
   });
 
   const assessment_data = useSelector((state) => state.createAsseement);
-  console.log('sending data-----', assessment_data);
   const token = useSelector((state) => state.user.authToken);
   const userId = useSelector((state) => state.user.loggedInUserId);
 
@@ -553,17 +552,17 @@ const FacialExpressionScreen = ({navigation}) => {
   };
 
   const handleCreateAssessmentAPI = () => {
-    console.log('=========assessment api========',assessment_data)
-  
+    console.log('=========assessment api========', assessment_data);
+
     let date = new Date(assessment_data.assessment_date);
-    let reminder_date = assessment_data.remainder_date?  new Date(assessment_data.remainder_date) : new Date();
-    console.log('----dddd0-----',date.getTime())
-    console.log('--reminder ----',reminder_date.getTime())
+    let reminder_date = assessment_data.remainder_date
+      ? new Date(assessment_data.remainder_date)
+      : new Date();
     if (assessment_data.isRemainder) {
       createAssessmentAPI(
         {
           patient_id: assessment_data.patient_id,
-          assessment_datetime :date.getTime(),
+          assessment_datetime: date.getTime(),
           type: assessment_data.type,
           current_pain_score: assessment_data.current_pain,
           least_pain_score: assessment_data.least_pain,
@@ -574,11 +573,11 @@ const FacialExpressionScreen = ({navigation}) => {
           pain_frequency_id: assessment_data.pain_frequency_id,
           note: assessment_data.notes,
           total_score: assessment_data.total_scrore,
-          createdAt:new Date().getTime(),
+          createdAt: new Date().getTime(),
           createdBy: userId,
           isReminder: assessment_data.isRemainder,
-          reminder_datetime:reminder_date.getTime(),
-         frequency: assessment_data.frequence,
+          reminder_datetime: reminder_date.getTime(),
+          frequency: assessment_data.frequence,
           pain_impact_id: assessment_data.painImpactId,
           pupillary_dilation: assessment_data.pupillary_dilation,
           facial_expresssion: 0.125,
@@ -610,7 +609,7 @@ const FacialExpressionScreen = ({navigation}) => {
           pain_frequency_id: assessment_data.pain_frequency_id,
           note: assessment_data.notes,
           total_score: assessment_data.total_scrore,
-          createdAt:new Date().getTime(),
+          createdAt: new Date().getTime(),
           createdBy: userId,
           isReminder: assessment_data.isRemainder,
           pain_impact_id: assessment_data.painImpactId,

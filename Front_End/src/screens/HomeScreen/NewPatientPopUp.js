@@ -14,7 +14,6 @@ import ReactNativeModal from 'react-native-modal';
 import AntDesignIcon from 'react-native-vector-icons/AntDesign';
 import CustomTextInput from '../../components/shared/CustomTextInput';
 import CustomTouchableOpacity from '../../components/shared/CustomTouchableOpacity';
-
 import {COLORS} from '../../constants/colors';
 import styles from './styles';
 import {GENDER_OPTIONS, EYE_COLOR_OPTIONS} from '../../constants/patient';
@@ -23,9 +22,8 @@ import CustomButton from '../../components/shared/CustomButton';
 import {useNavigation} from '@react-navigation/core';
 import {SCREEN_NAMES} from '../../constants/navigation';
 import {useDispatch, useSelector} from 'react-redux';
-import {ALL_PATIENTS_ACTIONS, PATIENT_ACTIONS} from '../../constants/actions';
+import {ALL_PATIENTS_ACTIONS} from '../../constants/actions';
 import {addPatientAPI, getPatientListAPI} from '../../api/patientsData';
-import patient from '../../reducers/patients';
 import patientUpdateApi from '../../api/patientUpdate';
 
 const {width, height} = Dimensions.get('window');
@@ -130,7 +128,7 @@ const NewPatientPopUp = ({open, onClose, patientData, updateApiIntegrate}) => {
         .then((res) => {
           console.log('-------new Patient Added sucessfully------', res);
           if (res.data.isError) {
-            Alert.alert('Invalid data');
+            Alert.alert('Invalid data patient data');
             return;
           }
           getPatientListAPI(token)

@@ -71,7 +71,9 @@ const PatientProfile = ({navigation}) => {
   const dispatch = useDispatch();
   const token = useSelector((state) => state.user.authToken);
   const userId = useSelector((state) => state.user.loggedInUserId);
-  const patientId = item.id;
+  const selectedPatient = useSelector((state)=>state?.allPatients?.all_patients)?.find((patient)=>patient.id === item.id)
+
+
 
   const [latestMedicationData, setLatestMedicationData] = useState({});
   const [last_medication, setLast_medication] = useState([]);
@@ -83,8 +85,8 @@ const PatientProfile = ({navigation}) => {
   const all_medication_data = last_assessment?.medication;
 
   useEffect(() => {
-    if (token && patientId) {
-      medicationListAPI(token, patientId)
+    if (token && selectedPatient.id) {
+      medicationListAPI(token, selectedPatient.id)
         .then((res) => {
           if (res.data.isError) {
             Alert.alert('-----invalid medication list-------');
@@ -96,7 +98,7 @@ const PatientProfile = ({navigation}) => {
         .catch((err) => {
           console.log('medication list error-----', err);
         });
-      lastMedicationAssessmentAPI(token, patientId)
+      lastMedicationAssessmentAPI(token, selectedPatient.id)
         .then((result) => {
           if (result.data.isError) {
             Alert.alert(
@@ -119,7 +121,7 @@ const PatientProfile = ({navigation}) => {
           console.log('------last medication error------', err);
         });
     }
-  }, [token, patientId]);
+  }, [token, selectedPatient.id]);
   
 
   useEffect(()=>{
@@ -250,7 +252,7 @@ const PatientProfile = ({navigation}) => {
         showsHorizontalScrollIndicator={false}
         showsVerticalScrollIndicator={false}>
         <PatientDetailCard 
-        profile={item} 
+        profile={selectedPatient} 
         newPatientPopUp ={newPatientPopUp}
          setNewPatientPopUp= {setNewPatientPopUp}
          />

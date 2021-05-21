@@ -430,13 +430,6 @@ const PupillaryDilationScreen = ({navigation}) => {
                   resetStates('');
                   return;
                 }
-                  //  dispatch({
-                  //    type:CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
-                  //    payload:{
-                  //     pupillary_dilation:'1.5642'
-                  //    }
-                  //  })
-
                 setResultValue(result.data);
                 setResultReady(true);
                 setShowSpinner(false);
@@ -551,7 +544,6 @@ const PupillaryDilationScreen = ({navigation}) => {
     } else {
       if (exposure !== DEFAULT_OTHER_EXPOSURE) {
         setExposure(DEFAULT_OTHER_EXPOSURE);
-        console.log('exp------', exposure);
       }
     }
   };

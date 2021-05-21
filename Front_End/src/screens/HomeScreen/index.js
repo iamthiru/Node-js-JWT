@@ -137,7 +137,7 @@ const HomeScreen = ({navigation}) => {
               });
             })
             .catch((err) => {
-              console.log('-----lookup data error----', err);
+              console.log('-----lookup data error----', );
             });
         })
         .catch((error) => {
@@ -238,7 +238,7 @@ const HomeScreen = ({navigation}) => {
              
               data = {recentPatients}
               renderItem={({item, index}) => {
-                return <PatientListItem  item={item} />;
+                return <PatientListItem  index ={index+''} item={item} />;
               }}
             />
           </View>
