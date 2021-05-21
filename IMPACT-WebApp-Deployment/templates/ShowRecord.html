@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>IMPACT: Patient Record</title>
+  <link rel = "icon" href ="/static/Images/favicon.ico" />
+<style>
+
+body {
+  margin: 0;
+}
+
+/* Style the header */
+.header {
+  background-color: #f1f1f1;
+  padding: 5px;
+  text-align: center;
+}
+
+.navbar {
+  background-color: #333;
+  overflow: hidden;
+}
+
+/* Style the links inside the navigation bar */
+.navbar a {
+  float: left;
+  color: #f2f2f2;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+  font-size: 17px;
+}
+
+/* Change the color of links on hover */
+.navbar a:hover {
+  background-color: #ddd;
+  color: black;
+}
+
+/* Add a color to the active/current link */
+.navbar a.active {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.column {
+float: left;
+width: 48%;
+padding: 10px;
+}
+
+.myimages {
+width: 700px;
+height: 450px;
+}
+
+.about-section {
+  padding: 40px;
+  text-align: center;
+  background-color: #474e5d;
+  color: white;
+}
+
+form.sbar input[type=text] {
+  padding: 10px;
+  font-size: 17px;
+  border: 1px solid grey;
+  float: left;
+  width: 80%;
+  background: #f1f1f1;
+}
+
+form.sbar button {
+  float: left;
+  width: 10%;
+  padding: 10px;
+  background: #2196F3;
+  color: white;
+  font-size: 17px;
+  border: 1px solid grey;
+  border-left: none;
+  cursor: pointer;
+}
+
+form.sbar button:hover {
+  background: #0b7dda;
+}
+
+form.sbar::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+th {
+    background-color: #339933;
+    color: white;
+    font-size: 25px;
+}
+
+td {
+    font-size: 20px;
+}
+
+td, th {
+    text-align: center;
+    border-bottom: 1px solid black;
+}
+
+tr {
+    background-color: #f5f5f5;
+}
+
+tr:hover {
+    background-color: LightGrey;
+}
+
+</style>
+</head>
+<body>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <div class="navbar" id="Topnav">
+        <a href="{{url_for('HomePage')}}" style="font-size: 20px">Home</a>
+        <a href="{{url_for('PupilPain')}}" style="font-size: 20px">Pupil-Pain</a>
+        <a href="{{url_for('FacialPain')}}" style="font-size: 20px">Facial-Pain</a>
+        <a href="{{url_for('PatientRecords')}}" style="font-size: 20px">Patient-Records</a>
+        <a href="{{url_for('Logout')}}" style="font-size: 20px; float: right;">Logout</a>
+        <a href="{{url_for('HomePage')}}" style="font-size: 20px; float: right;">Hello, {{ user }}</a>
+    </div>
+
+    <div class="header">
+        <h1>IMPACT PATIENT RECORDS</h1>
+    </div>
+
+    <br>
+    <br>
+    <table align="center" cellspacing="20px" cellpadding="30px">
+      <tr>
+        <th>Patient ID</th>
+        <th>Pupil Output Graph</th>
+        <th>Facial Output Graph</th>
+        <th>Pupil Score</th>
+        <th>Facial Score</th>
+      </tr>
+      <tr>
+        <td>{{ pat_id }}</td>
+        <td><a href={{ pupil_link }}>Linked File</td>
+        <td><a href={{ facial_link }}>Linked File</td>
+        <td>3.14</td>
+        <td>7.8</td>
+      </tr>
+    </table>
+
+</body>
+</html>

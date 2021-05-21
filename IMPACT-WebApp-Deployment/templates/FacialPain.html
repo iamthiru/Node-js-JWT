@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>IMPACT: Facial Pain</title>
+    <link rel = "icon" href ="/static/Images/favicon.ico" />
     <style>
 
     body {
@@ -125,7 +126,9 @@
         <a href="{{url_for('HomePage')}}" style="font-size: 20px">Home</a>
         <a href="{{url_for('PupilPain')}}" style="font-size: 20px">Pupil-Pain</a>
         <a href="{{url_for('FacialPain')}}" style="font-size: 20px">Facial-Pain</a>
-        <a href="{{url_for('Logout')}}" style="font-size: 20px">Logout</a>
+        <a href="{{url_for('PatientRecords')}}" style="font-size: 20px">Patient-Records</a>
+        <a href="{{url_for('Logout')}}" style="font-size: 20px; float: right;">Logout</a>
+        <a href="{{url_for('HomePage')}}" style="font-size: 20px; float: right;">Hello, {{ user }}</a>
     </div>
 
     <div class="header">
