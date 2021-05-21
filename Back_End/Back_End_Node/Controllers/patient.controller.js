@@ -13,6 +13,7 @@ router.get('/getLookupType',getLookupType);
 router.post('/createMedication',createMedication);
 router.get('/medicationList/:patientId',getMedicationList);
 router.get('/lastMedicationAndAssessment/:patientId',getPatientLastAssessmentAndMedication);
+router.post('/editPatient',editPatientDetails);
 
 
 module.exports = router;
@@ -70,5 +71,11 @@ function getMedicationList(req,res,next){
 function getPatientLastAssessmentAndMedication(req,res,next){
     patientService.getPatientLastAssessmentAndMedication(req.params.patientId)
         .then(data => res.json(data))
+        .catch(next);
+}
+
+function editPatientDetails(req,res,next){
+    patientService.updatePatientDetails(req.body)
+        .then(data=>res.json(data))
         .catch(next);
 }

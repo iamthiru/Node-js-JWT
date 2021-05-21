@@ -10,6 +10,7 @@ module.exports = {
     createMedication,
     getMedicationList,
     getPatientLastAssessmentAndMedication,
+    updatePatientDetails
 };
 
 
@@ -56,12 +57,6 @@ async function getAllPatientList() {
             }
         });
     });
-    if (!patients.isError) {
-        for (let patient of patients.result) {
-            patient.dob = new Date(patient.dob);
-            patient.createdAt = new Date(patient.createdAt);
-        }
-    }
     return patients;
 }
 
@@ -150,13 +145,13 @@ async function getAssessmentByPatientId() {
             }
         })
     });
-    if (assessments.result.length != 0) {
+    /*if (assessments.result.length != 0) {
         for (let assessment of assessments.result) {
             assessment.createdAt = new Date(assessment.createdAt);
             assessment.reminder_datetime = new Date(assessment.reminder_datetime);
             assessment.assessment_datetime = new Date(assessment.assessment_datetime);
         }
-    }
+    }*/
     return assessments;
 }
 
@@ -258,9 +253,9 @@ async function getMedicationList(patientId) {
             }
         })
     });
-    for (let list of lists.result) {
+   /* for (let list of lists.result) {
         list.createdAt = new Date(list.createdAt);
-    }
+    }*/
     return lists;
 }
 
@@ -300,7 +295,7 @@ async function getPatientLastAssessmentAndMedication(patientId) {
             }
         })
     });
-    if(assessment.result.length !=0){
+   /* if(assessment.result.length !=0){
         var assessment_date = assessment && assessment.result[0] ? assessment.result[0].assessment_datetime : ' ';
         assessment.result[0].assessment_datetime = new Date(assessment_date);
         var reminderDate = assessment && assessment.result[0] ? assessment.result[0].reminder_datetime : ' ';
@@ -310,7 +305,7 @@ async function getPatientLastAssessmentAndMedication(patientId) {
     }
     if(medication.result.length !=0){
         medication.result[0].createdAt = new Date(medication.result[0].createdAt);
-    }
+    }*/
     let data = {
         assessment: assessment && assessment.result[0] ? assessment.result[0] : {},
         medication: medication && medication.result[0] ? medication.result[0] : {}
@@ -320,5 +315,53 @@ async function getPatientLastAssessmentAndMedication(patientId) {
         isError: false,
         result: data,
     }
+}
+
+
+async function updatePatientDetails(data){
+    let patientDetails ={};
+    const getPatient = await this.getAllPatientList();
+   // console.log(getPatient);
+    for(let patient of getPatient.result){
+        if(patient.id == data.id){
+           patientDetails  = patient;
+        }
+    }
+
+    data.first_name = data.first_name?data.first_name:patientDetails.first_name;
+    data.last_name = data.last_name?data.last_name:patientDetails.last_name;
+    data.dob = data.dob?data.dob:patientDetails.dob;
+    data.eyeColor = data.eyeColor?data.eyeColor:patientDetails.eyeColor;
+    data.gender = data.gender?data.gender:patientDetails.gender;
+    data.medical_record_no = data.medical_record_no?data.medical_record_no:patientDetails.medical_record_no;
+    data.modifiedAt = new Date().getTime();
+
+    const SQL = `UPDATE patient set first_name=?,last_name=?,dob=?,eyeColor=?,gender=?,medical_record_no=?,modifiedBy=?,modifiedAt=? where id =?`;
+    param= [data.first_name,data.last_name,data.dob,data.eyeColor,data.gender,data.medical_record_no,data.modifiedBy,data.modifiedAt,data.id];
+
+    const editPatient = await new Promise((resolve, reject) => {
+        pool.query(SQL, param, (err, result) => {
+            if (err) {
+                console.log(err);
+                resolve({
+                    isError: true,
+                    error: err,
+                })
+            } else {
+                resolve({
+                    isError: false,
+                    result: result,
+                })
+            }
+        })
+    });
+    if(!editPatient.isError && editPatient.result.affectedRows){
+           return {
+               message:'Patient_updated_successfully'
+           }
+    }
+
+     return editPatient;
+
 }
 
