@@ -2,13 +2,13 @@ export const titles = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','
 export const sectionRenderData = ['John Doe','John Doe','John Doe','John Doe','Balu', 'Arindam','Chase']
 export const sortByListOptions = [
     {
-        key: 'lastName',
+        key: 'last_name',
         label: 'Last Name',
-        value: 'lastName',
+        value: 'last_name',
       },
       {
-        key: 'firstName',
+        key: 'first_name',
         label: 'First Name',
-        value: 'firstName',
+        value: 'first_name',
       },
 ]

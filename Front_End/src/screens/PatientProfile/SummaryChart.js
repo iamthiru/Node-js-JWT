@@ -13,7 +13,7 @@ import SummaryChartReport from '../../components/SummaryChatReport';
 
 import { COLORS } from '../../constants/colors';
 import styles from './styles'
-
+import {useSelector} from 'react-redux'
 const { width, height } = Dimensions.get("window");
 
 const chartConfig = {
@@ -42,7 +42,13 @@ const TIME_FILTER_OPTIONS = [
     'All'
 ]
 
-const SummaryChart = ({ patientData,patientReport }) => {
+const SummaryChart = ({ 
+    patientData,
+    patientReport,
+    last_assessment,
+    last_medication,
+    lookup_data
+ }) => {
     const [selectedTime, setSelectedTime] = useState(TIME_FILTER_OPTIONS[0])
     const [xPoint, setXPoint] = useState(0)
     const [currentIndex, setCurrentIndex] = useState(0)
@@ -51,11 +57,18 @@ const SummaryChart = ({ patientData,patientReport }) => {
     const [barSlideValue] = useState(new Animated.Value(0))
     const [sliderXValue] = useState(new Animated.Value(0))
 
+    const all_assessment_data =last_assessment?.assessment
+    const all_medication_data = last_assessment?.medication
+  const all_assessment_list = useSelector((state)=>state.allAssessmentList)
+
+
+
+
       const data = {
         labels: [],
         datasets: [
           {
-            data: patientData.map(data => {
+            data:patientData?.map(data => {
                 return data.value
             }),
             color: (opacity = 1) => COLORS.SECONDARY_MAIN, // optional
@@ -191,14 +204,17 @@ const SummaryChart = ({ patientData,patientReport }) => {
                             backgroundColor: COLORS.SECONDARY_MAIN
                         }}
                     >
-                    {"IMPACT "+patientData?.[currentIndex]?.score}
+                    {"IMPACT "+patientData?.[currentIndex]?.value}
+
+
                     </Text>
                     <Text
                          style={{
                             textAlign: 'center'
                         }}
                     >
-                    {"xxmed "+patientData?.[currentIndex]?.xxmed+"mg"}
+                    {/* {"xxmed "+patientData?.[currentIndex]?.xxmed+"mg"} */}
+                    {patientData?.[currentIndex]?.medicationData}
                     </Text>
                 </Animated.View>
                 {
@@ -344,6 +360,12 @@ const SummaryChart = ({ patientData,patientReport }) => {
             </View>
             <SummaryChartReport 
             patientReport ={patientReport}
+            all_assessment_data={all_assessment_data}
+            all_medication_data ={all_medication_data}
+            lookup_data={lookup_data}
+
+
+
              />
         </View>
     );

@@ -30,8 +30,15 @@ import CustomButton from '../../components/shared/CustomButton';
 import S3 from 'aws-sdk/clients/s3';
 import fs from 'react-native-fs';
 import {decode, encode} from 'base64-arraybuffer';
-import { ACCESS_ID, ACCESS_KEY, BUCKET_FOLDER_FOR_FACE, BUCKET_NAME } from '../../constants/aws';
-import { initiateFacialExpressionVideoProcessingAPI } from '../../api/painAssessment';
+import {
+  ACCESS_ID,
+  ACCESS_KEY,
+  BUCKET_FOLDER_FOR_FACE,
+  BUCKET_NAME,
+} from '../../constants/aws';
+import {initiateFacialExpressionVideoProcessingAPI} from '../../api/painAssessment';
+import {useDispatch, useSelector} from 'react-redux';
+import createAssessmentAPI from '../../api/createAssessment';
 
 const {width, height} = Dimensions.get('window');
 const {VideoCropper} = NativeModules;
@@ -89,6 +96,11 @@ const FacialExpressionScreen = ({navigation}) => {
     y: 0.5,
     autoExposure: true,
   });
+
+  const assessment_data = useSelector((state) => state.createAsseement);
+  const token = useSelector((state) => state.user.authToken);
+  const userId = useSelector((state) => state.user.loggedInUserId);
+
   // var pressOut;
 
   useEffect(() => {
@@ -466,6 +478,7 @@ const FacialExpressionScreen = ({navigation}) => {
           } else {
             console.log('success', data);
             console.log('Respomse URL : ' + data.Location);
+            // handleCreateAssessmentAPI()
 
             setShowSpinner({
               open: true,
@@ -473,7 +486,10 @@ const FacialExpressionScreen = ({navigation}) => {
             });
             initiateFacialExpressionVideoProcessingAPI(filename)
               .then((result) => {
-                console.log('initiateFacialExpressionVideoProcessingAPI: ', result);
+                console.log(
+                  'initiateFacialExpressionVideoProcessingAPI: ',
+                  result,
+                );
                 if (result && result.data === 'Retake') {
                   Alert.alert('Error', 'Please retake the video');
                   // setResultReady(true);
@@ -495,7 +511,6 @@ const FacialExpressionScreen = ({navigation}) => {
                 });
                 clearProcessingTimer();
 
-
                 /* setTimeout(() => {
                                 let pngFileName = `${filename.substring(0, filename.lastIndexOf("."))}_Dilation_Plot.png`
                                 setDownloadFileName(pngFileName);
@@ -507,7 +522,7 @@ const FacialExpressionScreen = ({navigation}) => {
               })
               .catch((err) => {
                 Alert.alert('Error', 'Error in processing the video');
-                console.log("Err:", err)
+                console.log('Err:', err);
                 setShowSpinner({
                   open: false,
                   message: '',
@@ -536,6 +551,86 @@ const FacialExpressionScreen = ({navigation}) => {
     resetStates();
   };
 
+  const handleCreateAssessmentAPI = () => {
+    console.log('=========assessment api========', assessment_data);
+
+    let date = new Date(assessment_data.assessment_date);
+    let reminder_date = assessment_data.remainder_date
+      ? new Date(assessment_data.remainder_date)
+      : new Date();
+    if (assessment_data.isRemainder) {
+      createAssessmentAPI(
+        {
+          patient_id: assessment_data.patient_id,
+          assessment_datetime: date.getTime(),
+          type: assessment_data.type,
+          current_pain_score: assessment_data.current_pain,
+          least_pain_score: assessment_data.least_pain,
+          most_pain_score: assessment_data.most_pain,
+          description: assessment_data.description,
+          pain_location_id: assessment_data.painLocation_id,
+          pain_quality_id: assessment_data.pain_activity_id,
+          pain_frequency_id: assessment_data.pain_frequency_id,
+          note: assessment_data.notes,
+          total_score: assessment_data.total_scrore,
+          createdAt: new Date().getTime(),
+          createdBy: userId,
+          isReminder: assessment_data.isRemainder,
+          reminder_datetime: reminder_date.getTime(),
+          frequency: assessment_data.frequence,
+          pain_impact_id: assessment_data.painImpactId,
+          pupillary_dilation: assessment_data.pupillary_dilation,
+          facial_expresssion: 0.125,
+        },
+        token,
+      )
+        .then((res) => {
+          if (res.data.isError) {
+            Alert.alert('------invalid assessment-----', res);
+            return;
+          }
+          console.log('----assessment sucessful----', res);
+        })
+        .catch((err) => {
+          console.log('assessment error', err);
+        });
+    } else {
+      createAssessmentAPI(
+        {
+          patient_id: assessment_data.patient_id,
+          assessment_datetime: date.getTime(),
+          type: assessment_data.type,
+          current_pain_score: assessment_data.current_pain,
+          least_pain_score: assessment_data.least_pain,
+          most_pain_score: assessment_data.most_pain,
+          description: assessment_data.description,
+          pain_location_id: assessment_data.painLocation_id,
+          pain_quality_id: assessment_data.pain_activity_id,
+          pain_frequency_id: assessment_data.pain_frequency_id,
+          note: assessment_data.notes,
+          total_score: assessment_data.total_scrore,
+          createdAt: new Date().getTime(),
+          createdBy: userId,
+          isReminder: assessment_data.isRemainder,
+          pain_impact_id: assessment_data.painImpactId,
+          pupillary_dilation: assessment_data.pupillary_dilation,
+          facial_expresssion: 0.125,
+        },
+        token,
+      )
+        .then((res) => {
+          if (res.data.isError) {
+            Alert.alert('------invalid assessment-----', res);
+            return;
+          }
+          console.log('----assessment sucessful----', res);
+        })
+        .catch((err) => {
+          console.log('assessment error', err);
+        });
+    }
+  };
+
   const resetStates = () => {
     setVideoURL('');
     setIsRecording(false);
@@ -561,7 +656,7 @@ const FacialExpressionScreen = ({navigation}) => {
           //   if (pressOut) {
           //     clearTimeout(pressOut);
           //   }
-            onPress = {(evt) =>{
+          onPress={(evt) => {
             setFocusPoints({
               x: parseFloat(1 - evt.nativeEvent.pageX / width),
               y: parseFloat(1 - (evt.nativeEvent.pageY - 60) / width),
@@ -607,7 +702,7 @@ const FacialExpressionScreen = ({navigation}) => {
                 : RNCamera.Constants.AutoFocus.on
               //  RNCamera.Constants.AutoFocus.off
             }
-             autoFocusPointOfInterest={foucsPoints || {}}
+            autoFocusPointOfInterest={foucsPoints || {}}
             zoom={zoom}
             focusDepth={focusDepth}
             exposure={exposure < 0.15 ? 0.15 : exposure}
@@ -803,6 +898,19 @@ const FacialExpressionScreen = ({navigation}) => {
               }}>
               3. Get ready to not blink for 10 seconds.
             </Text>
+            <CustomTouchableOpacity
+              onPress={() => {
+                navigation.navigate(SCREEN_NAMES.RESULT);
+                handleCreateAssessmentAPI();
+              }}>
+              <Text
+                style={{
+                  fontSize: 25,
+                  color: 'red',
+                }}>
+                goto Result
+              </Text>
+            </CustomTouchableOpacity>
 
             {/* <View style={{ width: width - 40, height: 30, marginTop: 20, marginBottom: 10, flexDirection: "row", justifyContent: 'center', alignItems: 'center' }}>
                     <Text style={{ fontWeight: "700", color: COLORS.GRAY_90 }}>{"FPS: "}</Text>
@@ -968,44 +1076,44 @@ const FacialExpressionScreen = ({navigation}) => {
         )}
 
         {
-        // ((!isRecording && showBrightnessSlider) ||
+          // ((!isRecording && showBrightnessSlider) ||
 
-          (!isRecording && selectedSetting !== '') && (
-          <View
-            style={{
-              flexDirection: 'row',
-              position: 'absolute',
-              zindex: 1000,
-              // top:
-              //   selectedSetting !== ''
-              //     ? width - 50 - 25
-              //     : foucsPoints.y <= 0.2
-              //     ? height * 0.36
-              //     : foucsPoints.y >= 0.7
-              //     ? 100
-              //     : (height - foucsPoints.y * 1000) / 2,
-              // left:
-              //   selectedSetting !== ''
-              //     ? 20
-              //     : foucsPoints.x >= 0.7
-              //     ? 20
-              //     : (width - foucsPoints.x * 1000) / 1.8 + 60,
-              // width: selectedSetting !== '' ? width - 40 : width * 0.5,
-                 top: width - 40,
-                 left: 20,
-                 width: width - 40,
-              height: 50,
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderRadius: 10,
-              backgroundColor: `${COLORS.WHITE}70`,
-              transform: [
-                {
-                  rotate: selectedSetting !== '' ? '360deg' : '270deg',
-                },
-              ],
-            }}>
-            {/* {showBrightnessSlider && (
+          !isRecording && selectedSetting !== '' && (
+            <View
+              style={{
+                flexDirection: 'row',
+                position: 'absolute',
+                zindex: 1000,
+                // top:
+                //   selectedSetting !== ''
+                //     ? width - 50 - 25
+                //     : foucsPoints.y <= 0.2
+                //     ? height * 0.36
+                //     : foucsPoints.y >= 0.7
+                //     ? 100
+                //     : (height - foucsPoints.y * 1000) / 2,
+                // left:
+                //   selectedSetting !== ''
+                //     ? 20
+                //     : foucsPoints.x >= 0.7
+                //     ? 20
+                //     : (width - foucsPoints.x * 1000) / 1.8 + 60,
+                // width: selectedSetting !== '' ? width - 40 : width * 0.5,
+                top: width - 40,
+                left: 20,
+                width: width - 40,
+                height: 50,
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: 10,
+                backgroundColor: `${COLORS.WHITE}70`,
+                transform: [
+                  {
+                    rotate: selectedSetting !== '' ? '360deg' : '270deg',
+                  },
+                ],
+              }}>
+              {/* {showBrightnessSlider && (
               <>
                 <Text style={{width: 40, textAlign: 'center'}}>{`${parseInt(
                   exposure * 100,
@@ -1034,61 +1142,62 @@ const FacialExpressionScreen = ({navigation}) => {
                 />
               </>
             )} */}
-            {selectedSetting === SETTINGS.EXPOSURE && (
-              <>
-                <Text
-                  style={{
-                    width: 40,
-                    textAlign: 'center',
-                  }}>{`${parseInt(zoom * 100)}%`}</Text>
-                <Slider
-                  style={{width: width - 120}}
-                  minimumValue={0}
-                  maximumValue={1}
-                  value={exposure}
-                  onValueChange = {(value) =>setExposure(value)}
-                  minimumTrackTintColor={COLORS.WHITE}
-                  maximumTrackTintColor={COLORS.BLACK}
-                />
-              </>
-            )}
+              {selectedSetting === SETTINGS.EXPOSURE && (
+                <>
+                  <Text
+                    style={{
+                      width: 40,
+                      textAlign: 'center',
+                    }}>{`${parseInt(zoom * 100)}%`}</Text>
+                  <Slider
+                    style={{width: width - 120}}
+                    minimumValue={0}
+                    maximumValue={1}
+                    value={exposure}
+                    onValueChange={(value) => setExposure(value)}
+                    minimumTrackTintColor={COLORS.WHITE}
+                    maximumTrackTintColor={COLORS.BLACK}
+                  />
+                </>
+              )}
 
-            {selectedSetting === SETTINGS.ZOOM && (
-              <>
-                <Text
-                  style={{
-                    width: 40,
-                    textAlign: 'center',
-                  }}>{`${parseInt(zoom * 100)}%`}</Text>
-                <Slider
-                  style={{width: width - 120}}
-                  minimumValue={0}
-                  maximumValue={1}
-                  value={zoom}
-                  onValueChange={(value) => setZoom(value)}
-                  minimumTrackTintColor={COLORS.WHITE}
-                  maximumTrackTintColor={COLORS.BLACK}
-                />
-              </>
-            )}
-            {selectedSetting === SETTINGS.FOCUS_DEPTH && (
-              <>
-                <Text style={{width: 40, textAlign: 'center'}}>{`${parseInt(
-                  focusDepth * 100,
-                )}%`}</Text>
-                <Slider
-                  style={{width: width - 120}}
-                  minimumValue={0}
-                  maximumValue={1}
-                  value={focusDepth}
-                  onValueChange={(value) => setFocusDepth(value)}
-                  minimumTrackTintColor={COLORS.WHITE}
-                  maximumTrackTintColor={COLORS.BLACK}
-                />
-              </>
-            )}
-          </View>
-        )}
+              {selectedSetting === SETTINGS.ZOOM && (
+                <>
+                  <Text
+                    style={{
+                      width: 40,
+                      textAlign: 'center',
+                    }}>{`${parseInt(zoom * 100)}%`}</Text>
+                  <Slider
+                    style={{width: width - 120}}
+                    minimumValue={0}
+                    maximumValue={1}
+                    value={zoom}
+                    onValueChange={(value) => setZoom(value)}
+                    minimumTrackTintColor={COLORS.WHITE}
+                    maximumTrackTintColor={COLORS.BLACK}
+                  />
+                </>
+              )}
+              {selectedSetting === SETTINGS.FOCUS_DEPTH && (
+                <>
+                  <Text style={{width: 40, textAlign: 'center'}}>{`${parseInt(
+                    focusDepth * 100,
+                  )}%`}</Text>
+                  <Slider
+                    style={{width: width - 120}}
+                    minimumValue={0}
+                    maximumValue={1}
+                    value={focusDepth}
+                    onValueChange={(value) => setFocusDepth(value)}
+                    minimumTrackTintColor={COLORS.WHITE}
+                    maximumTrackTintColor={COLORS.BLACK}
+                  />
+                </>
+              )}
+            </View>
+          )
+        }
 
         {isRecording && (
           <>
@@ -1156,118 +1265,120 @@ const FacialExpressionScreen = ({navigation}) => {
           style={{
             width: width,
             paddingTop: 30,
-          }} 
-          contentContainerStyle={{ 
+          }}
+          contentContainerStyle={{
             justifyContent: 'center',
-            alignItems: 'center'
+            alignItems: 'center',
           }}>
-          {!resultReady && <>
-            <CustomTouchableOpacity
-              disabled={processing}
-              style={{
-                backgroundColor: COLORS.PRIMARY_MAIN,
-                borderRadius: 10,
-                alignItems: 'center',
-                justifyContent: 'center',
-                height: 48,
-                width: width - 80,
-                paddingHorizontal: 28,
-                marginBottom: 12,
-              }}
-              onPress={onDownloadPress}>
-              <Text
+          {!resultReady && (
+            <>
+              <CustomTouchableOpacity
+                disabled={processing}
                 style={{
-                  fontSize: 14,
-                  fontWeight: '700',
-                  color: COLORS.WHITE,
-                  textAlign: 'center',
-                }}>
-                {'DOWNLOAD'}
-              </Text>
-            </CustomTouchableOpacity>
-            <CustomTouchableOpacity
-              disabled={processing}
-              style={{
-                backgroundColor: COLORS.PRIMARY_MAIN,
-                borderRadius: 10,
-                alignItems: 'center',
-                justifyContent: 'center',
-                height: 48,
-                width: width - 80,
-                paddingHorizontal: 28,
-                marginBottom: 12,
-              }}
-              onPress={onUploadPress}>
-              <Text
+                  backgroundColor: COLORS.PRIMARY_MAIN,
+                  borderRadius: 10,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  height: 48,
+                  width: width - 80,
+                  paddingHorizontal: 28,
+                  marginBottom: 12,
+                }}
+                onPress={onDownloadPress}>
+                <Text
+                  style={{
+                    fontSize: 14,
+                    fontWeight: '700',
+                    color: COLORS.WHITE,
+                    textAlign: 'center',
+                  }}>
+                  {'DOWNLOAD'}
+                </Text>
+              </CustomTouchableOpacity>
+              <CustomTouchableOpacity
+                disabled={processing}
                 style={{
-                  fontSize: 14,
-                  fontWeight: '700',
-                  color: COLORS.WHITE,
-                  textAlign: 'center',
-                }}>
-                {'CONFIRM'}
-              </Text>
-            </CustomTouchableOpacity>
-            <CustomTouchableOpacity
-              disabled={processing}
-              style={{
-                backgroundColor: COLORS.PRIMARY_MAIN,
-                borderRadius: 10,
-                alignItems: 'center',
-                justifyContent: 'center',
-                height: 48,
-                width: width - 80,
-                paddingHorizontal: 28,
-                marginBottom: 50
-              }}
-              onPress={onRetakePress}>
-              <Text
+                  backgroundColor: COLORS.PRIMARY_MAIN,
+                  borderRadius: 10,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  height: 48,
+                  width: width - 80,
+                  paddingHorizontal: 28,
+                  marginBottom: 12,
+                }}
+                onPress={onUploadPress}>
+                <Text
+                  style={{
+                    fontSize: 14,
+                    fontWeight: '700',
+                    color: COLORS.WHITE,
+                    textAlign: 'center',
+                  }}>
+                  {'CONFIRM'}
+                </Text>
+              </CustomTouchableOpacity>
+              <CustomTouchableOpacity
+                disabled={processing}
                 style={{
-                  fontSize: 14,
-                  fontWeight: '700',
-                  color: COLORS.WHITE,
-                  textAlign: 'center',
-                }}>
-                {'RETAKE'}
-              </Text>
-            </CustomTouchableOpacity>
-          </>}
+                  backgroundColor: COLORS.PRIMARY_MAIN,
+                  borderRadius: 10,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  height: 48,
+                  width: width - 80,
+                  paddingHorizontal: 28,
+                  marginBottom: 50,
+                }}
+                onPress={onRetakePress}>
+                <Text
+                  style={{
+                    fontSize: 14,
+                    fontWeight: '700',
+                    color: COLORS.WHITE,
+                    textAlign: 'center',
+                  }}>
+                  {'RETAKE'}
+                </Text>
+              </CustomTouchableOpacity>
+            </>
+          )}
 
-          {resultReady && <>
-            <Text
-              style={{
-                fontSize: 16,
-                fontWeight: '700',
-                color: COLORS.GRAY_90,
-                textAlign: 'center',
-                marginBottom: 15,
-              }}>{`RESULT: ${resultValue}`}</Text>
-            <CustomTouchableOpacity
-              disabled={processing}
-              style={{
-                backgroundColor: COLORS.PRIMARY_MAIN,
-                borderRadius: 10,
-                alignItems: 'center',
-                justifyContent: 'center',
-                height: 48,
-                width: width - 80,
-                paddingHorizontal: 28,
-                marginBottom: 12,
-              }}
-              onPress={() =>
-                navigation.navigate(SCREEN_NAMES.HOME_OLD)
-              }>
+          {resultReady && (
+            <>
               <Text
                 style={{
-                  fontSize: 14,
+                  fontSize: 16,
                   fontWeight: '700',
-                  color: COLORS.WHITE,
+                  color: COLORS.GRAY_90,
                   textAlign: 'center',
-                }}>
-                {'FINISH'}
-              </Text>
-            </CustomTouchableOpacity>
-          </>}
+                  marginBottom: 15,
+                }}>{`RESULT: ${resultValue}`}</Text>
+              <CustomTouchableOpacity
+                disabled={processing}
+                style={{
+                  backgroundColor: COLORS.PRIMARY_MAIN,
+                  borderRadius: 10,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  height: 48,
+                  width: width - 80,
+                  paddingHorizontal: 28,
+                  marginBottom: 12,
+                }}
+                onPress={() => navigation.navigate(SCREEN_NAMES.HOME_OLD)}>
+                <Text
+                  style={{
+                    fontSize: 14,
+                    fontWeight: '700',
+                    color: COLORS.WHITE,
+                    textAlign: 'center',
+                  }}>
+                  {'FINISH'}
+                </Text>
+              </CustomTouchableOpacity>
+            </>
+          )}
         </ScrollView>
       </>
     );

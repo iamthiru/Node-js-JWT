@@ -1,11 +1,35 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {FlatList, View} from 'react-native';
 import AllEntries from './AllEntries';
 
-const AllEntryItemsData = ({entriesData, width, height}) => {
+const AllEntryItemsData = ({
+
+  width,
+   height,
+   allEntries,
+   sortedValue
+  }) => {
+    const [allEntriesSortedList,setAllEntriesSortedList] = useState([])
+
+
+    useEffect(()=>{
+
+      if(sortedValue && allEntries && allEntries.length)
+      {
+       
+        if(sortedValue !== 'All'){
+          const allEntriesSortedData = allEntries.sort((item1,item2)=>new Date(item2.createdAt)- new Date(item1.createdAt))
+          setAllEntriesSortedList(allEntriesSortedData)
+        }
+        else{
+         setAllEntriesSortedList(allEntries)
+         } 
+        
+      }
+    },[allEntries,sortedValue])
   return (
       <FlatList
-      data = {entriesData}
+      data = {allEntriesSortedList || []}
       style={{
         marginBottom: 30
       }}

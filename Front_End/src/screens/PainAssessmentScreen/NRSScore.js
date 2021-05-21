@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     View,
     Text,
@@ -15,16 +15,43 @@ import { getStatusBarHeight } from 'react-native-status-bar-height';
 import ScoreSlider from '../../components/shared/ScoreSlider';
 import { VERBAL_ABILITY } from '../../constants/painAssessment';
 import { getPainScoreImage, getPainScoreDescription } from '../../helpers/painAssessment';
+import {useDispatch,useSelector} from 'react-redux'
+import { CREATE_ASSESSMENT_ACTION, PAIN_ASSESSMENT_DATA_ACTION } from '../../constants/actions';
 
 const { width, height } = Dimensions.get("window");
 
 
-const NRSScore = ({ gotoNext, gotoPrevious, verbalAbility }) => {
+const NRSScore = ({ 
+    gotoNext,
+     gotoPrevious, 
+     verbalAbility ,
+    }) => {
 
     const [currentPain, setCurrentPain] = useState(0);
     const [mostPain, setMostPain] = useState(0);
     const [leastPain, setLeastPain] = useState(0);
     const [nonVerbalPainScore, setNonVerbalPainScore] = useState(0);
+    const [ nrsScore , setNrsScore] = useState(null)
+    const dispatch =useDispatch()
+  const selectedAssessmentData = useSelector((state) => state.createAsseement);
+
+
+  useEffect(()=>{
+      if(selectedAssessmentData?.current_pain)
+      {
+          setCurrentPain(selectedAssessmentData?.current_pain)
+      }
+      if(selectedAssessmentData?.most_pain){
+          setMostPain(selectedAssessmentData?.most_pain)
+      }
+      if(selectedAssessmentData?.least_pain){
+          setLeastPain(selectedAssessmentData?.least_pain)
+      }
+  },[
+      selectedAssessmentData?.current_pain,
+      selectedAssessmentData?.most_pain,
+      selectedAssessmentData?.least_pain
+  ])
 
     const handlePrevious = () => {
         gotoPrevious();
@@ -32,7 +59,31 @@ const NRSScore = ({ gotoNext, gotoPrevious, verbalAbility }) => {
 
     const handleContinue = () => {
         gotoNext();
+        if(selectedAssessmentData.type !==VERBAL_ABILITY.NON_VERBAL.value)
+        {
+        dispatch({
+            type:CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
+            payload:{
+                current_pain:currentPain,
+                most_pain:mostPain,
+                least_pain:leastPain
+            }
+        })
     }
+    else{
+
+        dispatch({
+            type:CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
+            payload:{
+                current_pain:nonVerbalPainScore,
+                most_pain:0,
+                least_pain:0
+            }
+        })
+    }
+       
+    }
+
 
     return (
         <>
@@ -50,7 +101,9 @@ const NRSScore = ({ gotoNext, gotoPrevious, verbalAbility }) => {
                     </View>
 
                     {[0, 2, 4, 6, 8, 10].map((score, index) => (
-                        <CustomTouchableOpacity onPress={() => setNonVerbalPainScore(score)}>
+                        <CustomTouchableOpacity onPress={() => {
+                            setNonVerbalPainScore(score)
+                            }}>
                             <View style={{ width: width - 60, paddingHorizontal: 12, paddingVertical: 8, flexDirection: 'row', alignItems: "center", backgroundColor: (score === nonVerbalPainScore? COLORS.GRAY_10 : "transparent"), borderWidth: (score === nonVerbalPainScore? 1 : 0), borderColor: COLORS.PRIMARY_DARKER, borderRadius: 5 }}>
                                 <Image style={{ width: 45, height: 45, marginRight: 16 }} source={getPainScoreImage(score)} />
                                 <Text style={{ fontSize: 24, lineHeight: 29, color: COLORS.GRAY_90, marginRight: 12 }}>{score}</Text>
@@ -68,7 +121,17 @@ const NRSScore = ({ gotoNext, gotoPrevious, verbalAbility }) => {
                                 <AntDesignIcon name={"questioncircle"} size={15} color={COLORS.PRIMARY_MAIN} />
                             </CustomTouchableOpacity>
                         </View>
-                        <ScoreSlider sliderWidth={width - 90} value={currentPain} onValueChange={value => setCurrentPain(value)} />
+                        <ScoreSlider 
+                        sliderWidth={width - 90} 
+                        value={currentPain} 
+                        onValueChange={(value) =>{
+                                setCurrentPain(value) 
+                                setNrsScore({
+                                    ...nrsScore,
+                                    current_pain:currentPain
+                                })           
+                            } 
+                                }/>
                     </View>
 
                     <View style={{ width: width, borderTopWidth: 1, borderBottomWidth: 1, borderColor: COLORS.PRIMARY_MAIN, backgroundColor: COLORS.WHITE, paddingHorizontal: 30, paddingVertical: 20, marginBottom: 12 }}>
@@ -78,7 +141,16 @@ const NRSScore = ({ gotoNext, gotoPrevious, verbalAbility }) => {
                                 <AntDesignIcon name={"questioncircle"} size={15} color={COLORS.PRIMARY_MAIN} />
                             </CustomTouchableOpacity>
                         </View>
-                        <ScoreSlider sliderWidth={width - 90} value={leastPain} onValueChange={value => setLeastPain(value)} />
+                        <ScoreSlider 
+                        sliderWidth={width - 90} 
+                        value={leastPain} 
+                        onValueChange={(value) => {
+                            setLeastPain(value)
+                            setNrsScore({
+                                ...nrsScore,
+                                least_pain:leastPain
+                            })
+                            }} />
                     </View>
 
                     <View style={{ width: width, borderTopWidth: 1, borderBottomWidth: 1, borderColor: COLORS.PRIMARY_MAIN, backgroundColor: COLORS.WHITE, paddingHorizontal: 30, paddingVertical: 20, marginBottom: 12 }}>
@@ -88,7 +160,16 @@ const NRSScore = ({ gotoNext, gotoPrevious, verbalAbility }) => {
                                 <AntDesignIcon name={"questioncircle"} size={15} color={COLORS.PRIMARY_MAIN} />
                             </CustomTouchableOpacity>
                         </View>
-                        <ScoreSlider sliderWidth={width - 90} value={mostPain} onValueChange={value => setMostPain(value)} />
+                        <ScoreSlider 
+                        sliderWidth={width - 90} 
+                        value={mostPain} 
+                        onValueChange={(value)=> {
+                            setMostPain(value)
+                            setNrsScore({
+                                ...nrsScore,
+                                most_pain:mostPain
+                            })
+                            }} />
                     </View>
                 </>}
             </ScrollView>

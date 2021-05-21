@@ -12,5 +12,6 @@ export const SCREEN_NAMES = {
     SETTINGS: 'Settings',
     ASSIGN_PATIENT:'Assign Patient',
     PAINASSESSMENT: 'Pain Assessment',
-    PATIENT_DEATAIL_MODAL: 'Patient Detail Modal'
+    PATIENT_DEATAIL_MODAL: 'Patient Detail Modal',
+    RESULT : 'Result'
 }

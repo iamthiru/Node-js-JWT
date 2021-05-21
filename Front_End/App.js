@@ -34,6 +34,7 @@ import PatientList from './src/screens/PatientList';
 import AssignPatient from './src/screens/AssignPatient';
 import PainAssessment from './src/screens/PainAssessment';
 import PatientDetailModal from './src/components/PatientDetailsModal';
+import Result from './src/screens/PainAssessmentScreen/Result';
 
 const Stack = createStackNavigator();
 
@@ -60,6 +61,7 @@ const reducer = (prevState, action) => {
         isSignout: false,
         authToken: action.token,
         userId: action.userId,
+        // userName:action.userName,
         showOnboarding: false,
       };
     case AUTH_ACTIONS.SIGN_OUT:
@@ -113,16 +115,25 @@ function App() {
             asyncStorage
               .getItem(STORAGE_KEYS.USER_ID)
               .then((res) => {
-                let userId = res;
-                dispatch({
+                 if(res){
+                   let userId = res
+                   asyncStorage.getItem(STORAGE_KEYS.USER_NAME)
+                   .then((data)=>{
+                     userName = data
+                dispatch({ 
                   type: AUTH_ACTIONS.RESTORE_TOKEN,
                   token: token,
                   userId: userId,
+                  userName : userName
                 });
                 store.dispatch(
-                  updateAuthData({authToken: token, userId: userId}),
+                  updateAuthData({authToken: token, userId: userId,userName:userName}),
                 );
+                   
               })
+              .catch({})
+            }
+          })
               .catch((err) => {
                 dispatch({type: AUTH_ACTIONS.SKIP_ONBOARDING});
               });
@@ -147,6 +158,8 @@ function App() {
             asyncStorage
               .setItem(STORAGE_KEYS.USER_ID, data.userId)
               .then((res) => {
+                asyncStorage.setItem(STORAGE_KEYS.USER_NAME,data.userName)
+                .then((res)=>{
                 asyncStorage
                   .setItem(STORAGE_KEYS.HAS_LOGGED_IN_BEFORE, 'true')
                   .then((res) => {
@@ -154,10 +167,13 @@ function App() {
                       type: AUTH_ACTIONS.SIGN_IN,
                       token: data.authToken,
                       userId: data.userId,
+                      userName:data.userName
                     });
                   })
                   .catch((err) => {});
               })
+              .catch((err)=>{})
+            })
               .catch((err) => {});
           })
           .catch((err) => {});
@@ -260,12 +276,17 @@ function App() {
                     component={PatientList}
                     options={{headerShown: false}}
                   />
-
+                    <Stack.Screen
+                    name={SCREEN_NAMES.RESULT}
+                    component={Result}
+                    options={{headerShown: true}}
+                  />
                   <Stack.Screen
                     name={SCREEN_NAMES.PATIENT_PROFILE}
                     component={PatientProfile}
                     options={{headerShown: false}}
                   />
+                 
                   <Stack.Screen
                     name={SCREEN_NAMES.PUPILLARY_DILATION}
                     component={PupillaryDilationScreen}

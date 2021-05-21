@@ -6,8 +6,15 @@ import {useSelector} from 'react-redux';
 import {titles} from '../../constants/AssignPatientConstants';
 import assignPatientStyles from '../../screens/AssignPatient/styles';
 
-const AllPatientList = ({sortBy,painAssessment, searchString, moveUp,setShowPatient, setPatientData }) => {
-  const allPatients = useSelector((state) => state?.patient?.all);
+const AllPatientList = ({
+  sortBy,
+  painAssessment,
+  searchString,
+  moveUp,
+  setShowPatient,
+  setPatientData,
+}) => {
+  const recentPatients = useSelector((state) => state?.allPatients?.all_patients);
 
   const [sectionListData, setSectionList] = useState([]);
   const {width, height} = useWindowDimensions();
@@ -15,12 +22,12 @@ const AllPatientList = ({sortBy,painAssessment, searchString, moveUp,setShowPati
 
   useEffect(() => {
     const sortedList = [];
-    const filteredAllPatient = allPatients.filter((patient) =>
-      JSON.stringify(patient).includes(searchString),
+    const filteredAllPatient = recentPatients.filter((patient) =>
+      JSON.stringify(patient).includes(searchString.toUpperCase()),
     );
     titles.forEach((section) => {
       const filteredData = filteredAllPatient.filter(
-        (patient) => patient[sortBy]?.[0].toUpperCase() === section,
+        (patient) => patient[sortBy]?.[0]?.toUpperCase() === section,
       );
       if (filteredData?.length) {
         sortedList.push({
@@ -30,7 +37,7 @@ const AllPatientList = ({sortBy,painAssessment, searchString, moveUp,setShowPati
       }
     });
     setSectionList(sortedList);
-  }, [sortBy, allPatients, searchString]);
+  }, [sortBy, recentPatients, searchString]);
 
   return (
     <View
@@ -46,11 +53,14 @@ const AllPatientList = ({sortBy,painAssessment, searchString, moveUp,setShowPati
         showsVerticalScrollIndicator={false}
         sections={sectionListData}
         keyExtractor={(item, index) => item + index}
-        renderItem={(props) => <Section props={props} 
-        setShowPatient = {setShowPatient}
-        setPatientData = {setPatientData}
-        painAssessment = {painAssessment}
-        />}
+        renderItem={(props) => (
+          <Section
+            props={props}
+            setShowPatient={setShowPatient}
+            setPatientData={setPatientData}
+            painAssessment={painAssessment}
+          />
+        )}
         renderSectionHeader={({section: {title}}) => (
           <View style={styles.titleText}>
             <Text style={styles.title}>{title}</Text>

@@ -12,8 +12,15 @@ import {
   OTHER_DATA,
 } from '../../constants/settingsConstants';
 import styles from './styles';
+import AuthContext from '../../components/shared/AuthContext';
 
 const Settings = ({navigation}) => {
+  const { signOut } = React.useContext(AuthContext);
+
+  const handleLogout = () => {
+    signOut()
+  }
+
   return (
     <SafeAreaView style={styles.safeAreaView}>
       <View style={styles.mainView}>
@@ -29,7 +36,7 @@ const Settings = ({navigation}) => {
         </ScrollView>
         <View style={styles.btnView}>
           <CustomButton
-            onPress={() => {}}
+            onPress={() => handleLogout()}
             title="Logout"
             type="tertiary"
             textStyle={styles.textStyle}

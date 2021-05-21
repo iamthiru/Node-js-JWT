@@ -1,6 +1,6 @@
 export const VERBAL_ABILITY = {
     VERBAL: { value: "verbal", label: "Verbal" },
-    NON_VERBAL: { value: "nonVerbal", label: "Non verbal" },
+    NON_VERBAL: { value: "nonVerbal", label: "Non Verbal" },
     OTHER: { value: "other", label: "Other" }
 }
 
