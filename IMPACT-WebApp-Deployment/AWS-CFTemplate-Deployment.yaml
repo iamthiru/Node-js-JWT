@@ -345,13 +345,13 @@ Resources:
         SecurityGroupIds:
           - !GetAtt WebServerSecurityGroup.GroupId
         BlockDeviceMappings:
-          - DeviceName: /dev/sdm
+          - DeviceName: /dev/sda1
             Ebs:
               VolumeType: io1
               Encrypted: false
-              Iops: 200
+              Iops: 3200
               DeleteOnTermination: true
-              VolumeSize: 20
+              VolumeSize: 64
         Monitoring:
           Enabled: true
         UserData: !Base64 |
