@@ -103,7 +103,7 @@ Parameters:
   MyBucketName:
     Type: String
     Description: AWS Bucket Name
-    Default: impact-benten-test
+    Default: impact-benten
 
   # ------------ ACCOUNT & BILLING ------------
   MyBillingThreshold:
