@@ -532,11 +532,12 @@ const NewPatientPopUp = ({open, onClose, patientData, updateApiIntegrate}) => {
           style={{
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: 'white',
+            backgroundColor: 'black',
             borderRadius: 10,
             padding: 10,
           }}>
           <DateTimePicker
+            themeVariant="dark"
             style={{width: '100%'}}
             value={selectedDate || new Date()}
             mode={'date'}

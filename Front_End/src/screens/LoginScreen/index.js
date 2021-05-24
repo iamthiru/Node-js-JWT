@@ -19,6 +19,7 @@ import { COLORS } from '../../constants/colors';
 import { SCREEN_NAMES } from '../../constants/navigation';
 import styles from './styles';
 import { loginAPI } from '../../api/auth';
+import { APP_VERSION } from '../../constants';
 
 const { width, height } = Dimensions.get("window");
 
@@ -66,7 +67,8 @@ const LoginScreen = ({ navigation }) => {
             <ScrollView style={styles.scrollView}>
                 <View style={{ height: height, width: width, alignItems: "center", justifyContent: "center" }}>
                     <Text style={{ fontSize: 48, lineHeight: 58, fontWeight: "700", textAlign: "center", color: COLORS.PRIMARY_MAIN, paddingBottom: 16 }}>IMPACT</Text>
-                    <Text style={{ fontSize: 24, lineHeight: 29, textAlign: "center", color: COLORS.PRIMARY_DARKER, paddingBottom: 50 }}>Login</Text>
+                    <Text style={{ fontSize: 24, lineHeight: 29, textAlign: "center", color: COLORS.PRIMARY_DARKER }}>Login</Text>
+                    <Text style={{ fontSize: 12, textAlign: "center", color: COLORS.PRIMARY_DARKER, paddingBottom: 50 }}>{APP_VERSION}</Text>
 
                     <CustomTextInput placeholder="Enter Your Work Email" value={email} onChangeText={value => setEmail(value)} inputStyle={{ width: width - 60 }} />
                     <CustomTextInput placeholder="Password" value={password} secureTextEntry={true} onChangeText={value => setPassword(value)} containerStyle={{ paddingBottom: 0 }} inputStyle={{ width: width - 60 }} />

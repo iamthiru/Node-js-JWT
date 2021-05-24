@@ -548,6 +548,16 @@ const PupillaryDilationScreen = ({navigation}) => {
     }
   };
 
+  const handleOnNextPress = () => {
+    dispatch({
+      type: CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
+      payload: {
+        pupillary_dilation: Number(resultValue)
+      }
+    })
+    navigation.navigate(SCREEN_NAMES.FACIAL_EXPRESSION)
+  }
+
   const getCameraComponent = () => {
     return (
       <>
@@ -941,25 +951,6 @@ const PupillaryDilationScreen = ({navigation}) => {
                   4. Record the eye for at least 10 seconds.
                 </Text>
               </View>
-              <CustomTouchableOpacity 
-              onPress ={()=>{
-                navigation.navigate(SCREEN_NAMES.FACIAL_EXPRESSION)
-                dispatch({
-                  type:CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
-                  payload:{
-                    pupillary_dilation:1.5460
-                  }
-                })
-              }}
-              style ={{
-                borderWidth:1
-              }}>
-                <Text style ={{
-                  fontSize:25,
-                  color:'red',
-                  textAlign:'center'
-                }}>go to </Text>
-              </CustomTouchableOpacity>
             </View>
 
             <View
@@ -1654,7 +1645,7 @@ const PupillaryDilationScreen = ({navigation}) => {
                   marginBottom: 12,
                 }}
                 onPress={() =>
-                  navigation.navigate(SCREEN_NAMES.FACIAL_EXPRESSION)
+                  handleOnNextPress()
                 }>
                 <Text
                   style={{

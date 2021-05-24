@@ -558,6 +558,10 @@ const FacialExpressionScreen = ({navigation}) => {
     let reminder_date = assessment_data.remainder_date
       ? new Date(assessment_data.remainder_date)
       : new Date();
+    let facial_exp_parsed_value = JSON.parse(resultValue);
+    let facial_exp_result = facial_exp_parsed_value[facial_exp_parsed_value.length - 1];
+    let total_score = Number(assessment_data.pupillary_dilation) + Number(facial_exp_result);
+
     if (assessment_data.isRemainder) {
       createAssessmentAPI(
         {
@@ -572,7 +576,7 @@ const FacialExpressionScreen = ({navigation}) => {
           pain_quality_id: assessment_data.pain_activity_id,
           pain_frequency_id: assessment_data.pain_frequency_id,
           note: assessment_data.notes,
-          total_score: assessment_data.total_scrore,
+          total_score: total_score,
           createdAt: new Date().getTime(),
           createdBy: userId,
           isReminder: assessment_data.isRemainder,
@@ -580,7 +584,7 @@ const FacialExpressionScreen = ({navigation}) => {
           frequency: assessment_data.frequence,
           pain_impact_id: assessment_data.painImpactId,
           pupillary_dilation: assessment_data.pupillary_dilation,
-          facial_expresssion: 0.125,
+          facial_expresssion: Number(facial_exp_result),
         },
         token,
       )
@@ -639,6 +643,11 @@ const FacialExpressionScreen = ({navigation}) => {
     setEnableRecording(false);
     setToastText('');
   };
+
+  const handleOnNextPress = () => {
+    handleCreateAssessmentAPI();
+    navigation.navigate(SCREEN_NAMES.RESULT);
+  }
 
   const getCameraComponent = () => {
     return (
@@ -898,19 +907,6 @@ const FacialExpressionScreen = ({navigation}) => {
               }}>
               3. Get ready to not blink for 10 seconds.
             </Text>
-            <CustomTouchableOpacity
-              onPress={() => {
-                navigation.navigate(SCREEN_NAMES.RESULT);
-                handleCreateAssessmentAPI();
-              }}>
-              <Text
-                style={{
-                  fontSize: 25,
-                  color: 'red',
-                }}>
-                goto Result
-              </Text>
-            </CustomTouchableOpacity>
 
             {/* <View style={{ width: width - 40, height: 30, marginTop: 20, marginBottom: 10, flexDirection: "row", justifyContent: 'center', alignItems: 'center' }}>
                     <Text style={{ fontWeight: "700", color: COLORS.GRAY_90 }}>{"FPS: "}</Text>
@@ -1366,7 +1362,7 @@ const FacialExpressionScreen = ({navigation}) => {
                   paddingHorizontal: 28,
                   marginBottom: 12,
                 }}
-                onPress={() => navigation.navigate(SCREEN_NAMES.HOME_OLD)}>
+                onPress={() => handleOnNextPress()}>
                 <Text
                   style={{
                     fontSize: 14,
