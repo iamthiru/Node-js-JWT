@@ -333,7 +333,7 @@ Resources:
         SecurityGroupIds:
           - !GetAtt WebServerSecurityGroup.GroupId
         BlockDeviceMappings:
-          - DeviceName: /dev/sdm
+          - DeviceName: /dev/sda1
             Ebs:
               VolumeType: io1
               Encrypted: false
