@@ -7,9 +7,7 @@ export const addPatientAPI = (newPatientData, token) => {
         'Access-Control-Allow-Origin': '*',
         'Content-Type': 'application/json',
         Accept: 'application/json',
-        // "x-acces-token": token
-        // authorization: `Bearer ${token}`,
-        authorization:`Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImlhdCI6MTYyMTMzMzIzMiwiZXhwIjoxNjIxOTM4MDMyfQ.Zs1KCjzEKemQmEoyG2aOPyv8pD6D00QwsFROrgIZNVE`
+        authorization: `Bearer ${token}`,
       },
     })
       .then((res) => {
@@ -29,8 +27,7 @@ export const getPatientListAPI = (token) => {
         'Access-Control-Allow-Origin': '*',
         'Content-Type': 'application/json',
         Accept: 'application/json',
-        // authorization: `Bearer ${token}`,
-        authorization:`Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImlhdCI6MTYyMTMzMzIzMiwiZXhwIjoxNjIxOTM4MDMyfQ.Zs1KCjzEKemQmEoyG2aOPyv8pD6D00QwsFROrgIZNVE`
+        authorization: `Bearer ${token}`
 
       }
     })

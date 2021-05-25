@@ -29,9 +29,9 @@ const PainAssessment = ({route}) => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showDatePickerAndroid, setShowDatePickerAndroid] = useState(false);
   const [showTimerAndroid, setTimerAndroid] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(new Date());
   const [patient, setPatient] = useState('');
-  const [time, setTime] = useState(null);
+  const [time, setTime] = useState(new Date());
   const [showTimer, setShowTimer] = useState(false);
   const [AmOrPm, setAmOrPm] = useState('');
   const [formattedTime, setFormattedTime] = useState({

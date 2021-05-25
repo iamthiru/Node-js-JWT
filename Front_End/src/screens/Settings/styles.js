@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
    
   },
  textStyle:{
-    color: COLORS.red,
+    color: "red",
     textAlign: 'center',
     paddingLeft: 25,
   }
