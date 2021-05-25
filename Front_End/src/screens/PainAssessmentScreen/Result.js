@@ -7,6 +7,7 @@ import AntDesignIcon from 'react-native-vector-icons/AntDesign';
 import {COLORS} from '../../constants/colors';
 import {formatAMPM} from '../../utils/date';
 import {useSelector} from 'react-redux';
+import { SCREEN_NAMES } from '../../constants/navigation';
 
 const {width, height} = Dimensions.get('window');
 
@@ -33,13 +34,13 @@ const Result = (props) => {
     if (assessment_data?.assessment_date) {
       setSelectedTime(assessment_data.assessment_date);
     }
-    if (assessment_data?.total_scrore) {
-      setImpactScore(assessment_data?.total_scrore);
+    if (assessment_data?.total_score) {
+      setImpactScore(assessment_data?.total_score);
     }
   }, [
     assessment_data?.patient_name,
     assessment_data?.assessment_date,
-    assessment_data?.total_scrore,
+    assessment_data?.total_score,
   ]);
 
   return (
@@ -231,6 +232,29 @@ const Result = (props) => {
               {impactScore}
             </Text>
           </View>
+          <CustomTouchableOpacity
+            style={{
+              backgroundColor: COLORS.PRIMARY_MAIN,
+              borderRadius: 10,
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: 48,
+              width: width - 80,
+              paddingHorizontal: 28,
+              marginTop: 10,
+              marginBottom: 12,
+            }}
+            onPress={() => props.navigation.navigate(SCREEN_NAMES.HOME)}>
+            <Text
+              style={{
+                fontSize: 14,
+                fontWeight: '700',
+                color: COLORS.WHITE,
+                textAlign: 'center',
+              }}>
+              {'FINISH'}
+            </Text>
+          </CustomTouchableOpacity>
         </View>
       </ScrollView>
 
@@ -241,6 +265,7 @@ const Result = (props) => {
           onBackdropPress={() => hideDateTimePickers()}>
           <View style={{alignItems: 'center', justifyContent: 'center'}}>
             <DateTimePicker
+              disabled={true}
               style={{width: '100%', backgroundColor: 'white'}}
               value={showDatePicker ? selectedDate : selectedTime}
               mode={showDatePicker ? 'date' : 'time'}
@@ -259,6 +284,7 @@ const Result = (props) => {
 
       {Platform.OS === 'android' && (showDatePicker || showTimePicker) && (
         <DateTimePicker
+          disabled={true}
           value={showDatePicker ? selectedDate : selectedTime}
           mode={showDatePicker ? 'date' : 'time'}
           display="default"

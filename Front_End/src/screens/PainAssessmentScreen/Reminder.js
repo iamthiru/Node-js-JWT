@@ -64,7 +64,7 @@ useEffect(()=>{
           assessment_date: new Date(),
           frequence:'1',
           pain_frequency_id:'1',
-          total_scrore:'1'
+          total_score:'1'
         },
       });
     } else {
@@ -78,7 +78,7 @@ useEffect(()=>{
           assessment_date: new Date(),
           frequence:'1',
           pain_frequency_id:'1',
-          total_scrore:'1'
+          total_score:'1'
         },
       });
     }

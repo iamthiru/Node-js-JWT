@@ -39,6 +39,7 @@ import {
 import {initiateFacialExpressionVideoProcessingAPI} from '../../api/painAssessment';
 import {useDispatch, useSelector} from 'react-redux';
 import createAssessmentAPI from '../../api/createAssessment';
+import { CREATE_ASSESSMENT_ACTION } from '../../constants/actions';
 
 const {width, height} = Dimensions.get('window');
 const {VideoCropper} = NativeModules;
@@ -101,6 +102,8 @@ const FacialExpressionScreen = ({navigation}) => {
   const patientData = useSelector((state) => state.patientData.patient);
   const token = useSelector((state) => state.user.authToken);
   const userId = useSelector((state) => state.user.loggedInUserId);
+
+  const dispatch = useDispatch()
 
   // var pressOut;
 
@@ -562,9 +565,16 @@ const FacialExpressionScreen = ({navigation}) => {
     let reminder_date = assessment_data.remainder_date
       ? new Date(assessment_data.remainder_date)
       : new Date();
-    let facial_exp_parsed_value = JSON.parse(resultValue);
+    let facial_exp_parsed_value = JSON.parse(resultValue.replace(/'/g, '"'));
     let facial_exp_result = facial_exp_parsed_value[facial_exp_parsed_value.length - 1];
     let total_score = Number(assessment_data.pupillary_dilation) + Number(facial_exp_result);
+
+    dispatch({
+      type: CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
+      payload: {
+        total_score: total_score
+      },
+    });
 
     if (assessment_data.isRemainder) {
       createAssessmentAPI(
