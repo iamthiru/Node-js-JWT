@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
-import {Dimensions, View, Image} from 'react-native';
+import {Dimensions, View, Text,Image, Platform,} from 'react-native';
+import { TouchableOpacity} from 'react-native-gesture-handler'
 import ReactNativeModal from 'react-native-modal';
 import {COLORS} from '../../constants/colors';
 import humanBodyFront from '../../assets/images/Front.png';
@@ -14,6 +15,7 @@ import Locations from './Locations';
 import painLocationStyles from './styles';
 import {useDispatch,useSelector} from 'react-redux'
 import { CREATE_ASSESSMENT_ACTION } from '../../constants/actions';
+import CustomTouchableOpacity from '../shared/CustomTouchableOpacity';
 
 const {width, height} = Dimensions.get('window');
 
@@ -21,7 +23,6 @@ const PainLocationModal = ({
   open,
   showFrontButton,
   setShowFrontButton,
-  painLocation,
   setPainLocation,
   showFrontImage,
   setShowFrontImage,
@@ -207,13 +208,23 @@ const PainLocationModal = ({
               style={styles.frontButtonStyle}
             />
           )}
+          
+
+         
           <AntDesignIcon
             name={'close'}
             onPress={() => {
               onClose();
+
             }}
-            style={styles.closeIcon}
-          />
+            style={[styles.closeIcon,{
+              paddingRight:Boolean(Platform.OS==='ios')?0:10
+
+            }]}
+            />
+          
+              
+           
         </View>
         <View
           onStartShouldSetResponder={(evt) => {

@@ -14,6 +14,7 @@ const LatestEntryCard = ({
 
   const all_assessment_data = last_assessment?.assessment;
   const all_medication_data = last_assessment?.medication;
+
   const lookup_data = useSelector((state) => state.lookupData.lookup_data);
   const date = all_assessment_data?.assessment_datetime;
   const dateFormat = new Date(date);
@@ -29,6 +30,7 @@ const LatestEntryCard = ({
     })
     
   },[lookup_data,all_medication_data])
+  console.log('-----medication---label---',medicationList)
 
   const dosage= useMemo(()=>{
     if(lookup_data){
@@ -119,7 +121,7 @@ const LatestEntryCard = ({
             <Text style={styles.latestSubDataText}>Usage:</Text>
             <View>
               <Text style={styles.latest_subTextData}>
-                {(all_assessment_data?.frequency === 0 &&
+                {(all_assessment_data?.frequency===0 &&
                   'every ' + all_assessment_data?.frequency + ' hours') ||
                   '-'}
               </Text>
@@ -127,7 +129,7 @@ const LatestEntryCard = ({
                 {Boolean(date)
                   ? 'Starting ' +
                     dateFormat.toDateString() +
-                    '' +
+                    ' ' +
                     formatAMPM(dateFormat)
                   : '-'}
               </Text>

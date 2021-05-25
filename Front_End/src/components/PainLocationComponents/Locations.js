@@ -2,8 +2,9 @@ import React, {useEffect, useState} from 'react';
 import {View, Text, Platform} from 'react-native';
 import CustomTouchableOpacity from '../shared/CustomTouchableOpacity';
 import {COLORS} from '../../constants/colors';
-import {TouchableOpacity} from 'react-native-gesture-handler';
-import painLocationStyles from './styles';
+// import {TouchableOpacity} from 'react-native-gesture-handler';
+import {TouchableOpacity} from 'react-native'
+
 
 const Locations = ({
   body,
@@ -37,13 +38,13 @@ const Locations = ({
               ? COLORS.SECONDARY_MAIN
               : COLORS.WHITE,
           }}>
-          {Boolean(Platform.OS === 'ios') ? (
+          {Boolean(Platform.OS !== 'ios') ? (
             <CustomTouchableOpacity
               onPress={() => {
                 setPositionValue(body.value);
-                setTimeout(() => {
+              
                   onClose();
-                }, 300);
+
               }}>
               <Text
                 style={{
@@ -56,9 +57,9 @@ const Locations = ({
             <TouchableOpacity
               onPress={() => {
                 setPositionValue(body.value);
-                setTimeout(() => {
+               
                   onClose();
-                }, 300);
+          
               }}>
               <Text
                 style={{
@@ -102,9 +103,9 @@ const Locations = ({
             <TouchableOpacity
               onPress={() => {
                 setPositionValue(body.value);
-                setTimeout(() => {
+              
                   onClose();
-                }, 300);
+               
               }}>
               <Text
                 style={{

@@ -43,24 +43,24 @@ const NewPatientPopUp = ({open, onClose, patientData, updateApiIntegrate}) => {
   const token = useSelector((state) => state.user.authToken);
 
   useEffect(() => {
-    if (patientData?.first_name) {
-      setFirstName(patientData?.first_name);
-    }
-    if (patientData?.last_name) {
-      setLastName(patientData?.last_name);
-    }
-    if (patientData?.dob) {
-      setSelectedDate(new Date(patientData.dob));
-    }
-    if (patientData?.medical_record_no) {
-      setMedicalRecord(patientData.medical_record_no);
-    }
-    if (patientData?.gender) {
-      setGender(patientData.gender);
-    }
-    if (patientData?.eyeColor) {
-      setEyeColor(patientData?.eyeColor);
-    }
+      if (patientData?.first_name) {
+        setFirstName(patientData?.first_name);
+      }
+      if (patientData?.last_name) {
+        setLastName(patientData?.last_name);
+      }
+      if (patientData?.dob) {
+        setSelectedDate(new Date(patientData.dob));
+      }
+      if (patientData?.medical_record_no) {
+        setMedicalRecord(patientData.medical_record_no);
+      }
+      if (patientData?.gender) {
+        setGender(patientData.gender);
+      }
+      if (patientData?.eyeColor) {
+        setEyeColor(patientData?.eyeColor);
+      }
   }, [patientData]);
 
   const validate = useCallback(() => {
@@ -97,6 +97,13 @@ const NewPatientPopUp = ({open, onClose, patientData, updateApiIntegrate}) => {
                 return;
               }
               console.log('result', res);
+              setFirstName('');
+          setLastName('');
+          setGender(null);
+          setEyeColor(null);
+          setMedicalRecord('')
+          setSelectedDate(null);
+          getPatientListAPI(token)
               dispatch({
                 type: ALL_PATIENTS_ACTIONS.ALL_PATIENTS,
                 payload: res.data.result,
@@ -127,6 +134,12 @@ const NewPatientPopUp = ({open, onClose, patientData, updateApiIntegrate}) => {
       )
         .then((res) => {
           console.log('-------new Patient Added sucessfully------', res);
+          setFirstName('');
+          setLastName('');
+          setGender(null);
+          setEyeColor(null);
+          setMedicalRecord('');
+          setSelectedDate(null);
           if (res.data.isError) {
             Alert.alert('Invalid data patient data');
             return;
@@ -189,7 +202,11 @@ const NewPatientPopUp = ({open, onClose, patientData, updateApiIntegrate}) => {
               if (onClose) {
                 onClose();
               }
+              setFirstName('');
+              setLastName('');
               setGender(null);
+              setEyeColor(null);
+              setMedicalRecord('');
               setSelectedDate(null);
             }}
             style={{

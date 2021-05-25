@@ -104,7 +104,6 @@ const PainQuality = ({gotoNext, gotoPrevious}) => {
                 label={item.label}
                 value={selectedPainQualities.includes(item.label)}
                 onValueChange={(label) => {
-                  console.log('------', item);
                   if (label) {
                     setSelectedPainQualities([
                       ...selectedPainQualities,
@@ -122,7 +121,6 @@ const PainQuality = ({gotoNext, gotoPrevious}) => {
                     let qualities = [...selectedPainQualities];
                     qualities.splice(qualities.indexOf(item.label), 1);
                     setSelectedPainQualities(qualities);
-                    console.log('------', item);
 
                     dispatch({
                       type: CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,

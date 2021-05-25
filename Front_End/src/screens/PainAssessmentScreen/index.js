@@ -36,11 +36,7 @@ const PainAssessmentScreen = ({navigation}) => {
   const [verbalAbility, setVerbalAbility] = useState(
     VERBAL_ABILITY.VERBAL.value,
   );
-  useEffect(() => {
-    if (selectedAssessmentData) {
-      console.log('----seeeee--', selectedAssessmentData);
-    }
-  }, [selectedAssessmentData]);
+  
 
   const dispatch = useDispatch();
 

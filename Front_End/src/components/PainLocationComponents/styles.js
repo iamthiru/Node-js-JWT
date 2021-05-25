@@ -51,6 +51,7 @@ const painLocationStyles = () => {
     },
     closeIcon: {
       fontSize: 25,
+      right:10
     },
     imageStyle: {
       width: width * 0.9,
