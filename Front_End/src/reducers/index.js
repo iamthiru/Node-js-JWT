@@ -5,7 +5,7 @@ import painAssessmentData  from './painAssessMentData'
 import allPatients from './allPatients'
 import lookupData from './lookupData'
 import lookupType from './lookupType'
-import patientName from './patientName'
+import patientData from './patientData'
 import createAsseement from './createAssessmentData'
 import craeteMedication from './createMedication'
 import getLastAssesmentAndMedication from './getLastMedicationAssessment'
@@ -19,7 +19,7 @@ const rootReducer = combineReducers({
     allPatients,
     lookupData,
     lookupType,
-    patientName,
+    patientData,
     createAsseement,
     craeteMedication,
     getLastAssesmentAndMedication,

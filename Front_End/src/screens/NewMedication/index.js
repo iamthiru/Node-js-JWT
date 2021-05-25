@@ -38,7 +38,7 @@ const NewMedication = () => {
 
   const dispatch = useDispatch();
   const lookup_data = useSelector((state) => state.lookupData.lookup_data);
-  const patientData = useSelector((state) => state.patientName.patient);
+  const patientData = useSelector((state) => state.patientData.patient);
   const token = useSelector((state) => state.user.authToken);
   const userId = useSelector((state) => state.user.loggedInUserId);
 

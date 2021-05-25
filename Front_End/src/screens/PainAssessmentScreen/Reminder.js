@@ -27,7 +27,7 @@ const Reminder = ({gotoNext, gotoPrevious}) => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
 
-  const patientData = useSelector((state) => state.patientName.patient);
+  const patientData = useSelector((state) => state.patientData.patient);
   const selectedAssessmentData = useSelector((state) => state.createAsseement);
   
 

@@ -24,7 +24,7 @@ import { APP_VERSION } from '../../constants';
 const { width, height } = Dimensions.get("window");
 
 
-const LoginScreen = ({ navigation }) => {
+const LoginScreen = ({ navigation, updateAuthData }) => {
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -42,11 +42,11 @@ const LoginScreen = ({ navigation }) => {
                 setIsLoggingIn(false);
                 return;
             }
-            updateAuthData({ 
-                authToken: res.data.result.token,
+             updateAuthData({
+                 authToken: res.data.result.token,
                  userId: res.data.result.id,
-                 userName:res.data.result.first_name
-                 })
+                 userName: res.data.result.first_name
+             })
             signIn({ authToken: res.data.result.token, userId: res.data.result.id,userName:res.data.result.first_name });
             setIsLoggingIn(false);
         }).catch(err => {

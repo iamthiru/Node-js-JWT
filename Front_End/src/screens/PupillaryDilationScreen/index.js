@@ -120,7 +120,9 @@ const PupillaryDilationScreen = ({navigation}) => {
     autoExposure: true,
   });
   
-  const dispatch =useDispatch()
+  const patientData = useSelector((state) => state.patientData.patient);
+
+  const dispatch = useDispatch()
   // const [showFocusDepthSliderModal , setShowFocusDepthSliderModal ] = useState(false)
 
   // var pressOut;
@@ -389,7 +391,10 @@ const PupillaryDilationScreen = ({navigation}) => {
         signatureVersion: 'v4',
       });
 
-      const filename = `VID_${Date.now().toString()}.mp4`;
+      let filename = `VID_${Date.now().toString()}.mp4`;
+      if(patientData && patientData.patient_id) {
+        filename = `${(patientData.patient_id + "_" + patientData.patient_name).replace(/ /g, "_")}_${Date.now().toString()}.mp4`;
+      }
       let contentType = 'video/mp4';
       let contentDeposition = 'inline;filename="' + filename + '"';
       const base64 = await fs.readFile(videoURL, 'base64');

@@ -16,7 +16,7 @@ import {
 const {width, height} = Dimensions.get('window');
 
 const VerbalAbility = ({gotoNext, verbalAbility, setVerbalAbility}) => {
-  const patientData = useSelector((state) => state.patientName.patient);
+  const patientData = useSelector((state) => state.patientData.patient);
   const selectedAssessmentData = useSelector((state) => state.createAsseement);
   useEffect(() => {
     if (selectedAssessmentData && selectedAssessmentData?.type) {

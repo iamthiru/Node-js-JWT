@@ -115,27 +115,27 @@ function App() {
             asyncStorage
               .getItem(STORAGE_KEYS.USER_ID)
               .then((res) => {
-                 if(res){
-                   let userId = res
-                   asyncStorage.getItem(STORAGE_KEYS.USER_NAME)
-                   .then((data)=>{
-                     userName = data
-                dispatch({ 
-                  type: AUTH_ACTIONS.RESTORE_TOKEN,
-                  token: token,
-                  userId: userId,
-                  userName : userName
-                });
-                store.dispatch(
-                  updateAuthData({authToken: token, userId: userId,userName:userName}),
-                );
-                   
+                if (res) {
+                  let userId = res
+                  asyncStorage.getItem(STORAGE_KEYS.USER_NAME)
+                    .then((data) => {
+                      userName = data
+                      dispatch({
+                        type: AUTH_ACTIONS.RESTORE_TOKEN,
+                        token: token,
+                        userId: userId,
+                        userName: userName
+                      });
+                      store.dispatch(
+                        updateAuthData({ authToken: token, userId: userId, userName: userName }),
+                      );
+
+                    })
+                    .catch({})
+                }
               })
-              .catch({})
-            }
-          })
               .catch((err) => {
-                dispatch({type: AUTH_ACTIONS.SKIP_ONBOARDING});
+                dispatch({ type: AUTH_ACTIONS.SKIP_ONBOARDING });
               });
           } else {
             dispatch({type: AUTH_ACTIONS.SKIP_ONBOARDING});

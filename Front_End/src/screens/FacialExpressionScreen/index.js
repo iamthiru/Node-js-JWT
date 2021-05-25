@@ -98,6 +98,7 @@ const FacialExpressionScreen = ({navigation}) => {
   });
 
   const assessment_data = useSelector((state) => state.createAsseement);
+  const patientData = useSelector((state) => state.patientData.patient);
   const token = useSelector((state) => state.user.authToken);
   const userId = useSelector((state) => state.user.loggedInUserId);
 
@@ -450,7 +451,10 @@ const FacialExpressionScreen = ({navigation}) => {
         signatureVersion: 'v4',
       });
 
-      const filename = `VID_${Date.now().toString()}.mp4`;
+      let filename = `VID_${Date.now().toString()}.mp4`;
+      if(patientData && patientData.patient_id) {
+        filename = `${(patientData.patient_id + "_" + patientData.patient_name).replace(/ /g, "_")}_${Date.now().toString()}.mp4`;
+      }
       let contentType = 'video/mp4';
       let contentDeposition = 'inline;filename="' + filename + '"';
       const base64 = await fs.readFile(videoURL, 'base64');
@@ -565,7 +569,7 @@ const FacialExpressionScreen = ({navigation}) => {
     if (assessment_data.isRemainder) {
       createAssessmentAPI(
         {
-          patient_id: assessment_data.patient_id,
+          patient_id: (patientData && patientData.patient_id) || 0,
           assessment_datetime: date.getTime(),
           type: assessment_data.type,
           current_pain_score: assessment_data.current_pain,
@@ -601,7 +605,7 @@ const FacialExpressionScreen = ({navigation}) => {
     } else {
       createAssessmentAPI(
         {
-          patient_id: assessment_data.patient_id,
+          patient_id: (patientData && patientData.patient_id) || 0, 
           assessment_datetime: date.getTime(),
           type: assessment_data.type,
           current_pain_score: assessment_data.current_pain,
@@ -612,13 +616,13 @@ const FacialExpressionScreen = ({navigation}) => {
           pain_quality_id: assessment_data.pain_activity_id,
           pain_frequency_id: assessment_data.pain_frequency_id,
           note: assessment_data.notes,
-          total_score: assessment_data.total_scrore,
+          total_score: total_score,
           createdAt: new Date().getTime(),
           createdBy: userId,
           isReminder: assessment_data.isRemainder,
           pain_impact_id: assessment_data.painImpactId,
           pupillary_dilation: assessment_data.pupillary_dilation,
-          facial_expresssion: 0.125,
+          facial_expresssion: Number(facial_exp_result),
         },
         token,
       )
