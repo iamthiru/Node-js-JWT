@@ -41,6 +41,7 @@ const NewPatientPopUp = ({open, onClose, patientData, updateApiIntegrate}) => {
   const [errorState, setErrorState] = useState([]);
   const userId = useSelector((state) => state.user.loggedInUserId);
   const token = useSelector((state) => state.user.authToken);
+  const patientType = updateApiIntegrate ? 'Edi Patient' : 'New Patient'
 
   useEffect(() => {
       if (patientData?.first_name) {
@@ -233,17 +234,18 @@ const NewPatientPopUp = ({open, onClose, patientData, updateApiIntegrate}) => {
                 fontWeight: '400',
               },
             ]}>
-            New Patient
+            {patientType}
           </Text>
-          <CustomTouchableOpacity
+          <View
             style={{
               borderBottomColor: COLORS.PRIMARY_MAIN,
               borderBottomWidth: 1,
               alignItems: 'center',
             }}
-            disabled={validate()}
-            onPress={handleSubmit}>
-            <Text
+            // disabled={validate()}
+            // onPress={handleSubmit}
+            >
+            {/* <Text
               style={[
                 styles.h3Label,
                 {
@@ -253,8 +255,8 @@ const NewPatientPopUp = ({open, onClose, patientData, updateApiIntegrate}) => {
                 },
               ]}>
               Done
-            </Text>
-          </CustomTouchableOpacity>
+            </Text> */}
+          </View>
         </View>
         <View
           style={{

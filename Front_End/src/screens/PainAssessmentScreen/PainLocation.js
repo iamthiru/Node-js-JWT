@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState,useEffect} from 'react';
 import {View, Text, Dimensions, Platform, ScrollView} from 'react-native';
 import AntDesignIcon from 'react-native-vector-icons/AntDesign';
 import {COLORS} from '../../constants/colors';
@@ -7,8 +7,12 @@ import {getStatusBarHeight} from 'react-native-status-bar-height';
 import {useDispatch, useSelector} from 'react-redux';
 import PainLocationModal from '../../components/PainLocationComponents/PainLocationModal';
 import CustomTextInput from '../../components/shared/CustomTextInput';
+import Analytics from '../../utils/Analytics';
+import { SCREEN_NAMES } from '../../constants/navigation';
 
 const {width, height} = Dimensions.get('window');
+var startTime 
+var endTime 
 
 const PainLocation = ({gotoNext, gotoPrevious}) => {
   const [painLocation, setPainLocation] = useState('');
@@ -21,12 +25,32 @@ const PainLocation = ({gotoNext, gotoPrevious}) => {
     (state) => state.painAssessmentData.painLocation,
   );
 
+
+  useEffect(()=>{
+    startTime = new Date().getTime()
+
+  },[])
+
   const handlePrevious = () => {
     gotoPrevious();
+    endTime = new Date().getTime()
+    Analytics.setCurrentScreen(
+        SCREEN_NAMES.PAINASSESSMENT,
+        (endTime-startTime)/1000,
+        startTime,
+        endTime
+    )
   };
 
   const handleContinue = () => {
     gotoNext();
+    endTime = new Date().getTime()
+    Analytics.setCurrentScreen(
+        SCREEN_NAMES.PAINASSESSMENT,
+        (endTime-startTime)/1000,
+        startTime,
+        endTime
+    )
   };
 
   return (

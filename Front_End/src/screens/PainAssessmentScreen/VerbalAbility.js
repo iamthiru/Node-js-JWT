@@ -12,12 +12,25 @@ import {useDispatch, useSelector} from 'react-redux';
 import {
   CREATE_ASSESSMENT_ACTION,
 } from '../../constants/actions';
+import Analytics from '../../utils/Analytics';
+import { SCREEN_NAMES } from '../../constants/navigation';
+
 
 const {width, height} = Dimensions.get('window');
 
 const VerbalAbility = ({gotoNext, verbalAbility, setVerbalAbility}) => {
   const patientData = useSelector((state) => state.patientData.patient);
   const selectedAssessmentData = useSelector((state) => state.createAsseement);
+ 
+
+  var startTime;
+  var endTime ;
+  
+
+  useEffect(()=>{
+    startTime = new Date().getTime()
+  },[])
+
   useEffect(() => {
     if (selectedAssessmentData && selectedAssessmentData?.type) {
       setVerbalAbility(selectedAssessmentData?.type);
@@ -28,7 +41,17 @@ const VerbalAbility = ({gotoNext, verbalAbility, setVerbalAbility}) => {
   const dispatch = useDispatch();
 
   const handleContinue = () => {
+ 
+    endTime = new Date().getTime()
+    Analytics.setCurrentScreen(
+      SCREEN_NAMES.PAINASSESSMENT,
+      (endTime-startTime)/1000,
+      startTime,
+      endTime
+    )
+
     gotoNext();
+    
     if (verbalAbility) {
       dispatch({
         type: CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,

@@ -8,8 +8,12 @@ import {getStatusBarHeight} from 'react-native-status-bar-height';
 import CustomCheckBox from '../../components/shared/CustomCheckBox';
 import {useDispatch, useSelector} from 'react-redux';
 import {CREATE_ASSESSMENT_ACTION} from '../../constants/actions';
+import Analytics from '../../utils/Analytics';
+import {SCREEN_NAMES} from '../../constants/navigation';
 
 const {width, height} = Dimensions.get('window');
+var startTime;
+var endTime;
 
 const PainQuality = ({gotoNext, gotoPrevious}) => {
   const [selectedPainQualities, setSelectedPainQualities] = useState([]);
@@ -24,6 +28,9 @@ const PainQuality = ({gotoNext, gotoPrevious}) => {
     return item.name === 'PainQuality';
   })?.lookup_data;
 
+  useEffect(() => {
+    startTime = new Date().getTime();
+  }, []);
   useEffect(() => {
     if (selectedAssessmentData?.pain_activity_name) {
       setSelectedPainQualities([selectedAssessmentData?.pain_activity_name]);
@@ -40,10 +47,24 @@ const PainQuality = ({gotoNext, gotoPrevious}) => {
 
   const handlePrevious = () => {
     gotoPrevious();
+    endTime = new Date().getTime();
+    Analytics.setCurrentScreen(
+      SCREEN_NAMES.PAINASSESSMENT,
+      (endTime - startTime) / 1000,
+      startTime,
+      endTime,
+    );
   };
 
   const handleContinue = () => {
     gotoNext();
+    endTime = new Date().getTime();
+    Analytics.setCurrentScreen(
+      SCREEN_NAMES.PAINASSESSMENT,
+      (endTime - startTime) / 1000,
+      startTime,
+      endTime,
+    );
   };
 
   return (

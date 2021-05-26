@@ -1,5 +1,5 @@
 import {useNavigation} from '@react-navigation/core';
-import React, {useCallback, useMemo, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {
   Alert,
   Platform,
@@ -20,6 +20,7 @@ import CustomTextInput from '../../components/shared/CustomTextInput';
 import {useSelector, useDispatch} from 'react-redux';
 import createMedicationAPI from '../../api/createMedication';
 import {CREATE_MEDICATION_ACTION} from '../../constants/actions';
+import Analytics from '../../utils/Analytics';
 
 const NewMedication = () => {
   const window = useWindowDimensions();
@@ -36,29 +37,76 @@ const NewMedication = () => {
   const [errosState, setErrorState] = useState([]);
   const [medicationClassData, setMedicationClassData] = useState({});
 
+  useEffect(() => {
+    let startTime = 0;
+    let endTime = 0;
+    const unsubscribeFocus = navigation.addListener('focus', () => {
+      startTime = new Date().getTime();
+    });
+
+    const unsubscribeBlur = navigation.addListener('blur', (e) => {
+      endTime = new Date().getTime();
+      let screenName =
+        e && e.target && e.target.substring(0, e.target.indexOf('-'));
+      Analytics.setCurrentScreen(
+        screenName,
+        (endTime - startTime) / 1000,
+        startTime,
+        endTime,
+      );
+    });
+
+    const unsubscribeBeforeRemove = navigation.addListener(
+      'beforeRemove',
+      (e) => {
+        endTime = new Date().getTime();
+        let screenName =
+          e && e.target && e.target.substring(0, e.target.indexOf('-'));
+        Analytics.setCurrentScreen(
+          screenName,
+          (endTime - startTime) / 1000,
+          startTime,
+          endTime,
+        );
+      },
+    );
+
+    return () => {
+      unsubscribeFocus();
+      unsubscribeBlur();
+      unsubscribeBeforeRemove();
+    };
+  }, [navigation]);
+
   const dispatch = useDispatch();
   const lookup_data = useSelector((state) => state.lookupData.lookup_data);
   const patientData = useSelector((state) => state.patientData.patient);
   const token = useSelector((state) => state.user.authToken);
   const userId = useSelector((state) => state.user.loggedInUserId);
 
-  const medication = useMemo(()=>{
-    return  lookup_data?.find((item)=>{
-      return item?.name === 'MedicationClass'
-    })?.lookup_data || []
-  },[lookup_data])
+  const medication = useMemo(() => {
+    return (
+      lookup_data?.find((item) => {
+        return item?.name === 'MedicationClass';
+      })?.lookup_data || []
+    );
+  }, [lookup_data]);
 
-  const frequency_data = useMemo(()=>{
-    return lookup_data?.find((item)=>{
-      return item?.name ==='Frequency'
-    })?.lookup_data || []
-  },lookup_data)
+  const frequency_data = useMemo(() => {
+    return (
+      lookup_data?.find((item) => {
+        return item?.name === 'Frequency';
+      })?.lookup_data || []
+    );
+  }, lookup_data);
 
-  const dosage = useMemo(()=>{
-    return lookup_data?.find((item)=>{
-      return item?.name === 'Dose'
-    })?.lookup_data|| []
-  },[lookup_data])
+  const dosage = useMemo(() => {
+    return (
+      lookup_data?.find((item) => {
+        return item?.name === 'Dose';
+      })?.lookup_data || []
+    );
+  }, [lookup_data]);
 
   const validate = useCallback(() => {
     if (errosState?.length) {
@@ -196,7 +244,7 @@ const NewMedication = () => {
               }}>
               <Text
                 style={{
-                fontSize: 12,
+                  fontSize: 12,
                   lineHeight: 14,
                   color: COLORS.GRAY_80,
                   fontWeight: '600',
@@ -385,7 +433,7 @@ const NewMedication = () => {
               items={frequency_data}
               value={frequency}
               onChangeValue={(item) => {
-                console.log('--------',item)
+                console.log('--------', item);
                 setFrequency(item.label);
               }}
               containerStyle={{marginBottom: 20, width: window.width * 0.8}}

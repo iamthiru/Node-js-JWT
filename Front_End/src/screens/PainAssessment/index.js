@@ -19,6 +19,7 @@ import {useSelector, useDispatch} from 'react-redux';
 import CustomTextInput from '../../components/shared/CustomTextInput';
 import {SCREEN_NAMES} from '../../constants/navigation';
 import {PATIENT_NAME_ACTION} from '../../constants/actions';
+import Analytics from '../../utils/Analytics';
 
 const PainAssessment = ({route}) => {
   const patientData = useSelector((state) => state.patientData.patient);
@@ -40,6 +41,47 @@ const PainAssessment = ({route}) => {
   });
   const [assementDate, setAssessmentDate] = useState({});
   const selectedAssessmentData = useSelector((state) => state.createAsseement);
+
+  useEffect(() => {
+    let startTime = 0;
+    let endTime = 0;
+    const unsubscribeFocus = navigation.addListener('focus', () => {
+      startTime = new Date().getTime();
+    });
+
+    const unsubscribeBlur = navigation.addListener('blur', (e) => {
+      endTime = new Date().getTime();
+      let screenName =
+        e && e.target && e.target.substring(0, e.target.indexOf('-'));
+      Analytics.setCurrentScreen(
+        screenName,
+        (endTime - startTime) / 1000,
+        startTime,
+        endTime,
+      );
+    });
+
+    const unsubscribeBeforeRemove = navigation.addListener(
+      'beforeRemove',
+      (e) => {
+        endTime = new Date().getTime();
+        let screenName =
+          e && e.target && e.target.substring(0, e.target.indexOf('-'));
+        Analytics.setCurrentScreen(
+          screenName,
+          (endTime - startTime) / 1000,
+          startTime,
+          endTime,
+        );
+      },
+    );
+
+    return () => {
+      unsubscribeFocus();
+      unsubscribeBlur();
+      unsubscribeBeforeRemove();
+    };
+  }, [navigation]);
 
   useEffect(() => {
     if (time) {

@@ -23,6 +23,7 @@ import {
   CREATE_ASSESSMENT_ACTION,
   PAIN_ASSESSMENT_DATA_ACTION,
 } from '../../constants/actions';
+import Analytics from '../../utils/Analytics';
 
 const {width, height} = Dimensions.get('window');
 
@@ -36,8 +37,40 @@ const PainAssessmentScreen = ({navigation}) => {
   const [verbalAbility, setVerbalAbility] = useState(
     VERBAL_ABILITY.VERBAL.value,
   );
-  
 
+useEffect(()=>{
+  let startTime = 0;
+    let endTime = 0;
+    const unsubscribeFocus = navigation.addListener('focus', () => {
+      startTime = new Date().getTime();
+    });
+    const unsubscribeBlur = navigation.addListener('blur', (e) => {
+      endTime = new Date().getTime();
+      let screenName =
+        e && e.target && e.target.substring(0, e.target.indexOf('-'));
+      Analytics.setCurrentScreen(
+        screenName,
+        (endTime - startTime) / 1000,
+        startTime,
+        endTime,
+      );
+    });
+    const unsubscribeBeforeRemove = navigation.addListener(
+      'beforeRemove',
+      (e) => {
+        endTime = new Date().getTime();
+        let screenName =
+          e && e.target && e.target.substring(0, e.target.indexOf('-'));
+        Analytics.setCurrentScreen(
+          screenName,
+          (endTime - startTime) / 1000,
+          startTime,
+          endTime,
+        );
+      },
+    );
+},[navigation])
+  
   const dispatch = useDispatch();
 
   const navigateToScreen = (screenName) => {

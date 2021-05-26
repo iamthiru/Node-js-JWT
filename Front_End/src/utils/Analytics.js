@@ -1,5 +1,5 @@
-/* import analytics, { firebase } from '@react-native-firebase/analytics';
-import * as firebaseAPI from '../Api/firebase';
+ import analytics, { firebase } from '@react-native-firebase/analytics';
+import * as firebaseAPI from '../api/firebase';
 
 class Analytics {
     static init() {
@@ -48,4 +48,4 @@ class Analytics {
     };
 }
 
-export default Analytics; */
+export default Analytics;

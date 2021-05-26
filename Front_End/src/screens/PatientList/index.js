@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {View, Text, SafeAreaView} from 'react-native';
 import Footer from '../../components/Footer';
 import CustomDropDown from '../../components/shared/CustomDropDown';
@@ -8,11 +8,52 @@ import NewPatientPopUp from '../HomeScreen/NewPatientPopUp';
 import AllPatientList from '../../components/SectionListPatient';
 import CustomTouchableOpacity from '../../components/shared/CustomTouchableOpacity';
 import styles from './styles';
+import Analytics from '../../utils/Analytics';
 
 const PatientList = ({navigation}) => {
   const [searchString, setSearchString] = useState('');
   const [sortBy, setSortedBy] = useState('last_name');
   const [openNewPatient, setOpenNewPatient] = useState(false);
+  useEffect(() => {
+    let startTime = 0;
+    let endTime = 0;
+    const unsubscribeFocus = navigation.addListener('focus', () => {
+      startTime = new Date().getTime();
+    });
+
+    const unsubscribeBlur = navigation.addListener('blur', (e) => {
+      endTime = new Date().getTime();
+      let screenName =
+        e && e.target && e.target.substring(0, e.target.indexOf('-'));
+      Analytics.setCurrentScreen(
+        screenName,
+        (endTime - startTime) / 1000,
+        startTime,
+        endTime,
+      );
+    });
+
+    const unsubscribeBeforeRemove = navigation.addListener(
+      'beforeRemove',
+      (e) => {
+        endTime = new Date().getTime();
+        let screenName =
+          e && e.target && e.target.substring(0, e.target.indexOf('-'));
+        Analytics.setCurrentScreen(
+          screenName,
+          (endTime - startTime) / 1000,
+          startTime,
+          endTime,
+        );
+      },
+    );
+
+    return () => {
+      unsubscribeFocus();
+      unsubscribeBlur();
+      unsubscribeBeforeRemove();
+    };
+  }, [navigation]);
 
   return (
     <SafeAreaView
@@ -32,7 +73,7 @@ const PatientList = ({navigation}) => {
         </View>
 
         <CustomTextInput
-          placeholder="Search Name, DOB, medical number"
+          placeholder="Search Name"
           inputStyle={styles.inputStyle}
           value={searchString}
           onChangeText={(text) => setSearchString(text)}
@@ -44,7 +85,7 @@ const PatientList = ({navigation}) => {
             caretdown="caretdown"
             labelText="Sort By :"
             arrow={true}
-            arrowSize = {20}
+            arrowSize={20}
             items={sortByListOptions}
             value={sortBy}
             placeholderStyle={styles.dropDownPlaceHolder}

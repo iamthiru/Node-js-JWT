@@ -12,8 +12,13 @@ import {PAIN_FREQUENCY} from '../../constants/painAssessment';
 import {formatAMPM} from '../../utils/date';
 import {useDispatch, useSelector} from 'react-redux';
 import {CREATE_ASSESSMENT_ACTION} from '../../constants/actions';
+import Analytics from '../../utils/Analytics';
+import {SCREEN_NAMES} from '../../constants/navigation';
 
 const {width, height} = Dimensions.get('window');
+
+var startTime;
+var endTime;
 
 const PainTiming = ({gotoNext, gotoPrevious}) => {
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -27,21 +32,23 @@ const PainTiming = ({gotoNext, gotoPrevious}) => {
     (state) => state.painAssessmentData?.painFrequency_data,
   );
 
-   const selectedAssessmentData = useSelector((state) => state.createAsseement);
-   
-   useEffect(()=>{
-     if(selectedAssessmentData?.description){
-       setPainFrequency(selectedAssessmentData?.description)
-     }
-     if(selectedAssessmentData?.painDate){
-       setSelectedDate(selectedAssessmentData?.painDate)
-     }
-     if(selectedAssessmentData?.painTime){
-       setSelectedTime(selectedAssessmentData?.painTime)
-     }
-   },[selectedAssessmentData?.painDate,selectedAssessmentData?.painTime,selectedAssessmentData?.description])
+  const selectedAssessmentData = useSelector((state) => state.createAsseement);
 
-  
+  useEffect(() => {
+    if (selectedAssessmentData?.description) {
+      setPainFrequency(selectedAssessmentData?.description);
+    }
+    if (selectedAssessmentData?.painDate) {
+      setSelectedDate(selectedAssessmentData?.painDate);
+    }
+    if (selectedAssessmentData?.painTime) {
+      setSelectedTime(selectedAssessmentData?.painTime);
+    }
+  }, [
+    selectedAssessmentData?.painDate,
+    selectedAssessmentData?.painTime,
+    selectedAssessmentData?.description,
+  ]);
 
   useEffect(() => {
     if (painTimingData) {
@@ -53,19 +60,32 @@ const PainTiming = ({gotoNext, gotoPrevious}) => {
 
   const handlePrevious = () => {
     gotoPrevious();
+    endTime = new Date().getTime();
+    Analytics.setCurrentScreen(
+      SCREEN_NAMES.PAINASSESSMENT,
+      (endTime - startTime) / 1000,
+      startTime,
+      endTime,
+    );
   };
 
   const handleContinue = () => {
+    endTime = new Date().getTime();
+    Analytics.setCurrentScreen(
+      SCREEN_NAMES.PAINASSESSMENT,
+      (endTime - startTime) / 1000,
+      startTime,
+      endTime,
+    );
     dispatch({
-      type:CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
-      payload:{
-        description:painFrequency,
-        painDate:selectedDate,
-        painTime : selectedTime
-      }
-    })
+      type: CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
+      payload: {
+        description: painFrequency,
+        painDate: selectedDate,
+        painTime: selectedTime,
+      },
+    });
     gotoNext();
-   
   };
 
   const hideDateTimePickers = () => {

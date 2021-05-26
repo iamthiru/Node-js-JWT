@@ -1,4 +1,4 @@
-/* import auth from '@react-native-firebase/auth';
+ import auth from '@react-native-firebase/auth';
 import database from '@react-native-firebase/database';
 import { DEFAULT_ENVIRONMENT_KEY, ENVIRONMENT } from '../constants/environment';
 
@@ -98,4 +98,4 @@ export const setCurrentScreen = (screenName, duration, startTime, endTime) => {
 export const logEvent = (eventName, propertyObject = {}) => {
     incrementCount(`/${ENVIRONMENT[envKey].ANALYTICS_DATA_ROOT}/${userName}/events/${eventName}/count`).then(transaction => {
     });
-} */
+} 

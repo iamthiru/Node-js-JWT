@@ -9,6 +9,10 @@ import CustomTextArea from '../../components/shared/CustomTextArea';
 import SpeechToText from '../../components/shared/SpeechToText';
 import {useDispatch, useSelector} from 'react-redux';
 import {CREATE_ASSESSMENT_ACTION} from '../../constants/actions';
+import Analytics from '../../utils/Analytics';
+import { SCREEN_NAMES } from '../../constants/navigation';
+var startTime;
+var endTime;
 
 const {width, height} = Dimensions.get('window');
 
@@ -18,6 +22,9 @@ const Note = ({gotoNext, gotoPrevious}) => {
   const notesSpeech = useSelector((state) => state.painAssessmentData.notes);
 
   const selectedAssessmentData = useSelector((state) => state.createAsseement);
+  useEffect(()=>{
+    startTime = new Date().getTime()
+  },[])
   
 
 
@@ -32,10 +39,24 @@ const Note = ({gotoNext, gotoPrevious}) => {
 
   const handlePrevious = () => {
     gotoPrevious();
+    endTime = new Date().getTime()
+    Analytics.setCurrentScreen(
+      SCREEN_NAMES.PAINASSESSMENT,
+      (endTime-startTime)/1000,
+      startTime,
+      endTime
+    )
   };
 
   const handleContinue = () => {
     gotoNext();
+    endTime = new Date().getTime()
+    Analytics.setCurrentScreen(
+      SCREEN_NAMES.PAINASSESSMENT,
+      (endTime-startTime)/1000,
+      startTime,
+      endTime
+    )
     if (notesSpeech) {
       setNotes(notesSpeech);
     }

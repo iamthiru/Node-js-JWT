@@ -34,6 +34,7 @@ import medicationListAPI from '../../api/medicationList';
 import lastMedicationAssessmentAPI from '../../api/lastMedicationAssessment';
 import assessmentListAPI from '../../api/assessmentList';
 import { getPatientListAPI } from '../../api/patientsData';
+import Analytics from '../../utils/Analytics';
 
 const {width, height} = Dimensions.get('window');
 const reportData = {
@@ -47,20 +48,6 @@ const reportData = {
   note: 'Lorem ipsum dolor sit amet, consectetur elit',
   button: 'View Entry',
 };
-const latestEntryData = {
-  key: 'latest_entry',
-  time: 'Sep 10, 2020, 5:00 pm',
-  buttonText: '11',
-  pain_Medication: {
-    name: 'xxxxx',
-    Dosage: 'xxxxx',
-    Usage: {
-      dose: '1 pill every 4 hour',
-      start_time: 'Starting Sep 10, 2020, 3:0 pm',
-      end_time: 'No end time',
-    },
-  },
-};
 
 const PatientProfile = ({navigation}) => {
   const params = useRoute()?.params;
@@ -72,7 +59,6 @@ const PatientProfile = ({navigation}) => {
   const selectedPatient = useSelector((state)=>state?.allPatients?.all_patients)?.find((patient)=>patient.id === item.id)
 
 
-
   const [latestMedicationData, setLatestMedicationData] = useState({});
   const [last_medication, setLast_medication] = useState([]);
   const [last_assessment, setLastAssessment] = useState([]);
@@ -81,6 +67,33 @@ const PatientProfile = ({navigation}) => {
   const lookup_data = useSelector((state) => state.lookupData.lookup_data);
   const all_assessment_data = last_assessment?.assessment;
   const all_medication_data = last_assessment?.medication;
+
+  useEffect(()=>{
+    let startTime = 0;
+    let endTime = 0;
+    const unsubscribeFocus = navigation.addListener('focus', () => {
+        startTime = new Date().getTime();
+    });
+
+    const unsubscribeBlur = navigation.addListener('blur', (e) => {
+        endTime = new Date().getTime();
+        let screenName = e && e.target && e.target.substring(0, e.target.indexOf("-"));
+        Analytics.setCurrentScreen(screenName, (endTime - startTime)/1000, startTime, endTime);
+    });
+
+    const unsubscribeBeforeRemove = navigation.addListener('beforeRemove', (e) => {
+        endTime = new Date().getTime();
+        let screenName = e && e.target && e.target.substring(0, e.target.indexOf("-"));
+        Analytics.setCurrentScreen(screenName, (endTime - startTime)/1000, startTime, endTime);
+      });
+  
+      return () => {
+          unsubscribeFocus();
+          unsubscribeBlur();
+          unsubscribeBeforeRemove();              
+      }
+
+},[navigation])
 
   useEffect(() => {
     if (token && selectedPatient.id) {
@@ -119,7 +132,7 @@ const PatientProfile = ({navigation}) => {
           console.log('------last medication error------', err);
         });
     }
-  }, [token, selectedPatient.id]);
+  }, [token, selectedPatient?.id]);
   
 
   useEffect(()=>{
@@ -156,7 +169,10 @@ const PatientProfile = ({navigation}) => {
             type: ALL_ASSESSMENTS_LIST_ACTION.ALL_ASSESSMENT_LIST,
             payload: res.data.result,
           });
-          setAllAssessmentList(res.data.result);
+          setAllAssessmentList(res.data.result.filter((item)=>{
+            return item.id === selectedPatient?.id
+          }));
+
         })
         .catch((err) => {
           console.log('----assessment lsit error-----', err);

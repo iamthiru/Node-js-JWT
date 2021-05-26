@@ -7,7 +7,8 @@ import AntDesignIcon from 'react-native-vector-icons/AntDesign';
 import {COLORS} from '../../constants/colors';
 import {formatAMPM} from '../../utils/date';
 import {useSelector} from 'react-redux';
-import { SCREEN_NAMES } from '../../constants/navigation';
+import {SCREEN_NAMES} from '../../constants/navigation';
+import Analytics from '../../utils/Analytics';
 
 const {width, height} = Dimensions.get('window');
 
@@ -19,6 +20,51 @@ const Result = (props) => {
   const [patient, setPatient] = useState('');
   const [impactScore, setImpactScore] = useState(0);
   const assessment_data = useSelector((state) => state.createAsseement);
+
+  useEffect(() => {
+    let startTime = 0;
+    let endTime = 0;
+    const unsubscribeFocus = props.navigation.addListener('focus', () => {
+      startTime = new Date().getTime();
+    });
+    const unsubscribeBlur = props.navigation.addListener('blur', (e) => {
+      endTime = new Date().getTime();
+      let screenName =
+        e && e.target && e.target.substring(0, e.target.indexOf('-'));
+      Analytics.setCurrentScreen(
+        screenName,
+        (endTime - startTime) / 1000,
+        startTime,
+        endTime,
+      );
+    });
+    const unsubscribeBeforeRemove = props.navigation.addListener(
+      'beforeRemove',
+      (e) => {
+        endTime = new Date().getTime();
+        let screenName =
+          e && e.target && e.target.substring(0, e.target.indexOf('-'));
+        Analytics.setCurrentScreen(
+          screenName,
+          (endTime - startTime) / 1000,
+          startTime,
+          endTime,
+        );
+      },
+    );
+
+    return () => {
+      unsubscribeFocus();
+
+      unsubscribeBlur();
+
+      unsubscribeBeforeRemove();
+    };
+  }, [props.navigation]);
+
+  useEffect(() => {
+    startTime = new Date().getTime();
+  }, []);
 
   const hideDateTimePickers = () => {
     setShowDatePicker(false);

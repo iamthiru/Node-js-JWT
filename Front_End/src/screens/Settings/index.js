@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {View, Text, SafeAreaView, ScrollView} from 'react-native';
 import Footer from '../../components/Footer';
 import {COLORS} from '../../constants/colors';
@@ -14,13 +14,58 @@ import {
 import styles from './styles';
 import AuthContext from '../../components/shared/AuthContext';
 import { APP_VERSION } from '../../constants';
+import Analytics from '../../utils/Analytics';
+
+
 
 const Settings = ({navigation}) => {
-  const { signOut } = React.useContext(AuthContext);
 
+  const {signOut} = React.useContext(AuthContext);
   const handleLogout = () => {
-    signOut()
-  }
+    signOut();
+  };
+
+  useEffect(() => {  
+    let startTime = 0;
+    let endTime = 0;
+
+    const unsubscribeFocus = navigation.addListener('focus', () => {
+      startTime = new Date().getTime();
+    });
+
+    const unsubscribeBlur = navigation.addListener('blur', (e) => {
+      endTime = new Date().getTime();
+      let screenName =
+        e && e.target && e.target.substring(0, e.target.indexOf('-'));
+      Analytics.setCurrentScreen(
+        screenName,
+        (endTime - startTime) / 1000,
+        startTime,
+        endTime,
+      );
+    });
+       
+    const unsubscribeBeforeRemove = navigation.addListener(
+      'beforeRemove',
+      (e) => {
+        endTime = new Date().getTime();
+        let screenName =
+          e && e.target && e.target.substring(0, e.target.indexOf('-'));
+        Analytics.setCurrentScreen(
+          screenName,
+          (endTime - startTime) / 1000,
+          startTime,
+          endTime,
+        );
+      },
+    );
+
+    return () => {
+      unsubscribeFocus();
+      unsubscribeBlur();
+      unsubscribeBeforeRemove();
+    };
+  }, [navigation]);
 
   return (
     <SafeAreaView style={styles.safeAreaView}>

@@ -35,6 +35,7 @@ import AssignPatient from './src/screens/AssignPatient';
 import PainAssessment from './src/screens/PainAssessment';
 import PatientDetailModal from './src/components/PatientDetailsModal';
 import Result from './src/screens/PainAssessmentScreen/Result';
+import { Platform } from 'react-native';
 
 const Stack = createStackNavigator();
 
@@ -232,6 +233,7 @@ function App() {
                   fontWeight: '700',
                   fontSize: 20,
                   color: COLORS.WHITE,
+                  paddingRight:Boolean(Platform.OS=== 'ios')?20:60
                 },
               })}>
               {state.isLoading && (

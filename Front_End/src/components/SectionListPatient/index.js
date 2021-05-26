@@ -14,7 +14,9 @@ const AllPatientList = ({
   setShowPatient,
   setPatientData,
 }) => {
-  const recentPatients = useSelector((state) => state?.allPatients?.all_patients);
+  const recentPatients = useSelector(
+    (state) => state?.allPatients?.all_patients,
+  );
 
   const [sectionListData, setSectionList] = useState([]);
   const {width, height} = useWindowDimensions();
@@ -22,9 +24,13 @@ const AllPatientList = ({
 
   useEffect(() => {
     const sortedList = [];
+
     const filteredAllPatient = recentPatients.filter((patient) =>
-      JSON.stringify(patient).includes(searchString.toUpperCase()),
+      JSON.stringify(patient?.first_name + ' ' + patient?.last_name).includes(
+        searchString.toLowerCase(),
+      ),
     );
+
     titles.forEach((section) => {
       const filteredData = filteredAllPatient.filter(
         (patient) => patient[sortBy]?.[0]?.toUpperCase() === section,
@@ -36,6 +42,7 @@ const AllPatientList = ({
         });
       }
     });
+
     setSectionList(sortedList);
   }, [sortBy, recentPatients, searchString]);
 
@@ -55,7 +62,7 @@ const AllPatientList = ({
         keyExtractor={(item, index) => item + index}
         renderItem={(props) => (
           <Section
-            props={props}
+            items={props}
             setShowPatient={setShowPatient}
             setPatientData={setPatientData}
             painAssessment={painAssessment}

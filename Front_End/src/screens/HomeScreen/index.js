@@ -28,22 +28,80 @@ import {
 } from '../../constants/actions';
 import {lookupDataAPI} from '../../api/lookupData';
 import {lookupTypeAPI} from '../../api/lookupType';
+import Analytics from '../../utils/Analytics';
+const greetingTime = new Date().getHours()
 
 const {width, height} = Dimensions.get('window');
 
 const HomeScreen = ({navigation}) => {
-  
-  const recentPatients = useSelector((state) => state?.allPatients?.all_patients)?.filter((item,index)=>{
-    return index<=4
-  })
+  const recentPatients = useSelector(
+    (state) => state?.allPatients?.all_patients,
+  )?.filter((item, index) => {
+    return index <= 4;
+  });
   const [openNewPatient, setOpenNewPatient] = useState(false);
   const [user, setUser] = useState('');
   const token = useSelector((state) => state.user.authToken);
   const userName = useSelector((state) => state.user.userName);
   const dispatch = useDispatch();
+  const [greetingText,setGreetingText] = useState('')
+  
+
+  useEffect(()=>{
+    if(greetingTime<=12){
+      setGreetingText('Good Morning')
+      return
+    }
+    if(greetingTime >=12 && greetingTime<=20){
+      setGreetingText('Good Evening')
+      return
+    }
+    if(greetingTime>=20 && greetingTime<=24){
+      setGreetingText('Good Night')
+    }
+
+  },[greetingTime])
 
 
+  useEffect(() => {
+    let startTime = 0;
+    let endTime = 0;
+    const unsubscribeFocus = navigation.addListener('focus', () => {
+      startTime = new Date().getTime();
+    });
 
+    const unsubscribeBlur = navigation.addListener('blur', (e) => {
+      endTime = new Date().getTime();
+      let screenName =
+        e && e.target && e.target.substring(0, e.target.indexOf('-'));
+      Analytics.setCurrentScreen(
+        screenName,
+        (endTime - startTime) / 1000,
+        startTime,
+        endTime,
+      );
+    });
+    const unsubscribeBeforeRemove = navigation.addListener(
+      'beforeRemove',
+      (e) => {
+        endTime = new Date().getTime();
+        let screenName =
+          e && e.target && e.target.substring(0, e.target.indexOf('-'));
+        Analytics.setCurrentScreen(
+          screenName,
+          (endTime - startTime) / 1000,
+          startTime,
+          endTime,
+        );
+      },
+    );
+
+    return () => {
+      unsubscribeFocus();
+      unsubscribeBlur();
+      unsubscribeBeforeRemove();
+    };
+  }, [navigation]);
 
   useEffect(() => {
     if (userName) {
@@ -59,7 +117,10 @@ const HomeScreen = ({navigation}) => {
           console.log('result', res);
           dispatch({
             type: ALL_PATIENTS_ACTIONS.ALL_PATIENTS,
-            payload: res.data.result.sort((item1,item2)=> new Date(item2.createdAt) - new Date(item1.createdAt)),
+            payload: res.data.result.sort(
+              (item1, item2) =>
+                new Date(item2.createdAt) - new Date(item1.createdAt),
+            ),
           });
         })
         .catch((err) => {
@@ -67,8 +128,6 @@ const HomeScreen = ({navigation}) => {
         });
     }
   }, [token, userName]);
-
-
 
   useEffect(() => {
     if (token) {
@@ -137,7 +196,7 @@ const HomeScreen = ({navigation}) => {
               });
             })
             .catch((err) => {
-              console.log('-----lookup data error----', );
+              console.log('-----lookup data error----');
             });
         })
         .catch((error) => {
@@ -160,7 +219,7 @@ const HomeScreen = ({navigation}) => {
           }}
         />
         <View style={styles.headingLabelContainer}>
-          <Text style={styles.h1Label}>Good Morning,</Text>
+          <Text style={styles.h1Label}>{`${greetingText},`}</Text>
           <Text style={styles.hLabel}>{user ? user : 'Susan'}</Text>
         </View>
       </View>
@@ -235,12 +294,10 @@ const HomeScreen = ({navigation}) => {
               </Text>
             </View>
             <FlatList
-             
-              data = {recentPatients}
-              keyExtractor ={(item)=>item.id.toString()}
+              data={recentPatients}
+              keyExtractor={(item) => item.id.toString()}
               renderItem={({item, index}) => {
-                return <PatientListItem  
-                item={item} />;
+                return <PatientListItem item={item} />;
               }}
             />
           </View>

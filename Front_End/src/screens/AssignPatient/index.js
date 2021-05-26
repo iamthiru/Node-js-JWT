@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -20,24 +20,75 @@ import assignPatientStyles from './styles';
 import {sortByListOptions} from '../../constants/AssignPatientConstants';
 import NewPatientPopUp from '../HomeScreen/NewPatientPopUp';
 import PatientDetailModal from '../../components/PatientDetailsModal';
-import {useSelector} from 'react-redux'
+import {useSelector} from 'react-redux';
+import Analytics from '../../utils/Analytics';
 
 const AssignPatient = () => {
-
   const {width, height} = useWindowDimensions();
   const [searchString, setSearchString] = useState('');
   const [sortBy, setSortedBy] = useState('last_name');
   const navigation = useNavigation();
   const styles = assignPatientStyles({width, height, COLORS, Platform});
   const [openNewPatient, setOpenNewPatient] = useState(false);
-  const [showPatient,setShowPatient] = useState(false)
-  const [patientData,setPatientData] = useState({})
-  const painAssessment = true
+  const [showPatient, setShowPatient] = useState(false);
+  const [patientData, setPatientData] = useState({});
+  const painAssessment = true;
+
+  useEffect(() => {
+    let startTime = 0;
+    let endTime = 0;
+    const unsubscribeFocus = navigation.addListener('focus', () => {
+      startTime = new Date().getTime();
+    });
+
+    const unsubscribeBlur = navigation.addListener('blur', (e) => {
+      endTime = new Date().getTime();
+      let screenName =
+        e && e.target && e.target.substring(0, e.target.indexOf('-'));
+      Analytics.setCurrentScreen(
+        screenName,
+        (endTime - startTime) / 1000,
+        startTime,
+        endTime,
+      );
+    });
+
+    const unsubscribeBeforeRemove = navigation.addListener(
+      'beforeRemove',
+      (e) => {
+        endTime = new Date().getTime();
+        let screenName =
+          e && e.target && e.target.substring(0, e.target.indexOf('-'));
+        Analytics.setCurrentScreen(
+          screenName,
+          (endTime - startTime) / 1000,
+          startTime,
+          endTime,
+        );
+      },
+    );
+
+    return () => {
+      unsubscribeFocus();
+      unsubscribeBlur();
+      unsubscribeBeforeRemove();
+    };
+  }, [navigation]);
   return (
-    <View style={[styles.assignPatientMainView,{
-      // paddingTop:Boolean(Platform.OS === 'ios') ?0:Boolean(openNewPatient)?70:50
-      paddingTop: Boolean(Platform.OS === 'ios') ? height<=736 ?20:0:Boolean(openNewPatient)?70:50,
-    }]}>
+    <View
+      style={[
+        styles.assignPatientMainView,
+        {
+          // paddingTop:Boolean(Platform.OS === 'ios') ?0:Boolean(openNewPatient)?70:50
+          paddingTop: Boolean(Platform.OS === 'ios')
+            ? height <= 736
+              ? 20
+              : 0
+            : Boolean(openNewPatient)
+            ? 70
+            : 50,
+        },
+      ]}>
       {Platform.OS === 'android' && (
         <StatusBar
           backgroundColor={'transparent'}
@@ -71,7 +122,7 @@ const AssignPatient = () => {
         </View>
       </View>
       <CustomTextInput
-        placeholder="Search Name, DOB, medical number"
+        placeholder="Search Name"
         inputStyle={styles.inputStyles}
         value={searchString}
         onChangeText={(text) => setSearchString(text)}
@@ -108,12 +159,12 @@ const AssignPatient = () => {
           containerStyle={styles.dropDownContainerStyle}
         />
       </View>
-      <AllPatientList 
-      sortBy={sortBy} 
-      searchString={searchString}
-      setShowPatient ={setShowPatient}
-      setPatientData = {setPatientData}
-      painAssessment 
+      <AllPatientList
+        sortBy={sortBy}
+        searchString={searchString}
+        setShowPatient={setShowPatient}
+        setPatientData={setPatientData}
+        painAssessment
       />
       <NewPatientPopUp
         open={openNewPatient}
@@ -122,11 +173,11 @@ const AssignPatient = () => {
         }}
       />
       <PatientDetailModal
-      open = {showPatient}
-      onClose = {()=>{
-        setShowPatient(false)
-      }}
-      patientData = {patientData}
+        open={showPatient}
+        onClose={() => {
+          setShowPatient(false);
+        }}
+        patientData={patientData}
       />
     </View>
   );

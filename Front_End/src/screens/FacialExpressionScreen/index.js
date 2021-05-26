@@ -39,7 +39,8 @@ import {
 import {initiateFacialExpressionVideoProcessingAPI} from '../../api/painAssessment';
 import {useDispatch, useSelector} from 'react-redux';
 import createAssessmentAPI from '../../api/createAssessment';
-import { CREATE_ASSESSMENT_ACTION } from '../../constants/actions';
+import {CREATE_ASSESSMENT_ACTION} from '../../constants/actions';
+import Analytics from '../../utils/Analytics';
 
 const {width, height} = Dimensions.get('window');
 const {VideoCropper} = NativeModules;
@@ -103,9 +104,50 @@ const FacialExpressionScreen = ({navigation}) => {
   const token = useSelector((state) => state.user.authToken);
   const userId = useSelector((state) => state.user.loggedInUserId);
 
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
 
   // var pressOut;
+
+  useEffect(() => {
+    let startTime = 0;
+    let endTime = 0;
+    const unsubscribeFocus = navigation.addListener('focus', () => {
+      startTime = new Date().getTime();
+    });
+
+    const unsubscribeBlur = navigation.addListener('blur', (e) => {
+      endTime = new Date().getTime();
+      let screenName =
+        e && e.target && e.target.substring(0, e.target.indexOf('-'));
+      Analytics.setCurrentScreen(
+        screenName,
+        (endTime - startTime) / 1000,
+        startTime,
+        endTime,
+      );
+    });
+
+    const unsubscribeBeforeRemove = navigation.addListener(
+      'beforeRemove',
+      (e) => {
+        endTime = new Date().getTime();
+        let screenName =
+          e && e.target && e.target.substring(0, e.target.indexOf('-'));
+        Analytics.setCurrentScreen(
+          screenName,
+          (endTime - startTime) / 1000,
+          startTime,
+          endTime,
+        );
+      },
+    );
+
+    return () => {
+      unsubscribeFocus();
+      unsubscribeBlur();
+      unsubscribeBeforeRemove();
+    };
+  }, [navigation]);
 
   useEffect(() => {
     setTimeout(() => checkStoragePermission(), 3000);
@@ -455,8 +497,12 @@ const FacialExpressionScreen = ({navigation}) => {
       });
 
       let filename = `VID_${Date.now().toString()}.mp4`;
-      if(patientData && patientData.patient_id) {
-        filename = `${(patientData.patient_id + "_" + patientData.patient_name).replace(/ /g, "_")}_${Date.now().toString()}.mp4`;
+      if (patientData && patientData.patient_id) {
+        filename = `${(
+          patientData.patient_id +
+          '_' +
+          patientData.patient_name
+        ).replace(/ /g, '_')}_${Date.now().toString()}.mp4`;
       }
       let contentType = 'video/mp4';
       let contentDeposition = 'inline;filename="' + filename + '"';
@@ -559,20 +605,20 @@ const FacialExpressionScreen = ({navigation}) => {
   };
 
   const handleCreateAssessmentAPI = () => {
-    console.log('=========assessment api========', assessment_data);
-
     let date = new Date(assessment_data.assessment_date);
     let reminder_date = assessment_data.remainder_date
       ? new Date(assessment_data.remainder_date)
       : new Date();
     let facial_exp_parsed_value = JSON.parse(resultValue.replace(/'/g, '"'));
-    let facial_exp_result = facial_exp_parsed_value[facial_exp_parsed_value.length - 1];
-    let total_score = Number(assessment_data.pupillary_dilation) + Number(facial_exp_result);
+    let facial_exp_result =
+      facial_exp_parsed_value[facial_exp_parsed_value.length - 1];
+    let total_score =
+      Number(assessment_data.pupillary_dilation) + Number(facial_exp_result);
 
     dispatch({
       type: CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
       payload: {
-        total_score: total_score
+        total_score: total_score,
       },
     });
 
@@ -615,7 +661,7 @@ const FacialExpressionScreen = ({navigation}) => {
     } else {
       createAssessmentAPI(
         {
-          patient_id: (patientData && patientData.patient_id) || 0, 
+          patient_id: (patientData && patientData.patient_id) || 0,
           assessment_datetime: date.getTime(),
           type: assessment_data.type,
           current_pain_score: assessment_data.current_pain,
@@ -661,7 +707,7 @@ const FacialExpressionScreen = ({navigation}) => {
   const handleOnNextPress = () => {
     handleCreateAssessmentAPI();
     navigation.navigate(SCREEN_NAMES.RESULT);
-  }
+  };
 
   const getCameraComponent = () => {
     return (

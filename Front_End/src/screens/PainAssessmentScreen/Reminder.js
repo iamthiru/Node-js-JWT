@@ -12,9 +12,10 @@ import {formatAMPM} from '../../utils/date';
 import {useNavigation} from '@react-navigation/native';
 import {SCREEN_NAMES} from '../../constants/navigation';
 import {useDispatch, useSelector} from 'react-redux';
-import {
-  CREATE_ASSESSMENT_ACTION,
-} from '../../constants/actions';
+import {CREATE_ASSESSMENT_ACTION} from '../../constants/actions';
+import Analytics from '../../utils/Analytics';
+var startTime;
+var endTime;
 
 const {width, height} = Dimensions.get('window');
 
@@ -27,33 +28,49 @@ const Reminder = ({gotoNext, gotoPrevious}) => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
 
+  useEffect(() => {
+    startTime = new Date().getTime();
+  }, []);
+
   const patientData = useSelector((state) => state.patientData.patient);
   const selectedAssessmentData = useSelector((state) => state.createAsseement);
-  
 
-
-useEffect(()=>{
-  if(selectedAssessmentData?.isRemainder){
-    setNeedReminder(selectedAssessmentData?.isRemainder)
-  }
-  if(selectedAssessmentData.remainder_date){
-    setSelectedDate(selectedAssessmentData?.remainder_date)
-  }
-  if(selectedAssessmentData?.reminder_time){
-    setSelectedDate(selectedAssessmentData?.reminder_time)
-  }
-},[
-  selectedAssessmentData?.isRemainder,
-  selectedAssessmentData?.reminder_time,
-  selectedAssessmentData?.remainder_date
-])
+  useEffect(() => {
+    if (selectedAssessmentData?.isRemainder) {
+      setNeedReminder(selectedAssessmentData?.isRemainder);
+    }
+    if (selectedAssessmentData.remainder_date) {
+      setSelectedDate(selectedAssessmentData?.remainder_date);
+    }
+    if (selectedAssessmentData?.reminder_time) {
+      setSelectedDate(selectedAssessmentData?.reminder_time);
+    }
+  }, [
+    selectedAssessmentData?.isRemainder,
+    selectedAssessmentData?.reminder_time,
+    selectedAssessmentData?.remainder_date,
+  ]);
 
   const handlePrevious = () => {
     gotoPrevious();
+    endTime = new Date().getTime();
+    Analytics.setCurrentScreen(
+      SCREEN_NAMES.PAINASSESSMENT,
+      (endTime - startTime) / 1000,
+      startTime,
+      endTime,
+    );
   };
 
   const handleContinue = () => {
     navigation.navigate(SCREEN_NAMES.PUPILLARY_DILATION);
+    endTime = new Date().getTime();
+    Analytics.setCurrentScreen(
+      SCREEN_NAMES.PAINASSESSMENT,
+      (endTime - startTime) / 1000,
+      startTime,
+      endTime,
+    );
     if (needReminder) {
       dispatch({
         type: CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
@@ -62,13 +79,12 @@ useEffect(()=>{
           reminder_time: selectedTime,
           isRemainder: needReminder,
           assessment_date: new Date(),
-          frequence:'1',
-          pain_frequency_id:'1',
-          total_score:'1'
+          frequence: '1',
+          pain_frequency_id: '1',
+          total_score: '1',
         },
       });
     } else {
-      
       dispatch({
         type: CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
         payload: {
@@ -76,9 +92,9 @@ useEffect(()=>{
           reminder_time: selectedTime,
           isRemainder: needReminder,
           assessment_date: new Date(),
-          frequence:'1',
-          pain_frequency_id:'1',
-          total_score:'1'
+          frequence: '1',
+          pain_frequency_id: '1',
+          total_score: '1',
         },
       });
     }

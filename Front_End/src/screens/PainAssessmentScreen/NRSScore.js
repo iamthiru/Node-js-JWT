@@ -17,8 +17,13 @@ import { VERBAL_ABILITY } from '../../constants/painAssessment';
 import { getPainScoreImage, getPainScoreDescription } from '../../helpers/painAssessment';
 import {useDispatch,useSelector} from 'react-redux'
 import { CREATE_ASSESSMENT_ACTION} from '../../constants/actions';
+import Analytics from '../../utils/Analytics';
+import { SCREEN_NAMES } from '../../constants/navigation';
 
 const { width, height } = Dimensions.get("window");
+var startTime ;
+var endTime ;
+
 
 
 const NRSScore = ({ 
@@ -34,6 +39,11 @@ const NRSScore = ({
     const [ nrsScore , setNrsScore] = useState(null)
     const dispatch =useDispatch()
   const selectedAssessmentData = useSelector((state) => state.createAsseement);
+  
+
+  useEffect(()=>{
+      startTime = new Date().getTime()
+  },[])
 
 
   useEffect(()=>{
@@ -55,9 +65,23 @@ const NRSScore = ({
 
     const handlePrevious = () => {
         gotoPrevious();
+        endTime = new Date().getTime()
+        Analytics.setCurrentScreen(
+            SCREEN_NAMES.PAINASSESSMENT,
+            (endTime-startTime)/1000,
+            startTime,
+            endTime
+        )
     }
 
     const handleContinue = () => {
+        endTime = new Date().getTime()
+        Analytics.setCurrentScreen(
+            SCREEN_NAMES.PAINASSESSMENT,
+            (endTime-startTime)/1000,
+            startTime,
+            endTime
+        )
         gotoNext();
         if(selectedAssessmentData.type !==VERBAL_ABILITY.NON_VERBAL.value)
         {
