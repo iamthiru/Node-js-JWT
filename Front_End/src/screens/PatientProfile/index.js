@@ -132,7 +132,7 @@ const PatientProfile = ({navigation}) => {
           console.log('------last medication error------', err);
         });
     }
-  }, [token, selectedPatient?.id]);
+  }, [token, selectedPatient]);
   
 
   useEffect(()=>{
@@ -170,7 +170,7 @@ const PatientProfile = ({navigation}) => {
             payload: res.data.result,
           });
           setAllAssessmentList(res.data.result.filter((item)=>{
-            return item.id === selectedPatient?.id
+            return item.patient_id === selectedPatient?.id
           }));
 
         })
@@ -178,7 +178,8 @@ const PatientProfile = ({navigation}) => {
           console.log('----assessment lsit error-----', err);
         });
     }
-  }, [token]);
+  }, [token, selectedPatient]);
+
   const medicationList = useMemo(() => {
     return lookup_data
       .find((item) => {
@@ -203,10 +204,6 @@ const PatientProfile = ({navigation}) => {
         });
     }
   }, [lookup_data, all_medication_data]);
-
-
-
-
 
   return (
     <View
@@ -307,7 +304,7 @@ const PatientProfile = ({navigation}) => {
             style={styles.primaryButton}
           />
         </View>
-        {Boolean((last_assessment.length ===0  && last_medication.length === 0)) ? (
+        {(!Boolean((last_assessment && last_assessment.assessment && Object.keys(last_assessment.assessment).length !== 0)  ||  (last_medication && last_medication.length !== 0))) ? (
           <NoEntryCard />
         ) : (
           <>

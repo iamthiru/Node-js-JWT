@@ -26,7 +26,7 @@ const AllPatientList = ({
     const sortedList = [];
 
     const filteredAllPatient = recentPatients.filter((patient) =>
-      JSON.stringify(patient?.first_name + ' ' + patient?.last_name).includes(
+      (patient?.first_name + ' ' + patient?.last_name).toLowerCase().includes(
         searchString.toLowerCase(),
       ),
     );

@@ -41,7 +41,7 @@ const NewPatientPopUp = ({open, onClose, patientData, updateApiIntegrate}) => {
   const [errorState, setErrorState] = useState([]);
   const userId = useSelector((state) => state.user.loggedInUserId);
   const token = useSelector((state) => state.user.authToken);
-  const patientType = updateApiIntegrate ? 'Edi Patient' : 'New Patient'
+  const patientType = updateApiIntegrate ? 'Edit Patient' : 'New Patient'
 
   useEffect(() => {
       if (patientData?.first_name) {

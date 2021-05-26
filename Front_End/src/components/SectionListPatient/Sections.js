@@ -21,7 +21,7 @@ const Section = ({items, setShowPatient, painAssessment, setPatientData}) => {
           setShowPatient(true);
           setPatientData(items?.item);
         } else {
-          navigation.navigate(SCREEN_NAMES.PATIENT_PROFILE, items.item);
+          navigation.navigate(SCREEN_NAMES.PATIENT_PROFILE, {item: items.item});
         }
       }}>
       <View
