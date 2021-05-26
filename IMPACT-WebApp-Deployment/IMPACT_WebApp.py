@@ -1,13 +1,14 @@
 # Proprietary: Benten Technologies, Inc.
 # Author: Pranav H. Deo
 # Copyright Content
-# Date: 05/19/2021
-# Version: v1.9
+# Date: 05/26/2021
+# Version: v1.10
 
 # Code Description:
 # Web Simulation (Alpha Version) for Pupil and Facial Pain Analysis.
 
 # UPDATES:
+# Patient Record Search Feature.
 # Mobile APIs for Pupil and Facial integrated.
 # Login/Registration Changed from DynamoDB to RDS-MySQL.
 # User Data stored in DynamoDB.
@@ -134,9 +135,25 @@ def PatientRecords():
                 return render_template('PatientRecords.html', user=user)
             else:
                 pupil_link = links[0]
+                files = os.listdir('./static/Pupil_Output_Images/')
+                for file in files:
+                    if (pat_id in str(file)) and ('PUAL_' in file):
+                        filename = file
+                        img_name = str(os.path.splitext(filename)[0])
+                        file = img_name + '.csv'
+                        csv_f = './static/Pupil_Output_Images/' + file
+                        df = pd.read_csv(csv_f)
+                        pual_score = round(df['PUAL_Score'][0], 3)
                 facial_link = links[1]
-                return render_template('ShowRecord.html', user=user, pat_id=pat_id,
-                                       facial_link=facial_link, pupil_link=pupil_link)
+                files = os.listdir('./static/Face_Output_Images/')
+                for file in files:
+                    if (pat_id in str(file)) and ('_LabelFile.csv' in file):
+                        label_file_csv = './static/Face_Output_Images/' + file
+                        bucket_df = pd.read_csv(label_file_csv)
+                        face_score = round(float(bucket_df['Video Score'][0]), 2)
+
+                return render_template('ShowRecord.html', user=user, pat_id=pat_id, facial_link=facial_link,
+                                       pupil_link=pupil_link, pual_score=pual_score, face_score=face_score)
         return render_template('PatientRecords.html', user=user)
     else:
         session.pop('user_email', None)
