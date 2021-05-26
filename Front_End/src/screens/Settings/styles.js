@@ -84,6 +84,12 @@ const styles = StyleSheet.create({
     color: "red",
     textAlign: 'center',
     paddingLeft: 25,
+  },
+  logoutTextStyle:{
+    color: "red",
+    textAlign: 'center',
+    paddingLeft: 20,
+    paddingRight: 20
   }
 });
 

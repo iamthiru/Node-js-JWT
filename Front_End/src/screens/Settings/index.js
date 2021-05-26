@@ -13,6 +13,7 @@ import {
 } from '../../constants/settingsConstants';
 import styles from './styles';
 import AuthContext from '../../components/shared/AuthContext';
+import { APP_VERSION } from '../../constants';
 
 const Settings = ({navigation}) => {
   const { signOut } = React.useContext(AuthContext);
@@ -39,12 +40,14 @@ const Settings = ({navigation}) => {
             onPress={() => handleLogout()}
             title="Logout"
             type="tertiary"
-            textStyle={styles.textStyle}
+            textStyle={styles.logoutTextStyle}
             style={{
               backgroundColor: COLORS.WHITE,
             }}
           />
+          <Text style={{ fontSize: 12, textAlign: "center", color: COLORS.PRIMARY_DARKER, paddingTop: 10 }}>{APP_VERSION}</Text>
         </View>
+        
       </View>
       <Footer marginBottom={-5} />
     </SafeAreaView>

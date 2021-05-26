@@ -38,7 +38,6 @@ const styles = StyleSheet.create({
         color: COLORS.GRAY_90
     },
     teritaryBtnView:{
-        width:150,
         borderWidth: 2,
         borderColor: COLORS.PRIMARY_MAIN
     }

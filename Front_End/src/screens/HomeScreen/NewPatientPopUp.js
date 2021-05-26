@@ -496,7 +496,7 @@ const NewPatientPopUp = ({open, onClose, patientData, updateApiIntegrate}) => {
             <CustomButton
               onPress={handleSubmit}
               title="Confirm"
-              textStyle={{color: COLORS.GRAY_90, textAlign: 'center'}}
+              textStyle={{color: validate()? COLORS.GRAY_90: COLORS.WHITE, textAlign: 'center'}}
               disabled={validate()}
               style={{
                 width: width * 0.6,
