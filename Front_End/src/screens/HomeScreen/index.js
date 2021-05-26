@@ -72,14 +72,13 @@ const HomeScreen = ({navigation}) => {
 
   useEffect(() => {
     if (token) {
-      lookupTypeAPI(token) 
+      lookupTypeAPI(token)
         .then((result) => {
           console.log('-------lookup---type-- reult------', result);
           if (result.data.isError) {
-            Alert.alert('-------invalid lookup type--------');'s'
+            Alert.alert('-------invalid lookup type--------');
             return;
           }
-
           lookupDataAPI(token)
             .then((res) => {
               console.log('-----lookup--data--res--', res);

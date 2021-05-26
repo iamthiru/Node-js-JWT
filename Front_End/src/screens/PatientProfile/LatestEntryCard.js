@@ -30,7 +30,6 @@ const LatestEntryCard = ({
     })
     
   },[lookup_data,all_medication_data])
-  console.log('-----medication---label---',medicationList)
 
   const dosage= useMemo(()=>{
     if(lookup_data){
