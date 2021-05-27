@@ -6,9 +6,11 @@ import CustomTouchableOpacity from '../../components/shared/CustomTouchableOpaci
 import AntDesignIcon from 'react-native-vector-icons/AntDesign';
 import {COLORS} from '../../constants/colors';
 import {formatAMPM} from '../../utils/date';
-import {useSelector} from 'react-redux';
+import {useSelector,useDispatch} from 'react-redux';
 import {SCREEN_NAMES} from '../../constants/navigation';
 import Analytics from '../../utils/Analytics';
+import {CREATE_ASSESSMENT_ACTION} from '../../constants/actions';
+import {PAIN_FREQUENCY, VERBAL_ABILITY} from '../../constants/painAssessment';
 
 const {width, height} = Dimensions.get('window');
 
@@ -20,6 +22,7 @@ const Result = (props) => {
   const [patient, setPatient] = useState('');
   const [impactScore, setImpactScore] = useState(0);
   const assessment_data = useSelector((state) => state.createAsseement);
+  const dispatch = useDispatch()
 
   useEffect(() => {
     let startTime = 0;
@@ -290,7 +293,35 @@ const Result = (props) => {
               marginTop: 10,
               marginBottom: 12,
             }}
-            onPress={() => props.navigation.navigate(SCREEN_NAMES.HOME)}>
+            onPress={() => {
+              props.navigation.goBack();
+              dispatch({
+                type: CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
+                payload: {
+                  type: VERBAL_ABILITY.VERBAL.value,
+                  patient_id: 0,
+                  patient_name: '',
+                  current_pain: 0,
+                  most_pain: 0,
+                  least_pain: 0,
+                  painImpactId: 0,
+                  painImapctName: '',
+                  painLocation_id: 0,
+                  pain_activity_id: 0,
+                  pain_activity_name: '',
+                  description: PAIN_FREQUENCY[0].value,
+                  painDate: null,
+                  painTime: null,
+                  remainder_date: null,
+                  reminder_time: null,
+                  isRemainder: true,
+                  assessment_date: null,
+                  frequence: 0,
+                  pain_frequency_id: 0,
+                  total_score: 0,
+                },
+              });
+            }}>
             <Text
               style={{
                 fontSize: 14,

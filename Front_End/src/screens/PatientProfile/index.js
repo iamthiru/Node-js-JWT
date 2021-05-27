@@ -146,7 +146,10 @@ const PatientProfile = ({navigation}) => {
         console.log('result', res);
         dispatch({
           type: ALL_PATIENTS_ACTIONS.ALL_PATIENTS,
-          payload: res.data.result
+          payload: res.data.result.sort(
+            (item1, item2) =>
+              item2.createdAt - item1.createdAt,
+          )
         });
       })
       .catch((err) => {

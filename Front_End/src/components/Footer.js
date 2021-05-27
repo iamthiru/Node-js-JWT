@@ -199,7 +199,10 @@ const Footer = ({
                     elevation: 5,
                 }}
             >
-                <CustomTouchableOpacity
+                <CustomTouchableOpacity 
+                  onPress ={()=>{
+                      navigation.navigate(SCREEN_NAMES.PAINASSESSMENT)
+                  }}
                     style={{
                         width: 60,
                         height: 60,

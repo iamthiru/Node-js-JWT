@@ -1,58 +1,78 @@
-import React, { useState, useEffect } from 'react';
-import {
-    Text,
-    View,
-    TouchableHighlight,
-
-} from 'react-native';
+import React, {useState, useEffect} from 'react';
+import {Text, View, TouchableOpacity} from 'react-native';
 import Voice from '@react-native-community/voice';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
-import { COLORS } from '../../../constants/colors';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import {COLORS} from '../../../constants/colors';
 
+const SpeechToText = ({setPartialResults}) => {
+  const [startRecording, setStartRecording] = useState(false);
 
-const SpeechToText = ({ setPartialResults }) => {
-
-    useEffect(() => {
-        Voice.onSpeechPartialResults = onSpeechPartialResults;
-        return () => {
-            Voice.destroy().then(Voice.removeAllListeners);
-        };
-    }, []);
-
-    const onSpeechPartialResults = (e) => {
-        setPartialResults(e.value);
+  useEffect(() => {
+    Voice.onSpeechPartialResults = onSpeechPartialResults;
+    return () => {
+      Voice.destroy().then(Voice.removeAllListeners);
     };
+  }, []);
 
-    const startRecognizing = async () => {
-        await Voice.start('en-Us');
-        setPartialResults([]);
-    };
+  const onSpeechPartialResults = (e) => {
+    setPartialResults(e.value);
+  };
 
-    const stopRecognizing = async () => {
-        await Voice.stop();
-    };
+  const startRecognizing = async () => {
+    await Voice.start('en-Us');
+    setPartialResults([]);
+  };
 
-    return (
-        <View style={{
-            flex: 1,
-            flexDirection: 'column',
-            alignItems: 'center',
+  const stopRecognizing = async () => {
+    await Voice.stop();
+  };
+
+  const handleVoiceRecord = () => {
+    if (startRecording) {
+      startRecognizing();
+    } else {
+      stopRecognizing();
+    }
+  };
+
+  return (
+    <View
+      style={{
+        flex: 1,
+        flexDirection: 'column',
+        alignItems: 'center',
+      }}>
+      <Text
+        style={{
+          textAlign: 'center',
+          marginBottom: 10,
         }}>
-            <Text style={{
-                textAlign: 'center',
-                marginBottom: 10
-            }}>Press and hold the mic to enter notes by voice </Text>
-            <TouchableHighlight
-                underlayColor={COLORS.SECONDARY_MAIN}
-                activeOpacity={0.5}
-                onPressIn={startRecognizing}
-                onPressOut={stopRecognizing}
-                style={{ width: 50, height: 50, borderRadius: 25, alignItems: 'center', justifyContent: 'center' }}>
-                <MaterialIcons name={"keyboard-voice"} size={40} color={COLORS.PRIMARY_MAIN} />
-            </TouchableHighlight>
-        </View>
-    )
-}
+        Press and hold the mic to enter notes by voice{' '}
+      </Text>
+      <TouchableOpacity
+        activeOpacity={0.5}
+        onPress={() => {
+          setStartRecording(!startRecording);
+          handleVoiceRecord();
+        }}
+        style={{
+          width: 50,
+          height: 50,
+          borderRadius: 25,
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: Boolean(startRecording)
+            ? COLORS.SECONDARY_MAIN
+            : COLORS.WHITE,
+        }}>
+        <MaterialIcons
+          name={'keyboard-voice'}
+          size={40}
+          color={COLORS.PRIMARY_MAIN}
+        />
+      </TouchableOpacity>
+    </View>
+  );
+};
 
-export default SpeechToText
-
+export default SpeechToText;

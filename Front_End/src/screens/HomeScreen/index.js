@@ -52,11 +52,15 @@ const HomeScreen = ({navigation}) => {
       setGreetingText('Good Morning')
       return
     }
-    if(greetingTime >=12 && greetingTime<=20){
+    if(greetingTime>12 && greetingTime<=18){
+      setGreetingText('Good Afternoon')
+      return
+    }
+    if(greetingTime >18 && greetingTime<=20){
       setGreetingText('Good Evening')
       return
     }
-    if(greetingTime>=20 && greetingTime<=24){
+    if(greetingTime>20 && greetingTime<=24){
       setGreetingText('Good Night')
     }
 
@@ -119,7 +123,7 @@ const HomeScreen = ({navigation}) => {
             type: ALL_PATIENTS_ACTIONS.ALL_PATIENTS,
             payload: res.data.result.sort(
               (item1, item2) =>
-                new Date(item2.createdAt) - new Date(item1.createdAt),
+                item2.createdAt - item1.createdAt,
             ),
           });
         })
@@ -320,6 +324,7 @@ const HomeScreen = ({navigation}) => {
       <Footer />
       <NewPatientPopUp
         open={openNewPatient}
+        goToAssessment = {false}
         onClose={() => {
           setOpenNewPatient(false);
         }}

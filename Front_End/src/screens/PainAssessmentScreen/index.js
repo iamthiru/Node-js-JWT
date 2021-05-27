@@ -12,13 +12,12 @@ import PainLocation from './PainLocation';
 import NRSScore from './NRSScore';
 import styles from './styles';
 import PainTiming from './PainTiming';
-import {VERBAL_ABILITY} from '../../constants/painAssessment';
+import {PAIN_FREQUENCY, VERBAL_ABILITY} from '../../constants/painAssessment';
 import PainCausingActivity from './PainCausingActivity';
 import Note from './Note';
 import Reminder from './Reminder';
 import Result from './Result';
 import {useDispatch, useSelector} from 'react-redux';
-import {useRoute} from '@react-navigation/native';
 import {
   CREATE_ASSESSMENT_ACTION,
   PAIN_ASSESSMENT_DATA_ACTION,
@@ -38,8 +37,8 @@ const PainAssessmentScreen = ({navigation}) => {
     VERBAL_ABILITY.VERBAL.value,
   );
 
-useEffect(()=>{
-  let startTime = 0;
+  useEffect(() => {
+    let startTime = 0;
     let endTime = 0;
     const unsubscribeFocus = navigation.addListener('focus', () => {
       startTime = new Date().getTime();
@@ -69,8 +68,8 @@ useEffect(()=>{
         );
       },
     );
-},[navigation])
-  
+  }, [navigation]);
+
   const dispatch = useDispatch();
 
   const navigateToScreen = (screenName) => {
@@ -93,8 +92,60 @@ useEffect(()=>{
     if (showResult) {
       setShowResult(false);
       closeScreen();
+      dispatch({
+        type: CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
+        payload: {
+          type: VERBAL_ABILITY.VERBAL.value,
+          patient_id: 0,
+          patient_name: '',
+          current_pain: 0,
+          most_pain: 0,
+          least_pain: 0,
+          painImpactId: 0,
+          painImapctName: '',
+          painLocation_id: 0,
+          pain_activity_id: 0,
+          pain_activity_name: '',
+          description: PAIN_FREQUENCY[0].value,
+          painDate: null,
+          painTime: null,
+          remainder_date: null,
+          reminder_time: null,
+          isRemainder: true,
+          assessment_date: null,
+          frequence: 0,
+          pain_frequency_id: 0,
+          total_score: 0,
+        },
+      });
     } else {
       closeScreen();
+      dispatch({
+        type: CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
+        payload: {
+          type: VERBAL_ABILITY.VERBAL.value,
+          patient_id: 0,
+          patient_name: '',
+          current_pain: 0,
+          most_pain: 0,
+          least_pain: 0,
+          painImpactId: 0,
+          painImapctName: '',
+          painLocation_id: 0,
+          pain_activity_id: 0,
+          pain_activity_name: '',
+          description: PAIN_FREQUENCY[0].value,
+          painDate: null,
+          painTime: null,
+          remainder_date: null,
+          reminder_time: null,
+          isRemainder: true,
+          assessment_date: null,
+          frequence: 0,
+          pain_frequency_id: 0,
+          total_score: 0,
+        },
+      });
     }
   };
 
@@ -237,11 +288,9 @@ useEffect(()=>{
             <PainLocation gotoNext={gotoNext} gotoPrevious={gotoPrevious} />
           )}
           {currentStep === 4 && (
-            <PainQuality
-              gotoNext={gotoNext}
-              gotoPrevious={gotoPrevious}
-              PlacesTableViewCell
-            />
+            <PainQuality 
+            gotoNext={gotoNext}
+            gotoPrevious={gotoPrevious} />
           )}
           {currentStep === 5 && (
             <PainTiming gotoNext={gotoNext} gotoPrevious={gotoPrevious} />

@@ -22,13 +22,22 @@ import CustomButton from '../../components/shared/CustomButton';
 import {useNavigation} from '@react-navigation/core';
 import {SCREEN_NAMES} from '../../constants/navigation';
 import {useDispatch, useSelector} from 'react-redux';
-import {ALL_PATIENTS_ACTIONS} from '../../constants/actions';
+import {
+  ALL_PATIENTS_ACTIONS,
+  PATIENT_NAME_ACTION,
+} from '../../constants/actions';
 import {addPatientAPI, getPatientListAPI} from '../../api/patientsData';
 import patientUpdateApi from '../../api/patientUpdate';
 
 const {width, height} = Dimensions.get('window');
 
-const NewPatientPopUp = ({open, onClose, patientData, updateApiIntegrate}) => {
+const NewPatientPopUp = ({
+  open,
+  onClose,
+  patientData,
+  updateApiIntegrate,
+  goToAssessment,
+}) => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -41,27 +50,28 @@ const NewPatientPopUp = ({open, onClose, patientData, updateApiIntegrate}) => {
   const [errorState, setErrorState] = useState([]);
   const userId = useSelector((state) => state.user.loggedInUserId);
   const token = useSelector((state) => state.user.authToken);
-  const patientType = updateApiIntegrate ? 'Edit Patient' : 'New Patient'
+  const patientType = updateApiIntegrate ? 'Edit Patient' : 'New Patient';
+  const [patientId, setPatientId] = useState(0);
 
   useEffect(() => {
-      if (patientData?.first_name) {
-        setFirstName(patientData?.first_name);
-      }
-      if (patientData?.last_name) {
-        setLastName(patientData?.last_name);
-      }
-      if (patientData?.dob) {
-        setSelectedDate(new Date(patientData.dob));
-      }
-      if (patientData?.medical_record_no) {
-        setMedicalRecord(patientData.medical_record_no);
-      }
-      if (patientData?.gender) {
-        setGender(patientData.gender);
-      }
-      if (patientData?.eyeColor) {
-        setEyeColor(patientData?.eyeColor);
-      }
+    if (patientData?.first_name) {
+      setFirstName(patientData?.first_name);
+    }
+    if (patientData?.last_name) {
+      setLastName(patientData?.last_name);
+    }
+    if (patientData?.dob) {
+      setSelectedDate(new Date(patientData.dob));
+    }
+    if (patientData?.medical_record_no) {
+      setMedicalRecord(patientData.medical_record_no);
+    }
+    if (patientData?.gender) {
+      setGender(patientData.gender);
+    }
+    if (patientData?.eyeColor) {
+      setEyeColor(patientData?.eyeColor);
+    }
   }, [patientData]);
 
   const validate = useCallback(() => {
@@ -73,6 +83,65 @@ const NewPatientPopUp = ({open, onClose, patientData, updateApiIntegrate}) => {
     }
     return false;
   }, [errorState, firstName, lastName, gender, eyeColor, selectedDate]);
+
+  const handleAddPatientApi = useCallback(() => {
+    addPatientAPI(
+      {
+        firstName: firstName,
+        lastName: lastName,
+        dob: new Date(selectedDate).getTime(),
+        gender: gender,
+        eyeColor: eyeColor,
+        medicalRecordNo: medicalRecord,
+        createdBy: userId,
+      },
+      token,
+    )
+      .then((res) => {
+        console.log('-------new Patient Added sucessfully------', res);
+        setFirstName('');
+        setLastName('');
+        setGender(null);
+        setEyeColor(null);
+        setMedicalRecord('');
+        setSelectedDate(null);
+        if (res.data.isError) {
+          Alert.alert('Invalid data patient data');
+          return;
+        }
+        setPatientId(res.data.result.insertId);
+        getPatientListAPI(token)
+          .then((res) => {
+            if (res.data.err) {
+              Alert.alert('------all aptient error------');
+              return;
+            }
+            dispatch({
+              type: ALL_PATIENTS_ACTIONS.ALL_PATIENTS,
+              payload: res.data.result.sort(
+                (item1, item2) => item2.createdAt - item1.createdAt,
+              ),
+            });
+            if (onClose) {
+              onClose();
+            }
+          })
+          .catch((err) => {
+            console.log('-------error------', err);
+          });
+      })
+      .catch((err) => {
+        console.log('-----error-----', err);
+      });
+  }, [
+    dispatch,
+    firstName,
+    lastName,
+    gender,
+    eyeColor,
+    selectedDate,
+    medicalRecord,
+  ]);
 
   const handleSubmit = useCallback(() => {
     if (updateApiIntegrate) {
@@ -99,15 +168,17 @@ const NewPatientPopUp = ({open, onClose, patientData, updateApiIntegrate}) => {
               }
               console.log('result', res);
               setFirstName('');
-          setLastName('');
-          setGender(null);
-          setEyeColor(null);
-          setMedicalRecord('')
-          setSelectedDate(null);
-          getPatientListAPI(token)
+              setLastName('');
+              setGender(null);
+              setEyeColor(null);
+              setMedicalRecord('');
+              setSelectedDate(null);
+              getPatientListAPI(token);
               dispatch({
                 type: ALL_PATIENTS_ACTIONS.ALL_PATIENTS,
-                payload: res.data.result,
+                payload: res.data.result.sort(
+                  (item1, item2) => item2.createdAt - item1.createdAt,
+                ),
               });
             })
             .catch((err) => {
@@ -120,52 +191,18 @@ const NewPatientPopUp = ({open, onClose, patientData, updateApiIntegrate}) => {
         .catch((err) => {
           console.log('----update error-----', err);
         });
-    } else {
-      addPatientAPI(
-        {
-          firstName: firstName,
-          lastName: lastName,
-          dob: new Date(selectedDate).getTime(),
-          gender: gender,
-          eyeColor: eyeColor,
-          medicalRecordNo: medicalRecord,
-          createdBy: userId,
+    } else if (goToAssessment) {
+      handleAddPatientApi();
+      dispatch({
+        type: PATIENT_NAME_ACTION.PATIENT,
+        payload: {
+          patient_id: patientId,
+          patient_name: firstName + ' ' + lastName,
         },
-        token,
-      )
-        .then((res) => {
-          console.log('-------new Patient Added sucessfully------', res);
-          setFirstName('');
-          setLastName('');
-          setGender(null);
-          setEyeColor(null);
-          setMedicalRecord('');
-          setSelectedDate(null);
-          if (res.data.isError) {
-            Alert.alert('Invalid data patient data');
-            return;
-          }
-          getPatientListAPI(token)
-            .then((res) => {
-              if (res.data.err) {
-                Alert.alert('------all aptient error------');
-                return;
-              }
-              dispatch({
-                type: ALL_PATIENTS_ACTIONS.ALL_PATIENTS,
-                payload: res.data.result,
-              });
-              if (onClose) {
-                onClose();
-              }
-            })
-            .catch((err) => {
-              console.log('-------error------', err);
-            });
-        })
-        .catch((err) => {
-          console.log('-----error-----', err);
-        });
+      });
+      navigation.navigate(SCREEN_NAMES.PAINASSESSMENT);
+    } else {
+      handleAddPatientApi();
     }
   }, [
     dispatch,
@@ -244,7 +281,7 @@ const NewPatientPopUp = ({open, onClose, patientData, updateApiIntegrate}) => {
             }}
             // disabled={validate()}
             // onPress={handleSubmit}
-            >
+          >
             {/* <Text
               style={[
                 styles.h3Label,
@@ -297,7 +334,11 @@ const NewPatientPopUp = ({open, onClose, patientData, updateApiIntegrate}) => {
               <CustomTextInput
                 placeholder="First"
                 onChangeText={(value) => {
-                  setFirstName(value);
+                  if (/^(?:[A-Za-z]+)$/.test(value)) {
+                    setFirstName(value);
+                  } else {
+                    console.log('accepts alphabets letters only');
+                  }
                 }}
                 value={firstName}
                 inputStyle={{
@@ -317,7 +358,11 @@ const NewPatientPopUp = ({open, onClose, patientData, updateApiIntegrate}) => {
               <CustomTextInput
                 placeholder="Last"
                 onChangeText={(value) => {
-                  setLastName(value);
+                  if (/^(?:[A-Za-z]+)$/.test(value)) {
+                    setLastName(value);
+                  } else {
+                    console.log('accepts alphabets letters only');
+                  }
                 }}
                 value={lastName}
                 inputStyle={{
@@ -498,7 +543,10 @@ const NewPatientPopUp = ({open, onClose, patientData, updateApiIntegrate}) => {
             <CustomButton
               onPress={handleSubmit}
               title="Confirm"
-              textStyle={{color: validate()? COLORS.GRAY_90: COLORS.WHITE, textAlign: 'center'}}
+              textStyle={{
+                color: validate() ? COLORS.GRAY_90 : COLORS.WHITE,
+                textAlign: 'center',
+              }}
               disabled={validate()}
               style={{
                 width: width * 0.6,
