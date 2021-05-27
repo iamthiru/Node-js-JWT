@@ -3,6 +3,7 @@ const pool = require('../_helpers/db');
 module.exports = {
     addNewPatient,
     getAllPatientList,
+    getPatientListByUserId,
     createAssessment,
     getAssessmentByPatientId,
     getLookUp,
@@ -40,6 +41,28 @@ async function addNewPatient(data) {
 
 async function getAllPatientList() {
     const SQL = `select * from patient`;
+    params = [];
+    const patients = await new Promise((resolve, reject) => {
+        pool.query(SQL, params, (err, result) => {
+            if (err) {
+                console.log(err);
+                resolve({
+                    isError: true,
+                    error: err,
+                })
+            } else {
+                resolve({
+                    isError: false,
+                    result: result
+                })
+            }
+        });
+    });
+    return patients;
+}
+
+async function getPatientListByUserId(userId) {
+    const SQL = `select * from patient where createdBy = ${userId}`;
     params = [];
     const patients = await new Promise((resolve, reject) => {
         pool.query(SQL, params, (err, result) => {

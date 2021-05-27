@@ -25,7 +25,8 @@ function addPatient(req, res, next) {
 }
 
 function getPatienList(req, res, next) {
-    patientService.getAllPatientList()
+    const userId = req.query.userId;
+    patientService.getPatientListByUserId(userId)
         .then(users => res.json(users))
         .catch(next);
 }
