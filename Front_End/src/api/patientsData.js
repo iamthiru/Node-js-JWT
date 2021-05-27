@@ -20,9 +20,9 @@ export const addPatientAPI = (newPatientData, token) => {
       });
   });
 };
-export const getPatientListAPI = (token) => {
+export const getPatientListAPI = (token, userId) => {
   return new Promise((resolve, reject) => {
-    Api.get('patient/getPatientList',{
+    Api.get(`patient/getPatientList?userId=${userId}`,{
       headers :{
         'Access-Control-Allow-Origin': '*',
         'Content-Type': 'application/json',

@@ -89,64 +89,37 @@ const PainAssessmentScreen = ({navigation}) => {
   };
 
   const handleBackPress = () => {
-    if (showResult) {
+    if(showResult) {
       setShowResult(false);
-      closeScreen();
-      dispatch({
-        type: CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
-        payload: {
-          type: VERBAL_ABILITY.VERBAL.value,
-          patient_id: 0,
-          patient_name: '',
-          current_pain: 0,
-          most_pain: 0,
-          least_pain: 0,
-          painImpactId: 0,
-          painImapctName: '',
-          painLocation_id: 0,
-          pain_activity_id: 0,
-          pain_activity_name: '',
-          description: PAIN_FREQUENCY[0].value,
-          painDate: null,
-          painTime: null,
-          remainder_date: null,
-          reminder_time: null,
-          isRemainder: true,
-          assessment_date: null,
-          frequence: 0,
-          pain_frequency_id: 0,
-          total_score: 0,
-        },
-      });
-    } else {
-      closeScreen();
-      dispatch({
-        type: CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
-        payload: {
-          type: VERBAL_ABILITY.VERBAL.value,
-          patient_id: 0,
-          patient_name: '',
-          current_pain: 0,
-          most_pain: 0,
-          least_pain: 0,
-          painImpactId: 0,
-          painImapctName: '',
-          painLocation_id: 0,
-          pain_activity_id: 0,
-          pain_activity_name: '',
-          description: PAIN_FREQUENCY[0].value,
-          painDate: null,
-          painTime: null,
-          remainder_date: null,
-          reminder_time: null,
-          isRemainder: true,
-          assessment_date: null,
-          frequence: 0,
-          pain_frequency_id: 0,
-          total_score: 0,
-        },
-      });
     }
+    closeScreen();
+    dispatch({
+      type: CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
+      payload: {
+        type: VERBAL_ABILITY.VERBAL.value,
+        patient_id: 0,
+        patient_name: '',
+        current_pain: 0,
+        most_pain: 0,
+        least_pain: 0,
+        painImpactId: 0,
+        painImapctName: '',
+        painLocation_id: 0,
+        pain_activity_id: 0,
+        pain_activity_name: '',
+        description: PAIN_FREQUENCY[0].value,
+        painDate: null,
+        painTime: null,
+        remainder_date: null,
+        reminder_time: null,
+        isRemainder: true,
+        assessment_date: null,
+        frequence: 0,
+        pain_frequency_id: 0,
+        total_score: 0,
+        notes: ''
+      },
+    });
   };
 
   const closeScreen = () => {

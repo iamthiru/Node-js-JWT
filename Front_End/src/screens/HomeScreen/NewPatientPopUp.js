@@ -110,7 +110,17 @@ const NewPatientPopUp = ({
           return;
         }
         setPatientId(res.data.result.insertId);
-        getPatientListAPI(token)
+        if(goToAssessment) {
+          dispatch({
+            type: PATIENT_NAME_ACTION.PATIENT,
+            payload: {
+              patient_id: res.data.result.insertId,
+              patient_name: firstName[0].toUpperCase()+firstName.slice(1) + ' ' + lastName[0].toUpperCase()+lastName.slice(1),
+            },
+          });
+          navigation.navigate(SCREEN_NAMES.PAINASSESSMENT);
+        }
+        getPatientListAPI(token, userId)
           .then((res) => {
             if (res.data.err) {
               Alert.alert('------all aptient error------');
@@ -141,6 +151,7 @@ const NewPatientPopUp = ({
     eyeColor,
     selectedDate,
     medicalRecord,
+    goToAssessment
   ]);
 
   const handleSubmit = useCallback(() => {
@@ -160,7 +171,7 @@ const NewPatientPopUp = ({
       )
         .then((res) => {
           console.log('--------update data sucessfully-----', res);
-          getPatientListAPI(token)
+          getPatientListAPI(token, userId)
             .then((res) => {
               if (res.data.isError) {
                 Alert.alert('all patinets  data error');
@@ -173,7 +184,7 @@ const NewPatientPopUp = ({
               setEyeColor(null);
               setMedicalRecord('');
               setSelectedDate(null);
-              getPatientListAPI(token);
+              getPatientListAPI(token, userId);
               dispatch({
                 type: ALL_PATIENTS_ACTIONS.ALL_PATIENTS,
                 payload: res.data.result.sort(
@@ -191,16 +202,6 @@ const NewPatientPopUp = ({
         .catch((err) => {
           console.log('----update error-----', err);
         });
-    } else if (goToAssessment) {
-      handleAddPatientApi();
-      dispatch({
-        type: PATIENT_NAME_ACTION.PATIENT,
-        payload: {
-          patient_id: patientId,
-          patient_name: firstName[0].toUpperCase()+firstName.slice(1) + ' ' + lastName[0].toUpperCase()+lastName.slice(1),
-        },
-      });
-      navigation.navigate(SCREEN_NAMES.PAINASSESSMENT);
     } else {
       handleAddPatientApi();
     }

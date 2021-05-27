@@ -27,8 +27,8 @@ const SpeechToText = ({setPartialResults}) => {
     await Voice.stop();
   };
 
-  const handleVoiceRecord = () => {
-    if (startRecording) {
+  const handleVoiceRecord = (start = false) => {
+    if (start) {
       startRecognizing();
     } else {
       stopRecognizing();
@@ -52,8 +52,10 @@ const SpeechToText = ({setPartialResults}) => {
       <TouchableOpacity
         activeOpacity={0.5}
         onPress={() => {
-          setStartRecording(!startRecording);
-          handleVoiceRecord();
+          setStartRecording((value) => {
+            handleVoiceRecord(!value);
+            return !value;
+          });
         }}
         style={{
           width: 50,

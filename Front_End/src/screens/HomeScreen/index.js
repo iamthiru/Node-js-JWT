@@ -42,6 +42,7 @@ const HomeScreen = ({navigation}) => {
   const [openNewPatient, setOpenNewPatient] = useState(false);
   const [user, setUser] = useState('');
   const token = useSelector((state) => state.user.authToken);
+  const userId = useSelector((state) => state.user.loggedInUserId);
   const userName = useSelector((state) => state.user.userName);
   const dispatch = useDispatch();
   const [greetingText,setGreetingText] = useState('')
@@ -112,7 +113,7 @@ const HomeScreen = ({navigation}) => {
       setUser(userName);
     }
     if (token) {
-      getPatientListAPI(token)
+      getPatientListAPI(token, userId)
         .then((res) => {
           if (res.data.isError) {
             Alert.alert('all patinets  data error');

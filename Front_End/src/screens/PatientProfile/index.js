@@ -137,7 +137,7 @@ const PatientProfile = ({navigation}) => {
 
   useEffect(()=>{
     if(token){
-      getPatientListAPI(token)
+      getPatientListAPI(token, userId)
       .then((res)=>{
         if (res.data.isError) {
           Alert.alert('all patinets  data error');

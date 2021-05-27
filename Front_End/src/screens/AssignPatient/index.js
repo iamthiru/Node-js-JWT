@@ -32,7 +32,6 @@ const AssignPatient = () => {
   const [openNewPatient, setOpenNewPatient] = useState(false);
   const [showPatient, setShowPatient] = useState(false);
   const [patientData, setPatientData] = useState({});
-  const [goToAssessment,setGoToAssessment]= useState(true)
   const painAssessment = true;
 
   useEffect(() => {
@@ -169,7 +168,7 @@ const AssignPatient = () => {
       />
       <NewPatientPopUp
         open={openNewPatient}
-        goToAssessment = {goToAssessment}
+        goToAssessment = {true}
         onClose={() => {
           setOpenNewPatient(false);
         }}

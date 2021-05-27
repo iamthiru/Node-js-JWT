@@ -294,7 +294,8 @@ const Result = (props) => {
               marginBottom: 12,
             }}
             onPress={() => {
-              props.navigation.goBack();
+              props.navigation.navigate(SCREEN_NAMES.HOME)
+              /* props.navigation.goBack();
               dispatch({
                 type: CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
                 payload: {
@@ -320,7 +321,7 @@ const Result = (props) => {
                   pain_frequency_id: 0,
                   total_score: 0,
                 },
-              });
+              }); */
             }}>
             <Text
               style={{
