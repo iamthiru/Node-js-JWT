@@ -87,8 +87,8 @@ const NewPatientPopUp = ({
   const handleAddPatientApi = useCallback(() => {
     addPatientAPI(
       {
-        firstName: firstName,
-        lastName: lastName,
+        firstName: firstName[0].toUpperCase()+firstName.slice(1),
+        lastName: lastName[0].toUpperCase()+lastName.slice(1),
         dob: new Date(selectedDate).getTime(),
         gender: gender,
         eyeColor: eyeColor,
@@ -148,8 +148,8 @@ const NewPatientPopUp = ({
       patientUpdateApi(
         {
           id: patientData.id,
-          first_name: firstName,
-          last_name: lastName,
+          first_name: firstName[0].toUpperCase()+firstName.slice(1),
+          last_name: lastName[0].toUpperCase()+lastName.slice(1),
           dob: new Date(selectedDate).getTime(),
           eyeColor: eyeColor,
           gender: gender,
@@ -197,7 +197,7 @@ const NewPatientPopUp = ({
         type: PATIENT_NAME_ACTION.PATIENT,
         payload: {
           patient_id: patientId,
-          patient_name: firstName + ' ' + lastName,
+          patient_name: firstName[0].toUpperCase()+firstName.slice(1) + ' ' + lastName[0].toUpperCase()+lastName.slice(1),
         },
       });
       navigation.navigate(SCREEN_NAMES.PAINASSESSMENT);
