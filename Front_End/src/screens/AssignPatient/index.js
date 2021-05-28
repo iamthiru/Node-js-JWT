@@ -20,10 +20,14 @@ import assignPatientStyles from './styles';
 import {sortByListOptions} from '../../constants/AssignPatientConstants';
 import NewPatientPopUp from '../HomeScreen/NewPatientPopUp';
 import PatientDetailModal from '../../components/PatientDetailsModal';
-import {useSelector} from 'react-redux';
+import {useSelector,useDispatch} from 'react-redux';
 import Analytics from '../../utils/Analytics';
+import {useRoute} from '@react-navigation/native'
+import { ROUTE_NAME_ACTION } from '../../constants/actions';
 
 const AssignPatient = () => {
+
+
   const {width, height} = useWindowDimensions();
   const [searchString, setSearchString] = useState('');
   const [sortBy, setSortedBy] = useState('last_name');
@@ -32,7 +36,10 @@ const AssignPatient = () => {
   const [openNewPatient, setOpenNewPatient] = useState(false);
   const [showPatient, setShowPatient] = useState(false);
   const [patientData, setPatientData] = useState({});
+  const dispatch = useDispatch()
   const painAssessment = true;
+
+  const screenName = useRoute()?.name
 
   useEffect(() => {
     let startTime = 0;
@@ -131,6 +138,10 @@ const AssignPatient = () => {
         <CustomButton
           onPress={() => {
             setOpenNewPatient(true);
+            dispatch({
+              type: ROUTE_NAME_ACTION.ROUTE_NAME,
+              payload : screenName
+            })
           }}
           title="New Patient"
           textStyle={{

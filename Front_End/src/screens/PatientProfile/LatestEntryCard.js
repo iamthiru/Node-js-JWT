@@ -66,7 +66,7 @@ const LatestEntryCard = ({
 
         <Text style={styles.latest_subTextData}>
           {`${
-            (date && dateFormat.toDateString() + formatAMPM(dateFormat)) || '-'
+            (date && dateFormat.toDateString() +' '+ formatAMPM(dateFormat)) || '-'
           }`}
         </Text>
       </View>

@@ -6,7 +6,7 @@ import CustomTouchableOpacity from '../../components/shared/CustomTouchableOpaci
 import AntDesignIcon from 'react-native-vector-icons/AntDesign';
 import {COLORS} from '../../constants/colors';
 import {formatAMPM} from '../../utils/date';
-import {useSelector,useDispatch} from 'react-redux';
+import {useSelector, useDispatch} from 'react-redux';
 import {SCREEN_NAMES} from '../../constants/navigation';
 import Analytics from '../../utils/Analytics';
 import {CREATE_ASSESSMENT_ACTION} from '../../constants/actions';
@@ -22,7 +22,8 @@ const Result = (props) => {
   const [patient, setPatient] = useState('');
   const [impactScore, setImpactScore] = useState(0);
   const assessment_data = useSelector((state) => state.createAsseement);
-  const dispatch = useDispatch()
+  const screenName = useSelector((state) => state.routeName.route);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     let startTime = 0;
@@ -64,10 +65,6 @@ const Result = (props) => {
       unsubscribeBeforeRemove();
     };
   }, [props.navigation]);
-
-  useEffect(() => {
-    startTime = new Date().getTime();
-  }, []);
 
   const hideDateTimePickers = () => {
     setShowDatePicker(false);
@@ -294,8 +291,11 @@ const Result = (props) => {
               marginBottom: 12,
             }}
             onPress={() => {
-              props.navigation.navigate(SCREEN_NAMES.HOME)
-              /* props.navigation.goBack();
+              if (screenName === 'Home') {
+                props.navigation.navigate(SCREEN_NAMES.HOME);
+              } else {
+                props.navigation.navigate(SCREEN_NAMES.ASSIGN_PATIENT);
+              }
               dispatch({
                 type: CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
                 payload: {
@@ -320,8 +320,9 @@ const Result = (props) => {
                   frequence: 0,
                   pain_frequency_id: 0,
                   total_score: 0,
+                  notes: ''
                 },
-              }); */
+              });
             }}>
             <Text
               style={{

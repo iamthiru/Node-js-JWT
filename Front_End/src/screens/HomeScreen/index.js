@@ -25,15 +25,27 @@ import {getPatientListAPI} from '../../api/patientsData';
 import {
   ALL_PATIENTS_ACTIONS,
   LOOKUP_DATA_ACTION,
+  ROUTE_NAME_ACTION,
 } from '../../constants/actions';
 import {lookupDataAPI} from '../../api/lookupData';
 import {lookupTypeAPI} from '../../api/lookupType';
 import Analytics from '../../utils/Analytics';
+import {useRoute} from '@react-navigation/native'
 const greetingTime = new Date().getHours()
 
 const {width, height} = Dimensions.get('window');
 
+
+
 const HomeScreen = ({navigation}) => {
+
+  const {name} = useRoute()
+  const screenName = useRoute()?.name
+
+  console.log('-------',screenName)
+
+console.log(name)
+
   const recentPatients = useSelector(
     (state) => state?.allPatients?.all_patients,
   )?.filter((item, index) => {
@@ -241,6 +253,10 @@ const HomeScreen = ({navigation}) => {
           <CustomButton
             onPress={() => {
               navigation.navigate(SCREEN_NAMES.PAINASSESSMENT);
+              dispatch({
+                type:ROUTE_NAME_ACTION.ROUTE_NAME,
+                payload : screenName
+              })
             }}
             title="New Pain Assessment"
             textStyle={{
