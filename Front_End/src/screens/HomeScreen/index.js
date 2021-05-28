@@ -49,22 +49,21 @@ const HomeScreen = ({navigation}) => {
   
 
   useEffect(()=>{
-    if(greetingTime<=12){
+    if(greetingTime >= 4 && greetingTime <= 11){
       setGreetingText('Good Morning')
       return
     }
-    if(greetingTime>12 && greetingTime<=18){
+    if(greetingTime >= 12 && greetingTime <= 15){
       setGreetingText('Good Afternoon')
       return
     }
-    if(greetingTime >18 && greetingTime<=20){
+    if(greetingTime >= 16 && greetingTime <= 21){
       setGreetingText('Good Evening')
       return
     }
-    if(greetingTime>20 && greetingTime<=24){
+    if(greetingTime >= 22 || greetingTime <= 3){
       setGreetingText('Good Night')
     }
-
   },[greetingTime])
 
 
