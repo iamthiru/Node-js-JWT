@@ -5,13 +5,13 @@ export const SCREEN_NAMES = {
     PUPILLARY_DILATION: "PupillaryDilation",
     FACIAL_EXPRESSION: "FacialExpression",
     PAIN_ASSESSMENT: "PainAssessment",
-    NEW_MEDICATION: 'New Medication',
-    PATIENT_PROFILE: 'Patient Profile',
-    PATIENT_LIST: 'Patient List',
+    NEW_MEDICATION: 'NewMedication',
+    PATIENT_PROFILE: 'PatientProfile',
+    PATIENT_LIST: 'PatientList',
     SCHEDULE: 'Schedule',
     SETTINGS: 'Settings',
-    ASSIGN_PATIENT:'Assign Patient',
+    ASSIGN_PATIENT:'AssignPatient',
     PAINASSESSMENT: 'Pain Assessment',
-    PATIENT_DEATAIL_MODAL: 'Patient Detail Modal',
+    PATIENT_DEATAIL_MODAL: 'PatientDetailModal',
     RESULT : 'Result'
 }

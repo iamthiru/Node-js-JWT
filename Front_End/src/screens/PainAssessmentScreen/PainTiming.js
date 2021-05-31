@@ -17,8 +17,8 @@ import {SCREEN_NAMES} from '../../constants/navigation';
 
 const {width, height} = Dimensions.get('window');
 
-var startTime;
-var endTime;
+let startTime = 0;
+let endTime = 0;
 
 const PainTiming = ({gotoNext, gotoPrevious}) => {
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -33,6 +33,10 @@ const PainTiming = ({gotoNext, gotoPrevious}) => {
   );
 
   const selectedAssessmentData = useSelector((state) => state.createAsseement);
+
+  useEffect(()=>{
+    startTime = new Date().getTime()
+  },[])
 
   useEffect(() => {
     if (selectedAssessmentData?.description) {
@@ -50,13 +54,13 @@ const PainTiming = ({gotoNext, gotoPrevious}) => {
     selectedAssessmentData?.description,
   ]);
 
-  useEffect(() => {
+  /* useEffect(() => {
     if (painTimingData) {
       setPainFrequency(painTimingData.painFrequency);
       setSelectedDate(painTimingData.selectedDate);
       setSelectedTime(painTimingData.selectedTime);
     }
-  }, [painTimingData]);
+  }, [painTimingData]); */
 
   const handlePrevious = () => {
     gotoPrevious();

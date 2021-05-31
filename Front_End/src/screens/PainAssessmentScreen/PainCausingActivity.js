@@ -12,14 +12,14 @@ import Analytics from '../../utils/Analytics';
 import { SCREEN_NAMES } from '../../constants/navigation';
 
 const {width, height} = Dimensions.get('window');
-var startTime
-var endTime
+let startTime = 0;
+let endTime = 0;
 
 const PainCausingActivity = ({gotoNext, gotoPrevious}) => {
   const [selectedActivities, setSelectedActivities] = useState([]);
   const dispatch = useDispatch();
   const painCausingActivity = useSelector(
-    (state) => state.painAssessmentData.selectedActivities,
+    (state) => state.painAssessmentData.selectedActivities
   );
   const selectedAssessmentData = useSelector((state) => state.createAsseement);
   const pain_activity = useSelector((state) => state.lookupData.lookup_data);
@@ -34,15 +34,15 @@ const PainCausingActivity = ({gotoNext, gotoPrevious}) => {
     startTime = new Date().getTime()
   },[])
 
-  useEffect(() => {
+  /* useEffect(() => {
     if (painCausingActivity && painCausingActivity.length) {
       setSelectedActivities(painCausingActivity);
     }
-  }, [painCausingActivity]);
+  }, [painCausingActivity]); */
 
   useEffect(() => {
-    if (selectedAssessmentData?.painImapctName) {
-      setSelectedActivities(selectedAssessmentData?.painImapctName);
+    if (selectedAssessmentData && selectedAssessmentData.painImapctName) {
+      setSelectedActivities(selectedAssessmentData.painImapctName);
     }
   }, [selectedAssessmentData?.painImapctName]);
 

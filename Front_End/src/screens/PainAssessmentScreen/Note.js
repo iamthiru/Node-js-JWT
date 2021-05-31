@@ -11,8 +11,8 @@ import {useDispatch, useSelector} from 'react-redux';
 import {CREATE_ASSESSMENT_ACTION} from '../../constants/actions';
 import Analytics from '../../utils/Analytics';
 import { SCREEN_NAMES } from '../../constants/navigation';
-var startTime;
-var endTime;
+let startTime = 0;
+let endTime = 0;
 
 const {width, height} = Dimensions.get('window');
 

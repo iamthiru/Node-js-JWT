@@ -21,8 +21,8 @@ import Analytics from '../../utils/Analytics';
 import { SCREEN_NAMES } from '../../constants/navigation';
 
 const { width, height } = Dimensions.get("window");
-var startTime ;
-var endTime ;
+let startTime = 0;
+let endTime = 0;
 
 
 

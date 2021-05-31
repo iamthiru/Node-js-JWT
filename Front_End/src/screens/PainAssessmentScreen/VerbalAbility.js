@@ -18,14 +18,12 @@ import { SCREEN_NAMES } from '../../constants/navigation';
 
 const {width, height} = Dimensions.get('window');
 
+let startTime = 0;
+let endTime = 0;
+
 const VerbalAbility = ({gotoNext, verbalAbility, setVerbalAbility}) => {
   const patientData = useSelector((state) => state.patientData.patient);
   const selectedAssessmentData = useSelector((state) => state.createAsseement);
- 
-
-  var startTime;
-  var endTime ;
-  
 
   useEffect(()=>{
     startTime = new Date().getTime()
