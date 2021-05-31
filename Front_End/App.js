@@ -136,7 +136,7 @@ function App() {
                   asyncStorage.getItem(STORAGE_KEYS.USER_NAME)
                     .then((data) => {
                       let userName = data
-                      asyncStorage.setItem(STORAGE_KEYS.EMAIL_TO_LOGIN, data.emailToLogin)
+                      asyncStorage.getItem(STORAGE_KEYS.EMAIL_TO_LOGIN)
                       .then(emailRes => {
                         let emailToLogin = emailRes;
                         if (emailRes && emailRes !== "") {
@@ -152,11 +152,29 @@ function App() {
                           updateAuthData({ authToken: token, userId: userId, userName: userName, emailToLogin: emailToLogin }),
                         );
                       })
-                      .catch(err => {});
-                      
-
+                      .catch(err => {
+                        dispatch({
+                          type: AUTH_ACTIONS.RESTORE_TOKEN,
+                          token: token,
+                          userId: userId,
+                          userName: userName
+                        });
+                        store.dispatch(
+                          updateAuthData({ authToken: token, userId: userId, userName: userName, emailToLogin: userName }),
+                        );
+                      });
                     })
-                    .catch({})
+                    .catch(err => {
+                      dispatch({
+                        type: AUTH_ACTIONS.RESTORE_TOKEN,
+                        token: token,
+                        userId: userId,
+                        userName: ""
+                      });
+                      store.dispatch(
+                        updateAuthData({ authToken: token, userId: userId, userName: userId, emailToLogin: userId }),
+                      );
+                    })
                 }
               })
               .catch((err) => {

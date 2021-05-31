@@ -58,6 +58,7 @@ const LoginScreen = ({navigation, updateAuthData}) => {
           authToken: res.data.result.token,
           userId: res.data.result.id,
           userName: res.data.result.first_name,
+          emailToLogin: email
         });
         setIsLoggingIn(false);
       })
