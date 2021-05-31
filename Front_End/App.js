@@ -37,7 +37,7 @@ import AssignPatient from './src/screens/AssignPatient';
 import PainAssessment from './src/screens/PainAssessment';
 import PatientDetailModal from './src/components/PatientDetailsModal';
 import Result from './src/screens/PainAssessmentScreen/Result';
-import * as firebaseAPI from './src/Api/firebase';
+import * as firebaseAPI from './src/api/firebase';
 
 const Stack = createStackNavigator();
 
