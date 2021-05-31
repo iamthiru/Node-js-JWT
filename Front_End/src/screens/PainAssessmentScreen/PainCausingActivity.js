@@ -35,7 +35,7 @@ const PainCausingActivity = ({gotoNext, gotoPrevious}) => {
   },[])
 
   useEffect(() => {
-    if (painCausingActivity && painCausingActivity.lenght) {
+    if (painCausingActivity && painCausingActivity.length) {
       setSelectedActivities(painCausingActivity);
     }
   }, [painCausingActivity]);
