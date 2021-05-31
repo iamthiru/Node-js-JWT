@@ -291,7 +291,7 @@ const Result = (props) => {
               marginBottom: 12,
             }}
             onPress={() => {
-              if (screenName === 'Home') {
+              if (screenName === SCREEN_NAMES.HOME) {
                 props.navigation.navigate(SCREEN_NAMES.HOME);
               } else {
                 props.navigation.navigate(SCREEN_NAMES.ASSIGN_PATIENT);

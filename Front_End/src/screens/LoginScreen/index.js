@@ -35,7 +35,7 @@ const LoginScreen = ({navigation, updateAuthData}) => {
   const handleSignIn = () => {
     setIsLoggingIn(true);
     loginAPI({email: email, password: password})
-      .then((res) => {
+      .then(async (res) => {
         console.log(res);
         if (res.data.isError) {
           Alert.alert(
@@ -51,8 +51,9 @@ const LoginScreen = ({navigation, updateAuthData}) => {
           authToken: res.data.result.token,
           userId: res.data.result.id,
           userName: res.data.result.first_name,
+          emailToLogin: email
         });
-        Analytics.onSignIn({id: res.data.result.id, email: email});
+        await Analytics.onSignIn({id: res.data.result.id, email: email});
         signIn({
           authToken: res.data.result.token,
           userId: res.data.result.id,

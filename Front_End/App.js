@@ -7,10 +7,12 @@
  */
 
 import React, {useReducer, useMemo, useState, useEffect} from 'react';
+import { Platform } from 'react-native';
 import {Provider} from 'react-redux';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
+import auth from '@react-native-firebase/auth';
 import store from './src/store';
 import PupillaryDilationScreen from './src/screens/PupillaryDilationScreen';
 import {SCREEN_NAMES} from './src/constants/navigation';
@@ -35,7 +37,7 @@ import AssignPatient from './src/screens/AssignPatient';
 import PainAssessment from './src/screens/PainAssessment';
 import PatientDetailModal from './src/components/PatientDetailsModal';
 import Result from './src/screens/PainAssessmentScreen/Result';
-import { Platform } from 'react-native';
+import * as firebaseAPI from './src/Api/firebase';
 
 const Stack = createStackNavigator();
 
@@ -91,6 +93,18 @@ const reducer = (prevState, action) => {
 function App() {
   const [state, dispatch] = useReducer(reducer, initialState);
 
+  function onFirebaseAuthStateChanged(user) {
+    if (!user) {
+      console.log("Firebase User is not signed in: ", user);
+      firebaseAPI.doFirebaseSignIn();
+    }
+  }
+
+  useEffect(() => {
+    const subscriber = auth().onAuthStateChanged(onFirebaseAuthStateChanged);
+    return subscriber;
+  }, []);
+
   useEffect(() => {
     const checkToShowOnBoarding = () => {
       asyncStorage
@@ -117,19 +131,29 @@ function App() {
               .getItem(STORAGE_KEYS.USER_ID)
               .then((res) => {
                 if (res) {
-                  let userId = res
+                  let userId = res;
+                  firebaseAPI.setUserId(userId);
                   asyncStorage.getItem(STORAGE_KEYS.USER_NAME)
                     .then((data) => {
-                      userName = data
-                      dispatch({
-                        type: AUTH_ACTIONS.RESTORE_TOKEN,
-                        token: token,
-                        userId: userId,
-                        userName: userName
-                      });
-                      store.dispatch(
-                        updateAuthData({ authToken: token, userId: userId, userName: userName }),
-                      );
+                      let userName = data
+                      asyncStorage.setItem(STORAGE_KEYS.EMAIL_TO_LOGIN, data.emailToLogin)
+                      .then(emailRes => {
+                        let emailToLogin = emailRes;
+                        if (emailRes && emailRes !== "") {
+                          firebaseAPI.setUserName(emailRes);
+                        }
+                        dispatch({
+                          type: AUTH_ACTIONS.RESTORE_TOKEN,
+                          token: token,
+                          userId: userId,
+                          userName: userName
+                        });
+                        store.dispatch(
+                          updateAuthData({ authToken: token, userId: userId, userName: userName, emailToLogin: emailToLogin }),
+                        );
+                      })
+                      .catch(err => {});
+                      
 
                     })
                     .catch({})
@@ -161,17 +185,21 @@ function App() {
               .then((res) => {
                 asyncStorage.setItem(STORAGE_KEYS.USER_NAME,data.userName)
                 .then((res)=>{
-                asyncStorage
-                  .setItem(STORAGE_KEYS.HAS_LOGGED_IN_BEFORE, 'true')
+                  asyncStorage.setItem(STORAGE_KEYS.EMAIL_TO_LOGIN, data.emailToLogin)
                   .then((res) => {
-                    dispatch({
-                      type: AUTH_ACTIONS.SIGN_IN,
-                      token: data.authToken,
-                      userId: data.userId,
-                      userName:data.userName
-                    });
+                    asyncStorage
+                    .setItem(STORAGE_KEYS.HAS_LOGGED_IN_BEFORE, 'true')
+                    .then((res) => {
+                      dispatch({
+                        type: AUTH_ACTIONS.SIGN_IN,
+                        token: data.authToken,
+                        userId: data.userId,
+                        userName:data.userName
+                      });
+                    })
+                    .catch((err) => {});
                   })
-                  .catch((err) => {});
+                  .catch(err => {})
               })
               .catch((err)=>{})
             })
@@ -183,7 +211,11 @@ function App() {
         asyncStorage.multiRemove([
           STORAGE_KEYS.AUTH_TOKEN,
           STORAGE_KEYS.USER_ID,
+          STORAGE_KEYS.USER_NAME,
+          STORAGE_KEYS.EMAIL_TO_LOGIN
         ]);
+        firebaseAPI.setUserId(null);
+        firebaseAPI.setUserName(null);
         dispatch({type: AUTH_ACTIONS.SIGN_OUT});
       },
       signUp: async (data) => {

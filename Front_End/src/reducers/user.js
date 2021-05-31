@@ -3,7 +3,8 @@ import { USER_ACTIONS } from "../constants/actions";
 const initialState = {
     loggedInUserId: "",
     authToken: "",
-    userName: ""
+    userName: "",
+    emailToLogin: ""
 }
 
 const user = (state = initialState, action) => {
@@ -14,6 +15,7 @@ const user = (state = initialState, action) => {
                 authToken: action.data.authToken,
                 loggedInUserId: action.data.userId,
                 userName: action.data.userName,
+                emailToLogin: action.data.emailToLogin
             };
         default:
             return state;
