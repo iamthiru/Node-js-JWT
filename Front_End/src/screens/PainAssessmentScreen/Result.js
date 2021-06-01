@@ -291,11 +291,12 @@ const Result = (props) => {
               marginBottom: 12,
             }}
             onPress={() => {
-              if (screenName === SCREEN_NAMES.HOME) {
+              props.navigation.navigate(SCREEN_NAMES.HOME);
+              /* if (screenName === SCREEN_NAMES.HOME) {
                 props.navigation.navigate(SCREEN_NAMES.HOME);
               } else {
                 props.navigation.navigate(SCREEN_NAMES.ASSIGN_PATIENT);
-              }
+              } */
               dispatch({
                 type: CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
                 payload: {

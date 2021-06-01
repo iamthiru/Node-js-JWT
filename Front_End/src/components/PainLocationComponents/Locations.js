@@ -34,7 +34,7 @@ const Locations = ({body, showFrontImage, selectedPainLocations}) => {
               onPress={() => {
                 if (select) {
                   const filterData = selectedPainLocations.filter((item) => {
-                    return item.painLocationId !== data.painLocationId;
+                    return item.painLocationId !== body.value;
                   });
                   dispatch({
                     type: PAIN_LOCATIONS_ACTION.PAIN_LOCATION,

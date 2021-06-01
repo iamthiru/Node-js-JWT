@@ -634,7 +634,7 @@ const FacialExpressionScreen = ({navigation}) => {
           most_pain_score: assessment_data.most_pain,
           description: assessment_data.description,
           pain_location_id: Boolean(assessment_data.painLocationId?.length)
-            ? JSON.stringify(assessment_data?.painLocationId)
+            ? JSON.stringify(assessment_data.painLocationId.map(painLocData => painLocData.painLocationId))
             : '',
           pain_quality_id: assessment_data.pain_activity_id,
           pain_frequency_id: assessment_data.pain_frequency_id,
@@ -672,7 +672,7 @@ const FacialExpressionScreen = ({navigation}) => {
           most_pain_score: assessment_data.most_pain,
           description: assessment_data.description,
           pain_location_id: Boolean(assessment_data.painLocationId?.length)
-            ? JSON.stringify(assessment_data?.painLocationId)
+            ? JSON.stringify(assessment_data.painLocationId.map(painLocData => painLocData.painLocationId))
             : '',
           pain_quality_id: assessment_data.pain_activity_id,
           pain_frequency_id: assessment_data.pain_frequency_id,
@@ -972,19 +972,6 @@ const FacialExpressionScreen = ({navigation}) => {
               }}>
               3. Get ready to not blink for 10 seconds.
             </Text>
-            <CustomTouchableOpacity
-              onPress={() => {
-                handleCreateAssessmentAPI();
-                navigation.navigate(SCREEN_NAMES.RESULT);
-              }}>
-              <Text
-                style={{
-                  fontSize: 20,
-                  color: 'red',
-                }}>
-                go
-              </Text>
-            </CustomTouchableOpacity>
 
             {/* <View style={{ width: width - 40, height: 30, marginTop: 20, marginBottom: 10, flexDirection: "row", justifyContent: 'center', alignItems: 'center' }}>
                     <Text style={{ fontWeight: "700", color: COLORS.GRAY_90 }}>{"FPS: "}</Text>
