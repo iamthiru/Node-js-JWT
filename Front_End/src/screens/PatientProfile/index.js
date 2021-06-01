@@ -59,6 +59,7 @@ const PatientProfile = ({navigation}) => {
   const selectedPatient = useSelector((state)=>state?.allPatients?.all_patients)?.find((patient)=>patient.id === item.id)
 
 
+
   const [latestMedicationData, setLatestMedicationData] = useState({});
   const [last_medication, setLast_medication] = useState([]);
   const [last_assessment, setLastAssessment] = useState([]);
@@ -67,6 +68,7 @@ const PatientProfile = ({navigation}) => {
   const lookup_data = useSelector((state) => state.lookupData.lookup_data);
   const all_assessment_data = last_assessment?.assessment;
   const all_medication_data = last_assessment?.medication;
+const [ summaryChartData , setSummaryChartData] = useState([])
 
   useEffect(()=>{
     let startTime = 0;
@@ -161,6 +163,7 @@ const PatientProfile = ({navigation}) => {
 
   useEffect(() => {
     if (token) {
+
       assessmentListAPI(token)
         .then((res) => {
           if (res.data.isError) {
@@ -172,9 +175,11 @@ const PatientProfile = ({navigation}) => {
             type: ALL_ASSESSMENTS_LIST_ACTION.ALL_ASSESSMENT_LIST,
             payload: res.data.result,
           });
+         
           setAllAssessmentList(res.data.result.filter((item)=>{
             return item.patient_id === selectedPatient?.id
           }));
+          
 
         })
         .catch((err) => {
@@ -207,6 +212,54 @@ const PatientProfile = ({navigation}) => {
         });
     }
   }, [lookup_data, all_medication_data]);
+
+
+
+  const   handleSummaryChartData = (index)=>{
+    let now = new Date()
+    let year = now.getFullYear()
+    let month = now.getMonth()
+    let fullDate = now.getDate()
+    let hours = now.getHours()
+    if(index === 0){
+      let  date = new Date(year,month,fullDate,hours-6).getTime()
+      const data = allAssessmentList.filter((item)=>{
+        return item.assessment_datetime >= date
+      })
+      setSummaryChartData(data)
+      return
+    }
+    if(index === 1){
+      let  date = new Date(year,month,fullDate,hours-12).getTime()
+      const data = allAssessmentList.filter((item)=>{
+        return item.assessment_datetime >= date
+      })
+      setSummaryChartData(data || [])
+      return
+    }
+    if(index === 2){
+      let  date = new Date(year,month,fullDate-1,hours).getTime()
+      const data = allAssessmentList.filter((item)=>{
+        return item.assessment_datetime >= date
+      })
+      setSummaryChartData(data || [])
+      return
+    }
+    if(index === 3){
+      let  date = new Date(year,month,fullDate-7,hours).getTime()
+      const data = allAssessmentList.filter((item)=>{
+        return item.assessment_datetime >= date
+      })
+      setSummaryChartData(data|| [])
+      return
+    }
+    if(index ===4){
+      setSummaryChartData(allAssessmentList || [])
+    }
+  
+    
+
+  }
 
   return (
     <View
@@ -322,14 +375,15 @@ const PatientProfile = ({navigation}) => {
               last_assessment={last_assessment}
               last_medication={last_medication}
               lookup_data={lookup_data}
+              allAssessmentList ={allAssessmentList}
   
               patientData={
-                allAssessmentList?.map((list) => {
-                  let dateTime = new Date(list.assessment_datetime);
+                summaryChartData?.map((list) => {
+                  let dateTime =  list?.assessment_datetime;
 
                   return {
                     value: list?.total_score,
-                    time: dateTime.toDateString(),
+                    time: dateTime,
                     score: list?.current_pain_score,
                     medicationData: `${
                       (medicationList?.label && medicationList?.label) || ''
@@ -339,9 +393,10 @@ const PatientProfile = ({navigation}) => {
                         : ''
                     } ${dosage?.label ? dosage?.label : ''}`,
                   };
-                }) || []
+                })  || []
               }
               patientReport={reportData}
+              handleSummaryChartData= {handleSummaryChartData}
             />
             :
             <Text style ={styles.noDataFound}>

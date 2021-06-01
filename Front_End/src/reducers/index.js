@@ -11,6 +11,7 @@ import craeteMedication from './createMedication'
 import getLastAssesmentAndMedication from './getLastMedicationAssessment'
 import allAssessmentList from './allAssessmentList'
 import routeName from './route'
+import painLocations from './painLocations'
        
 
 const rootReducer = combineReducers({
@@ -25,7 +26,8 @@ const rootReducer = combineReducers({
     craeteMedication,
     getLastAssesmentAndMedication,
     allAssessmentList,
-    routeName
+    routeName,
+    painLocations
 });
 
 export default rootReducer;

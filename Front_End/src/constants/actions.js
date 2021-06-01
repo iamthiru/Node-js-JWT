@@ -56,3 +56,6 @@ export const ALL_ASSESSMENTS_LIST_ACTION={
 export const envActions = {
   SET_ENVIRONMENT: "setEnvironment"
 }
+export const PAIN_LOCATIONS_ACTION ={
+  PAIN_LOCATION : 'SET PAIN LOCATION'
+}

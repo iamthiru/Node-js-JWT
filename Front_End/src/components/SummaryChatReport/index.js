@@ -11,6 +11,7 @@ const SummaryChartReport = ({
   all_assessment_data,
   all_medication_data,
   lookup_data,
+  data
 }) => {
   const last_assessment = useSelector(
     (state) => state.getLastAssesmentAndMedication.assessment,
@@ -20,60 +21,28 @@ const SummaryChartReport = ({
   );
   const all_assessment_list = useSelector((state) => state.allAssessmentList);
 
-  const medicationList = useMemo(() => {
-    return lookup_data
-      .find((item) => {
-        return item.name === 'MedicationClass';
-      })
-      ?.lookup_data?.find((item) => {
-        return item.id === all_medication_data?.medication_class_id;
-      })
-      ?.lookup_data?.find((item) => {
-        return item.id === all_medication_data?.medication_id;
-      });
-  }, [lookup_data, all_medication_data]);
 
-  const dosage = useMemo(() => {
-    if (lookup_data) {
-      return lookup_data
-        ?.find((item) => {
-          return item.name === 'Dose';
-        })
-        ?.lookup_data?.find((item) => {
-          return item.id === all_medication_data?.dosage_unit_id;
-        });
-    }
-  }, [lookup_data, all_medication_data]);
 
-  const dose_number = last_medication?.dosage_number;
-
-  const date = all_assessment_data?.assessment_datetime;
-  const dateFormat = new Date(date);
+ 
   return (
     <View style={styles.summaryChatReportMainView}>
       <View style={styles.summaryChatReportView}>
         <Text style={styles.summaryChatReportMainText}>Time:</Text>
         <Text style={styles.summaryReportDataText}>
-          {(date && dateFormat.toDateString() + formatAMPM(dateFormat)) || '-'}
+          {data?.date && new Date(data.date).toDateString()+" "+formatAMPM(new Date(data.date)) || '-'}
         </Text>
       </View>
       <View style={styles.summaryChatReportView}>
         <Text style={styles.summaryChatReportMainText}>IMPACT score:</Text>
         <Text style={styles.summaryReportDataText}>
-          {all_assessment_data?.total_score
-            ? all_assessment_data?.total_score
-            : '-'}
+          {data?.impact_score ? data?.impact_score : '-'}
         </Text>
       </View>
       <View style={styles.summaryChatReportView}>
         <Text style={styles.summaryChatReportMainText}>Medication:</Text>
         <View>
           <Text style={styles.summaryReportDataText}>
-            {`${(medicationList && medicationList.label) || '-'} ${
-              (all_medication_data?.dosage_number &&
-                all_medication_data?.dosage_number) ||
-              '-'
-            } ${dosage ? dosage?.label : '-'}`}
+            {data?.medication ? data.medication : '-'}
           </Text>
           <Text
             style={[

@@ -41,7 +41,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import createAssessmentAPI from '../../api/createAssessment';
 import {CREATE_ASSESSMENT_ACTION} from '../../constants/actions';
 import Analytics from '../../utils/Analytics';
-
+import {useNavigation} from '@react-navigation/native';
 const {width, height} = Dimensions.get('window');
 const {VideoCropper} = NativeModules;
 
@@ -105,6 +105,7 @@ const FacialExpressionScreen = ({navigation}) => {
   const userId = useSelector((state) => state.user.loggedInUserId);
 
   const dispatch = useDispatch();
+  console.log('-----assssss------ccc----', assessment_data?.painLocationId);
 
   // var pressOut;
 
@@ -632,7 +633,9 @@ const FacialExpressionScreen = ({navigation}) => {
           least_pain_score: assessment_data.least_pain,
           most_pain_score: assessment_data.most_pain,
           description: assessment_data.description,
-          pain_location_id: assessment_data.painLocation_id,
+          pain_location_id: Boolean(assessment_data.painLocationId?.length)
+            ? JSON.stringify(assessment_data?.painLocationId)
+            : '',
           pain_quality_id: assessment_data.pain_activity_id,
           pain_frequency_id: assessment_data.pain_frequency_id,
           note: assessment_data.notes,
@@ -668,7 +671,9 @@ const FacialExpressionScreen = ({navigation}) => {
           least_pain_score: assessment_data.least_pain,
           most_pain_score: assessment_data.most_pain,
           description: assessment_data.description,
-          pain_location_id: assessment_data.painLocation_id,
+          pain_location_id: Boolean(assessment_data.painLocationId?.length)
+            ? JSON.stringify(assessment_data?.painLocationId)
+            : '',
           pain_quality_id: assessment_data.pain_activity_id,
           pain_frequency_id: assessment_data.pain_frequency_id,
           note: assessment_data.notes,
@@ -967,6 +972,19 @@ const FacialExpressionScreen = ({navigation}) => {
               }}>
               3. Get ready to not blink for 10 seconds.
             </Text>
+            <CustomTouchableOpacity
+              onPress={() => {
+                handleCreateAssessmentAPI();
+                navigation.navigate(SCREEN_NAMES.RESULT);
+              }}>
+              <Text
+                style={{
+                  fontSize: 20,
+                  color: 'red',
+                }}>
+                go
+              </Text>
+            </CustomTouchableOpacity>
 
             {/* <View style={{ width: width - 40, height: 30, marginTop: 20, marginBottom: 10, flexDirection: "row", justifyContent: 'center', alignItems: 'center' }}>
                     <Text style={{ fontWeight: "700", color: COLORS.GRAY_90 }}>{"FPS: "}</Text>

@@ -1,26 +1,17 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {View, Text, Platform} from 'react-native';
 import CustomTouchableOpacity from '../shared/CustomTouchableOpacity';
 import {COLORS} from '../../constants/colors';
-// import {TouchableOpacity} from 'react-native-gesture-handler';
-import {TouchableOpacity} from 'react-native'
+import {TouchableOpacity} from 'react-native';
+import {useDispatch} from 'react-redux';
+import {PAIN_LOCATIONS_ACTION} from '../../constants/actions';
 
+const Locations = ({body, showFrontImage, selectedPainLocations}) => {
+  const select = selectedPainLocations.find((item) => {
+    return item.painLocationId === body.value;
+  });
 
-const Locations = ({
-  body,
-  showFrontImage,
-  positionValue,
-  setPositionValue,
-  index,
-  onClose,
-}) => {
-  const [position, setPosition] = useState(0);
-
-  useEffect(() => {
-    if (positionValue) {
-      setPosition(positionValue);
-    }
-  }, [positionValue]);
+  const dispatch = useDispatch();
 
   return (
     <>
@@ -34,17 +25,31 @@ const Locations = ({
             borderRadius: 15,
             top: body.top,
             left: body.left,
-            backgroundColor: Boolean(position === body.value)
+            backgroundColor: Boolean(select)
               ? COLORS.SECONDARY_MAIN
               : COLORS.WHITE,
           }}>
           {Boolean(Platform.OS !== 'ios') ? (
             <CustomTouchableOpacity
               onPress={() => {
-                setPositionValue(body.value);
-              
-                  onClose();
-
+                if (select) {
+                  const filterData = selectedPainLocations.filter((item) => {
+                    return item.painLocationId !== data.painLocationId;
+                  });
+                  dispatch({
+                    type: PAIN_LOCATIONS_ACTION.PAIN_LOCATION,
+                    payload: filterData,
+                  });
+                } else {
+                  selectedPainLocations.push({
+                    painLocationId: body.value,
+                    painData: body,
+                  });
+                  dispatch({
+                    type: PAIN_LOCATIONS_ACTION.PAIN_LOCATION,
+                    payload: selectedPainLocations,
+                  });
+                }
               }}>
               <Text
                 style={{
@@ -56,10 +61,24 @@ const Locations = ({
           ) : (
             <TouchableOpacity
               onPress={() => {
-                setPositionValue(body.value);
-               
-                  onClose();
-          
+                if (select) {
+                  const filterData = selectedPainLocations.filter((item) => {
+                    return item.painLocationId !== body.value;
+                  });
+                  dispatch({
+                    type: PAIN_LOCATIONS_ACTION.PAIN_LOCATION,
+                    payload: filterData,
+                  });
+                } else {
+                  selectedPainLocations.push({
+                    painLocationId: body.value,
+                    painData: body,
+                  });
+                  dispatch({
+                    type: PAIN_LOCATIONS_ACTION.PAIN_LOCATION,
+                    payload: selectedPainLocations,
+                  });
+                }
               }}>
               <Text
                 style={{
@@ -80,17 +99,31 @@ const Locations = ({
             borderRadius: 15,
             top: body.top,
             left: body.left,
-            backgroundColor: Boolean(position === body.value)
+            backgroundColor: Boolean(select)
               ? COLORS.SECONDARY_MAIN
               : COLORS.WHITE,
           }}>
           {Boolean(Platform.OS === 'ios') ? (
             <CustomTouchableOpacity
               onPress={() => {
-                setPositionValue(body.value);
-                setTimeout(() => {
-                  onClose();
-                }, 300);
+                if (select) {
+                  const filterData = selectedPainLocations.filter((item) => {
+                    return item.painLocationId !== body.value;
+                  });
+                  dispatch({
+                    type: PAIN_LOCATIONS_ACTION.PAIN_LOCATION,
+                    payload: filterData,
+                  });
+                } else {
+                  selectedPainLocations.push({
+                    painLocationId: body.value,
+                    painData: body,
+                  });
+                  dispatch({
+                    type: PAIN_LOCATIONS_ACTION.PAIN_LOCATION,
+                    payload: selectedPainLocations,
+                  });
+                }
               }}>
               <Text
                 style={{
@@ -102,10 +135,24 @@ const Locations = ({
           ) : (
             <TouchableOpacity
               onPress={() => {
-                setPositionValue(body.value);
-              
-                  onClose();
-               
+                if (select) {
+                  const filterData = selectedPainLocations.filter((item) => {
+                    return item.painLocationId !== body.value;
+                  });
+                  dispatch({
+                    type: PAIN_LOCATIONS_ACTION.PAIN_LOCATION,
+                    payload: filterData,
+                  });
+                } else {
+                  selectedPainLocations.push({
+                    painLocationId: body.value,
+                    painData: body,
+                  });
+                  dispatch({
+                    type: PAIN_LOCATIONS_ACTION.PAIN_LOCATION,
+                    payload: selectedPainLocations,
+                  });
+                }
               }}>
               <Text
                 style={{

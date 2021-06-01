@@ -30,21 +30,13 @@ import {
 import {lookupDataAPI} from '../../api/lookupData';
 import {lookupTypeAPI} from '../../api/lookupType';
 import Analytics from '../../utils/Analytics';
-import {useRoute} from '@react-navigation/native'
-const greetingTime = new Date().getHours()
+import {useRoute} from '@react-navigation/native';
+const greetingTime = new Date().getHours();
 
 const {width, height} = Dimensions.get('window');
 
-
-
 const HomeScreen = ({navigation}) => {
-
-  const {name} = useRoute()
-  const screenName = useRoute()?.name
-
-  console.log('-------',screenName)
-
-console.log(name)
+  const screenName = useRoute()?.name;
 
   const recentPatients = useSelector(
     (state) => state?.allPatients?.all_patients,
