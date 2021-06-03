@@ -39,6 +39,7 @@ const NRSScore = ({
     const [ nrsScore , setNrsScore] = useState(null)
     const dispatch =useDispatch()
   const selectedAssessmentData = useSelector((state) => state.createAsseement);
+
   
 
   useEffect(()=>{
@@ -47,6 +48,15 @@ const NRSScore = ({
 
 
   useEffect(()=>{
+      if(selectedAssessmentData.non_verbal_painScore){
+        if(selectedAssessmentData?.current_pain){
+            setNonVerbalPainScore(selectedAssessmentData?.non_verbal_painScore)
+        }
+    }
+    else{
+
+  
+
       if(selectedAssessmentData?.current_pain)
       {
           setCurrentPain(selectedAssessmentData?.current_pain)
@@ -57,10 +67,12 @@ const NRSScore = ({
       if(selectedAssessmentData?.least_pain){
           setLeastPain(selectedAssessmentData?.least_pain)
       }
+    }
   },[
       selectedAssessmentData?.current_pain,
       selectedAssessmentData?.most_pain,
-      selectedAssessmentData?.least_pain
+      selectedAssessmentData?.least_pain,
+      selectedAssessmentData?.non_verbal_painScore
   ])
 
     const handlePrevious = () => {
@@ -90,18 +102,19 @@ const NRSScore = ({
             payload:{
                 current_pain:currentPain,
                 most_pain:mostPain,
-                least_pain:leastPain
+                least_pain:leastPain,
+                non_verbal_painScore : 0
             }
         })
     }
     else{
-
         dispatch({
             type:CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
             payload:{
                 current_pain:nonVerbalPainScore,
                 most_pain:0,
-                least_pain:0
+                least_pain:0,
+                non_verbal_painScore : nonVerbalPainScore
             }
         })
     }

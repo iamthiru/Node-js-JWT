@@ -11,6 +11,7 @@ const SummaryChartReport = ({
   all_assessment_data,
   all_medication_data,
   lookup_data,
+  patientData,
   data
 }) => {
   const last_assessment = useSelector(
@@ -29,20 +30,20 @@ const SummaryChartReport = ({
       <View style={styles.summaryChatReportView}>
         <Text style={styles.summaryChatReportMainText}>Time:</Text>
         <Text style={styles.summaryReportDataText}>
-          {data?.date && new Date(data.date).toDateString()+" "+formatAMPM(new Date(data.date)) || '-'}
+          {(data?.date && patientData?.length)&& new Date(data.date).toDateString()+" "+formatAMPM(new Date(data.date)) || '-'}
         </Text>
       </View>
       <View style={styles.summaryChatReportView}>
         <Text style={styles.summaryChatReportMainText}>IMPACT score:</Text>
         <Text style={styles.summaryReportDataText}>
-          {data?.impact_score ? data?.impact_score : '-'}
+          {(data?.impact_score && patientData?.length) ? data?.impact_score : '-'}
         </Text>
       </View>
       <View style={styles.summaryChatReportView}>
         <Text style={styles.summaryChatReportMainText}>Medication:</Text>
         <View>
           <Text style={styles.summaryReportDataText}>
-            {data?.medication ? data.medication : '-'}
+            {(data?.medication && patientData.length)? data.medication : '-'}
           </Text>
           <Text
             style={[

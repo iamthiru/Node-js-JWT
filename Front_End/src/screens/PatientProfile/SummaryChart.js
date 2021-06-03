@@ -45,7 +45,7 @@ const SummaryChart = ({
   const [barSlideValue] = useState(new Animated.Value(0));
   const [sliderXValue] = useState(new Animated.Value(0));
   const [summaryReportData, setSummaryReport] = useState({});
-
+  const [chartDataPresent,setChartDataPresent]= useState(false)
   const all_assessment_data = Boolean(last_assessment)
     ? last_assessment?.assessment
     : null;
@@ -66,6 +66,11 @@ const SummaryChart = ({
     ],
     labelColor: () => COLORS.WHITE,
   };
+  useEffect(()=>{
+    if(patientData?.length ===0){
+      setShowMarker(false)
+    }
+  },[patientData])
 
   useEffect(() => {
     Animated.timing(slideValue, {
@@ -206,9 +211,10 @@ const SummaryChart = ({
                   zIndex: 2,
                 }}></Animated.View>
             );
-          })}
+          })
+          }         
         </>
-      )}
+        )}
 
       <View
         style={{
@@ -225,7 +231,7 @@ const SummaryChart = ({
             width: 6,
             height: 6,
             borderRadius: 3,
-            backgroundColor: COLORS.PRIMARY_MAIN,
+            backgroundColor: Boolean(patientData?.length) ? COLORS.PRIMARY_MAIN : COLORS.WHITE,
           }}></View>
         <Text>{Boolean(patientData.length) ? 'IMPACT score' : ''}</Text>
       </View>
@@ -327,6 +333,7 @@ const SummaryChart = ({
             </CustomTouchableOpacity>
           </Animated.View>
         )}
+        
       </View>
       <SummaryChartReport
         data={summaryReportData}
@@ -334,6 +341,8 @@ const SummaryChart = ({
         all_assessment_data={all_assessment_data}
         all_medication_data={all_medication_data}
         lookup_data={lookup_data}
+        patientData ={patientData}
+        chartDataPresent ={chartDataPresent}
       />
     </View>
   );

@@ -21,6 +21,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import {
   CREATE_ASSESSMENT_ACTION,
   PAIN_ASSESSMENT_DATA_ACTION,
+  PAIN_LOCATIONS_ACTION,
 } from '../../constants/actions';
 import Analytics from '../../utils/Analytics';
 
@@ -94,6 +95,10 @@ const PainAssessmentScreen = ({navigation}) => {
     }
     closeScreen();
     dispatch({
+      type:PAIN_LOCATIONS_ACTION.PAIN_LOCATION,
+      payload:[]
+    })
+    dispatch({
       type: CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
       payload: {
         type: VERBAL_ABILITY.VERBAL.value,
@@ -114,8 +119,9 @@ const PainAssessmentScreen = ({navigation}) => {
         reminder_time: null,
         isRemainder: true,
         assessment_date: null,
-        frequence: 0,
-        pain_frequency_id: 0,
+        // frequence: 0,
+        // pain_frequency_id: 0,
+        frequencyData:null,
         total_score: 0,
         notes: ''
       },

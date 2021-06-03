@@ -59,3 +59,7 @@ export const envActions = {
 export const PAIN_LOCATIONS_ACTION ={
   PAIN_LOCATION : 'SET PAIN LOCATION'
 }
+export const LATEST_ENTRY_ACTION = {
+  LATEST_ENTRY:"LATEST ENTRY"
+
+}

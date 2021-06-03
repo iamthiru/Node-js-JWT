@@ -79,9 +79,9 @@ const Reminder = ({gotoNext, gotoPrevious}) => {
           reminder_time: selectedTime,
           isRemainder: needReminder,
           assessment_date: new Date(),
-          frequence: '1',
-          pain_frequency_id: '1',
-          total_score: '1',
+          // frequence: '1',
+          // pain_frequency_id: '1',
+          // total_score: '1',
         },
       });
     } else {
@@ -92,9 +92,9 @@ const Reminder = ({gotoNext, gotoPrevious}) => {
           reminder_time: selectedTime,
           isRemainder: needReminder,
           assessment_date: new Date(),
-          frequence: '1',
-          pain_frequency_id: '1',
-          total_score: '1',
+          // frequence: '1',
+          // pain_frequency_id: '1',
+          // total_score: '1',
         },
       });
     }

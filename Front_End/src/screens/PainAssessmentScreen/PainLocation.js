@@ -43,7 +43,7 @@ const PainLocation = ({gotoNext, gotoPrevious}) => {
     gotoPrevious();
     endTime = new Date().getTime()
     Analytics.setCurrentScreen(
-      SCREEN_NAMES.PAINASSESSMENT,
+        SCREEN_NAMES.PAINASSESSMENT,
         (endTime-startTime)/1000,
         startTime,
         endTime
@@ -102,6 +102,7 @@ const PainLocation = ({gotoNext, gotoPrevious}) => {
             selectedPainLocations.map((pain, index) => {
               return (
                 <Text
+                key ={index+''}
                   style={{
                     fontSize: 20,
                     paddingVertical: 10,

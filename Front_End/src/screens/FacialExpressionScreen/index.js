@@ -39,7 +39,11 @@ import {
 import {initiateFacialExpressionVideoProcessingAPI} from '../../api/painAssessment';
 import {useDispatch, useSelector} from 'react-redux';
 import createAssessmentAPI from '../../api/createAssessment';
-import {CREATE_ASSESSMENT_ACTION} from '../../constants/actions';
+import {
+  CREATE_ASSESSMENT_ACTION,
+  LATEST_ENTRY_ACTION,
+  PAIN_ASSESSMENT_DATA_ACTION,
+} from '../../constants/actions';
 import Analytics from '../../utils/Analytics';
 import {useNavigation} from '@react-navigation/native';
 const {width, height} = Dimensions.get('window');
@@ -610,7 +614,9 @@ const FacialExpressionScreen = ({navigation}) => {
     let reminder_date = assessment_data.remainder_date
       ? new Date(assessment_data.remainder_date)
       : new Date();
-    let facial_exp_parsed_value = JSON.parse(resultValue.replace(/'/g, '"'));
+    // let facial_exp_parsed_value = JSON.parse(resultValue.replace(/'/g, '"'));
+    let facial_exp_parsed_value = 10;
+
     let facial_exp_result =
       facial_exp_parsed_value[facial_exp_parsed_value.length - 1];
     let total_score =
@@ -634,17 +640,27 @@ const FacialExpressionScreen = ({navigation}) => {
           most_pain_score: assessment_data.most_pain,
           description: assessment_data.description,
           pain_location_id: Boolean(assessment_data.painLocationId?.length)
-            ? JSON.stringify(assessment_data.painLocationId.map(painLocData => painLocData.painLocationId))
+            ? JSON.stringify(
+                assessment_data.painLocationId.map(
+                  (painLocData) => painLocData.painLocationId,
+                ),
+              )
             : '',
-          pain_quality_id: assessment_data.pain_activity_id,
-          pain_frequency_id: assessment_data.pain_frequency_id,
+           pain_quality_id: assessment_data.pain_activity_id,
+          pain_frequency_id: assessment_data?.frequencyData
+            ? assessment_data?.frequencyData?.value
+            : 0,
+          // pain_frequency_id : assessment_data?.pain_frequency_id ? assessment_data?.pain_frequency_id : 0,
           note: assessment_data.notes,
           total_score: total_score,
           createdAt: new Date().getTime(),
           createdBy: userId,
           isReminder: assessment_data.isRemainder,
           reminder_datetime: reminder_date.getTime(),
-          frequency: assessment_data.frequence,
+          frequency: assessment_data?.frequencyData
+            ? assessment_data?.frequencyData?.label
+            : '',
+          // frequency : assessment_data?.frequency ? assessment_data?.frequency : '',
           pain_impact_id: assessment_data.painImpactId,
           pupillary_dilation: assessment_data.pupillary_dilation,
           facial_expresssion: Number(facial_exp_result),
@@ -656,7 +672,15 @@ const FacialExpressionScreen = ({navigation}) => {
             Alert.alert('------invalid assessment-----', res);
             return;
           }
+          dispatch({
+            type: LATEST_ENTRY_ACTION.LATEST_ENTRY,
+            payload: {
+              assessmentDateAndTime: date.getTime(),
+              impactScore: total_score,
+            },
+          });
           console.log('----assessment sucessful----', res);
+          navigation.navigate(SCREEN_NAMES.RESULT);
         })
         .catch((err) => {
           console.log('assessment error', err);
@@ -672,10 +696,14 @@ const FacialExpressionScreen = ({navigation}) => {
           most_pain_score: assessment_data.most_pain,
           description: assessment_data.description,
           pain_location_id: Boolean(assessment_data.painLocationId?.length)
-            ? JSON.stringify(assessment_data.painLocationId.map(painLocData => painLocData.painLocationId))
+            ? JSON.stringify(
+                assessment_data.painLocationId.map(
+                  (painLocData) => painLocData.painLocationId,
+                ),
+              )
             : '',
           pain_quality_id: assessment_data.pain_activity_id,
-          pain_frequency_id: assessment_data.pain_frequency_id,
+          // pain_frequency_id: assessment_data.pain_frequency_id,
           note: assessment_data.notes,
           total_score: total_score,
           createdAt: new Date().getTime(),
@@ -972,7 +1000,6 @@ const FacialExpressionScreen = ({navigation}) => {
               }}>
               3. Get ready to not blink for 10 seconds.
             </Text>
-
             {/* <View style={{ width: width - 40, height: 30, marginTop: 20, marginBottom: 10, flexDirection: "row", justifyContent: 'center', alignItems: 'center' }}>
                     <Text style={{ fontWeight: "700", color: COLORS.GRAY_90 }}>{"FPS: "}</Text>
                     <View

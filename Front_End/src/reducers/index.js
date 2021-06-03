@@ -12,6 +12,7 @@ import getLastAssesmentAndMedication from './getLastMedicationAssessment'
 import allAssessmentList from './allAssessmentList'
 import routeName from './route'
 import painLocations from './painLocations'
+import latestEntry from './latestEntryData'
        
 
 const rootReducer = combineReducers({
@@ -27,7 +28,8 @@ const rootReducer = combineReducers({
     getLastAssesmentAndMedication,
     allAssessmentList,
     routeName,
-    painLocations
+    painLocations,
+    latestEntry
 });
 
 export default rootReducer;

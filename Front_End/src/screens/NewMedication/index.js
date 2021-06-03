@@ -19,7 +19,10 @@ import CustomButton from '../../components/shared/CustomButton';
 import CustomTextInput from '../../components/shared/CustomTextInput';
 import {useSelector, useDispatch} from 'react-redux';
 import createMedicationAPI from '../../api/createMedication';
-import {CREATE_MEDICATION_ACTION} from '../../constants/actions';
+import {
+  CREATE_MEDICATION_ACTION,
+  LATEST_ENTRY_ACTION,
+} from '../../constants/actions';
 import Analytics from '../../utils/Analytics';
 
 const NewMedication = () => {
@@ -36,17 +39,12 @@ const NewMedication = () => {
   const [medicationInputName, setMedicationInputname] = useState('');
   const [errosState, setErrorState] = useState([]);
   const [medicationClassData, setMedicationClassData] = useState({});
-  const [allSelectedPatients, setAllSelectedPatients] = useState([]);
   const dispatch = useDispatch();
   const lookup_data = useSelector((state) => state.lookupData.lookup_data);
   const patientData = useSelector((state) => state.patientData.patient);
   const token = useSelector((state) => state.user.authToken);
   const userId = useSelector((state) => state.user.loggedInUserId);
-  const latestMedication = useSelector(
-    (state) => state.getLastAssesmentAndMedication?.medication,
-  );
-  console.log('----latest medicaion------', latestMedication);
-  console.log('---patient data---new medication---', patientData);
+  const latestData = useSelector((state) => state.latestEntry);
 
   useEffect(() => {
     let startTime = 0;
@@ -97,18 +95,6 @@ const NewMedication = () => {
     );
   }, [lookup_data]);
 
-  const medicationClassName = useMemo(() => {
-    return medication.find((item) => {
-      return item.id === latestMedication?.medication_class_id;
-    });
-  }, [latestMedication, medication]);
-
-  const mediName = useMemo(() => {
-    return medicationClassName?.lookup_data?.find((item) => {
-      return (item.id = latestMedication?.medication_id);
-    });
-  }, [latestMedication, medicationClassName]);
-
   const frequency_data = useMemo(() => {
     return (
       lookup_data?.find((item) => {
@@ -116,12 +102,6 @@ const NewMedication = () => {
       })?.lookup_data || []
     );
   }, lookup_data);
-
-  const freqData = useMemo(() => {
-    return frequency_data.find((item) => {
-      return item.label === latestMedication?.frequency;
-    });
-  }, [latestMedication, frequency_data]);
 
   const dosage = useMemo(() => {
     return (
@@ -131,45 +111,66 @@ const NewMedication = () => {
     );
   }, [lookup_data]);
 
-  const dosageData = useMemo(() => {
-    return dosage?.find((item) => {
-      return item.id === latestMedication?.dosage_unit_id;
-    });
-  }, [latestMedication, dosage]);
-
   useEffect(() => {
     if (
-      latestMedication.dosage_number &&
-      medicationClassName &&
-      mediName &&
-      dosageData &&
-      freqData
+      lookup_data &&
+      latestData?.medication_name_id &&
+      latestData?.medication_id &&
+      latestData?.dosage_number &&
+      latestData?.dosage_unit_id &&
+      latestData?.frequency
     ) {
-      if (medicationClassName?.name) {
-        setMedicationClass(medicationClassName?.name);
+      if (latestData?.medication_name_id) {
+        const medication_class =
+          lookup_data
+            ?.find((item) => {
+              return item?.name === 'MedicationClass';
+            })
+            ?.lookup_data?.find((item) => {
+              return item.id === latestData?.medication_name_id;
+            }) || {};
+        setMedicationClass(medication_class.name || '');
+        setMedicationClassData(medication_class);
       }
-      if (mediName?.label) {
-        setMedicationName(mediName?.label);
+      if (latestData?.medication_id) {
+        const data = lookup_data
+          ?.find((item) => {
+            return item?.name === 'MedicationClass';
+          })
+          ?.lookup_data?.find((item) => {
+            return item.id === latestData?.medication_name_id;
+          })
+          ?.lookup_data?.find((item) => {
+            return item.id === latestData?.medication_id;
+          });
+        setMedicationName(data.label);
+        setMedicationData(data);
       }
-      if (dosageData?.value) {
-        setUnit(dosageData?.value);
+      if (latestData?.dosage_number) {
+        setUnitValue(latestData?.dosage_number.toString());
       }
-      if (freqData?.label) {
-        setFrequency(freqData?.label);
+      if (latestData?.dosage_unit_id) {
+        const data = lookup_data
+          ?.find((item) => {
+            return item.name === 'Dose';
+          })
+          ?.lookup_data?.find((item) => {
+            return item.id === latestData?.dosage_unit_id;
+          });
+        setUnit(data.value);
       }
-      if (latestMedication?.dosage_number) {
-        let value = latestMedication?.dosage_number.toString()
-        console.log('----tyep of value---',typeof value)
-        setUnitValue(value)
+      if (latestData?.frequency) {
+        setFrequency(latestData?.frequency);
       }
     }
-  }, [latestMedication.dosage_number, mediName, medicationClassName, dosageData, freqData]);
+  }, [
+    latestData?.frequency,
+    latestData?.dosage_unit_id,
+    latestData?.dosage_number,
+    latestData?.medication_id,
+    latestData?.medication_name_id,
+  ]);
 
-  useEffect(() => {
-    if (latestMedication?.dosage_number) {
-      setUnitValue(latestMedication?.dosage_number);
-    }
-  }, [latestMedication?.dosage_number]);
   const validate = useCallback(() => {
     if (errosState?.length) {
       return true;
@@ -199,12 +200,14 @@ const NewMedication = () => {
   const handleMedication = () => {
     createMedicationAPI(
       {
-        patient_id: patientData?.patient_id,
-        medication_class_id: medicationClassData.id,
-        medication_id: medicationData.id,
-        dosage_number: unitValue,
-        dosage_unit_id: unit,
-        frequency: frequency,
+        patient_id: patientData.patient_id,
+        medication_class_id: medicationClassData?.id
+          ? medicationClassData.id
+          : 1,
+        medication_id: medicationData?.id ? medicationData.id : 1,
+        dosage_number: unitValue ? unitValue : 0,
+        dosage_unit_id: unit ? unit : 0,
+        frequency: frequency ? frequency : '',
         createdBy: userId,
       },
       token,
@@ -217,14 +220,28 @@ const NewMedication = () => {
         console.log('-------  medication created successfully------', res);
 
         dispatch({
+          type: LATEST_ENTRY_ACTION.LATEST_ENTRY,
+          payload: {
+            medication_name_id: medicationClassData?.id,
+            medication_id: medicationData?.id,
+            frequency: frequency,
+            dosage_unit_id: unit,
+            dosage_number: unitValue,
+            createdAt: new Date().getTime(),
+          },
+        });
+
+        dispatch({
           type: CREATE_MEDICATION_ACTION.CREATE_MEDICATION,
           payload: {
             patient_id: patientData.patient_id,
-            medication_class_id: medicationClassData.id,
-            medication_id: medicationData.id,
-            dosage_number: unitValue,
-            dosage_unit_id: unit,
-            frequency: frequency,
+            medication_class_id: medicationClassData?.id
+              ? medicationClassData.id
+              : 1,
+            medication_id: medicationData?.id ? medicationData.id : 1,
+            dosage_number: unitValue ? unitValue : 0,
+            dosage_unit_id: unit ? unit : 0,
+            frequency: frequency ? frequency : '',
             createdBy: userId,
           },
         });
@@ -498,6 +515,12 @@ const NewMedication = () => {
               value={frequency}
               onChangeValue={(item) => {
                 setFrequency(item.label);
+                dispatch({
+                  type:CREATE_MEDICATION_ACTION.CREATE_MEDICATION,
+                  payload : {
+                    frequencyData : item
+                  }
+                })
               }}
               containerStyle={{marginBottom: 20, width: window.width * 0.8}}
             />

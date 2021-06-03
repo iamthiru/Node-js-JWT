@@ -16,31 +16,35 @@ const LatestEntryCard = ({
   const all_medication_data = last_assessment?.medication;
 
   const lookup_data = useSelector((state) => state.lookupData.lookup_data);
-  const date = all_assessment_data?.assessment_datetime;
+  const latestData = useSelector((state)=>state.latestEntry)
+  const date = latestData?.assessmentDateAndTime;
   const dateFormat = new Date(date);
+  const createdDate = new Date(latestData?.createdAt)
 
   const medicationList = useMemo(()=>{
 
     return lookup_data.find((item)=>{
       return item.name === 'MedicationClass'
     })?.lookup_data?.find((item )=>{
-      return item.id === all_medication_data?.medication_class_id
+      return item.id === latestData?.medication_name_id
     })?.lookup_data?.find((item)=>{
-      return item.id === all_medication_data?.medication_id
+      return item.id === latestData?.medication_id
     })
     
-  },[lookup_data,all_medication_data])
+  },[lookup_data,latestData.medication_id,latestData.medication_name_id])
+
 
   const dosage= useMemo(()=>{
     if(lookup_data){
     return lookup_data?.find((item)=>{
       return item.name === 'Dose'
     })?.lookup_data?.find((item)=>{
-      return item.id === all_medication_data?.dosage_unit_id
+      return item.id === latestData?.dosage_unit_id
     })
   }
 
-  },[lookup_data,all_medication_data])
+  },[lookup_data,latestData?.dosage_unit_id])
+ 
 
   return (
     <View
@@ -79,8 +83,8 @@ const LatestEntryCard = ({
               style={{
                 color: COLORS.WHITE,
               }}>
-              {(all_assessment_data?.total_score &&
-                all_assessment_data?.total_score) ||
+              {(latestData?.impactScore &&
+                latestData?.impactScore) ||
                 '-'}
             </Text>
           </View>
@@ -120,16 +124,16 @@ const LatestEntryCard = ({
             <Text style={styles.latestSubDataText}>Usage:</Text>
             <View>
               <Text style={styles.latest_subTextData}>
-                {(all_assessment_data?.frequency===0 &&
-                  'every ' + all_assessment_data?.frequency + ' hours') ||
+                {(Boolean(latestData?.frequency) &&
+                  'every ' + latestData?.frequency ) ||
                   '-'}
               </Text>
               <Text style={styles.latest_subTextData}>
-                {Boolean(date)
+                {Boolean(createdDate)
                   ? 'Starting ' +
-                    dateFormat.toDateString() +
+                    createdDate.toDateString() +
                     ' ' +
-                    formatAMPM(dateFormat)
+                    formatAMPM(createdDate)
                   : '-'}
               </Text>
               {/* <Text style={styles.latest_subTextData}>No end time</Text> */}

@@ -1,6 +1,5 @@
 import React, {useEffect, useState} from 'react';
 import {Dimensions, View, Text, Image, Platform} from 'react-native';
-import {TouchableOpacity} from 'react-native-gesture-handler';
 import ReactNativeModal from 'react-native-modal';
 import {COLORS} from '../../constants/colors';
 import humanBodyFront from '../../assets/images/Front.png';
@@ -14,8 +13,7 @@ import {
 import Locations from './Locations';
 import painLocationStyles from './styles';
 import {useDispatch, useSelector} from 'react-redux';
-import {CREATE_ASSESSMENT_ACTION} from '../../constants/actions';
-import CustomTouchableOpacity from '../shared/CustomTouchableOpacity';
+
 
 const {width, height} = Dimensions.get('window');
 

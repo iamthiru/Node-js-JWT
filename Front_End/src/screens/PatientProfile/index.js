@@ -28,6 +28,7 @@ import {
   ALL_ASSESSMENTS_LIST_ACTION,
   ALL_PATIENTS_ACTIONS,
   GET_ASSESSMENT_ACTION,
+  LATEST_ENTRY_ACTION,
   PATIENT_NAME_ACTION,
 } from '../../constants/actions';
 import medicationListAPI from '../../api/medicationList';
@@ -57,9 +58,6 @@ const PatientProfile = ({navigation}) => {
   const token = useSelector((state) => state.user.authToken);
   const userId = useSelector((state) => state.user.loggedInUserId);
   const selectedPatient = useSelector((state)=>state?.allPatients?.all_patients)?.find((patient)=>patient.id === item.id)
-
-
-
   const [latestMedicationData, setLatestMedicationData] = useState({});
   const [last_medication, setLast_medication] = useState([]);
   const [last_assessment, setLastAssessment] = useState([]);
@@ -69,6 +67,7 @@ const PatientProfile = ({navigation}) => {
   const all_assessment_data = last_assessment?.assessment;
   const all_medication_data = last_assessment?.medication;
 const [ summaryChartData , setSummaryChartData] = useState([])
+const [summaryChartDataPresent,setSummaryChartDataPresent]= useState(false)
 
   useEffect(()=>{
     let startTime = 0;
@@ -97,6 +96,9 @@ const [ summaryChartData , setSummaryChartData] = useState([])
 
 },[navigation])
 
+
+
+
   useEffect(() => {
     if (token && selectedPatient.id) {
       medicationListAPI(token, selectedPatient.id)
@@ -118,12 +120,27 @@ const [ summaryChartData , setSummaryChartData] = useState([])
               '-------invalid last medication Assessment data---------',
             );
           }
-          console.log('----last medication all list ------', result);
+          console.log('----last medication all list xxxxxx ------', result);
           setLastAssessment(result.data.result);
           dispatch({
             type: GET_ASSESSMENT_ACTION.GET_ASSESSMENT,
             payload: result.data.result,
+            
           });
+
+          dispatch({
+            type:LATEST_ENTRY_ACTION.LATEST_ENTRY,
+            payload:{
+              assessmentDateAndTime:result.data.result.assessment?.assessment_datetime,
+              impactScore:result.data.result.assessment?.assessment_datetime?.total_score,
+              medication_name_id:result.data.result.medication?.medication_class_id,
+              medication_id :result.data.result.medication?.medication_id,
+              frequency:result.data.result.medication?.frequency,
+              createdAt:result.data.result.medication?.createdAt,
+              dosage_unit_id:result.data.result.medication.dosage_unit_id,
+              dosage_number:result.data.result.medication.dosage_number,
+            }
+          })
           setLatestMedicationData({
             ...latestMedicationData,
             assessment: result.data.result.assessment,
@@ -189,6 +206,7 @@ const [ summaryChartData , setSummaryChartData] = useState([])
   }, [token, selectedPatient]);
 
   const medicationList = useMemo(() => {
+    console.log('----all_medi---',all_medication_data?.medication_class_id)
     return lookup_data
       .find((item) => {
         return item.name === 'MedicationClass';
@@ -380,6 +398,7 @@ const [ summaryChartData , setSummaryChartData] = useState([])
               patientData={
                 summaryChartData?.map((list) => {
                   let dateTime =  list?.assessment_datetime;
+                  console.log('-----list----',list)
 
                   return {
                     value: list?.total_score,
