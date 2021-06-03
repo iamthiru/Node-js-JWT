@@ -96,9 +96,6 @@ const [summaryChartDataPresent,setSummaryChartDataPresent]= useState(false)
 
 },[navigation])
 
-
-
-
   useEffect(() => {
     if (token && selectedPatient.id) {
       medicationListAPI(token, selectedPatient.id)
@@ -120,12 +117,11 @@ const [summaryChartDataPresent,setSummaryChartDataPresent]= useState(false)
               '-------invalid last medication Assessment data---------',
             );
           }
-          console.log('----last medication all list xxxxxx ------', result);
+          console.log('----last medication all list ------', result);
           setLastAssessment(result.data.result);
           dispatch({
             type: GET_ASSESSMENT_ACTION.GET_ASSESSMENT,
             payload: result.data.result,
-            
           });
 
           dispatch({
@@ -206,7 +202,6 @@ const [summaryChartDataPresent,setSummaryChartDataPresent]= useState(false)
   }, [token, selectedPatient]);
 
   const medicationList = useMemo(() => {
-    console.log('----all_medi---',all_medication_data?.medication_class_id)
     return lookup_data
       .find((item) => {
         return item.name === 'MedicationClass';
@@ -398,8 +393,6 @@ const [summaryChartDataPresent,setSummaryChartDataPresent]= useState(false)
               patientData={
                 summaryChartData?.map((list) => {
                   let dateTime =  list?.assessment_datetime;
-                  console.log('-----list----',list)
-
                   return {
                     value: list?.total_score,
                     time: dateTime,

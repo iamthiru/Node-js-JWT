@@ -40,8 +40,6 @@ const NRSScore = ({
     const dispatch =useDispatch()
   const selectedAssessmentData = useSelector((state) => state.createAsseement);
 
-  
-
   useEffect(()=>{
       startTime = new Date().getTime()
   },[])
@@ -54,9 +52,6 @@ const NRSScore = ({
         }
     }
     else{
-
-  
-
       if(selectedAssessmentData?.current_pain)
       {
           setCurrentPain(selectedAssessmentData?.current_pain)

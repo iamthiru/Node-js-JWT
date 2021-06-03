@@ -20,7 +20,6 @@ import Result from './Result';
 import {useDispatch, useSelector} from 'react-redux';
 import {
   CREATE_ASSESSMENT_ACTION,
-  PAIN_ASSESSMENT_DATA_ACTION,
   PAIN_LOCATIONS_ACTION,
 } from '../../constants/actions';
 import Analytics from '../../utils/Analytics';
