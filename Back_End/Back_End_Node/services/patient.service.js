@@ -114,9 +114,9 @@ async function createAssessment(data) {
 
     let reminder = {};
     if (data.isReminder) {
-        data.assessment_id = assessment.result ? assessment.result.insertId : null;
+        let assessment_id = assessment.result ? assessment.result.insertId : null;
         const SQL2 = `INSERT INTO reminder (patient_id,reminder_datetime,frequency,createdAt,createdBy,assessment_id) VALUE(?,?,?,?,?,?)`;
-        params2 = [data.patient_id, data.reminder_datetime, data.frequency, data.createdAt, data.createdBy, data.assessment_id];
+        params2 = [data.patient_id, data.reminder_datetime, data.frequency, data.createdAt, data.createdBy, assessment_id];
         reminder = await new Promise((resolve, reject) => {
             pool.query(SQL2, params2, (err, result) => {
                 if (err) {
