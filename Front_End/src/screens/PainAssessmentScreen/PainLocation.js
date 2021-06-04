@@ -42,12 +42,12 @@ const PainLocation = ({gotoNext, gotoPrevious}) => {
   const handlePrevious = () => {
     gotoPrevious();
     endTime = new Date().getTime()
-    Analytics.setCurrentScreen(
+    /* Analytics.setCurrentScreen(
         SCREEN_NAMES.PAINASSESSMENT,
         (endTime-startTime)/1000,
         startTime,
         endTime
-    )
+    ) */
   };
 
   const handleContinue = () => {
@@ -57,12 +57,12 @@ const PainLocation = ({gotoNext, gotoPrevious}) => {
     });
     gotoNext();
     endTime = new Date().getTime();
-    Analytics.setCurrentScreen(
+    /* Analytics.setCurrentScreen(
       SCREEN_NAMES.PAINASSESSMENT,
       (endTime - startTime) / 1000,
       startTime,
       endTime,
-    );
+    ); */
   };
 
   return (

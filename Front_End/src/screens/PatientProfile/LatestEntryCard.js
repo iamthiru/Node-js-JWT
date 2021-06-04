@@ -19,7 +19,7 @@ const LatestEntryCard = ({
   const latestData = useSelector((state)=>state.latestEntry)
   const date = latestData?.assessmentDateAndTime;
   const dateFormat = new Date(date);
-  const createdDate = new Date(latestData?.createdAt)
+  const createdDate = (latestData && latestData.createdAt) ? new Date(latestData.createdAt) : null;
 
   const medicationList = useMemo(()=>{
 
@@ -114,7 +114,7 @@ const LatestEntryCard = ({
           <View style={{flexDirection: 'row', paddingVertical: 10}}>
             <Text style={styles.latestSubDataText}>Dosage:</Text>
             <Text style={styles.latest_subTextData}>
-              {(dosage && dosage.label) || '-'}
+              {(dosage && dosage.label && `${latestData.dosage_number || 0} ${dosage.label}`) || '-'}
             </Text>
           </View>
           <View

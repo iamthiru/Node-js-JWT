@@ -65,22 +65,22 @@ const PainTiming = ({gotoNext, gotoPrevious}) => {
   const handlePrevious = () => {
     gotoPrevious();
     endTime = new Date().getTime();
-    Analytics.setCurrentScreen(
+    /* Analytics.setCurrentScreen(
       SCREEN_NAMES.PAINASSESSMENT,
       (endTime - startTime) / 1000,
       startTime,
       endTime,
-    );
+    ); */
   };
 
   const handleContinue = () => {
     endTime = new Date().getTime();
-    Analytics.setCurrentScreen(
+    /* Analytics.setCurrentScreen(
       SCREEN_NAMES.PAINASSESSMENT,
       (endTime - startTime) / 1000,
       startTime,
       endTime,
-    );
+    ); */
     dispatch({
       type: CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
       payload: {

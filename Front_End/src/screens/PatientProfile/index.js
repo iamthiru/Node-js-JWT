@@ -128,7 +128,7 @@ const [summaryChartDataPresent,setSummaryChartDataPresent]= useState(false)
             type:LATEST_ENTRY_ACTION.LATEST_ENTRY,
             payload:{
               assessmentDateAndTime:result.data.result.assessment?.assessment_datetime,
-              impactScore:result.data.result.assessment?.assessment_datetime?.total_score,
+              impactScore:result.data.result.assessment?.total_score,
               medication_name_id:result.data.result.medication?.medication_class_id,
               medication_id :result.data.result.medication?.medication_id,
               frequency:result.data.result.medication?.frequency,

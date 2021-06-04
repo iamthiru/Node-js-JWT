@@ -73,22 +73,22 @@ const NRSScore = ({
     const handlePrevious = () => {
         gotoPrevious();
         endTime = new Date().getTime()
-        Analytics.setCurrentScreen(
+        /* Analytics.setCurrentScreen(
             SCREEN_NAMES.PAINASSESSMENT,
             (endTime-startTime)/1000,
             startTime,
             endTime
-        )
+        ) */
     }
 
     const handleContinue = () => {
         endTime = new Date().getTime()
-        Analytics.setCurrentScreen(
+        /* Analytics.setCurrentScreen(
             SCREEN_NAMES.PAINASSESSMENT,
             (endTime-startTime)/1000,
             startTime,
             endTime
-        )
+        ) */
         gotoNext();
         if(selectedAssessmentData.type !==VERBAL_ABILITY.NON_VERBAL.value)
         {

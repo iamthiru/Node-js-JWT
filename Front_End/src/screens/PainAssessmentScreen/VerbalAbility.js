@@ -41,12 +41,12 @@ const VerbalAbility = ({gotoNext, verbalAbility, setVerbalAbility}) => {
   const handleContinue = () => {
  
     endTime = new Date().getTime()
-    Analytics.setCurrentScreen(
+    /* Analytics.setCurrentScreen(
       SCREEN_NAMES.PAINASSESSMENT,
       (endTime-startTime)/1000,
       startTime,
       endTime
-    )
+    ) */
 
     gotoNext();
     

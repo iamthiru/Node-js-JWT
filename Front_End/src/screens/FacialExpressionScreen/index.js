@@ -614,9 +614,7 @@ const FacialExpressionScreen = ({navigation}) => {
     let reminder_date = assessment_data.remainder_date
       ? new Date(assessment_data.remainder_date)
       : new Date();
-    // let facial_exp_parsed_value = JSON.parse(resultValue.replace(/'/g, '"'));
-    let facial_exp_parsed_value = 10;
-
+    let facial_exp_parsed_value = JSON.parse(resultValue.replace(/'/g, '"'));
     let facial_exp_result =
       facial_exp_parsed_value[facial_exp_parsed_value.length - 1];
     let total_score =
