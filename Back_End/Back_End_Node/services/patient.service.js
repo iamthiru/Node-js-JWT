@@ -283,7 +283,7 @@ async function getMedicationList(patientId) {
 }
 
 async function getPatientLastAssessmentAndMedication(patientId) {
-    const SQL = `SELECT * from assessment  ass  join reminder rem on ass.id = rem.assessment_id where ass.patient_id =? and ass.isDeleted =? order by ass.id desc`;
+    const SQL = `SELECT * from assessment  ass left join reminder rem on ass.id = rem.assessment_id where ass.patient_id =? and ass.isDeleted =? order by ass.id desc`;
     params = [patientId, false];
     const assessment = await new Promise((resolve, reject) => {
         pool.query(SQL, params, (err, result) => {
