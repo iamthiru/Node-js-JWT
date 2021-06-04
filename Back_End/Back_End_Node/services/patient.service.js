@@ -151,7 +151,7 @@ async function createAssessment(data) {
 }
 
 async function getAssessmentByPatientId() {
-    const SQL = `SELECT * from assessment left join reminder on assessment.id = reminder.assessment_id`;
+    const SQL = `SELECT * from assessment left join (select reminder_datetime, frequency, assessment_id from reminder) reminder on assessment.id = reminder.assessment_id`;
     const assessments = await new Promise((resolve, reject) => {
         pool.query(SQL, (err, result) => {
             if (err) {
