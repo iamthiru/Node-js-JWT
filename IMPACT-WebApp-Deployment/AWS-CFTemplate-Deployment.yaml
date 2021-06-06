@@ -103,7 +103,7 @@ Parameters:
   MyBucketName:
     Type: String
     Description: AWS Bucket Name
-    Default: impact-benten
+    Default: impact-benten-test
 
   # ------------ ACCOUNT & BILLING ------------
   MyBillingThreshold:
@@ -160,6 +160,21 @@ Resources:
         From: 80
         To: 80
 
+  InboundRule03:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      NetworkAclId:
+        Fn::GetAtt:
+          - ImpactVPC
+          - DefaultNetworkAcl
+      RuleNumber: 110
+      Protocol: 6
+      RuleAction: allow
+      CidrBlock: 0.0.0.0/0
+      PortRange:
+        From: 443
+        To: 443
+
 # ----------------------------------- WEB SECURITY GROUPS, IAM ROLE & INSTANCE PROFILE ---------------------------------
   WebServerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -174,6 +189,10 @@ Resources:
         - IpProtocol: tcp
           FromPort: 80
           ToPort: 80
+          CidrIp: !Ref 'SSHLocation'
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
           CidrIp: !Ref 'SSHLocation'
         - IpProtocol: tcp
           FromPort: 5000
@@ -345,13 +364,13 @@ Resources:
         SecurityGroupIds:
           - !GetAtt WebServerSecurityGroup.GroupId
         BlockDeviceMappings:
-          - DeviceName: /dev/sda1
+          - DeviceName: /dev/sdm
             Ebs:
               VolumeType: io1
               Encrypted: false
-              Iops: 3200
+              Iops: 200
               DeleteOnTermination: true
-              VolumeSize: 64
+              VolumeSize: 20
         Monitoring:
           Enabled: true
         UserData: !Base64 |
@@ -373,9 +392,9 @@ Resources:
           add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
           apt-get update
           apt install -y docker-ce
-          docker login -u pdeo2020 -p Pdeo_2020
-          docker pull pdeo2020/impact-benten:v11
-          docker run -d -p 5000:5000 --name impact pdeo2020/impact-benten:v11
+          docker login -u hkchang3 -p benten_105
+          docker pull hkchang3/impact-benten:v14
+          docker run -d -p 5000:5000 --name impact hkchang3/impact-benten:v14
         TagSpecifications:
           - ResourceType: instance
             Tags:
