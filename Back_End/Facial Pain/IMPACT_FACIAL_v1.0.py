@@ -1,7 +1,7 @@
 # Proprietary: Benten Technologies, Inc.
 # Author: Pranav H. Deo, Jagadesh N.
 # Copyright Content
-# Date: 04/01/2021
+# Date: 05/05/2021
 # Version: v1.0
 
 # Code Description:
@@ -13,18 +13,26 @@
 # The algorithm also computes a single video score based on a weighted sum formula (Based on actual mean of
 # the pain level scores).
 
-
 # UPDATES:
 # Added comments to explain all the functions in a detailed manner
+# Added time tracking and module imports
 
-
+########################################################################################################################
+# PACKAGE IMPORTS
 import os
 import sys
 import cv2
+import time
 import subprocess
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+
+# MODULE IMPORTS
+import Data_Processing
+
+# INITIALIZATIONS:
+start_time = time.time()
 
 
 #######################################################################################################################
@@ -33,9 +41,8 @@ import matplotlib.pyplot as plt
 def OpenFace_API_Call(ipath, opath):
     print("> OpenFace Feature Extraction Command Executed !!")
     cmd = "OpenFace/build/bin/FeatureExtraction -f " + ipath + " -out_dir " + opath + " -aus"
-    print(cmd)
+    print("> Command : ", cmd)
     subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True).communicate()
-    print("# AUs Detected...")
 
 
 #######################################################################################################################
@@ -141,8 +148,8 @@ def Compute_PSPI_AUs(opath, fpath, D):
     Final_DF['sum_AU_r'] = sum_AU_r
 
     Final_DF.to_csv(opath + '/' + D + '_PSPI_AUs.csv', index=False)
-    print("     # Read Complete! Attempting to write CSV files...")
-    print("     # CSV written successfully !!")
+    # print("     # Read Complete! Attempting to write CSV files...")
+    print("# CSV written successfully !!")
 
 
 #######################################################################################################################
@@ -151,11 +158,11 @@ def Compute_PSPI_AUs(opath, fpath, D):
 # Function to have a sliding window over the frame values to classify pain as one of the 4 bucket classes
 # NOTE: Any other mode of calculation (DL approaches) would come here in classifying the sequence of frames into buckets
 def Calculate_Pain_Labeler(opath, fpath, D, num_steps):
-    """ Sliding window for calculating pain levels """
+    # Sliding window for calculating pain levels
     video_csv = pd.read_csv(fpath)
 
     # Bucket threshold values here:
-    no_pain_UL = 5.18 # (Calculated by using Delaware Pain DB and computing scores on Neutral faces)
+    no_pain_UL = 5.18  # (Calculated by using Delaware Pain DB and computing scores on Neutral faces)
     pain_1_UL = 6.78  # (BioVid Pain 1 and Pain 2 labels below)
     pain_2_UL = 8.05  # (BioVid Pain 3 label below, Pain 4 label above)
 
@@ -201,7 +208,8 @@ def Calculate_Pain_Labeler(opath, fpath, D, num_steps):
         label_csv = pd.DataFrame(Word_Label)
         label_csv.columns = {'Label'}
         label_csv['Time (sec)'] = range(1, len(Word_Label) + 1)
-        label_csv = label_csv[['Time (sec)', 'Label']]
+        label_csv['Video Score'] = 0
+        label_csv = label_csv[['Time (sec)', 'Label', 'Video Score']]
         label_csv.to_csv(opath + '/' + D + '_LabelFile.csv', index=False)
 
     return Word_Label
@@ -211,7 +219,7 @@ def Calculate_Pain_Labeler(opath, fpath, D, num_steps):
 
 # Video Labeler: Used to read the csv file and generate a new file with high level second and pain scores.
 # Also used to compute a video score using a weighted formula.
-def Video_Labeler(label_list):
+def Video_Labeler(opath, D, label_list):
     # Value of each level (Mean of the pain levels as calcuated using BioVid Dataset):
     Pain_0 = 5.18
     Pain_1 = 6.44
@@ -233,14 +241,17 @@ def Video_Labeler(label_list):
         if level == 'Pain Level 3':
             count_p3 += 1
 
-    print("The sliding window counter:    ")
-    print("No Pain count is:   ", count_np)
-    print("Pain 1 count is:    ", count_p1)
-    print("Pain 2 count is:    ", count_p2)
-    print("Pain 3 count is:    ", count_p3)
+    # print("The sliding window counter:    ")
+    # print("No Pain count is:   ", count_np)
+    # print("Pain 1 count is:    ", count_p1)
+    # print("Pain 2 count is:    ", count_p2)
+    # print("Pain 3 count is:    ", count_p3)
 
     score = (count_np * Pain_0 + count_p1 * Pain_1 + count_p2 * Pain_2 + count_p3 * Pain_3) / len(label_list)
     score = ((score - Pain_0) / (Pain_3 - Pain_0)) * 10
+    label_file = pd.read_csv(opath + '/' + D + '_LabelFile.csv')
+    label_file['Video Score'] = score
+    label_file.to_csv(opath + '/' + D + '_LabelFile.csv', index=False)
     print("Final score for the video is : ", score)
     return score
 
@@ -260,7 +271,7 @@ def Graph_Plot(opath, fname, fl, flag):
         plt.savefig(opath + fl + '_Pain_Plot.png')
     else:
         plt.savefig(opath + '_Pain_Plot.png')
-    print("     # Pain Plot Complete")
+    print("# Pain Plot Complete")
     plt.close()
 
 
@@ -269,19 +280,19 @@ def Graph_Plot(opath, fname, fl, flag):
 # __MAIN__
 if __name__ == "__main__":
     in_path = ""
-    out_path = "./static/Face_Output_Images/"
+    out_path = "static/Face_Output_Images/"
     tag = 0
 
     if len(sys.argv) > 1:
         print("\n############################## IMPACT FACIAL ##############################")
         global filenm
         filenm = str(sys.argv[1])
-        in_path = "./static/Face_Input_Videos/" + filenm
+        in_path = "static/Face_Input_Videos/" + filenm
         tag = 1
     else:
         print("\n############################## IMPACT FACIAL ##############################")
         filenm = "face.mp4"
-        in_path = "./static/Face_Input_Videos/" + filenm
+        in_path = "static/Face_Input_Videos/" + filenm
 
     print("\n************* Video Capture Complete *************")
     print("> Extracting Features...")
@@ -293,14 +304,19 @@ if __name__ == "__main__":
         Compute_PSPI_AUs(out_path, out_path + os.path.splitext(filenm)[0] + '.csv', os.path.splitext(filenm)[0])
         video_label_list = Calculate_Pain_Labeler(out_path, out_path + os.path.splitext(filenm)[0] + '_PSPI_AUs.csv',
                                                   os.path.splitext(filenm)[0], int(video_fps))
-        final_video_label = Video_Labeler(video_label_list)
+        final_video_label = Video_Labeler(out_path, os.path.splitext(filenm)[0], video_label_list)
         Graph_Plot(out_path, os.path.splitext(filenm)[0] + '_PSPI_AUs.csv', os.path.splitext(filenm)[0], 0)
     else:
         OpenFace_API_Call(in_path, out_path)
         Compute_PSPI_AUs(out_path, out_path + 'face.csv', 'face')
         video_label_list = Calculate_Pain_Labeler(out_path, out_path + 'face_PSPI_AUs.csv', 'face', int(video_fps))
-        final_video_label = Video_Labeler(video_label_list)
+        final_video_label = Video_Labeler(out_path, os.path.splitext(filenm)[0], video_label_list)
         Graph_Plot(out_path, 'face_PSPI_AUs.csv', 'face', 0)
 
     print("\n############################## END OF EXECUTION ##############################")
-#######################################################################################################################
+########################################################################################################################
+
+# Compute Resources being used or utilized
+print('\n***************************************************************************')
+Data_Processing.Compute_Resources(start_time)
+########################################################################################################################
