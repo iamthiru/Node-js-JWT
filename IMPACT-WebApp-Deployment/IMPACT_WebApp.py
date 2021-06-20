@@ -1,14 +1,14 @@
 # Proprietary: Benten Technologies, Inc.
 # Author: Pranav H. Deo
 # Copyright Content
-# Date: 05/26/2021
+# Date: 06/20/2021
 # Version: v1.10
 
 # Code Description:
-# Web Simulation (Alpha Version) for Pupil and Facial Pain Analysis.
+# Web Simulation (Beta Version) for Pupil and Facial Pain Analysis.
 
 # UPDATES:
-# Patient Record Search Feature.
+# Patient Record Search Feature - Fetch Linked File Record
 # Mobile APIs for Pupil and Facial integrated.
 # Login/Registration Changed from DynamoDB to RDS-MySQL.
 # User Data stored in DynamoDB.
@@ -27,12 +27,10 @@
 ##############################################################
 import os
 import yaml
-import time
 import boto3
 import pymysql
-import string
+from time import *
 from flask import *
-import random as rnd
 import pandas as pd
 import datetime as dt
 
@@ -130,30 +128,24 @@ def PatientRecords():
     if 'user_email' in session:
         if request.method == 'POST':
             pat_id = request.form['PatientID']
-            links = FetchS3BucketObj(pat_id)
+            dts = request.form['TentativeDate']
+            operation = request.form['operation']
+            # print(pat_id, ' - ', dts, ' - ', operation)
+            links, dt_mod = FetchS3BucketObj(pat_id, dts, operation)
             if len(links) == 0:
                 return render_template('PatientRecords.html', user=user)
             else:
-                pupil_link = links[0]
-                files = os.listdir('./static/Pupil_Output_Images/')
-                for file in files:
-                    if (pat_id in str(file)) and ('PUAL_' in file):
-                        filename = file
-                        img_name = str(os.path.splitext(filename)[0])
-                        file = img_name + '.csv'
-                        csv_f = './static/Pupil_Output_Images/' + file
-                        df = pd.read_csv(csv_f)
-                        pual_score = round(df['PUAL_Score'][0], 3)
-                facial_link = links[1]
-                files = os.listdir('./static/Face_Output_Images/')
-                for file in files:
-                    if (pat_id in str(file)) and ('_LabelFile.csv' in file):
-                        label_file_csv = './static/Face_Output_Images/' + file
-                        bucket_df = pd.read_csv(label_file_csv)
-                        face_score = round(float(bucket_df['Video Score'][0]), 2)
-
-                return render_template('ShowRecord.html', user=user, pat_id=pat_id, facial_link=facial_link,
-                                       pupil_link=pupil_link, pual_score=pual_score, face_score=face_score)
+                data_buck = []
+                for i in range(0, len(links)):
+                    data_tup = (links[i], dt_mod[i])
+                    data_buck.append(data_tup)
+                # print(data_buck)
+                if operation == 'Pupil':
+                    page_header = 'Pupil'
+                else:
+                    page_header = 'Facial'
+                return render_template('ShowRecord.html', user=user, page_header=page_header,
+                                       pat_id=pat_id, data_buck=data_buck)
         return render_template('PatientRecords.html', user=user)
     else:
         session.pop('user_email', None)
@@ -426,25 +418,33 @@ def Download_from_S3(buck, KEY, Local_fp):
     return 'Download Done'
 
 
-def FetchS3BucketObj(patient_id):
+def FetchS3BucketObj(patient_id, tent_date, op):
     s3 = boto3.resource('s3', aws_access_key_id=key_db['AWSAccessKeyId'], aws_secret_access_key=key_db['AWSSecretKey'])
     my_bucket = s3.Bucket(BUCKET_NAME)
-    Links = []
-    for file in my_bucket.objects.filter(Prefix='Pupil_Data/Results-Output/'):
-        filename = file.key
-        if filename.find(patient_id) != -1:
-            if filename.find('_Dilation_Plot.png') != -1:
-                pupil_url = f'https://{BUCKET_NAME}.s3.amazonaws.com/' + filename
-                Links.append(pupil_url)
+    op_links = []
+    dt_modified = []
+    if op == 'Pupil':
+        for file in my_bucket.objects.filter(Prefix='Pupil_Data/Results-Output/'):
+            filename = file.key
+            last_mod_date = file.last_modified
+            if filename.find(patient_id) != -1:
+                if filename.find('PUAL_') and str(filename).endswith('.csv'):
+                    if str(tent_date) in str(last_mod_date):
+                        pupil_url = f'https://{BUCKET_NAME}.s3.amazonaws.com/' + filename
+                        op_links.append(pupil_url)
+                        dt_modified.append(last_mod_date)
+    else:
+        for file in my_bucket.objects.filter(Prefix='Facial_Data/Results-Output/'):
+            filename = file.key
+            last_mod_date = file.last_modified
+            if filename.find(patient_id) != -1:
+                if filename.find('_Pain_Plot.png') != -1:
+                    if str(tent_date) in str(last_mod_date):
+                        facial_url = f'https://{BUCKET_NAME}.s3.amazonaws.com/' + filename
+                        op_links.append(facial_url)
+                        dt_modified.append(last_mod_date)
 
-    for file in my_bucket.objects.filter(Prefix='Facial_Data/Results-Output/'):
-        filename = file.key
-        if filename.find(patient_id) != -1:
-            if filename.find('_Pain_Plot.png') != -1:
-                facial_url = f'https://{BUCKET_NAME}.s3.amazonaws.com/' + filename
-                Links.append(facial_url)
-
-    return Links
+    return op_links, dt_modified
 
 
 if __name__ == '__main__':
