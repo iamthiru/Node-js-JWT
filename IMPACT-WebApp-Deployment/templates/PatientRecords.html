@@ -113,8 +113,16 @@ form.sbar::after {
     <br>
     <br>
     <form class="sbar" action="/PatientRecords" method="post" style="margin:auto;max-width:800px">
-      <input type="text" placeholder="Search Patient (ID / Name)..." name="PatientID">
-      <button type="submit"><i class="fa fa-search"></i></button>
+        <input type="text" placeholder="Search Patient (ID / Name)..." name="PatientID">
+        <button type="submit"><i class="fa fa-search"></i></button>
+        <br><br><br>
+        <h3>Choose Date: <input type="date" id="TentativeDate" name="TentativeDate" value="2021-01-01" style="width:10%;"></h3>
+        <h3>Choose Result:
+            <select name="operation" id="operation">
+                <option value="Pupil">Pupil Data</option>
+                <option value="Facial">Facial Data</option>
+            </select>
+        </h3>
     </form>
 
 </body>
