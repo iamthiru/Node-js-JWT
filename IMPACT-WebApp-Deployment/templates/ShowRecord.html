@@ -123,6 +123,7 @@ tr:hover {
 </style>
 </head>
 <body>
+    <p id="demo"></p>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <div class="navbar" id="Topnav">
         <a href="{{url_for('HomePage')}}" style="font-size: 20px">Home</a>
@@ -134,27 +135,24 @@ tr:hover {
     </div>
 
     <div class="header">
-        <h1>IMPACT PATIENT RECORDS</h1>
+        <h1>IMPACT PATIENT RECORDS : {{ page_header }}</h1>
     </div>
 
     <br>
     <br>
     <table align="center" cellspacing="20px" cellpadding="30px">
-      <tr>
-        <th>Patient ID</th>
-        <th>Pupil Output Graph</th>
-        <th>Facial Output Graph</th>
-        <th>Pupil Score</th>
-        <th>Facial Score</th>
-      </tr>
-      <tr>
-        <td>{{ pat_id }}</td>
-        <td><a href={{ pupil_link }}>Linked File</td>
-        <td><a href={{ facial_link }}>Linked File</td>
-        <td>{{ pual_score }}</td>
-        <td>{{ face_score }}</td>
-      </tr>
+        <tr>
+            <th>Patient ID</th>
+            <th>{{ page_header }} Download Link</th>
+            <th>Date Modified</th>
+        </tr>
+        {% for data in data_buck %}
+            <tr>
+                <td>{{ pat_id }}</td>
+                <td><a href={{ data[0] }}>Linked File</a></td>
+                <td>{{ data[1] }}</td>
+            </tr>
+        {% endfor %}
     </table>
-
 </body>
 </html>
