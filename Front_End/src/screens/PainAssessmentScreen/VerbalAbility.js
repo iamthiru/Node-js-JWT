@@ -9,12 +9,10 @@ import CustomTextInput from '../../components/shared/CustomTextInput';
 import {VERBAL_ABILITY} from '../../constants/painAssessment';
 import {getStatusBarHeight} from 'react-native-status-bar-height';
 import {useDispatch, useSelector} from 'react-redux';
-import {
-  CREATE_ASSESSMENT_ACTION,
-} from '../../constants/actions';
+import {CREATE_ASSESSMENT_ACTION} from '../../constants/actions';
+import {useNavigation} from '@react-navigation/native';
 import Analytics from '../../utils/Analytics';
-import { SCREEN_NAMES } from '../../constants/navigation';
-
+import {SCREEN_NAMES} from '../../constants/navigation';
 
 const {width, height} = Dimensions.get('window');
 
@@ -24,10 +22,11 @@ let endTime = 0;
 const VerbalAbility = ({gotoNext, verbalAbility, setVerbalAbility}) => {
   const patientData = useSelector((state) => state.patientData.patient);
   const selectedAssessmentData = useSelector((state) => state.createAsseement);
+  const navigation = useNavigation();
 
-  useEffect(()=>{
-    startTime = new Date().getTime()
-  },[])
+  useEffect(() => {
+    startTime = new Date().getTime();
+  }, []);
 
   useEffect(() => {
     if (selectedAssessmentData && selectedAssessmentData?.type) {
@@ -39,8 +38,7 @@ const VerbalAbility = ({gotoNext, verbalAbility, setVerbalAbility}) => {
   const dispatch = useDispatch();
 
   const handleContinue = () => {
- 
-    endTime = new Date().getTime()
+    endTime = new Date().getTime();
     /* Analytics.setCurrentScreen(
       SCREEN_NAMES.PAINASSESSMENT,
       (endTime-startTime)/1000,
@@ -49,7 +47,7 @@ const VerbalAbility = ({gotoNext, verbalAbility, setVerbalAbility}) => {
     ) */
 
     gotoNext();
-    
+
     if (verbalAbility) {
       dispatch({
         type: CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
@@ -61,6 +59,9 @@ const VerbalAbility = ({gotoNext, verbalAbility, setVerbalAbility}) => {
       });
     }
   };
+  const handleNavigation = ()=>{
+    navigation.navigate(SCREEN_NAMES.PUPILLARY_DILATION);
+  }
 
   return (
     <>
@@ -131,6 +132,32 @@ const VerbalAbility = ({gotoNext, verbalAbility, setVerbalAbility}) => {
               }}
             />
           </View>
+        </View>
+        <View
+          style={{
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginTop: 50,
+          }}>
+          <CustomButton
+            onPress={() => handleNavigation()}
+            title="Skip"
+            textStyle={{
+              color: COLORS.GRAY_90,
+              textAlign: 'center',
+              paddingHorizontal: 5,
+            }}
+            style={{
+              width: (width - 16 - 16 - 75) / 2,
+              borderColor: COLORS.PRIMARY_DARKER,
+              borderWidth: 1,
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: 48,
+              borderRadius: 10,
+              backgroundColor: COLORS.SECONDARY_MAIN,
+            }}
+          />
         </View>
       </ScrollView>
       <View
