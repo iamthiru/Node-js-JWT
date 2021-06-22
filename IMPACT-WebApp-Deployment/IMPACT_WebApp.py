@@ -152,7 +152,7 @@ def PatientRecords():
         return render_template('Login.html')
 
 
-@app.route('/Device_Data_Upload')
+@app.route('/Device_Data_Upload', methods=['GET', 'POST'])
 def Device_Data_Upload():
     global user
     if 'user_email' in session:
@@ -160,9 +160,11 @@ def Device_Data_Upload():
             pat_fname = request.form['firstname']
             pat_lname = request.form['lastname']
             upload_date = request.form['uploaddate']
-            file_to_upload = str(pat_fname) + str(pat_lname) + str(upload_date)
+            upload_file = request.files['file']
+            upload_file.filename = str(pat_fname) + str(pat_lname) + str(upload_date)
+            upload_file.save(os.path.join('./static/tempData/', upload_file.filename))
             s3_path = 'Pupil_Data/Pupillometer_Data/'
-            Upload_2_S3(BUCKET_NAME, file_to_upload, s3_path + file_to_upload, s3_path)
+            Upload_2_S3(BUCKET_NAME, upload_file.filename, './static/tempData/' + upload_file.filename, s3_path)
             return render_template('HomePage.html', user=user)
         return render_template('Upload_from_device.html', user=user)
     else:
