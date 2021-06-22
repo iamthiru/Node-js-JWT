@@ -1,7 +1,7 @@
 # Proprietary: Benten Technologies, Inc.
 # Author: Pranav H. Deo
 # Copyright Content
-# Date: 06/20/2021
+# Date: 06/21/2021
 # Version: v1.10
 
 # Code Description:
@@ -147,6 +147,24 @@ def PatientRecords():
                 return render_template('ShowRecord.html', user=user, page_header=page_header,
                                        pat_id=pat_id, data_buck=data_buck)
         return render_template('PatientRecords.html', user=user)
+    else:
+        session.pop('user_email', None)
+        return render_template('Login.html')
+
+
+@app.route('/Device_Data_Upload')
+def Device_Data_Upload():
+    global user
+    if 'user_email' in session:
+        if request.method == 'POST':
+            pat_fname = request.form['firstname']
+            pat_lname = request.form['lastname']
+            upload_date = request.form['uploaddate']
+            file_to_upload = str(pat_fname) + str(pat_lname) + str(upload_date)
+            s3_path = 'Pupil_Data/Pupillometer_Data/'
+            Upload_2_S3(BUCKET_NAME, file_to_upload, s3_path + file_to_upload, s3_path)
+            return render_template('HomePage.html', user=user)
+        return render_template('Upload_from_device.html', user=user)
     else:
         session.pop('user_email', None)
         return render_template('Login.html')
