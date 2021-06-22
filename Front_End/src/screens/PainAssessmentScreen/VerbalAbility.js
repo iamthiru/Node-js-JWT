@@ -45,9 +45,7 @@ const VerbalAbility = ({gotoNext, verbalAbility, setVerbalAbility}) => {
       startTime,
       endTime
     ) */
-
     gotoNext();
-
     if (verbalAbility) {
       dispatch({
         type: CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
@@ -59,9 +57,9 @@ const VerbalAbility = ({gotoNext, verbalAbility, setVerbalAbility}) => {
       });
     }
   };
-  const handleNavigation = ()=>{
+  const handleNavigation = () => {
     navigation.navigate(SCREEN_NAMES.PUPILLARY_DILATION);
-  }
+  };
 
   return (
     <>
@@ -141,14 +139,14 @@ const VerbalAbility = ({gotoNext, verbalAbility, setVerbalAbility}) => {
           }}>
           <CustomButton
             onPress={() => handleNavigation()}
-            title="Skip"
+            title="Skip Assessment"
             textStyle={{
               color: COLORS.GRAY_90,
               textAlign: 'center',
               paddingHorizontal: 5,
             }}
             style={{
-              width: (width - 16 - 16 - 75) / 2,
+              width: (width - 16 - 16) / 2,
               borderColor: COLORS.PRIMARY_DARKER,
               borderWidth: 1,
               justifyContent: 'center',
