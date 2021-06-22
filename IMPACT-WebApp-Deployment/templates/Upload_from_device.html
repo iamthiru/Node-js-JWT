@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>IMPACT: Pupil Pain</title>
+    <link rel = "icon" href ="/static/Images/favicon.ico" />
+    <style>
+
+   .upload-btn-wrapper {
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+    }
+
+    .btn {
+      color: blue;
+      border: 2px solid black;
+      background-color: white;
+      padding: 8px 20px;
+      border-radius: 20px;
+      font-size: 20px;
+      width: 105px;
+    }
+
+    .upload-btn-wrapper input[type=file] {
+      font-size: 100px;
+      position: absolute;
+      left: 0;
+      top: 0;
+      opacity: 0;
+    }
+
+    input[type=text], select {
+      width: 49%;
+      padding: 12px 20px;
+      margin: 8px 0;
+      display: inline-block;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-sizing: border-box;
+    }
+
+    .form-wrap{
+        width: 700px;
+        height: 450px;
+        background: white;
+        padding: 30px 80px;
+        box-sizing: border-box;
+        border-radius: 10px;
+        box-shadow: 50px 50px 50px #000000;
+        position: fixed;
+        left: 50%;
+        top: 56%;
+        transform: translate(-50%, -50%);
+    }
+
+    body {
+      margin: 0;
+      background: #474e5d;
+    }
+
+    /* Style the header */
+    .header {
+      background-color: #f1f1f1;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .navbar {
+      background-color: #333;
+      overflow: hidden;
+    }
+
+    /* Style the links inside the navigation bar */
+    .navbar a {
+      float: left;
+      color: #f2f2f2;
+      text-align: center;
+      padding: 14px 16px;
+      text-decoration: none;
+      font-size: 17px;
+    }
+
+    /* Change the color of links on hover */
+    .navbar a:hover {
+      background-color: #ddd;
+      color: black;
+    }
+
+    /* Add a color to the active/current link */
+    .navbar a.active {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    .buttonstyle
+    {
+        background: black;
+        background-position: 0px -401px;
+        border: solid 1px #000000;
+        color: #00ffff;
+        height: 40px;
+        margin-top: -1px;
+        padding-bottom: 4px;
+        border-radius: 10px;
+        font-size: 20px;
+    }
+    .buttonstyle:hover {background: white;background-position: 0px -501px;color: #000000; }
+
+    .container {
+      display: inline;
+      position: relative;
+      padding-left: 35px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      font-size: 15px;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+
+    /* Hide the browser's default radio button */
+    .container input {
+      position: absolute;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    /* Create a custom radio button */
+    .checkmark {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 25px;
+      width: 25px;
+      background-color: #eee;
+      border-radius: 50%;
+    }
+
+    /* On mouse-over, add a grey background color */
+    .container:hover input ~ .checkmark {
+      background-color: #ccc;
+    }
+
+    /* When the radio button is checked, add a blue background */
+    .container input:checked ~ .checkmark {
+      background-color: #2196F3;
+    }
+
+    /* Create the indicator (the dot/circle - hidden when not checked) */
+    .checkmark:after {
+      content: "";
+      position: absolute;
+      display: none;
+    }
+
+    /* Show the indicator (dot/circle) when checked */
+    .container input:checked ~ .checkmark:after {
+      display: block;
+    }
+
+    /* Style the indicator (dot/circle) */
+    .container .checkmark:after {
+        top: 9px;
+        left: 9px;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: white;
+    }
+    </style>
+</head>
+<body>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <div class="navbar" id="Topnav">
+        <a href="{{url_for('HomePage')}}" style="font-size: 20px">Home</a>
+        <a href="{{url_for('PupilPain')}}" style="font-size: 20px">Pupil-Pain</a>
+        <a href="{{url_for('FacialPain')}}" style="font-size: 20px">Facial-Pain</a>
+        <a href="{{url_for('Device_Data_Upload')}}" style="font-size: 20px">Upload Pupillometer Data</a>
+        <a href="{{url_for('PatientRecords')}}" style="font-size: 20px">Patient-Records</a>
+        <a href="{{url_for('Logout')}}" style="font-size: 20px; float: right;">Logout</a>
+        <a href="{{url_for('HomePage')}}" style="font-size: 20px; float: right;">Hello, {{ user }}</a>
+    </div>
+
+    <div class="header">
+        <h1> Pupillometer Device - Data Upload </h1>
+    </div>
+
+    <form action="/Device_Data_Upload" method="post" enctype="multipart/form-data" class="form-wrap">
+        <h2 align="center">Export Data</h2>
+        <p>
+        <input type="text" name="firstname" placeholder="PATIENT - FIRST NAME" />
+        <input type="text" name="lastname" placeholder="PATIENT - LAST NAME" />
+        <br>
+        <br>
+
+        <h3>Upload Time: <input type="datetime-local" id="uploaddate" name="uploaddate"></h3><br>
+
+        <div class="upload-btn-wrapper">
+            <input class="btn" value="Choose File">
+            <input type="file" name="file" accept=".csv, .txt"/> Upload Raw Date File!
+        </div>
+        <br>
+        <br>
+        <br>
+        <p><input class="buttonstyle" type="submit" value="Send to Cloud" style="width:540px"></p>
+    </form>
+
+</body>
+</html>
