@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>IMPACT: Facial Pain</title>
+    <title>IMPACT: Pupil Pain</title>
     <link rel = "icon" href ="/static/Images/favicon.ico" />
     <style>
 
@@ -93,7 +93,8 @@
       color: white;
     }
 
-    .buttonstyle{
+    .buttonstyle
+    {
         background: black;
         background-position: 0px -401px;
         border: solid 1px #000000;
@@ -183,41 +184,27 @@
     </div>
 
     <div class="header">
-        <h1> Facial Measurements of Pain </h1>
+        <h1> Pupillometer Device - Data Upload </h1>
     </div>
 
-    <form action="/Upload_Process_Facial" method="post" enctype="multipart/form-data" class="form-wrap">
-        <h2 align="center">Facial Upload Form</h2>
+    <form action="/Device_Data_Upload" method="post" enctype="multipart/form-data" class="form-wrap">
+        <h2 align="center">Export Data</h2>
         <p>
-        <input type="text" name="firstname" placeholder="FIRST NAME" />
-        <input type="text" name="lastname" placeholder="LAST NAME" />
-        <br>
-        <h3>Select Pain Type</h3>
-        <label class="container">Neutral
-          <input type="radio" name="radio" value="NeutralVideo">
-          <span class="checkmark"></span>
-        </label>
-        &nbsp;
-        &nbsp;
-        <label class="container">Pain
-          <input type="radio" name="radio" value="PainVideo">
-          <span class="checkmark"></span>
-        </label>
-        &nbsp;
-        &nbsp;
-        <label class="container">Neutral & Pain
-          <input type="radio" name="radio" value="MixedVideo">
-          <span class="checkmark"></span>
-        </label>
+        <input type="text" name="firstname" placeholder="PATIENT - FIRST NAME" />
+        <input type="text" name="lastname" placeholder="PATIENT - LAST NAME" />
         <br>
         <br>
-        <br>
+
+        <h3>Upload Time: <input type="datetime-local" id="uploaddate" name="uploaddate"></h3><br>
+
         <div class="upload-btn-wrapper">
             <input class="btn" value="Choose File">
-            <input type="file" name="file" accept=".jpg, .png, .avi, .mp4, .MOV"/> Upload Your File Here!
+            <input type="file" name="file" accept=".csv, .txt"/> Upload Raw Date File!
         </div>
-        <br><br>
-        <p><input class="buttonstyle" type="submit" value="UPLOAD & PROCESS" style="width:540px"></p>
+        <br>
+        <br>
+        <br>
+        <p><input class="buttonstyle" type="submit" value="Send to Cloud" style="width:540px"></p>
     </form>
 
 </body>
