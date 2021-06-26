@@ -26,10 +26,10 @@
 
 ##############################################################
 import os
+import time
 import yaml
 import boto3
 import pymysql
-from time import *
 from flask import *
 import pandas as pd
 import datetime as dt
@@ -235,8 +235,6 @@ def Upload_Process_Pupil():
             f = request.files['file']
             PUPIL_UPLOAD_FOLDER_S3 = 'Pupil_Data/Uploads-VideoFiles/'
             PUPIL_UPLOAD_FOLDER = './static/Pupil_Input_Videos/'
-            ts = time.time()
-            st = dt.datetime.fromtimestamp(ts).strftime('%Y-%m-%d_%H:%M:%S')
             # pat_id = ''.join(rnd.choices(string.ascii_uppercase + string.digits, k=12))
             # fname = eye_color_val + fname_txtfield + lname_txtfield + str(st) + '.mp4'
             fname = eye_color_val + '_' + fname_txtfield + lname_txtfield + '.mp4'
@@ -245,12 +243,12 @@ def Upload_Process_Pupil():
             pth = os.path.join(app.config['PUPIL_UPLOAD_FOLDER'], fname)
             f.save(os.path.join(app.config['PUPIL_UPLOAD_FOLDER'], fname))
             Upload_2_S3(BUCKET_NAME, fname, pth, PUPIL_UPLOAD_FOLDER_S3)
-            table_userData.put_item(Item={'timestamp': str(st), 'Request': 'Website', 'user-email': email,
-                                          'user-name': fname_txtfield + ' ' + lname_txtfield,
+            table_userData.put_item(Item={'timestamp': str(dt.datetime.now()), 'Request': 'Website',
+                                          'user-email': email, 'user-name': fname_txtfield + ' ' + lname_txtfield,
                                           'user-eyecolor': eye_color_val, 'user-metric': 'Pupil Pain',
                                           's3-filepath': 's3://impact-benten/' + PUPIL_UPLOAD_FOLDER_S3 + fname})
             # Processing Segment:
-            os.system('python IMPACT_PUPIL_v1_3.py ' + str(fname) + ' Color')
+            os.system('python modules/IMPACT_PUPIL_v1_3.py ' + str(fname) + ' Color')
             token = os.path.exists('./static/Pupil_Output_Images/' + 'PUAL_' + str(os.path.splitext(fname)[0]) + '.csv')
             if token:
                 res_img_fold = os.path.join('static', 'Pupil_Output_Images')
@@ -293,8 +291,6 @@ def UploadFacial():
             f = request.files['file']
             FACIAL_UPLOAD_FOLDER_S3 = 'Facial_Data/Uploads-VideoFiles/'
             FACIAL_UPLOAD_FOLDER = './static/Face_Input_Videos/'
-            ts = time.time()
-            st = dt.datetime.fromtimestamp(ts).strftime('%Y-%m-%d_%H:%M:%S')
             # pat_id = ''.join(rnd.choices(string.ascii_uppercase + string.digits, k=12))
             # face_fname = option_val + fname_txtfield + lname_txtfield + str(st) + '.avi'
             face_fname = option_val + '_' + fname_txtfield + lname_txtfield + '.avi'
@@ -303,12 +299,12 @@ def UploadFacial():
             pth = os.path.join(app.config['FACIAL_UPLOAD_FOLDER'], face_fname)
             f.save(os.path.join(app.config['FACIAL_UPLOAD_FOLDER'], face_fname))
             Upload_2_S3(BUCKET_NAME, face_fname, pth, FACIAL_UPLOAD_FOLDER_S3)
-            table_userData.put_item(Item={'timestamp': str(st), 'Request': 'Website', 'user-email': email,
-                                          'user-name': fname_txtfield + ' ' + lname_txtfield,
+            table_userData.put_item(Item={'timestamp': str(dt.datetime.now()), 'Request': 'Website',
+                                          'user-email': email, 'user-name': fname_txtfield + ' ' + lname_txtfield,
                                           'user-video-type': option_val, 'user-metric': 'Facial Pain',
                                           's3-filepath': 's3://impact-benten/' + FACIAL_UPLOAD_FOLDER_S3 + face_fname})
             # Processing Segment:
-            os.system('python IMPACT_FACIAL_v1_0.py ' + str(face_fname))
+            os.system('python modules/IMPACT_FACIAL_v1_0.py ' + str(face_fname))
             token = os.path.exists('./static/Face_Output_Images/' + str(os.path.splitext(face_fname)[0]) + '.csv')
             if token:
                 res_img_fold = os.path.join('static', 'Face_Output_Images')
@@ -355,7 +351,7 @@ def pupil_api(filename):
     Download_from_S3(BUCKET_NAME, download_folder_s3 + filename, PUPIL_UPLOAD_FOLDER + filename)
     ts = time.time()
     st = dt.datetime.fromtimestamp(ts).strftime('%Y-%m-%d_%H:%M:%S')
-    os.system('python IMPACT_PUPIL_v1_3.py ' + str(filename) + ' Color')
+    os.system('python modules/IMPACT_PUPIL_v1_3.py ' + str(filename) + ' Color')
     token = os.path.exists('./static/Pupil_Output_Images/' + 'PUAL_' + str(os.path.splitext(filename)[0]) + '.csv')
     if token:
         print('\n*************** TOKEN : GOOD ****************\n')
@@ -393,7 +389,7 @@ def facial_api(filename):
     Download_from_S3(BUCKET_NAME, download_folder_s3 + filename, FACIAL_UPLOAD_FOLDER + filename)
     ts = time.time()
     st = dt.datetime.fromtimestamp(ts).strftime('%Y-%m-%d_%H:%M:%S')
-    os.system('python IMPACT_FACIAL_v1_0.py ' + str(filename))
+    os.system('python modules/IMPACT_FACIAL_v1_0.py ' + str(filename))
     token = os.path.exists('./static/Face_Output_Images/' + str(os.path.splitext(filename)[0]) + '.csv')
     if token:
         print('\n*************** TOKEN : GOOD ****************\n')
