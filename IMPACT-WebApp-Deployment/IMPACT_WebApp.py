@@ -130,22 +130,29 @@ def PatientRecords():
             pat_id = request.form['PatientID']
             dts = request.form['TentativeDate']
             operation = request.form['operation']
-            # print(pat_id, ' - ', dts, ' - ', operation)
-            links, dt_mod = FetchS3BucketObj(pat_id, dts, operation)
-            if len(links) == 0:
+            app_links, app_dt_mod = FetchS3BucketObj(pat_id, dts, operation)
+            dev_links, dev_dt_mod = Pull_Device_S3_Record(pat_id, dts)
+            if len(app_links) == 0 and operation == 'Facial Data':
+                return render_template('PatientRecords.html', user=user)
+            elif len(app_links) == 0 and len(dev_links) == 0 and operation == 'Pupil Data':
                 return render_template('PatientRecords.html', user=user)
             else:
-                data_buck = []
-                for i in range(0, len(links)):
-                    data_tup = (links[i], dt_mod[i])
-                    data_buck.append(data_tup)
-                # print(data_buck)
+                app_data_buck = []
+                dev_data_buck = []
+                for i in range(0, len(app_links)):
+                    app_data_tup = (app_links[i], app_dt_mod[i])
+                    app_data_buck.append(app_data_tup)
                 if operation == 'Pupil':
+                    for i in range(0, len(dev_links)):
+                        dev_data_tup = (dev_links[i], dev_dt_mod[i])
+                        dev_data_buck.append(dev_data_tup)
                     page_header = 'Pupil'
+                    return render_template('ShowRecord.html', user=user, page_header=page_header,
+                                           pat_id=pat_id, app_data_buck=app_data_buck, dev_data_buck=dev_data_buck)
                 else:
                     page_header = 'Facial'
-                return render_template('ShowRecord.html', user=user, page_header=page_header,
-                                       pat_id=pat_id, data_buck=data_buck)
+                    return render_template('ShowRecord.html', user=user, page_header=page_header,
+                                           pat_id=pat_id, app_data_buck=app_data_buck, dev_data_buck=dev_data_buck)
         return render_template('PatientRecords.html', user=user)
     else:
         session.pop('user_email', None)
@@ -161,7 +168,7 @@ def Device_Data_Upload():
             pat_lname = request.form['lastname']
             upload_date = request.form['uploaddate']
             upload_file = request.files['file']
-            upload_file.filename = str(pat_fname) + str(pat_lname) + str(upload_date)
+            upload_file.filename = str(pat_fname) + '_' + str(pat_lname) + '_' + str(upload_date)
             upload_file.save(os.path.join('./static/tempData/', upload_file.filename))
             s3_path = 'Pupil_Data/Pupillometer_Data/'
             Upload_2_S3(BUCKET_NAME, upload_file.filename, './static/tempData/' + upload_file.filename, s3_path)
@@ -463,6 +470,23 @@ def FetchS3BucketObj(patient_id, tent_date, op):
                         facial_url = f'https://{BUCKET_NAME}.s3.amazonaws.com/' + filename
                         op_links.append(facial_url)
                         dt_modified.append(last_mod_date)
+
+    return op_links, dt_modified
+
+
+def Pull_Device_S3_Record(patient_id, date_timestamp):
+    s3 = boto3.resource('s3', aws_access_key_id=key_db['AWSAccessKeyId'], aws_secret_access_key=key_db['AWSSecretKey'])
+    my_bucket = s3.Bucket(BUCKET_NAME)
+    op_links = []
+    dt_modified = []
+    for file in my_bucket.objects.filter(Prefix='Pupil_Data/Pupillometer_Data/'):
+        filename = file.key
+        last_mod_date = file.last_modified
+        if filename.find(patient_id) != -1:
+            # if str(date_timestamp) in str(last_mod_date):
+            pupil_url = f'https://{BUCKET_NAME}.s3.amazonaws.com/' + filename
+            op_links.append(pupil_url)
+            dt_modified.append(last_mod_date)
 
     return op_links, dt_modified
 
