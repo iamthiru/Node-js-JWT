@@ -137,16 +137,32 @@ tr:hover {
     <div class="header">
         <h1>IMPACT PATIENT RECORDS : {{ page_header }}</h1>
     </div>
-
     <br>
-    <br>
+    <h2 align="center">App Records</h2>
     <table align="center" cellspacing="20px" cellpadding="30px">
         <tr>
             <th>Patient ID</th>
             <th>{{ page_header }} Download Link</th>
             <th>Date Modified</th>
         </tr>
-        {% for data in data_buck %}
+        {% for data in app_data_buck %}
+            <tr>
+                <td>{{ pat_id }}</td>
+                <td><a href={{ data[0] }}>Linked File</a></td>
+                <td>{{ data[1] }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+    <br>
+    <br>
+    <h2 align="center">Pupillometer Records</h2>
+    <table align="center" cellspacing="20px" cellpadding="30px">
+        <tr>
+            <th>Patient ID</th>
+            <th>{{ page_header }} Download Link</th>
+            <th>Date Modified</th>
+        </tr>
+        {% for data in dev_data_buck %}
             <tr>
                 <td>{{ pat_id }}</td>
                 <td><a href={{ data[0] }}>Linked File</a></td>
