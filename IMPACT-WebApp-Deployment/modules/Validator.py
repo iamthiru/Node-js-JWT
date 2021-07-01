@@ -1,12 +1,13 @@
 # Proprietary: Benten Technologies, Inc.
-# Author: Pranav H. Deo
-# Copyright Content
+# Author: Pranav H. Deo { pdeo@bententech.com }
+# (C) Copyright Content
 # Date: 04/19/2021
 
 # Module Description:
 # * Radius_Validity_Check - Checks the Current Frame's detected Radius Validity wrt previously recorded Radius values.
 # * Checks if Pupil was detected in a frame.
 
+########################################################################################################################
 # PACKAGE IMPORTS
 import numpy as np
 
