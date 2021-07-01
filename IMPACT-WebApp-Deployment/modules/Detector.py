@@ -1,6 +1,6 @@
 # Proprietary: Benten Technologies, Inc.
-# Author: Pranav H. Deo
-# Copyright Content
+# Author: Pranav H. Deo { pdeo@bententech.com }
+# (C) Copyright Content
 # Date: 04/27/2021
 
 # Module Description:
@@ -8,11 +8,13 @@
 # * Pupil Detector - Logical Cropping and Pixel Re-mapping to Original Frame
 # * Dynamic Pupil, Iris Threshold Detection
 
+########################################################################################################################
 # PACKAGE IMPORTS
 import cv2
 import Validator
 import numpy as np
 
+########################################################################################################################
 # LIST INITIALIZATION
 Pupil_Thresh_Store = []
 Iris_Thresh_Store = []
@@ -64,7 +66,7 @@ def Iris_Detection(or_im, im, frame_num, iris_thresh, pup_cen, iris_radii, iris_
     w, h = imge.shape
 
     _, thresh = cv2.threshold(imge, abs(int(iris_thresh)), 255, cv2.THRESH_BINARY)
-    cv2.imshow('Iris Threshold', thresh)
+    # cv2.imshow('Iris Threshold', thresh)
 
     circles = cv2.HoughCircles(thresh, cv2.HOUGH_GRADIENT, 3, 800, param1=90, param2=30,
                                minRadius=int(min(w, h)/1.90), maxRadius=int(max(w, h)))
@@ -136,7 +138,7 @@ def Pupil_Detection(or_im, im, frame_num, Pupil_Thresh, pupil_radii, pupil_xpoin
     w, h = imge.shape
 
     _, thresh = cv2.threshold(imge, abs(int(Pupil_Thresh)), 255, cv2.THRESH_BINARY)
-    cv2.imshow('Pupil', thresh)
+    # cv2.imshow('Pupil', thresh)
     contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     flg = 0
 
