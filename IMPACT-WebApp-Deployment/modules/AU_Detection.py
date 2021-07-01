@@ -1,5 +1,5 @@
 # Proprietary: Benten Technologies, Inc.
-# Author: Pranav H. Deo { pdeo@bententech.com }, Jagadesh N. { jnischal@bententech.com }
+# Author: Pranav H. Deo { pdeo@bententech.com }
 # (C) Copyright Content
 
 #######################################################################################################################
