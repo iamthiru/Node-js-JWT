@@ -1,7 +1,8 @@
-# Proprietary: BentenTech
-# Author: Pranav H. Deo
-# Copyright Content
+# Proprietary: Benten Technologies, Inc.
+# Author: Pranav H. Deo { pdeo@bententech.com }, Jagadesh N. { jnischal@bententech.com }
+# (C) Copyright Content
 
+#######################################################################################################################
 import cv2
 import pandas as pd
 import os
@@ -236,7 +237,7 @@ if __name__ == "__main__":
             in_path = "/AWS_Lambda/static/Facial_Input_Videos/" + filenm
         else:
             in_path = "/static/Face_Input_Videos/face.png"
-        os.chdir('OpenFace')
+        os.chdir('../OpenFace')
         Image_Processing(in_path, out_path)
         sign = 0
 
@@ -247,7 +248,7 @@ if __name__ == "__main__":
             in_path = "/AWS_Lambda/static/Face_Input_Videos/" + filenm
         else:
             in_path = "/AWS_lambda/static/Face_Input_Videos/face.mp4"
-        os.chdir('OpenFace')
+        os.chdir('../OpenFace')
         Image_Processing(in_path, out_path)
         sign = 0
 
@@ -256,7 +257,7 @@ if __name__ == "__main__":
         in_path = "/Users/pranavdeo/Documents/FAUs/Face_Test/"
         files = os.listdir(in_path)
         print("> Extracting Features...")
-        os.chdir('OpenFace')
+        os.chdir('../OpenFace')
 
         for f in files:
             in_path = '/Users/pranavdeo/Documents/FAUs/Face_Test'
