@@ -1,6 +1,6 @@
 # Proprietary: Benten Technologies, Inc.
-# Author: Pranav H. Deo
-# Copyright Content
+# Author: Pranav H. Deo { pdeo@bententech.com }
+# (C) Copyright Content
 # Date: 03/01/2021
 # Version: v1.0
 
@@ -93,7 +93,8 @@ def Calculate_PUAL(filename, ratio_data, fps):
         Corrected_PUAL = 0
 
     # STEP 8: WRITING TO CSV FILE
-    Write_to_CSV(fl_name, ratio_data, std_dev, low_freq, ratio_data_cleaned, FFT_Data, Amp, PUAL_index, Noise, Corrected_PUAL)
+    Write_to_CSV(fl_name, ratio_data, std_dev, low_freq, ratio_data_cleaned,
+                 FFT_Data, Amp, PUAL_index, Noise, Corrected_PUAL)
 
     return PUAL_index, Noise, Corrected_PUAL
 
