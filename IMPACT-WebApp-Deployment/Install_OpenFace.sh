@@ -1,3 +1,8 @@
+# Proprietary: Benten Technologies, Inc.
+# Author: Pranav H. Deo { pdeo@bententech.com }
+# Copyright Content (C)
+# Date: 06/21/2021
+# Version: v1.0
 #!/bin/bash
 apt-get update
 apt-get -y install build-essential
