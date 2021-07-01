@@ -1,3 +1,9 @@
+# Proprietary: Benten Technologies, Inc.
+# Author: Pranav H. Deo { pdeo@bententech.com }
+# Copyright Content (C)
+# Date: 05/21/2021
+# Version: v1.0
+
 FROM ubuntu:20.04
 FROM python:3.8
 
