@@ -1,3 +1,8 @@
+<!--
+# Proprietary: Benten Technologies, Inc.
+Author: Pranav H. Deo { pdeo@bententech.com }
+(C) Copyright Content
+-->
 <!DOCTYPE html>
 <html>
 <head>
@@ -128,8 +133,7 @@ tr:hover {
         <a href="{{url_for('HomePage')}}" style="font-size: 20px">Home</a>
         <a href="{{url_for('PupilPain')}}" style="font-size: 20px">Pupil-Pain</a>
         <a href="{{url_for('FacialPain')}}" style="font-size: 20px">Facial-Pain</a>
-        <a href="{{url_for('Device_Data_Upload')}}" style="font-size: 20px">Upload Pupillometer Data</a>
-        <a href="{{url_for('PatientRecords')}}" style="font-size: 20px">Patient-Records</a>
+        <a href="{{url_for('PupilRecords')}}" style="font-size: 20px">Patient-Records</a>
         <a href="{{url_for('Logout')}}" style="font-size: 20px; float: right;">Logout</a>
         <a href="{{url_for('HomePage')}}" style="font-size: 20px; float: right;">Hello, {{ user }}</a>
     </div>
@@ -138,35 +142,19 @@ tr:hover {
         <h1>IMPACT PATIENT RECORDS : {{ page_header }}</h1>
     </div>
     <br>
-    <h2 align="center">App Records</h2>
     <table align="center" cellspacing="20px" cellpadding="30px">
         <tr>
-            <th>Patient ID</th>
-            <th>{{ page_header }} Download Link</th>
+            <th>Pupil File List</th>
             <th>Date Modified</th>
+            <th>Download Output CSV</th>
+            <th>Upload Device CSV</th>
         </tr>
-        {% for data in app_data_buck %}
+        {% for key, value in pupil_csv_list.items() %}
             <tr>
-                <td>{{ pat_id }}</td>
-                <td><a href={{ data[0] }}>Linked File</a></td>
-                <td>{{ data[1] }}</td>
-            </tr>
-        {% endfor %}
-    </table>
-    <br>
-    <br>
-    <h2 align="center">Pupillometer Records</h2>
-    <table align="center" cellspacing="20px" cellpadding="30px">
-        <tr>
-            <th>Patient ID</th>
-            <th>{{ page_header }} Download Link</th>
-            <th>Date Modified</th>
-        </tr>
-        {% for data in dev_data_buck %}
-            <tr>
-                <td>{{ pat_id }}</td>
-                <td><a href={{ data[0] }}>Linked File</a></td>
-                <td>{{ data[1] }}</td>
+                <td>{{ key }}</td>
+                <td>{{ value[0] }}</td>
+                <td><a href={{ value[1] }}>Linked File</a></td>
+                <td><button>Click to Upload</button></td>
             </tr>
         {% endfor %}
     </table>
