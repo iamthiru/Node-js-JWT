@@ -1,6 +1,6 @@
 # Proprietary: Benten Technologies, Inc.
-# Author: Pranav H. Deo
-# Copyright Content
+# Author: Pranav H. Deo { pdeo@bententech.com }
+# (C) Copyright Content
 # Date: 06/21/2021
 # Version: v1.10
 
@@ -37,10 +37,10 @@ import datetime as dt
 ##############################################################
 # --------------------- AMAZON-S3 -------------------------- #
 BUCKET_NAME = 'impact-benten'
-key_db = yaml.load(open('Keys.yaml'))
+key_db = yaml.load(open('config/Keys.yaml'))
 ##############################################################
 # ------------------- AMAZON-RDS-MySQL --------------------- #
-db = yaml.load(open('db.yaml'))
+db = yaml.load(open('config/db.yaml'))
 conn = pymysql.connect(host=db['mysql_host'],
                        user=db['mysql_user'],
                        password=db['mysql_password'],
@@ -122,6 +122,15 @@ def Register():
     return render_template('Register.html')
 
 
+@app.route('/PupilRecords', methods=['GET', 'POST'])
+def PupilRecords():
+    global user
+    if 'user_email' in session:
+        page_header = 'Pupil'
+        pupil_csv_list = S3_record_fetcher()
+        return render_template('ShowRecord.html', user=user, pupil_csv_list=pupil_csv_list, page_header=page_header)
+
+'''
 @app.route('/PatientRecords', methods=['GET', 'POST'])
 def PatientRecords():
     global user
@@ -157,26 +166,7 @@ def PatientRecords():
     else:
         session.pop('user_email', None)
         return render_template('Login.html')
-
-
-@app.route('/Device_Data_Upload', methods=['GET', 'POST'])
-def Device_Data_Upload():
-    global user
-    if 'user_email' in session:
-        if request.method == 'POST':
-            pat_fname = request.form['firstname']
-            pat_lname = request.form['lastname']
-            upload_date = request.form['uploaddate']
-            upload_file = request.files['file']
-            upload_file.filename = str(pat_fname) + '_' + str(pat_lname) + '_' + str(upload_date)
-            upload_file.save(os.path.join('./static/tempData/', upload_file.filename))
-            s3_path = 'Pupil_Data/Pupillometer_Data/'
-            Upload_2_S3(BUCKET_NAME, upload_file.filename, './static/tempData/' + upload_file.filename, s3_path)
-            return render_template('HomePage.html', user=user)
-        return render_template('Upload_from_device.html', user=user)
-    else:
-        session.pop('user_email', None)
-        return render_template('Login.html')
+'''
 
 
 @app.route('/HomePage')
@@ -441,6 +431,7 @@ def Download_from_S3(buck, KEY, Local_fp):
     return 'Download Done'
 
 
+'''
 def FetchS3BucketObj(patient_id, tent_date, op):
     s3 = boto3.resource('s3', aws_access_key_id=key_db['AWSAccessKeyId'], aws_secret_access_key=key_db['AWSSecretKey'])
     my_bucket = s3.Bucket(BUCKET_NAME)
@@ -485,6 +476,21 @@ def Pull_Device_S3_Record(patient_id, date_timestamp):
             dt_modified.append(last_mod_date)
 
     return op_links, dt_modified
+'''
+
+
+def S3_record_fetcher():
+    s3 = boto3.resource('s3', aws_access_key_id=key_db['AWSAccessKeyId'], aws_secret_access_key=key_db['AWSSecretKey'])
+    my_bucket = s3.Bucket(BUCKET_NAME)
+    all_pupil_csv_files = {}
+    for file in my_bucket.objects.filter(Prefix='Pupil_Data/Results-Output/'):
+        filename = file.key
+        last_mod_date = file.last_modified
+        if filename.find('.csv') != -1:
+            head, tail = os.path.split(filename)
+            url = f'https://{BUCKET_NAME}.s3.amazonaws.com/' + filename
+            all_pupil_csv_files[tail] = (last_mod_date, url)
+    return all_pupil_csv_files
 
 
 if __name__ == '__main__':
