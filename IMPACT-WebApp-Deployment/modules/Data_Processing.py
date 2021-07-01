@@ -1,6 +1,6 @@
 # Proprietary: Benten Technologies, Inc.
-# Author: Pranav H. Deo
-# Copyright Content
+# Author: Pranav H. Deo { pdeo@bententech.com }
+# (C) Copyright Content
 # Date: 05/05/2021
 
 # Module Description:
@@ -10,6 +10,7 @@
 # * Graph Plotter
 # * Resource Sharer
 
+########################################################################################################################
 # PACKAGE IMPORTS
 import cv2
 import os
@@ -105,7 +106,8 @@ def Make_DFs(filename, frame_num, Iris_Dilation, Pupil_Dilation, ratio, processe
     df.columns = ['Frame', 'Iris Dilation', 'Pupil Dilation', 'Ratio',
                   'Processed Iris Dilation', 'Processed Pupil Dilation', 'Processed Ratio']
     df.to_csv('./static/Pupil_Output_Images/' + os.path.splitext(filename)[0] + '_Dilation.csv', index=False)
-    df.to_csv('./static/Pupil_Output_Images/' + os.path.splitext(filename)[0] + '_Ratio_Dilation.csv', index=False, columns=['Frame', 'Processed Ratio'])
+    df.to_csv('./static/Pupil_Output_Images/' + os.path.splitext(filename)[0] + '_Ratio_Dilation.csv', index=False,
+              columns=['Frame', 'Processed Ratio'])
 
     return ratio, processed_ratio
 
@@ -161,7 +163,6 @@ def Compute_Resources(start_time):
     usage = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
     end_time = time.time() - start_time
     print('Execution Time : ', end_time, ' sec')
-    print('Memory Usage : ', (usage / (8*np.power(10, 6))), 'MB')
-
+    print('Memory Usage : ', (usage / (8 * np.power(10, 6))), 'MB')
 
 ########################################################################################################################
