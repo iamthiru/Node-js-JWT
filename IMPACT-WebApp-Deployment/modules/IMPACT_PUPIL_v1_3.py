@@ -1,6 +1,6 @@
 # Proprietary: Benten Technologies, Inc.
-# Author: Pranav H. Deo
-# Copyright Content
+# Author: Pranav H. Deo { pdeo@bententech.com }
+# (C) Copyright Content
 # Date: 04/19/2021
 # Version: v1.5
 
