@@ -1,3 +1,7 @@
+# Proprietary: Benten Technologies, Inc.
+# Author: Pranav H. Deo { pdeo@bententech.com }
+# (C) Copyright Content
+
 import json
 import boto3
 
