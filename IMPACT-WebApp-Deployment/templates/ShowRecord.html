@@ -55,47 +55,39 @@ width: 48%;
 padding: 10px;
 }
 
-.myimages {
-width: 700px;
-height: 450px;
+.buttonstyle{
+    background: black;
+    background-position: 0px -401px;
+    border: solid 1px #000000;
+    color: #00ffff;
+    height: 40px;
+    margin-top: -1px;
+    padding-bottom: 4px;
+    border-radius: 10px;
+    font-size: 20px;
+}
+.buttonstyle:hover {background: white;background-position: 0px -501px;color: #000000; }
+
+input[type=text] {
+  width: 200px;
+  padding: 12px 20px;
+  margin: 8px 0;
+  box-sizing: border-box;
+  border: 2px solid blue;
+  border-radius: 8px;
 }
 
-.about-section {
-  padding: 40px;
-  text-align: center;
-  background-color: #474e5d;
-  color: white;
+input[type="file"] {
+    display: none;
 }
-
-form.sbar input[type=text] {
-  padding: 10px;
-  font-size: 17px;
-  border: 1px solid grey;
-  float: left;
-  width: 80%;
-  background: #f1f1f1;
+.custom-file-upload {
+    border: 2px solid black;
+    display: inline-block;
+    padding: 6px 12px;
+    cursor: pointer;
 }
-
-form.sbar button {
-  float: left;
-  width: 10%;
-  padding: 10px;
-  background: #2196F3;
-  color: white;
-  font-size: 17px;
-  border: 1px solid grey;
-  border-left: none;
-  cursor: pointer;
-}
-
-form.sbar button:hover {
-  background: #0b7dda;
-}
-
-form.sbar::after {
-  content: "";
-  clear: both;
-  display: table;
+.custom-file-upload:active {
+  background: -webkit-linear-gradient(top, #e3e3e3, green);
 }
 
 table {
@@ -144,17 +136,30 @@ tr:hover {
     <br>
     <table align="center" cellspacing="20px" cellpadding="30px">
         <tr>
-            <th>Pupil File List</th>
+            <th>Pupil File</th>
             <th>Date Modified</th>
-            <th>Download Output CSV</th>
-            <th>Upload Device CSV</th>
+            <th>Download CSV</th>
+            <th>Upload CSV</th>
         </tr>
         {% for key, value in pupil_csv_list.items() %}
             <tr>
                 <td>{{ key }}</td>
                 <td>{{ value[0] }}</td>
                 <td><a href={{ value[1] }}>Linked File</a></td>
-                <td><button>Click to Upload</button></td>
+                <td>
+                    <form action="/Upload_Device_Data" method="post" enctype="multipart/form-data" class="form-wrap">
+                        <label for="file-upload" class="custom-file-upload" style="width:370px">
+                            <i class="fa fa-cloud-upload"></i> File Upload
+                        </label>
+                        <br>
+                        <br>
+                        <input id="file-upload" type="file" type="file" name="file" accept=".csv"/>
+                        <input type="text" name="text" placeholder="Enter Filename" style="width:400px">
+                        <br>
+                        <br>
+                        <input class="buttonstyle" type="submit" value="UPLOAD" style="width:400px">
+                    </form>
+                </td>
             </tr>
         {% endfor %}
     </table>
