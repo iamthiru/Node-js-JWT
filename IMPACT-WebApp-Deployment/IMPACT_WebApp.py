@@ -1,7 +1,7 @@
 # Proprietary: Benten Technologies, Inc.
 # Author: Pranav H. Deo { pdeo@bententech.com }
 # (C) Copyright Content
-# Date: 07/01/2021
+# Date: 07/03/2021
 # Version: v1.10
 
 # Code Description:
@@ -129,6 +129,30 @@ def PupilRecords():
         page_header = 'Pupil'
         pupil_csv_list = S3_record_fetcher()
         return render_template('ShowRecord.html', user=user, pupil_csv_list=pupil_csv_list, page_header=page_header)
+
+
+@app.route('/Upload_Device_Data', methods=['GET', 'POST'])
+def Upload_Device_Data():
+    global user
+    if 'user_email' in session:
+        if request.method == 'POST':
+            f = request.files['file']
+            txt_fname = request.form['text']
+            head, tail = txt_fname.split(".")
+            new_filename = head + '_device.' + tail
+            f.filename = str(new_filename)
+            PUPIL_UPLOAD_FOLDER_S3 = 'Pupil_Data/Pupillometer_Data/'
+            PUPIL_UPLOAD_FOLDER = './static/Device_Data/'
+            app.config['PUPIL_UPLOAD_FOLDER'] = PUPIL_UPLOAD_FOLDER
+            pth = os.path.join(app.config['PUPIL_UPLOAD_FOLDER'], f.filename)
+            f.save(os.path.join(app.config['PUPIL_UPLOAD_FOLDER'], f.filename))
+            Upload_2_S3(BUCKET_NAME, f.filename, pth, PUPIL_UPLOAD_FOLDER_S3)
+            return render_template('HomePage.html', user=user)
+        return render_template('HomePage.html', user=user)
+    else:
+        session.pop('user_email', None)
+        return render_template('Login.html')
+
 
 '''
 @app.route('/PatientRecords', methods=['GET', 'POST'])
