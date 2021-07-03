@@ -1,5 +1,13 @@
 # IMPACT
 
+***
+
+**Proprietary:** Benten Technologies, Inc.
+
+**Copyright (c) 2021., Author:** Pranav H. Deo { pdeo@bententech.com }
+
+***
+
 ## IMPACT SYNOPSIS
 * **Objective:** Detecting Pain based on Pupillary Unrest and changes in the intensity of the "Facial Action Units" (FAUs).
 
