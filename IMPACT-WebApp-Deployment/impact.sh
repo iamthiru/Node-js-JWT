@@ -43,5 +43,5 @@ apt-get update
 apt install -y docker-ce
 docker login -u hkchang3 -p benten_105
 docker pull hkchang3/impact-benten:v15
-docker run -d -p 5000:5000 --name impact hkchang3/impact-benten:v15
+docker run -d --restart unless-stopped -p 5000:5000 --name impact hkchang3/impact-benten:v15
 --//
