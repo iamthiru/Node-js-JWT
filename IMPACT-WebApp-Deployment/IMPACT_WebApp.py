@@ -1,7 +1,7 @@
 # Proprietary: Benten Technologies, Inc.
 # Author: Pranav H. Deo { pdeo@bententech.com }
 # (C) Copyright Content
-# Date: 07/03/2021
+# Date: 07/10/2021
 # Version: v1.10
 
 # Code Description:
@@ -127,8 +127,8 @@ def PupilRecords():
     global user
     if 'user_email' in session:
         page_header = 'Pupil'
-        pupil_csv_list = S3_record_fetcher()
-        return render_template('ShowRecord.html', user=user, pupil_csv_list=pupil_csv_list, page_header=page_header)
+        pupil_csv_dict = S3_record_fetcher()
+        return render_template('ShowRecord.html', user=user, pupil_csv_list=pupil_csv_dict, page_header=page_header)
 
 
 @app.route('/Upload_Device_Data', methods=['GET', 'POST'])
@@ -138,7 +138,7 @@ def Upload_Device_Data():
         if request.method == 'POST':
             f = request.files['file']
             txt_fname = request.form['text']
-            head, tail = txt_fname.split(".")
+            head, tail = txt_fname.split('.')
             new_filename = head + '_device.' + tail
             f.filename = str(new_filename)
             PUPIL_UPLOAD_FOLDER_S3 = 'Pupil_Data/Pupillometer_Data/'
@@ -152,45 +152,6 @@ def Upload_Device_Data():
     else:
         session.pop('user_email', None)
         return render_template('Login.html')
-
-
-'''
-@app.route('/PatientRecords', methods=['GET', 'POST'])
-def PatientRecords():
-    global user
-    if 'user_email' in session:
-        if request.method == 'POST':
-            pat_id = request.form['PatientID']
-            dts = request.form['TentativeDate']
-            operation = request.form['operation']
-            app_links, app_dt_mod = FetchS3BucketObj(pat_id, dts, operation)
-            dev_links, dev_dt_mod = Pull_Device_S3_Record(pat_id, dts)
-            if len(app_links) == 0 and operation == 'Facial Data':
-                return render_template('PatientRecords.html', user=user)
-            elif len(app_links) == 0 and len(dev_links) == 0 and operation == 'Pupil Data':
-                return render_template('PatientRecords.html', user=user)
-            else:
-                app_data_buck = []
-                dev_data_buck = []
-                for i in range(0, len(app_links)):
-                    app_data_tup = (app_links[i], app_dt_mod[i])
-                    app_data_buck.append(app_data_tup)
-                if operation == 'Pupil':
-                    for i in range(0, len(dev_links)):
-                        dev_data_tup = (dev_links[i], dev_dt_mod[i])
-                        dev_data_buck.append(dev_data_tup)
-                    page_header = 'Pupil'
-                    return render_template('ShowRecord.html', user=user, page_header=page_header,
-                                           pat_id=pat_id, app_data_buck=app_data_buck, dev_data_buck=dev_data_buck)
-                else:
-                    page_header = 'Facial'
-                    return render_template('ShowRecord.html', user=user, page_header=page_header,
-                                           pat_id=pat_id, app_data_buck=app_data_buck, dev_data_buck=dev_data_buck)
-        return render_template('PatientRecords.html', user=user)
-    else:
-        session.pop('user_email', None)
-        return render_template('Login.html')
-'''
 
 
 @app.route('/HomePage')
@@ -455,54 +416,6 @@ def Download_from_S3(buck, KEY, Local_fp):
     return 'Download Done'
 
 
-'''
-def FetchS3BucketObj(patient_id, tent_date, op):
-    s3 = boto3.resource('s3', aws_access_key_id=key_db['AWSAccessKeyId'], aws_secret_access_key=key_db['AWSSecretKey'])
-    my_bucket = s3.Bucket(BUCKET_NAME)
-    op_links = []
-    dt_modified = []
-    if op == 'Pupil':
-        for file in my_bucket.objects.filter(Prefix='Pupil_Data/Results-Output/'):
-            filename = file.key
-            last_mod_date = file.last_modified
-            if filename.find(patient_id) != -1:
-                if filename.find('PUAL_') and str(filename).endswith('.csv'):
-                    if str(tent_date) in str(last_mod_date):
-                        pupil_url = f'https://{BUCKET_NAME}.s3.amazonaws.com/' + filename
-                        op_links.append(pupil_url)
-                        dt_modified.append(last_mod_date)
-    else:
-        for file in my_bucket.objects.filter(Prefix='Facial_Data/Results-Output/'):
-            filename = file.key
-            last_mod_date = file.last_modified
-            if filename.find(patient_id) != -1:
-                if filename.find('_Pain_Plot.png') != -1:
-                    if str(tent_date) in str(last_mod_date):
-                        facial_url = f'https://{BUCKET_NAME}.s3.amazonaws.com/' + filename
-                        op_links.append(facial_url)
-                        dt_modified.append(last_mod_date)
-
-    return op_links, dt_modified
-
-
-def Pull_Device_S3_Record(patient_id, date_timestamp):
-    s3 = boto3.resource('s3', aws_access_key_id=key_db['AWSAccessKeyId'], aws_secret_access_key=key_db['AWSSecretKey'])
-    my_bucket = s3.Bucket(BUCKET_NAME)
-    op_links = []
-    dt_modified = []
-    for file in my_bucket.objects.filter(Prefix='Pupil_Data/Pupillometer_Data/'):
-        filename = file.key
-        last_mod_date = file.last_modified
-        if filename.find(patient_id) != -1:
-            # if str(date_timestamp) in str(last_mod_date):
-            pupil_url = f'https://{BUCKET_NAME}.s3.amazonaws.com/' + filename
-            op_links.append(pupil_url)
-            dt_modified.append(last_mod_date)
-
-    return op_links, dt_modified
-'''
-
-
 def S3_record_fetcher():
     s3 = boto3.resource('s3', aws_access_key_id=key_db['AWSAccessKeyId'], aws_secret_access_key=key_db['AWSSecretKey'])
     my_bucket = s3.Bucket(BUCKET_NAME)
@@ -511,10 +424,14 @@ def S3_record_fetcher():
         filename = file.key
         last_mod_date = file.last_modified
         if filename.find('.csv') != -1:
-            head, tail = os.path.split(filename)
-            url = f'https://{BUCKET_NAME}.s3.amazonaws.com/' + filename
-            all_pupil_csv_files[tail] = (last_mod_date, url)
-    return all_pupil_csv_files
+            _, fl = os.path.split(filename)
+            head, tail = os.path.splitext(fl)
+            fn = head.split('PUAL_')
+            csv_url = f'https://{BUCKET_NAME}.s3.amazonaws.com/' + filename
+            video_url = f'https://{BUCKET_NAME}.s3.amazonaws.com/Pupil_Data/Results-Output/' + str(fn[1]) + '.mp4'
+            all_pupil_csv_files[fl] = (last_mod_date, csv_url, video_url)
+    sorted_list = sorted(all_pupil_csv_files.items(), key=lambda x: x[1][0], reverse=True)
+    return sorted_list
 
 
 if __name__ == '__main__':
