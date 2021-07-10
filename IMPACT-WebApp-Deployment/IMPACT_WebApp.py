@@ -127,8 +127,8 @@ def PupilRecords():
     global user
     if 'user_email' in session:
         page_header = 'Pupil'
-        pupil_csv_dict = S3_record_fetcher()
-        return render_template('ShowRecord.html', user=user, pupil_csv_list=pupil_csv_dict, page_header=page_header)
+        pupil_csv_list = S3_record_fetcher()
+        return render_template('ShowRecord.html', user=user, pupil_csv_list=pupil_csv_list, page_header=page_header)
 
 
 @app.route('/Upload_Device_Data', methods=['GET', 'POST'])
