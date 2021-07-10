@@ -134,30 +134,32 @@ tr:hover {
         <h1>IMPACT PATIENT RECORDS : {{ page_header }}</h1>
     </div>
     <br>
-    <table align="center" cellspacing="20px" cellpadding="30px">
+    <table align="center" cellspacing="15px" cellpadding="13px">
         <tr>
             <th>Pupil File</th>
             <th>Date Modified</th>
             <th>Download CSV</th>
+            <th>Download Video</th>
             <th>Upload CSV</th>
         </tr>
         {% for key, value in pupil_csv_list.items() %}
             <tr>
                 <td>{{ key }}</td>
                 <td>{{ value[0] }}</td>
-                <td><a href={{ value[1] }}>Linked File</a></td>
+                <td><a href={{ value[1] }}>Download CSV File</a></td>
+                <td><a href={{ value[2] }}>Download Video File</a></td>
                 <td>
                     <form action="/Upload_Device_Data" method="post" enctype="multipart/form-data" class="form-wrap">
-                        <label for="file-upload" class="custom-file-upload" style="width:370px">
+                        <label for="file-upload" class="custom-file-upload" style="width:310px">
                             <i class="fa fa-cloud-upload"></i> File Upload
                         </label>
                         <br>
                         <br>
                         <input id="file-upload" type="file" type="file" name="file" accept=".csv"/>
-                        <input type="text" name="text" placeholder="Enter Filename" style="width:400px">
+                        <input type="text" name="text" placeholder="Enter Filename" style="width:340px">
                         <br>
                         <br>
-                        <input class="buttonstyle" type="submit" value="UPLOAD" style="width:400px">
+                        <input class="buttonstyle" type="submit" value="UPLOAD" style="width:340px">
                     </form>
                 </td>
             </tr>
