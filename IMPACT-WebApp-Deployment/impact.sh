@@ -41,7 +41,7 @@ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
 apt-get update
 apt install -y docker-ce
-docker login -u hkchang3 -p benten_105
+docker login -u hkchang3xxxxxx -p benten_105x090xxxx
 docker pull hkchang3/impact-benten:v15
 docker run -d --restart unless-stopped -p 5000:5000 --name impact hkchang3/impact-benten:v15
 --//
