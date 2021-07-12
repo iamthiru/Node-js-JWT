@@ -118,6 +118,7 @@ const PainAssessmentScreen = ({navigation}) => {
         reminder_time: null,
         isRemainder: true,
         assessment_date: null,
+        pain_qualities: [],
         // frequence: 0,
         // pain_frequency_id: 0,
         frequencyData:null,

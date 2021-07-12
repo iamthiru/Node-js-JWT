@@ -20,7 +20,9 @@ const PainQuality = ({gotoNext, gotoPrevious}) => {
   const painQuality = useSelector(
     (state) => state.painAssessmentData.selectedPainQualities,
   );
-  const selectedAssessmentData = useSelector((state) => state.createAsseement);
+  const previousQualities = useSelector(
+    (state) => state.createAsseement?.pain_qualities,
+  );
 
   const pain_qualities = useSelector((state) => state.lookupData.lookup_data);
 
@@ -31,19 +33,14 @@ const PainQuality = ({gotoNext, gotoPrevious}) => {
   useEffect(() => {
     startTime = new Date().getTime();
   }, []);
-  useEffect(() => {
-    if (selectedAssessmentData?.pain_activity_name) {
-      setSelectedPainQualities([selectedAssessmentData?.pain_activity_name]);
-    }
-  }, [selectedAssessmentData?.pain_activity_id]);
 
   const dispatch = useDispatch();
 
-  /* useEffect(() => {
-    if (painQuality && painQuality.length) {
-      setSelectedPainQualities([...painQuality]);
+  useEffect(() => {
+    if (previousQualities?.length) {
+      setSelectedPainQualities(previousQualities);
     }
-  }, [painQuality]); */
+  }, [[previousQualities]?.length]);
 
   const handlePrevious = () => {
     gotoPrevious();
@@ -58,6 +55,12 @@ const PainQuality = ({gotoNext, gotoPrevious}) => {
 
   const handleContinue = () => {
     gotoNext();
+    dispatch({
+      type: CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
+      payload: {
+        pain_qualities: selectedPainQualities,
+      },
+    });
     endTime = new Date().getTime();
     /* Analytics.setCurrentScreen(
       SCREEN_NAMES.PAINASSESSMENT,
@@ -122,34 +125,18 @@ const PainQuality = ({gotoNext, gotoPrevious}) => {
             return (
               <CustomCheckBox
                 key={index}
-                label={item.label}
-                value={selectedPainQualities.includes(item.label)}
-                onValueChange={(label) => {
-                  if (label) {
+                label={item?.label}
+                value={selectedPainQualities?.includes(item.label)}
+                onValueChange={(data) => {
+                  if (data) {
                     setSelectedPainQualities([
                       ...selectedPainQualities,
                       item.label,
                     ]);
-
-                    dispatch({
-                      type: CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
-                      payload: {
-                        pain_activity_id: item.value,
-                        pain_activity_name: item.label,
-                      },
-                    });
                   } else {
                     let qualities = [...selectedPainQualities];
                     qualities.splice(qualities.indexOf(item.label), 1);
                     setSelectedPainQualities(qualities);
-
-                    dispatch({
-                      type: CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
-                      payload: {
-                        pain_activity_id: item.value,
-                        pain_activity_name: item.label,
-                      },
-                    });
                   }
                 }}
                 containerStyle={{

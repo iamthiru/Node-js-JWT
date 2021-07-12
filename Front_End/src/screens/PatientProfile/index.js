@@ -34,7 +34,7 @@ import {
 import medicationListAPI from '../../api/medicationList';
 import lastMedicationAssessmentAPI from '../../api/lastMedicationAssessment';
 import assessmentListAPI from '../../api/assessmentList';
-import { getPatientListAPI } from '../../api/patientsData';
+import {getPatientListAPI} from '../../api/patientsData';
 import Analytics from '../../utils/Analytics';
 
 const {width, height} = Dimensions.get('window');
@@ -57,44 +57,60 @@ const PatientProfile = ({navigation}) => {
   const dispatch = useDispatch();
   const token = useSelector((state) => state.user.authToken);
   const userId = useSelector((state) => state.user.loggedInUserId);
-  const selectedPatient = useSelector((state)=>state?.allPatients?.all_patients)?.find((patient)=>patient.id === item.id)
+  const selectedPatient = useSelector(
+    (state) => state?.allPatients?.all_patients,
+  )?.find((patient) => patient.id === item.id);
   const [latestMedicationData, setLatestMedicationData] = useState({});
   const [last_medication, setLast_medication] = useState([]);
   const [last_assessment, setLastAssessment] = useState([]);
   const [allAssessmentList, setAllAssessmentList] = useState([]);
-  const [newPatientPopUp,setNewPatientPopUp] = useState(false)
+  const [newPatientPopUp, setNewPatientPopUp] = useState(false);
   const lookup_data = useSelector((state) => state.lookupData.lookup_data);
   const all_assessment_data = last_assessment?.assessment;
   const all_medication_data = last_assessment?.medication;
-const [ summaryChartData , setSummaryChartData] = useState([])
-const [summaryChartDataPresent,setSummaryChartDataPresent]= useState(false)
+  const [summaryChartData, setSummaryChartData] = useState([]);
+  const [summaryChartDataPresent, setSummaryChartDataPresent] = useState(false);
 
-  useEffect(()=>{
+  useEffect(() => {
     let startTime = 0;
     let endTime = 0;
     const unsubscribeFocus = navigation.addListener('focus', () => {
-        startTime = new Date().getTime();
+      startTime = new Date().getTime();
     });
 
     const unsubscribeBlur = navigation.addListener('blur', (e) => {
-        endTime = new Date().getTime();
-        let screenName = e && e.target && e.target.substring(0, e.target.indexOf("-"));
-        Analytics.setCurrentScreen(screenName, (endTime - startTime)/1000, startTime, endTime);
+      endTime = new Date().getTime();
+      let screenName =
+        e && e.target && e.target.substring(0, e.target.indexOf('-'));
+      Analytics.setCurrentScreen(
+        screenName,
+        (endTime - startTime) / 1000,
+        startTime,
+        endTime,
+      );
     });
 
-    const unsubscribeBeforeRemove = navigation.addListener('beforeRemove', (e) => {
+    const unsubscribeBeforeRemove = navigation.addListener(
+      'beforeRemove',
+      (e) => {
         endTime = new Date().getTime();
-        let screenName = e && e.target && e.target.substring(0, e.target.indexOf("-"));
-        Analytics.setCurrentScreen(screenName, (endTime - startTime)/1000, startTime, endTime);
-      });
-  
-      return () => {
-          unsubscribeFocus();
-          unsubscribeBlur();
-          unsubscribeBeforeRemove();              
-      }
+        let screenName =
+          e && e.target && e.target.substring(0, e.target.indexOf('-'));
+        Analytics.setCurrentScreen(
+          screenName,
+          (endTime - startTime) / 1000,
+          startTime,
+          endTime,
+        );
+      },
+    );
 
-},[navigation])
+    return () => {
+      unsubscribeFocus();
+      unsubscribeBlur();
+      unsubscribeBeforeRemove();
+    };
+  }, [navigation]);
 
   useEffect(() => {
     if (token && selectedPatient.id) {
@@ -125,18 +141,20 @@ const [summaryChartDataPresent,setSummaryChartDataPresent]= useState(false)
           });
 
           dispatch({
-            type:LATEST_ENTRY_ACTION.LATEST_ENTRY,
-            payload:{
-              assessmentDateAndTime:result.data.result.assessment?.assessment_datetime,
-              impactScore:result.data.result.assessment?.total_score,
-              medication_name_id:result.data.result.medication?.medication_class_id,
-              medication_id :result.data.result.medication?.medication_id,
-              frequency:result.data.result.medication?.frequency,
-              createdAt:result.data.result.medication?.createdAt,
-              dosage_unit_id:result.data.result.medication.dosage_unit_id,
-              dosage_number:result.data.result.medication.dosage_number,
-            }
-          })
+            type: LATEST_ENTRY_ACTION.LATEST_ENTRY,
+            payload: {
+              assessmentDateAndTime:
+                result.data.result.assessment?.assessment_datetime,
+              impactScore: result.data.result.assessment?.total_score,
+              medication_name_id:
+                result.data.result.medication?.medication_class_id,
+              medication_id: result.data.result.medication?.medication_id,
+              frequency: result.data.result.medication?.frequency,
+              createdAt: result.data.result.medication?.createdAt,
+              dosage_unit_id: result.data.result.medication.dosage_unit_id,
+              dosage_number: result.data.result.medication.dosage_number,
+            },
+          });
           setLatestMedicationData({
             ...latestMedicationData,
             assessment: result.data.result.assessment,
@@ -148,35 +166,31 @@ const [summaryChartDataPresent,setSummaryChartDataPresent]= useState(false)
         });
     }
   }, [token, selectedPatient]);
-  
-
-  useEffect(()=>{
-    if(token){
-      getPatientListAPI(token, userId)
-      .then((res)=>{
-        if (res.data.isError) {
-          Alert.alert('all patinets  data error');
-          return;
-        }
-        console.log('result', res);
-        dispatch({
-          type: ALL_PATIENTS_ACTIONS.ALL_PATIENTS,
-          payload: res.data.result.sort(
-            (item1, item2) =>
-              item2.createdAt - item1.createdAt,
-          )
-        });
-      })
-      .catch((err) => {
-        console.log('-----all patients error-----', err);
-      });
-    }
-
-  },[token])
 
   useEffect(() => {
     if (token) {
+      getPatientListAPI(token, userId)
+        .then((res) => {
+          if (res.data.isError) {
+            Alert.alert('all patinets  data error');
+            return;
+          }
+          console.log('result', res);
+          dispatch({
+            type: ALL_PATIENTS_ACTIONS.ALL_PATIENTS,
+            payload: res.data.result.sort(
+              (item1, item2) => item2.createdAt - item1.createdAt,
+            ),
+          });
+        })
+        .catch((err) => {
+          console.log('-----all patients error-----', err);
+        });
+    }
+  }, [token]);
 
+  useEffect(() => {
+    if (token) {
       assessmentListAPI(token)
         .then((res) => {
           if (res.data.isError) {
@@ -188,12 +202,12 @@ const [summaryChartDataPresent,setSummaryChartDataPresent]= useState(false)
             type: ALL_ASSESSMENTS_LIST_ACTION.ALL_ASSESSMENT_LIST,
             payload: res.data.result,
           });
-         
-          setAllAssessmentList(res.data.result.filter((item)=>{
-            return item.patient_id === selectedPatient?.id
-          }));
-          
 
+          setAllAssessmentList(
+            res.data.result.filter((item) => {
+              return item.patient_id === selectedPatient?.id;
+            }),
+          );
         })
         .catch((err) => {
           console.log('----assessment lsit error-----', err);
@@ -226,53 +240,53 @@ const [summaryChartDataPresent,setSummaryChartDataPresent]= useState(false)
     }
   }, [lookup_data, all_medication_data]);
 
-
-
-  const   handleSummaryChartData = (index)=>{
-    let now = new Date()
-    let year = now.getFullYear()
-    let month = now.getMonth()
-    let fullDate = now.getDate()
-    let hours = now.getHours()
-    if(index === 0){
-      let  date = new Date(year,month,fullDate,hours-6).getTime()
-      const data = allAssessmentList.filter((item)=>{
-        return item.assessment_datetime >= date
-      })
-      setSummaryChartData(data)
-      return
+  const handleSummaryChartData = (index) => {
+    let now = new Date();
+    let year = now.getFullYear();
+    let month = now.getMonth();
+    let fullDate = now.getDate();
+    let hours = now.getHours();
+    if (index === 0) {
+      let date = new Date(year, month, fullDate, hours - 6).getTime();
+      const data = allAssessmentList.filter((item) => {
+        return item.assessment_datetime >= date;
+      });
+      const basedOnDateData = data?.sort((item1,item2)=>item2?.assessment_datetime - item1?.assessment_datetime)
+      setSummaryChartData(basedOnDateData);
+      return;
     }
-    if(index === 1){
-      let  date = new Date(year,month,fullDate,hours-12).getTime()
-      const data = allAssessmentList.filter((item)=>{
-        return item.assessment_datetime >= date
-      })
-      setSummaryChartData(data || [])
-      return
+    if (index === 1) {
+      let date = new Date(year, month, fullDate, hours - 12).getTime();
+      const data = allAssessmentList.filter((item) => {
+        return item.assessment_datetime >= date;
+      });
+      const basedOnDateData = data?.sort((item1,item2)=>item1.assessment_datetime - item2.assessment_datetime)
+      setSummaryChartData(basedOnDateData || []);
+      return;
     }
-    if(index === 2){
-      let  date = new Date(year,month,fullDate-1,hours).getTime()
-      const data = allAssessmentList.filter((item)=>{
-        return item.assessment_datetime >= date
-      })
-      setSummaryChartData(data || [])
-      return
+    if (index === 2) {
+      let date = new Date(year, month, fullDate - 1, hours).getTime();
+      const data = allAssessmentList.filter((item) => {
+        return item.assessment_datetime >= date;
+      });
+      const basedOnDateData = data?.sort((item1,item2)=>item1.assessment_datetime - item2.assessment_datetime)
+      setSummaryChartData(basedOnDateData || []);
+      return;
     }
-    if(index === 3){
-      let  date = new Date(year,month,fullDate-7,hours).getTime()
-      const data = allAssessmentList.filter((item)=>{
-        return item.assessment_datetime >= date
-      })
-      setSummaryChartData(data|| [])
-      return
+    if (index === 3) {
+      let date = new Date(year, month, fullDate - 7, hours).getTime();
+      const data = allAssessmentList.filter((item) => {
+        return item.assessment_datetime >= date;
+      });
+      const basedOnDateData = data?.sort((item1,item2)=>item1.assessment_datetime - item2.assessment_datetime)
+      setSummaryChartData(basedOnDateData || []);
+      return;
     }
-    if(index ===4){
-      setSummaryChartData(allAssessmentList || [])
+    if (index === 4) {
+      const basedOnDateData = allAssessmentList?.sort((item1,item2)=>item1.assessment_datetime - item2.assessment_datetime)
+      setSummaryChartData(basedOnDateData || []);
     }
-  
-    
-
-  }
+  };
 
   return (
     <View
@@ -290,10 +304,8 @@ const [summaryChartDataPresent,setSummaryChartDataPresent]= useState(false)
         />
       )}
       <View style={styles.headingContainer}>
-        <View
-          style={styles.patient_main_view}>
-          <View
-            style={styles.main_view_position}>
+        <View style={styles.patient_main_view}>
+          <View style={styles.main_view_position}>
             <CustomTouchableOpacity
               onPress={() => {
                 navigation.goBack();
@@ -305,23 +317,19 @@ const [summaryChartDataPresent,setSummaryChartDataPresent]= useState(false)
               />
             </CustomTouchableOpacity>
           </View>
-          <Text
-            style={styles.patientProfileText}>
-            Patient Profile
-          </Text>
+          <Text style={styles.patientProfileText}>Patient Profile</Text>
         </View>
       </View>
       <ScrollView
         nestedScrollEnabled
         showsHorizontalScrollIndicator={false}
         showsVerticalScrollIndicator={false}>
-        <PatientDetailCard 
-        profile={selectedPatient} 
-        newPatientPopUp ={newPatientPopUp}
-         setNewPatientPopUp= {setNewPatientPopUp}
-         />
-        <View
-          style={styles.profileButtonsView}>
+        <PatientDetailCard
+          profile={selectedPatient}
+          newPatientPopUp={newPatientPopUp}
+          setNewPatientPopUp={setNewPatientPopUp}
+        />
+        <View style={styles.profileButtonsView}>
           <CustomButton
             onPress={() => {
               navigation.navigate(SCREEN_NAMES.PAINASSESSMENT);
@@ -351,16 +359,14 @@ const [summaryChartDataPresent,setSummaryChartDataPresent]= useState(false)
           <CustomButton
             onPress={() => {
               navigation.navigate(SCREEN_NAMES.NEW_MEDICATION);
-               dispatch({
+              dispatch({
                 type: PATIENT_NAME_ACTION.PATIENT,
                 payload: {
                   patient_id: item.id,
                   patient_name: item.first_name + ' ' + item.last_name,
                 },
               });
-
             }}
-            
             title="Change Medication"
             textStyle={{
               color: COLORS.WHITE,
@@ -373,7 +379,12 @@ const [summaryChartDataPresent,setSummaryChartDataPresent]= useState(false)
             style={styles.primaryButton}
           />
         </View>
-        {(!Boolean((last_assessment && last_assessment.assessment && Object.keys(last_assessment.assessment).length !== 0)  ||  (last_medication && last_medication.length !== 0))) ? (
+        {!Boolean(
+          (last_assessment &&
+            last_assessment.assessment &&
+            Object.keys(last_assessment.assessment).length !== 0) ||
+            (last_medication && last_medication.length !== 0),
+        ) ? (
           <NoEntryCard />
         ) : (
           <>
@@ -381,40 +392,34 @@ const [summaryChartDataPresent,setSummaryChartDataPresent]= useState(false)
               last_assessment={last_assessment}
               last_medication={last_medication}
             />
-            {
-            Boolean(allAssessmentList?.length) ?
-           
-            <SummaryChart
-              last_assessment={last_assessment}
-              last_medication={last_medication}
-              lookup_data={lookup_data}
-              allAssessmentList ={allAssessmentList}
-  
-              patientData={
-                summaryChartData?.map((list) => {
-                  let dateTime =  list?.assessment_datetime;
-                  return {
-                    value: list?.total_score,
-                    time: dateTime,
-                    score: list?.current_pain_score,
-                    medicationData: `${
-                      (medicationList?.label && medicationList?.label) || ''
-                    } ${
-                      all_medication_data?.dosage_number
-                        ? all_medication_data?.dosage_number
-                        : ''
-                    } ${dosage?.label ? dosage?.label : ''}`,
-                  };
-                })  || []
-              }
-              patientReport={reportData}
-              handleSummaryChartData= {handleSummaryChartData}
-            />
-            :
-            <Text style ={styles.noDataFound}>
-              No Data Found
-            </Text>
-          }
+            {Boolean(allAssessmentList?.length) && (
+              <SummaryChart
+                last_assessment={last_assessment}
+                last_medication={last_medication}
+                lookup_data={lookup_data}
+                allAssessmentList={allAssessmentList}
+                patientData={
+                  summaryChartData?.map((list) => {
+                    let dateTime = list?.assessment_datetime;
+                    return {
+                      value: list?.total_score,
+                      time: dateTime,
+                      score: list?.current_pain_score,
+                      medicationData: `${
+                        (medicationList?.label && medicationList?.label) || ''
+                      } ${
+                        all_medication_data?.dosage_number
+                          ? all_medication_data?.dosage_number
+                          : ''
+                      } ${dosage?.label ? dosage?.label : ''}`,
+                    };
+                  }) || []
+                }
+                patientReport={reportData}
+                handleSummaryChartData={handleSummaryChartData}
+                summaryChartData={summaryChartData}
+              />
+            )}
             <AllEntryCard allEntries={allAssessmentList} />
           </>
         )}

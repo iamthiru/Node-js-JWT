@@ -109,7 +109,8 @@ const FacialExpressionScreen = ({navigation}) => {
   const userId = useSelector((state) => state.user.loggedInUserId);
 
   const dispatch = useDispatch();
-  console.log('-----assssss------ccc----', assessment_data?.painLocationId);
+
+  console.log('----assessment---data----',assessment_data)
 
   // var pressOut;
 

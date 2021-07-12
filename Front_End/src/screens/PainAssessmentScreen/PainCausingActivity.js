@@ -21,30 +21,21 @@ const PainCausingActivity = ({gotoNext, gotoPrevious}) => {
   const painCausingActivity = useSelector(
     (state) => state.painAssessmentData.selectedActivities
   );
-  const selectedAssessmentData = useSelector((state) => state.createAsseement);
+  const pain_impact_activities = useSelector((state) => state.createAsseement?.pain_impact_activiy);
   const pain_activity = useSelector((state) => state.lookupData.lookup_data);
 
   const activity_data = pain_activity.find((item) => {
     return item.name === 'PainImpact';
   })?.lookup_data;
-
- 
-
   useEffect(()=>{
     startTime = new Date().getTime()
   },[])
-
-  /* useEffect(() => {
-    if (painCausingActivity && painCausingActivity.length) {
-      setSelectedActivities(painCausingActivity);
+  useEffect(()=>{
+    if(pain_impact_activities?.length){
+      setSelectedActivities(pain_impact_activities)
     }
-  }, [painCausingActivity]); */
+  },[pain_impact_activities?.length])
 
-  useEffect(() => {
-    if (selectedAssessmentData && selectedAssessmentData.painImapctName) {
-      setSelectedActivities(selectedAssessmentData.painImapctName);
-    }
-  }, [selectedAssessmentData?.painImapctName]);
 
   const handlePrevious = () => {
     gotoPrevious();
@@ -57,8 +48,16 @@ const PainCausingActivity = ({gotoNext, gotoPrevious}) => {
     ) */
   };
 
+
   const handleContinue = () => {
     gotoNext();
+
+    dispatch({
+      type: CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
+      payload: {
+        pain_impact_activiy : selectedActivities
+      },
+    });
     endTime = new Date().getTime()
     /* Analytics.setCurrentScreen(
         SCREEN_NAMES.PAINASSESSMENT,
@@ -125,27 +124,14 @@ const PainCausingActivity = ({gotoNext, gotoPrevious}) => {
                 key={index}
                 label={item.label}
                 value={selectedActivities.includes(item.label)}
-                onValueChange={(value) => {
-                  if (value) {
-                    setSelectedActivities([...selectedActivities, item.label]);
-
-                    dispatch({
-                      type: CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
-                      payload: {
-                        painImpactId: item.value,
-                        painImapctName: item.label,
-                      },
-                    });
-                  } else {
-                    let qualities = [...selectedActivities];
-                    qualities.splice(qualities.indexOf(item.label), 1);
-                    setSelectedActivities(qualities);
-                    dispatch({
-                      type: CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
-                      payload: {
-                        painImpactId: item.value,
-                      },
-                    });
+                onValueChange ={(value)=>{
+                  if(value){
+                    setSelectedActivities([...selectedActivities,item.label])
+                  }
+                  else{
+                    let activites = [...selectedActivities]
+                    activites.splice(activites.indexOf(item.label),1)
+                    setSelectedActivities(activites)
                   }
                 }}
                 containerStyle={{

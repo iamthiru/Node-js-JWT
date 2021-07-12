@@ -25,7 +25,10 @@ const PainTiming = ({gotoNext, gotoPrevious}) => {
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedTime, setSelectedTime] = useState(new Date());
-  const [painFrequency, setPainFrequency] = useState(PAIN_FREQUENCY[0].value);
+  const [painFrequency, setPainFrequency] = useState([PAIN_FREQUENCY[0]?.label]);
+
+  console.log(painFrequency)
+
   const dispatch = useDispatch();
 
   const painTimingData = useSelector(
@@ -37,6 +40,8 @@ const PainTiming = ({gotoNext, gotoPrevious}) => {
   useEffect(()=>{
     startTime = new Date().getTime()
   },[])
+  // console.log('----pain timing-----',painFrequency)
+  // console.log('dtore data----',selectedAssessmentData?.description)
 
   useEffect(() => {
     if (selectedAssessmentData?.description) {
@@ -237,13 +242,25 @@ const PainTiming = ({gotoNext, gotoPrevious}) => {
             </Text>
           </View>
           {PAIN_FREQUENCY.map((item) => {
+
             return (
               <CustomRadioButton
                 key={item.value}
                 containerStyle={{marginBottom: 15}}
                 label={item.label}
-                selected={painFrequency === item.value}
-                onPress={() => setPainFrequency(item.value)}
+                selected = {painFrequency?.includes((item?.label))}
+                onPress = {()=>{
+                  const alreadySelected = painFrequency?.includes(item?.label)
+                  if(alreadySelected){
+                    let painFreq = [...painFrequency]
+                    painFreq.splice(painFreq.indexOf(item?.label),1)
+                    setPainFrequency(painFreq)
+                  }
+                  else{
+                    setPainFrequency([...painFrequency,item.label])
+                  }
+                }}
+                  
               />
             );
           })}

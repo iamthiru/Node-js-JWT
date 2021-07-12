@@ -87,8 +87,8 @@ const NewPatientPopUp = ({
   const handleAddPatientApi = useCallback(() => {
     addPatientAPI(
       {
-        firstName: firstName[0].toUpperCase()+firstName.slice(1),
-        lastName: lastName[0].toUpperCase()+lastName.slice(1),
+        firstName: firstName[0].toUpperCase() + firstName.slice(1),
+        lastName: lastName[0].toUpperCase() + lastName.slice(1),
         dob: new Date(selectedDate).getTime(),
         gender: gender,
         eyeColor: eyeColor,
@@ -110,12 +110,17 @@ const NewPatientPopUp = ({
           return;
         }
         setPatientId(res.data.result.insertId);
-        if(goToAssessment) {
+        if (goToAssessment) {
           dispatch({
             type: PATIENT_NAME_ACTION.PATIENT,
             payload: {
               patient_id: res.data.result.insertId,
-              patient_name: firstName[0].toUpperCase()+firstName.slice(1) + ' ' + lastName[0].toUpperCase()+lastName.slice(1),
+              patient_name:
+                firstName[0].toUpperCase() +
+                firstName.slice(1) +
+                ' ' +
+                lastName[0].toUpperCase() +
+                lastName.slice(1),
             },
           });
           navigation.navigate(SCREEN_NAMES.PAINASSESSMENT);
@@ -151,7 +156,7 @@ const NewPatientPopUp = ({
     eyeColor,
     selectedDate,
     medicalRecord,
-    goToAssessment
+    goToAssessment,
   ]);
 
   const handleSubmit = useCallback(() => {
@@ -159,8 +164,8 @@ const NewPatientPopUp = ({
       patientUpdateApi(
         {
           id: patientData.id,
-          first_name: firstName[0].toUpperCase()+firstName.slice(1),
-          last_name: lastName[0].toUpperCase()+lastName.slice(1),
+          first_name: firstName[0].toUpperCase() + firstName.slice(1),
+          last_name: lastName[0].toUpperCase() + lastName.slice(1),
           dob: new Date(selectedDate).getTime(),
           eyeColor: eyeColor,
           gender: gender,
@@ -214,6 +219,17 @@ const NewPatientPopUp = ({
     selectedDate,
     medicalRecord,
   ]);
+  const validateNames = (name, setName) => {
+    if (/^(?:[A-Za-z\s]*)$/.test(name)) {
+      if (name.length < 50) {
+        setName(name);
+      } else {
+        console.log('please enter uptp 50 charectors');
+      }
+    } else {
+      console.log('accepts alphabets letters only');
+    }
+  };
 
   return (
     <ReactNativeModal
@@ -335,11 +351,7 @@ const NewPatientPopUp = ({
               <CustomTextInput
                 placeholder="First"
                 onChangeText={(value) => {
-                  if (/^(?:[A-Za-z]+)$/.test(value)) {
-                    setFirstName(value);
-                  } else {
-                    console.log('accepts alphabets letters only');
-                  }
+                  validateNames(value, setFirstName);
                 }}
                 value={firstName}
                 inputStyle={{
@@ -359,11 +371,7 @@ const NewPatientPopUp = ({
               <CustomTextInput
                 placeholder="Last"
                 onChangeText={(value) => {
-                  if (/^(?:[A-Za-z]+)$/.test(value)) {
-                    setLastName(value);
-                  } else {
-                    console.log('accepts alphabets letters only');
-                  }
+                  validateNames(value, setLastName);
                 }}
                 value={lastName}
                 inputStyle={{

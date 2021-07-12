@@ -1,11 +1,11 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import {View, Text, Dimensions, Animated} from 'react-native';
 import {LineChart} from 'react-native-chart-kit';
 import CustomTouchableOpacity from '../../components/shared/CustomTouchableOpacity';
 import SummaryChartReport from '../../components/SummaryChatReport';
 
 import {COLORS} from '../../constants/colors';
-import {formatAMPM} from '../../utils/date';
+import {formatAMPM, padNumber} from '../../utils/date';
 import styles from './styles';
 const {width, height} = Dimensions.get('window');
 
@@ -36,6 +36,7 @@ const SummaryChart = ({
   last_medication,
   lookup_data,
   handleSummaryChartData,
+  summaryChartData,
 }) => {
   const [selectedTime, setSelectedTime] = useState(TIME_FILTER_OPTIONS[0]);
   const [xPoint, setXPoint] = useState(0);
@@ -45,7 +46,7 @@ const SummaryChart = ({
   const [barSlideValue] = useState(new Animated.Value(0));
   const [sliderXValue] = useState(new Animated.Value(0));
   const [summaryReportData, setSummaryReport] = useState({});
-  const [chartDataPresent,setChartDataPresent]= useState(false)
+  const [chartDataPresent, setChartDataPresent] = useState(false);
   const all_assessment_data = Boolean(last_assessment)
     ? last_assessment?.assessment
     : null;
@@ -66,11 +67,12 @@ const SummaryChart = ({
     ],
     labelColor: () => COLORS.WHITE,
   };
-  useEffect(()=>{
-    if(patientData?.length ===0){
-      setShowMarker(false)
+  useEffect(() => {
+    if (patientData?.length === 0) {
+      setShowMarker(false);
     }
-  },[patientData])
+  }, [patientData]);
+
 
   useEffect(() => {
     Animated.timing(slideValue, {
@@ -162,15 +164,21 @@ const SummaryChart = ({
               style={{
                 textAlign: 'center',
               }}>
-              {Boolean(patientData?.length)
-                ? `${new Date(
-                    patientData?.[currentIndex]?.time,
-                  ).getDate()}/${new Date(
-                    patientData?.[currentIndex]?.time,
-                  ).getMonth()}/${new Date(
-                    patientData?.[currentIndex]?.time,
+              {Boolean( patientData?.length)
+                ? `${padNumber(
+                    new Date(
+                       patientData?.[currentIndex]?.time,
+                    ).getMonth(),
+                  )}/${padNumber(
+                    new Date(
+                       patientData?.[currentIndex]?.time,
+                    ).getDate(),
+                  )}/${new Date(
+                     patientData?.[currentIndex]?.time,
                   ).getFullYear()} ${formatAMPM(
-                    new Date(patientData?.[currentIndex]?.time),
+                    new Date(
+                       patientData?.[currentIndex]?.time,
+                    ),
                   )}`
                 : ''}
             </Text>
@@ -180,14 +188,14 @@ const SummaryChart = ({
                 lineHeight: 22,
                 backgroundColor: COLORS.SECONDARY_MAIN,
               }}>
-              {'IMPACT ' + patientData?.[currentIndex]?.value}
+              {'IMPACT ' +  patientData?.[currentIndex]?.value}
             </Text>
             <Text
               style={{
                 textAlign: 'center',
               }}>
               {Boolean(patientData?.length)
-                ? patientData?.[currentIndex]?.medicationData
+                ?  patientData?.[currentIndex]?.medicationData
                 : ''}
             </Text>
           </Animated.View>
@@ -211,10 +219,9 @@ const SummaryChart = ({
                   zIndex: 2,
                 }}></Animated.View>
             );
-          })
-          }         
+          })}
         </>
-        )}
+      )}
 
       <View
         style={{
@@ -231,12 +238,14 @@ const SummaryChart = ({
             width: 6,
             height: 6,
             borderRadius: 3,
-            backgroundColor: Boolean(patientData?.length) ? COLORS.PRIMARY_MAIN : COLORS.WHITE,
+            backgroundColor: Boolean(patientData?.length)
+              ? COLORS.PRIMARY_MAIN
+              : COLORS.WHITE,
           }}></View>
         <Text>{Boolean(patientData.length) ? 'IMPACT score' : ''}</Text>
       </View>
 
-      {Boolean(patientData?.length) && (
+      {Boolean(patientData?.length) ? (
         <LineChart
           data={data || []}
           width={width - 30}
@@ -264,85 +273,93 @@ const SummaryChart = ({
           }}
           xLabelsOffset={10}
         />
-      )}
-
-      <View
-        style={{
-          width: width - 60,
-          marginLeft: 30,
-          height: 10,
-          backgroundColor: COLORS.GRAY_40,
-          borderRadius: 5,
-          marginTop: 5,
+      ) : (
+        <View style ={{
+          paddingVertical:30
         }}>
-        {showMarker && (
-          <Animated.View
-            style={{
-              position: 'absolute',
-              top: -5,
-              left: sliderXValue,
-              height: 20,
-              borderRadius: 10,
-              width: 30,
-              borderWidth: 2,
-              borderColor: COLORS.PRIMARY_MAIN,
-              backgroundColor: COLORS.SECONDARY_MAIN,
-              padding: 2,
-              justifyContent: 'space-between',
-              flexDirection: 'row',
-              alignItems: 'center',
-            }}>
-            <CustomTouchableOpacity
+        <Text style={styles.summaryChatText}>
+          {'No Summary Chart Data Found'}
+        </Text>
+        </View>
+      )}
+      {Boolean(patientData.length) && (
+        <View
+          style={{
+            width: width - 60,
+            marginLeft: 30,
+            height: 10,
+            backgroundColor: COLORS.GRAY_40,
+            borderRadius: 5,
+            marginTop: 5,
+          }}>
+          {showMarker && (
+            <Animated.View
               style={{
-                width: 10,
-                height: 19,
-              }}
-              disabled>
-              <Text
+                position: 'absolute',
+                top: -5,
+                left: sliderXValue,
+                height: 20,
+                borderRadius: 10,
+                width: 30,
+                borderWidth: 2,
+                borderColor: COLORS.PRIMARY_MAIN,
+                backgroundColor: COLORS.SECONDARY_MAIN,
+                padding: 2,
+                justifyContent: 'space-between',
+                flexDirection: 'row',
+                alignItems: 'center',
+              }}>
+              <CustomTouchableOpacity
                 style={{
-                  color: COLORS.BLACK,
-                  fontWeight: '700',
-                  transform: [
-                    {
-                      scaleY: 1.5,
-                    },
-                  ],
-                }}>
-                {'<'}
-              </Text>
-            </CustomTouchableOpacity>
-            <CustomTouchableOpacity
-              style={{
-                width: 10,
-                height: 19,
-                alignItems: 'flex-end',
-              }}
-              disabled>
-              <Text
+                  width: 10,
+                  height: 19,
+                }}
+                disabled>
+                <Text
+                  style={{
+                    color: COLORS.BLACK,
+                    fontWeight: '700',
+                    transform: [
+                      {
+                        scaleY: 1.5,
+                      },
+                    ],
+                  }}>
+                  {'<'}
+                </Text>
+              </CustomTouchableOpacity>
+              <CustomTouchableOpacity
                 style={{
-                  color: COLORS.BLACK,
-                  fontWeight: '700',
-                  transform: [
-                    {
-                      scaleY: 1.5,
-                    },
-                  ],
-                }}>
-                {'>'}
-              </Text>
-            </CustomTouchableOpacity>
-          </Animated.View>
-        )}
-        
-      </View>
+                  width: 10,
+                  height: 19,
+                  alignItems: 'flex-end',
+                }}
+                disabled>
+                <Text
+                  style={{
+                    color: COLORS.BLACK,
+                    fontWeight: '700',
+                    transform: [
+                      {
+                        scaleY: 1.5,
+                      },
+                    ],
+                  }}>
+                  {'>'}
+                </Text>
+              </CustomTouchableOpacity>
+            </Animated.View>
+          )}
+        </View>
+      )}
       <SummaryChartReport
         data={summaryReportData}
         patientReport={patientReport}
         all_assessment_data={all_assessment_data}
         all_medication_data={all_medication_data}
         lookup_data={lookup_data}
-        patientData ={patientData}
-        chartDataPresent ={chartDataPresent}
+        patientData={patientData}
+        chartDataPresent={chartDataPresent}
       />
     </View>
   );
