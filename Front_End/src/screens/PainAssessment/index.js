@@ -20,6 +20,7 @@ import CustomTextInput from '../../components/shared/CustomTextInput';
 import {SCREEN_NAMES} from '../../constants/navigation';
 import {PATIENT_NAME_ACTION} from '../../constants/actions';
 import Analytics from '../../utils/Analytics';
+import { padNumber } from '../../utils/date';
 
 const PainAssessment = ({route}) => {
   const patientData = useSelector((state) => state.patientData.patient);
@@ -207,8 +208,8 @@ const PainAssessment = ({route}) => {
               <Text style={styles.dateLabel}>
                 {selectedDate
                   ? `${
-                      selectedDate.getMonth() + 1
-                    }/${selectedDate.getDate()}/${selectedDate.getFullYear()}`
+                     padNumber( selectedDate.getMonth() + 1)
+                    }/${padNumber(selectedDate.getDate())}/${selectedDate.getFullYear()}`
                   : '9/07/2020'}
               </Text>
               <AntDesignIcon
@@ -317,9 +318,10 @@ const PainAssessment = ({route}) => {
           animationOut="zoomOut">
           <View style={styles.datePickerView}>
             <DateTimePicker
-              style={{width: '100%'}}
+              style={{width: '100%',backgroundColor:'white'}}
               value={selectedDate || new Date()}
               mode={'date'}
+              themeVariant={'light'}
               maximumDate={new Date()}
               display="inline"
               onChange={(event, value) => {

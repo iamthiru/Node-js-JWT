@@ -1,4 +1,4 @@
-import React, {useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {ScrollView, Text, useWindowDimensions, View} from 'react-native';
 // import DropDownPicker from 'react-native-dropdown-picker'
 import AntDesignIcon from 'react-native-vector-icons/AntDesign';
@@ -42,6 +42,8 @@ const CustomDropDown = ({
   const dropDownRef = useRef(null);
   const label =
     items.find((item) => item.value === value)?.label || value || '';
+
+
 
   return (
     // <DropDownPicker
@@ -183,11 +185,12 @@ const CustomDropDown = ({
             style={{
               width: topLeft.width,
             }}>
-            {Boolean(items?.length) &&
+             {Boolean(items?.length) &&
               items.map((item) => {
                 const active = item.value === value;
 
                 return (
+                  <View>
                   <CustomTouchableOpacity
                     key={item.value}
                     style={{
@@ -214,8 +217,9 @@ const CustomDropDown = ({
                       {Boolean(medicationClass) ? item?.name : item?.label}
                     </Text>
                   </CustomTouchableOpacity>
+                  </View>
                 );
-              })}
+              })} 
           </ScrollView>
         </View>
       </ReactNativeModal>

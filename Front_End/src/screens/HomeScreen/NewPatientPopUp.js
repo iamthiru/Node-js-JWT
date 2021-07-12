@@ -608,13 +608,14 @@ const NewPatientPopUp = ({
           style={{
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: 'black',
+            backgroundColor: 'white',
             borderRadius: 10,
             padding: 10,
           }}>
           <DateTimePicker
             themeVariant="dark"
-            style={{width: '100%'}}
+            style={{width: '100%', backgroundColor: 'white'}}
+            themeVariant={'light'}
             value={selectedDate || new Date()}
             mode={'date'}
             maximumDate={new Date()}

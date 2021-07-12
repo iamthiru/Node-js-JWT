@@ -89,8 +89,8 @@ const PupillaryDilationScreen = ({navigation}) => {
   const [selectedSetting, setSelectedSetting] = useState('');
   const [exposure, setExposure] = useState(DEFAULT_OTHER_EXPOSURE);
   const [autoAdjust, setAutoAdjust] = useState(0.0);
-  // const [zoom, setZoom] = useState(Platform.OS === "ios" ? 0.02 : 0.175)
-  const [zoom, setZoom] = useState(0.1);
+  const [zoom, setZoom] = useState(Platform.OS === "ios" ? 0.002 : 0.1)
+  // const [zoom, setZoom] = useState(0.01);
   // const [focusDepth, setFocusDepth] = useState(0.3)
   const [focusDepth, setFocusDepth] = useState(0.0);
   const [timer, setTimer] = useState('0');
@@ -125,7 +125,6 @@ const PupillaryDilationScreen = ({navigation}) => {
   // const [showFocusDepthSliderModal , setShowFocusDepthSliderModal ] = useState(false)
 
   // var pressOut;
-
   useEffect(() => {
     setTimeout(() => checkStoragePermission(), 3000);
   }, []);
@@ -222,8 +221,6 @@ const PupillaryDilationScreen = ({navigation}) => {
   };
 
   const onStartRecordingPress = () => {
-    navigation.navigate(SCREEN_NAMES.FACIAL_EXPRESSION)
-    return;
     setProcessing(true);
     let timerValue = 3;
     setTimer(timerValue.toString());
@@ -646,8 +643,9 @@ const PupillaryDilationScreen = ({navigation}) => {
             onRecordingEnd={() => {
               handleStopRecording();
             }}
-            zoom={zoom}
+            zoom={(zoom/100)}
             focusDepth={focusDepth}
+            maxZoom ={1}
             exposure={exposure < 0.15 ? 0.15 : exposure}
             flashMode={
               flashOn && isCameraReady
@@ -1097,14 +1095,14 @@ const PupillaryDilationScreen = ({navigation}) => {
 
               <View
                 style={{
-                  height: height < 850 ? 20 : 30,
+                  height: height < 850 ? 50 : 80,
                   marginBottom: 30,
                 }}>
                 <View
                   style={{
                     flexDirection: 'row',
                     backgroundColor: `${COLORS.PRIMARY_MAIN}50`,
-                    // justifyContent: 'space-between',
+                    justifyContent: 'space-between',
                     height: height < 850 ? 20 : 30,
                     alignItems: 'center',
                     borderRadius: 10,
@@ -1126,7 +1124,8 @@ const PupillaryDilationScreen = ({navigation}) => {
                       justifyContent: 'center',
                       borderWidth: captureMode === CAPTURE_MODE.AUTO ? 1 : 0,
                     }}
-                    onPress={() => setCaptureMode(CAPTURE_MODE.AUTO)}>
+                    onPress={() => setCaptureMode(CAPTURE_MODE.AUTO)}
+                    >
                     <Text
                       style={{
                         color:
@@ -1474,8 +1473,7 @@ const PupillaryDilationScreen = ({navigation}) => {
                           : width * 0.3,
                     }}
                     minimumValue={0}
-                    maximumValue={1}
-                    value={zoom}
+                    value ={zoom}
                     onValueChange={(value) => setZoom(value)}
                     minimumTrackTintColor={COLORS.WHITE}
                     maximumTrackTintColor={COLORS.BLACK}

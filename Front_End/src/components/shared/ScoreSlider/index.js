@@ -9,7 +9,7 @@ const { width } = Dimensions.get("window")
 const ScoreSlider = ({ sliderWidth, minValue = 0, maxValue = 10, step = 1, value, onValueChange }) => {
 
     return (
-        <View style={{ width: sliderWidth, alignItems: "center" }}>
+        <View style={{ width: sliderWidth-10, alignItems: "center" }}>
             <View style={{
                 width: 40,
                 height: 50,
@@ -29,7 +29,7 @@ const ScoreSlider = ({ sliderWidth, minValue = 0, maxValue = 10, step = 1, value
                 </Text>
             </View>
             <View style={{
-                width: sliderWidth,
+                width: sliderWidth-14,
                 height: 14,
                 borderRadius: 14,
                 backgroundColor: COLORS.GRAY_40,

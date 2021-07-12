@@ -147,7 +147,7 @@ const NRSScore = ({
 
                 {verbalAbility !== VERBAL_ABILITY.NON_VERBAL.value && <>
                     <View style={{ width: width, borderTopWidth: 1, borderBottomWidth: 1, borderColor: COLORS.PRIMARY_MAIN, backgroundColor: COLORS.WHITE, paddingHorizontal: 30, paddingVertical: 20, marginBottom: 12 }}>
-                        <View style={{ flexDirection: "row", width: (width - 60), alignItems: "center", marginBottom: 16 }}>
+                        <View style={{ flexDirection: "row", width: (width - 60), alignItems: "center", marginBottom: 16, }}>
                             <Text style={{ fontSize: 16, lineHeight: 22, color: COLORS.GRAY_90, fontWeight: "700", maxWidth: (width - 60 - 15 - 15) }}>{"What is the patient’s current pain score?"}</Text>
                             <CustomTouchableOpacity style={{ marginLeft: 15 }}>
                                 <AntDesignIcon name={"questioncircle"} size={15} color={COLORS.PRIMARY_MAIN} />

@@ -25,9 +25,9 @@ const PainTiming = ({gotoNext, gotoPrevious}) => {
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedTime, setSelectedTime] = useState(new Date());
-  const [painFrequency, setPainFrequency] = useState([PAIN_FREQUENCY[0]?.label]);
+  const [painFrequency, setPainFrequency] = useState([]);
 
-  console.log(painFrequency)
+  console.log(painFrequency);
 
   const dispatch = useDispatch();
 
@@ -37,12 +37,9 @@ const PainTiming = ({gotoNext, gotoPrevious}) => {
 
   const selectedAssessmentData = useSelector((state) => state.createAsseement);
 
-  useEffect(()=>{
-    startTime = new Date().getTime()
-  },[])
-  // console.log('----pain timing-----',painFrequency)
-  // console.log('dtore data----',selectedAssessmentData?.description)
-
+  useEffect(() => {
+    startTime = new Date().getTime();
+  }, []);
   useEffect(() => {
     if (selectedAssessmentData?.description) {
       setPainFrequency(selectedAssessmentData?.description);
@@ -242,25 +239,22 @@ const PainTiming = ({gotoNext, gotoPrevious}) => {
             </Text>
           </View>
           {PAIN_FREQUENCY.map((item) => {
-
             return (
               <CustomRadioButton
                 key={item.value}
                 containerStyle={{marginBottom: 15}}
                 label={item.label}
-                selected = {painFrequency?.includes((item?.label))}
-                onPress = {()=>{
-                  const alreadySelected = painFrequency?.includes(item?.label)
-                  if(alreadySelected){
-                    let painFreq = [...painFrequency]
-                    painFreq.splice(painFreq.indexOf(item?.label),1)
-                    setPainFrequency(painFreq)
-                  }
-                  else{
-                    setPainFrequency([...painFrequency,item.label])
+                selected={painFrequency?.includes(item?.label)}
+                onPress={() => {
+                  const alreadySelected = painFrequency?.includes(item?.label);
+                  if (alreadySelected) {
+                    let painFreq = [...painFrequency];
+                    painFreq.splice(painFreq.indexOf(item?.label), 1);
+                    setPainFrequency(painFreq);
+                  } else {
+                    setPainFrequency([...painFrequency, item.label]);
                   }
                 }}
-                  
               />
             );
           })}
@@ -318,13 +312,22 @@ const PainTiming = ({gotoNext, gotoPrevious}) => {
         <Modal
           isVisible={showDatePicker || showTimePicker}
           onDismiss={() => hideDateTimePickers()}
-          onBackdropPress={() => hideDateTimePickers()}>
-          <View style={{alignItems: 'center', justifyContent: 'center'}}>
+          onBackdropPress={() => hideDateTimePickers()}
+          animationIn="zoomIn"
+          animationOut="zoomOut">
+          <View
+            style={{
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: 'white',
+              borderRadius: 10,
+              padding: 10,
+            }}>
             <DateTimePicker
               style={{width: '100%', backgroundColor: 'white'}}
               value={showDatePicker ? selectedDate : selectedTime}
               mode={showDatePicker ? 'date' : 'time'}
-              display="default"
+              display="inline"
               onChange={(event, value) => {
                 if (showDatePicker) {
                   setSelectedDate(value);

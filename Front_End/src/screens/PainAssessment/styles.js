@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
   datePickerView: {
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'black',
+    backgroundColor: 'white',
     borderRadius: 10,
     padding: 10,
   },
