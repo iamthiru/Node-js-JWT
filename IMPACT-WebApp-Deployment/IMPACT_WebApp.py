@@ -1,7 +1,7 @@
 # Proprietary: Benten Technologies, Inc.
 # Author: Pranav H. Deo { pdeo@bententech.com }
 # (C) Copyright Content
-# Date: 07/10/2021
+# Date: 07/12/2021
 # Version: v1.10
 
 # Code Description:
@@ -129,6 +129,9 @@ def PupilRecords():
         page_header = 'Pupil'
         pupil_csv_list = S3_record_fetcher()
         return render_template('ShowRecord.html', user=user, pupil_csv_list=pupil_csv_list, page_header=page_header)
+    else:
+        session.pop('user_email', None)
+        return render_template('Login.html')
 
 
 @app.route('/Upload_Device_Data', methods=['GET', 'POST'])
@@ -170,6 +173,7 @@ def FacialPain():
     if 'user_email' in session:
         return render_template('FacialPain_Form.html', user=user)
     else:
+        session.pop('user_email', None)
         return render_template('Login.html')
 
 
@@ -179,6 +183,7 @@ def PupilPain():
     if 'user_email' in session:
         return render_template('PupilPain_Form.html', user=user)
     else:
+        session.pop('user_email', None)
         return render_template('Login.html')
 
 
@@ -193,6 +198,7 @@ def Upload():
     if 'user_email' in session:
         return render_template('FileUpload.html')
     else:
+        session.pop('user_email', None)
         return render_template('Login.html')
 
 
@@ -249,6 +255,7 @@ def Upload_Process_Pupil():
                 print('\n*************** TOKEN : BAD ****************\n')
                 return render_template('PupilPain_Form.html', user=user)
     else:
+        session.pop('user_email', None)
         return render_template('Login.html')
 
 
@@ -315,6 +322,7 @@ def UploadFacial():
                 print('\n*************** TOKEN : BAD ****************\n')
                 render_template('FacialPain_Form.html', user=user)
     else:
+        session.pop('user_email', None)
         return render_template('Login.html')
 
 
