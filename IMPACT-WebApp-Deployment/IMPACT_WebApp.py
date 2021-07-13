@@ -1,7 +1,7 @@
 # Proprietary: Benten Technologies, Inc.
 # Author: Pranav H. Deo { pdeo@bententech.com }
 # (C) Copyright Content
-# Date: 07/12/2021
+# Date: 07/13/2021
 # Version: v1.10
 
 # Code Description:
@@ -39,19 +39,10 @@ import datetime as dt
 BUCKET_NAME = 'impact-benten'
 key_db = yaml.load(open('config/Keys.yaml'))
 ##############################################################
-# ------------------- AMAZON-RDS-MySQL --------------------- #
-db = yaml.load(open('config/db.yaml'))
-conn = pymysql.connect(host=db['mysql_host'],
-                       user=db['mysql_user'],
-                       password=db['mysql_password'],
-                       database=db['mysql_db'],
-                       port=int(db['mysql_port']))
-##############################################################
 # -------------------- AMAZON-DynamoDB --------------------- #
 # Dynamo_DB = boto3.resource('dynamodb', region_name="us-east-1")
 Dynamo_DB = boto3.resource('dynamodb', aws_access_key_id=key_db['AWSAccessKeyId'],
                            aws_secret_access_key=key_db['AWSSecretKey'], region_name="us-east-1")
-# table_users = DB.Table('impact-users')
 table_userData = Dynamo_DB.Table('impact-user-data')
 ##############################################################
 # ------------------- FLASK-APP CONFIG --------------------- #
@@ -77,6 +68,7 @@ def Login():
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
+        conn = est_conn_rds()
         cur = conn.cursor()
         cur.execute('SELECT * FROM information_schema.tables WHERE table_name = "impact_users"')
         if cur.fetchone() is None:
@@ -105,6 +97,7 @@ def Register():
         user_name = request.form['username']
         email = request.form['email']
         password = request.form['password']
+        conn = est_conn_rds()
         cur = conn.cursor()
         cur.execute('SELECT * FROM information_schema.tables WHERE table_name = "impact_users"')
         if cur.fetchone() is None:
@@ -410,7 +403,6 @@ def facial_api(filename):
 
 
 def Upload_2_S3(buck, f, fp, s3_to_path):
-    # s3 = boto3.resource('s3')
     s3 = boto3.resource('s3', aws_access_key_id=key_db['AWSAccessKeyId'], aws_secret_access_key=key_db['AWSSecretKey'])
     bucket = s3.Bucket(buck)
     bucket.upload_file(Filename=fp, Key=s3_to_path + str(f), ExtraArgs={'ACL': 'public-read'})
@@ -418,7 +410,6 @@ def Upload_2_S3(buck, f, fp, s3_to_path):
 
 
 def Download_from_S3(buck, KEY, Local_fp):
-    # s3 = boto3.resource('s3')
     s3 = boto3.resource('s3', aws_access_key_id=key_db['AWSAccessKeyId'], aws_secret_access_key=key_db['AWSSecretKey'])
     s3.Bucket(buck).download_file(KEY, Local_fp)
     return 'Download Done'
@@ -440,6 +431,16 @@ def S3_record_fetcher():
             all_pupil_csv_files[fl] = (last_mod_date, csv_url, video_url)
     sorted_list = sorted(all_pupil_csv_files.items(), key=lambda x: x[1][0], reverse=True)
     return sorted_list
+
+
+def est_conn_rds():
+    db = yaml.load(open('config/db.yaml'))
+    conn = pymysql.connect(host=db['mysql_host'],
+                           user=db['mysql_user'],
+                           password=db['mysql_password'],
+                           database=db['mysql_db'],
+                           port=int(db['mysql_port']))
+    return conn
 
 
 if __name__ == '__main__':
