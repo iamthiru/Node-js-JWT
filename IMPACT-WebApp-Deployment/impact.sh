@@ -1,7 +1,7 @@
 # Proprietary: Benten Technologies, Inc.
 # Author: Pranav H. Deo { pdeo@bententech.com }
 # Copyright Content (C)
-# Date: 05/21/2021
+# Date: 07/12/2021
 # Version: v1.0
 
 Content-Type: multipart/mixed; boundary="//"
@@ -41,7 +41,7 @@ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
 apt-get update
 apt install -y docker-ce
-docker login -u hkchang3xxxxxx -p benten_105x090xxxx
-docker pull hkchang3/impact-benten:v15
-docker run -d --restart unless-stopped -p 5000:5000 --name impact hkchang3/impact-benten:v15
+docker login -u hkchang3x024--xxxxxx -p bentenx-p-s--xxxxxwrwedff_1x0x5
+docker pull hkchang3x024/impact-benten:v16
+docker run -d --restart unless-stopped -p 5000:5000 --name impact hkchang3x024/impact-benten:v16
 --//
