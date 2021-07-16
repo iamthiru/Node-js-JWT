@@ -1,14 +1,15 @@
+# **********************************************************************************************************************
 # Proprietary: Benten Technologies, Inc.
 # Author: Pranav H. Deo { pdeo@bententech.com }
 # (C) Copyright Content
-# Date: 07/10/2021
-# Version: v1.10
+# Date: 07/13/2021
+# Version: v1.11
 
 # Code Description:
 # Web Simulation (Beta Version) for Pupil and Facial Pain Analysis.
 
 # UPDATES:
-# Patient Record Search Feature - Fetch Linked File Record
+# Patient Pupil Record - Pupillometer Data Uploader
 # Mobile APIs for Pupil and Facial integrated.
 # Login/Registration Changed from DynamoDB to RDS-MySQL.
 # User Data stored in DynamoDB.
@@ -23,6 +24,8 @@
 # Integrated New IMPACT_FACIAL_v1_0.py for script call.
 # Integrated New IMPACT_PUPIL_v1_3.py for script call.
 # Removed Pupil From Facial Detection.
+
+# **********************************************************************************************************************
 
 ##############################################################
 import os
@@ -39,19 +42,10 @@ import datetime as dt
 BUCKET_NAME = 'impact-benten'
 key_db = yaml.load(open('config/Keys.yaml'))
 ##############################################################
-# ------------------- AMAZON-RDS-MySQL --------------------- #
-db = yaml.load(open('config/db.yaml'))
-conn = pymysql.connect(host=db['mysql_host'],
-                       user=db['mysql_user'],
-                       password=db['mysql_password'],
-                       database=db['mysql_db'],
-                       port=int(db['mysql_port']))
-##############################################################
 # -------------------- AMAZON-DynamoDB --------------------- #
 # Dynamo_DB = boto3.resource('dynamodb', region_name="us-east-1")
 Dynamo_DB = boto3.resource('dynamodb', aws_access_key_id=key_db['AWSAccessKeyId'],
                            aws_secret_access_key=key_db['AWSSecretKey'], region_name="us-east-1")
-# table_users = DB.Table('impact-users')
 table_userData = Dynamo_DB.Table('impact-user-data')
 ##############################################################
 # ------------------- FLASK-APP CONFIG --------------------- #
@@ -69,6 +63,7 @@ user = ""
 ##############################################################
 
 
+# [Routing] Login Routine
 @app.route('/')
 @app.route('/Login', methods=['GET', 'POST'])
 def Login():
@@ -77,6 +72,7 @@ def Login():
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
+        conn = est_conn_rds()
         cur = conn.cursor()
         cur.execute('SELECT * FROM information_schema.tables WHERE table_name = "impact_users"')
         if cur.fetchone() is None:
@@ -98,6 +94,7 @@ def Login():
     return render_template('Login.html')
 
 
+# [Routing] Register Routine
 @app.route('/Register', methods=['GET', 'POST'])
 def Register():
     session.pop('user_email', None)
@@ -105,6 +102,7 @@ def Register():
         user_name = request.form['username']
         email = request.form['email']
         password = request.form['password']
+        conn = est_conn_rds()
         cur = conn.cursor()
         cur.execute('SELECT * FROM information_schema.tables WHERE table_name = "impact_users"')
         if cur.fetchone() is None:
@@ -122,6 +120,7 @@ def Register():
     return render_template('Register.html')
 
 
+# [Routing] Routine to Fetch Pupil Records [CSV and Video]
 @app.route('/PupilRecords', methods=['GET', 'POST'])
 def PupilRecords():
     global user
@@ -129,8 +128,12 @@ def PupilRecords():
         page_header = 'Pupil'
         pupil_csv_list = S3_record_fetcher()
         return render_template('ShowRecord.html', user=user, pupil_csv_list=pupil_csv_list, page_header=page_header)
+    else:
+        session.pop('user_email', None)
+        return render_template('Login.html')
 
 
+# [Routing] Upload Pupillometer Data Routine
 @app.route('/Upload_Device_Data', methods=['GET', 'POST'])
 def Upload_Device_Data():
     global user
@@ -154,6 +157,7 @@ def Upload_Device_Data():
         return render_template('Login.html')
 
 
+# [Routing] HomePage
 @app.route('/HomePage')
 def HomePage():
     global user
@@ -164,38 +168,46 @@ def HomePage():
         return render_template('Login.html')
 
 
+# [Routing] Facial Pain Form Routine
 @app.route('/FacialPain')
 def FacialPain():
     global user
     if 'user_email' in session:
         return render_template('FacialPain_Form.html', user=user)
     else:
+        session.pop('user_email', None)
         return render_template('Login.html')
 
 
+# [Routing] Pupil Pain Form Routine
 @app.route('/PupilPain')
 def PupilPain():
     global user
     if 'user_email' in session:
         return render_template('PupilPain_Form.html', user=user)
     else:
+        session.pop('user_email', None)
         return render_template('Login.html')
 
 
+# [Routing] Logout Routine
 @app.route('/Logout')
 def Logout():
     session.pop('user_email', None)
     return render_template('Login.html')
 
 
+# [Routing] File Upload Routine
 @app.route('/Upload')
 def Upload():
     if 'user_email' in session:
         return render_template('FileUpload.html')
     else:
+        session.pop('user_email', None)
         return render_template('Login.html')
 
 
+# [Routing] Pupil Processing Algorithm Routine [Upload Video-Data + Process Video-Data]
 @app.route('/Upload_Process_Pupil', methods=['GET', 'POST'])
 def Upload_Process_Pupil():
     global fname
@@ -210,8 +222,6 @@ def Upload_Process_Pupil():
             f = request.files['file']
             PUPIL_UPLOAD_FOLDER_S3 = 'Pupil_Data/Uploads-VideoFiles/'
             PUPIL_UPLOAD_FOLDER = './static/Pupil_Input_Videos/'
-            # pat_id = ''.join(rnd.choices(string.ascii_uppercase + string.digits, k=12))
-            # fname = eye_color_val + fname_txtfield + lname_txtfield + str(st) + '.mp4'
             fname = eye_color_val + '_' + fname_txtfield + lname_txtfield + '.mp4'
             f.filename = fname
             app.config['PUPIL_UPLOAD_FOLDER'] = PUPIL_UPLOAD_FOLDER
@@ -249,9 +259,11 @@ def Upload_Process_Pupil():
                 print('\n*************** TOKEN : BAD ****************\n')
                 return render_template('PupilPain_Form.html', user=user)
     else:
+        session.pop('user_email', None)
         return render_template('Login.html')
 
 
+# [Routing] Facial Pain Processing Algorithm Routine [Upload Video-Data + Process Video-Data]
 @app.route('/Upload_Process_Facial', methods=['GET', 'POST'])
 def UploadFacial():
     global face_fname
@@ -266,8 +278,6 @@ def UploadFacial():
             f = request.files['file']
             FACIAL_UPLOAD_FOLDER_S3 = 'Facial_Data/Uploads-VideoFiles/'
             FACIAL_UPLOAD_FOLDER = './static/Face_Input_Videos/'
-            # pat_id = ''.join(rnd.choices(string.ascii_uppercase + string.digits, k=12))
-            # face_fname = option_val + fname_txtfield + lname_txtfield + str(st) + '.avi'
             face_fname = option_val + '_' + fname_txtfield + lname_txtfield + '.avi'
             f.filename = face_fname
             app.config['FACIAL_UPLOAD_FOLDER'] = FACIAL_UPLOAD_FOLDER
@@ -315,9 +325,11 @@ def UploadFacial():
                 print('\n*************** TOKEN : BAD ****************\n')
                 render_template('FacialPain_Form.html', user=user)
     else:
+        session.pop('user_email', None)
         return render_template('Login.html')
 
 
+# [API] Pupil Processing Algorithm Routine (Routing)
 @app.route('/mobile_pupil_api/<filename>', methods=['GET', 'POST'])
 def pupil_api(filename):
     upload_folder_s3 = 'Pupil_Data/Results-Output/'
@@ -356,6 +368,7 @@ def pupil_api(filename):
         return "Retake"
 
 
+# [API] Facial Pain Processing Algorithm Routine (Routing)
 @app.route('/mobile_facial_api/<filename>', methods=['GET', 'POST'])
 def facial_api(filename):
     upload_folder_s3 = 'Facial_Data/Results-Output/'
@@ -401,21 +414,22 @@ def facial_api(filename):
         return "Retake"
 
 
+# [Function] Upload to S3 Bucket Routine
 def Upload_2_S3(buck, f, fp, s3_to_path):
-    # s3 = boto3.resource('s3')
     s3 = boto3.resource('s3', aws_access_key_id=key_db['AWSAccessKeyId'], aws_secret_access_key=key_db['AWSSecretKey'])
     bucket = s3.Bucket(buck)
     bucket.upload_file(Filename=fp, Key=s3_to_path + str(f), ExtraArgs={'ACL': 'public-read'})
     return 'Upload Done'
 
 
+# [Function] Download from S3 Bucket Routine
 def Download_from_S3(buck, KEY, Local_fp):
-    # s3 = boto3.resource('s3')
     s3 = boto3.resource('s3', aws_access_key_id=key_db['AWSAccessKeyId'], aws_secret_access_key=key_db['AWSSecretKey'])
     s3.Bucket(buck).download_file(KEY, Local_fp)
     return 'Download Done'
 
 
+# [Function] Fetch S3 Records from Pupil Folder in Bucket
 def S3_record_fetcher():
     s3 = boto3.resource('s3', aws_access_key_id=key_db['AWSAccessKeyId'], aws_secret_access_key=key_db['AWSSecretKey'])
     my_bucket = s3.Bucket(BUCKET_NAME)
@@ -434,5 +448,19 @@ def S3_record_fetcher():
     return sorted_list
 
 
+# [Function] Establishing new connection with RDS-MySQL DB-Server
+def est_conn_rds():
+    db = yaml.load(open('config/db.yaml'))
+    conn = pymysql.connect(host=db['mysql_host'],
+                           user=db['mysql_user'],
+                           password=db['mysql_password'],
+                           database=db['mysql_db'],
+                           port=int(db['mysql_port']))
+    return conn
+
+
+# [MAIN] Runner Call
 if __name__ == '__main__':
     app.run()
+
+# **********************************************************************************************************************
