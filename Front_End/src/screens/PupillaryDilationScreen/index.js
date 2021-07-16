@@ -89,7 +89,7 @@ const PupillaryDilationScreen = ({navigation}) => {
   const [selectedSetting, setSelectedSetting] = useState('');
   const [exposure, setExposure] = useState(DEFAULT_OTHER_EXPOSURE);
   const [autoAdjust, setAutoAdjust] = useState(0.0);
-  const [zoom, setZoom] = useState(Platform.OS === "ios" ? 0.002 : 0.1)
+  const [zoom, setZoom] = useState(Platform.OS === 'ios' ? 0.002 : 0.0);
   // const [zoom, setZoom] = useState(0.01);
   // const [focusDepth, setFocusDepth] = useState(0.3)
   const [focusDepth, setFocusDepth] = useState(0.0);
@@ -113,6 +113,7 @@ const PupillaryDilationScreen = ({navigation}) => {
   const [processingTimer, setProcessingTimer] = useState('0');
   // const [showBrightnessSlider, setShowBrightnessSlider] = useState(false);
   // const [focusDepthOn,setFocusDepthOn] = useState(false)
+  const [fixZoom, setFixZoom] = useState(Platform.OS === 'ios' ? 0.002 : 0.0);
   const [foucsPoints, setFocusPoints] = useState({
     x: 0.5,
     y: 0.5,
@@ -241,6 +242,11 @@ const PupillaryDilationScreen = ({navigation}) => {
     if (!isCameraReady) {
       return;
     }
+    if (Platform.OS === 'ios') {
+      setZoom(fixZoom * 11.5);
+    } else {
+      setZoom(fixZoom);
+    }
 
     const recordOptions = {
       mute: true,
@@ -251,10 +257,10 @@ const PupillaryDilationScreen = ({navigation}) => {
       .recordAsync(recordOptions)
       .then(async (data) => {
         console.log('videoData: ', data);
-
         setShowSpinner(true);
         setSpinnerMessage('Cropping...');
         startProcessingTimer();
+        setZoom(fixZoom)
 
         cropVideo(
           data.uri,
@@ -275,12 +281,14 @@ const PupillaryDilationScreen = ({navigation}) => {
                   clearProcessingTimer();
                   setIsRecording(false);
                   setVideoURL(resultPath);
+                  // setZoom(fixZoom)
                 } else {
                   setShowSpinner(false);
                   setSpinnerMessage('');
                   clearProcessingTimer();
                   setIsRecording(false);
                   setVideoURL(resultPath);
+                  // setZoom(fixZoom)
                 }
               })
               .catch((err) => {
@@ -379,7 +387,6 @@ const PupillaryDilationScreen = ({navigation}) => {
       }, 11000);
     }
   };
-
   const stopRecordingVideo = () => {
     camera.stopRecording();
   };
@@ -643,9 +650,8 @@ const PupillaryDilationScreen = ({navigation}) => {
             onRecordingEnd={() => {
               handleStopRecording();
             }}
-            zoom={(zoom/100)}
+            zoom={Platform.OS === 'ios' ? zoom / 100 : zoom}
             focusDepth={focusDepth}
-            maxZoom ={1}
             exposure={exposure < 0.15 ? 0.15 : exposure}
             flashMode={
               flashOn && isCameraReady
@@ -1108,7 +1114,7 @@ const PupillaryDilationScreen = ({navigation}) => {
                     borderRadius: 10,
                     marginLeft: width > 600 ? 10 : 30,
                     bottom: height > 850 ? 0 : 5,
-                    top : height >850 ? 20 : 0
+                    top: height > 850 ? 20 : 0,
                   }}>
                   <CustomTouchableOpacity
                     style={{
@@ -1169,9 +1175,7 @@ const PupillaryDilationScreen = ({navigation}) => {
                       {'Manual'}
                     </Text>
                   </CustomTouchableOpacity>
-                  
                 </View>
-                
               </View>
             </View>
             {/* </View> */}
@@ -1473,8 +1477,11 @@ const PupillaryDilationScreen = ({navigation}) => {
                           : width * 0.3,
                     }}
                     minimumValue={0}
-                    value ={zoom}
-                    onValueChange={(value) => setZoom(value)}
+                    value={zoom}
+                    onValueChange={(value) => {
+                      setZoom(value);
+                      setFixZoom(value);
+                    }}
                     minimumTrackTintColor={COLORS.WHITE}
                     maximumTrackTintColor={COLORS.BLACK}
                   />

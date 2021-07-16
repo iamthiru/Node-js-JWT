@@ -297,6 +297,7 @@ const Result = (props) => {
               } else {
                 props.navigation.navigate(SCREEN_NAMES.ASSIGN_PATIENT);
               } */
+
               dispatch({
                 type: CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
                 payload: {
@@ -318,10 +319,13 @@ const Result = (props) => {
                   reminder_time: null,
                   isRemainder: true,
                   assessment_date: null,
-                  frequence: 0,
-                  pain_frequency_id: 0,
+                  pain_qualities: [],
+                  pain_impact_activiy: [],
+                  // frequence: 0,
+                  // pain_frequency_id: 0,
+                  frequencyData: null,
                   total_score: 0,
-                  notes: ''
+                  notes: '',
                 },
               });
             }}>

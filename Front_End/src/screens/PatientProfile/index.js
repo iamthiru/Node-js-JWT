@@ -1,5 +1,5 @@
 import {useRoute} from '@react-navigation/core';
-import React, {useEffect, useMemo, useState} from 'react';
+import React, {useEffect, useMemo, useRef, useState} from 'react';
 import {
   View,
   Text,
@@ -36,6 +36,7 @@ import lastMedicationAssessmentAPI from '../../api/lastMedicationAssessment';
 import assessmentListAPI from '../../api/assessmentList';
 import {getPatientListAPI} from '../../api/patientsData';
 import Analytics from '../../utils/Analytics';
+import {formatAMPM, padNumber} from '../../utils/date';
 
 const {width, height} = Dimensions.get('window');
 const reportData = {
@@ -70,6 +71,9 @@ const PatientProfile = ({navigation}) => {
   const all_medication_data = last_assessment?.medication;
   const [summaryChartData, setSummaryChartData] = useState([]);
   const [summaryChartDataPresent, setSummaryChartDataPresent] = useState(false);
+  const [summaryChartLabels, setSummaryChartLabels] = useState([]);
+  const scrollRef = useRef(null);
+  const [showMarker, setShowMarker] = useState(false);
 
   useEffect(() => {
     let startTime = 0;
@@ -240,7 +244,8 @@ const PatientProfile = ({navigation}) => {
     }
   }, [lookup_data, all_medication_data]);
 
-  const handleSummaryChartData = (index) => {
+  const handleSummaryChartData = (index, setShowMarker) => {
+    setShowMarker(false);
     let now = new Date();
     let year = now.getFullYear();
     let month = now.getMonth();
@@ -251,8 +256,15 @@ const PatientProfile = ({navigation}) => {
       const data = allAssessmentList.filter((item) => {
         return item.assessment_datetime >= date;
       });
-      const basedOnDateData = data?.sort((item1,item2)=>item2?.assessment_datetime - item1?.assessment_datetime)
+      const basedOnDateData = data?.sort(
+        (item1, item2) =>
+          item1?.assessment_datetime - item2?.assessment_datetime,
+      );
       setSummaryChartData(basedOnDateData);
+      let labels = basedOnDateData?.map((label) => {
+        return `${formatAMPM(new Date(label?.assessment_datetime))}`;
+      });
+      setSummaryChartLabels(labels);
       return;
     }
     if (index === 1) {
@@ -260,8 +272,14 @@ const PatientProfile = ({navigation}) => {
       const data = allAssessmentList.filter((item) => {
         return item.assessment_datetime >= date;
       });
-      const basedOnDateData = data?.sort((item1,item2)=>item1.assessment_datetime - item2.assessment_datetime)
+      const basedOnDateData = data?.sort(
+        (item1, item2) => item1.assessment_datetime - item2.assessment_datetime,
+      );
       setSummaryChartData(basedOnDateData || []);
+      let labels = basedOnDateData?.map((label) => {
+        return `${formatAMPM(new Date(label?.assessment_datetime))}`;
+      });
+      setSummaryChartLabels(labels);
       return;
     }
     if (index === 2) {
@@ -269,8 +287,17 @@ const PatientProfile = ({navigation}) => {
       const data = allAssessmentList.filter((item) => {
         return item.assessment_datetime >= date;
       });
-      const basedOnDateData = data?.sort((item1,item2)=>item1.assessment_datetime - item2.assessment_datetime)
+      const basedOnDateData = data?.sort(
+        (item1, item2) => item1.assessment_datetime - item2.assessment_datetime,
+      );
       setSummaryChartData(basedOnDateData || []);
+      let labels = basedOnDateData?.map((label) => {
+        return `${padNumber(
+          new Date(label?.assessment_datetime).getMonth() + 1,
+        )}-${padNumber(new Date(label?.assessment_datetime).getDate())}`;
+        //  + '\n'+ `${formatAMPM(new Date(label?.assessment_datetime))}`;
+      });
+      setSummaryChartLabels(labels);
       return;
     }
     if (index === 3) {
@@ -278,13 +305,31 @@ const PatientProfile = ({navigation}) => {
       const data = allAssessmentList.filter((item) => {
         return item.assessment_datetime >= date;
       });
-      const basedOnDateData = data?.sort((item1,item2)=>item1.assessment_datetime - item2.assessment_datetime)
+      const basedOnDateData = data?.sort(
+        (item1, item2) => item1.assessment_datetime - item2.assessment_datetime,
+      );
       setSummaryChartData(basedOnDateData || []);
+      let labels = basedOnDateData?.map((label) => {
+        return `${padNumber(
+          new Date(label?.assessment_datetime).getMonth() + 1,
+        )}-${padNumber(new Date(label?.assessment_datetime).getDate())}`;
+      });
+      setSummaryChartLabels(labels);
       return;
     }
     if (index === 4) {
-      const basedOnDateData = allAssessmentList?.sort((item1,item2)=>item1.assessment_datetime - item2.assessment_datetime)
+      const basedOnDateData = allAssessmentList?.sort(
+        (item1, item2) => item1.assessment_datetime - item2.assessment_datetime,
+      );
       setSummaryChartData(basedOnDateData || []);
+      let labels = basedOnDateData?.map((label) => {
+        return `${padNumber(
+          new Date(label?.assessment_datetime).getMonth() + 1,
+        )}-${padNumber(new Date(label?.assessment_datetime).getDate())}${'\n'}`;
+        // +
+        // '\n'+`${formatAMPM(new Date(label?.assessment_datetime))}`;
+      });
+      setSummaryChartLabels(labels);
     }
   };
 
@@ -321,6 +366,7 @@ const PatientProfile = ({navigation}) => {
         </View>
       </View>
       <ScrollView
+        ref={scrollRef}
         nestedScrollEnabled
         showsHorizontalScrollIndicator={false}
         showsVerticalScrollIndicator={false}>
@@ -391,6 +437,7 @@ const PatientProfile = ({navigation}) => {
             <LatestEntryCard
               last_assessment={last_assessment}
               last_medication={last_medication}
+              scrollRef={scrollRef}
             />
             {Boolean(allAssessmentList?.length) && (
               <SummaryChart
@@ -418,6 +465,8 @@ const PatientProfile = ({navigation}) => {
                 patientReport={reportData}
                 handleSummaryChartData={handleSummaryChartData}
                 summaryChartData={summaryChartData}
+                summaryChartLabels={summaryChartLabels}
+                scrollRef={scrollRef}
               />
             )}
             <AllEntryCard allEntries={allAssessmentList} />

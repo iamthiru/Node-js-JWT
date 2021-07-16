@@ -59,7 +59,7 @@ const Locations = ({body, showFrontImage, selectedPainLocations}) => {
               </Text>
             </CustomTouchableOpacity>
           ) : (
-            <TouchableOpacity
+            <CustomTouchableOpacity
               onPress={() => {
                 if (select) {
                   const filterData = selectedPainLocations.filter((item) => {
@@ -86,7 +86,7 @@ const Locations = ({body, showFrontImage, selectedPainLocations}) => {
                 }}>
                 {body.key}
               </Text>
-            </TouchableOpacity>
+            </CustomTouchableOpacity>
           )}
         </View>
       ) : (

@@ -125,7 +125,7 @@ const NewPatientPopUp = ({
           });
           navigation.navigate(SCREEN_NAMES.PAINASSESSMENT);
         }
-        getPatientListAPI(token, userId)
+        getPatientListAPI(token)
           .then((res) => {
             if (res.data.err) {
               Alert.alert('------all aptient error------');
@@ -169,14 +169,14 @@ const NewPatientPopUp = ({
           dob: new Date(selectedDate).getTime(),
           eyeColor: eyeColor,
           gender: gender,
-          medicalRecordNo: medicalRecord,
+          medical_record_no: medicalRecord,
           modifiedAt: userId,
         },
         token,
       )
         .then((res) => {
           console.log('--------update data sucessfully-----', res);
-          getPatientListAPI(token, userId)
+          getPatientListAPI(token)
             .then((res) => {
               if (res.data.isError) {
                 Alert.alert('all patinets  data error');
@@ -189,7 +189,7 @@ const NewPatientPopUp = ({
               setEyeColor(null);
               setMedicalRecord('');
               setSelectedDate(null);
-              getPatientListAPI(token, userId);
+              getPatientListAPI(token);
               dispatch({
                 type: ALL_PATIENTS_ACTIONS.ALL_PATIENTS,
                 payload: res.data.result.sort(

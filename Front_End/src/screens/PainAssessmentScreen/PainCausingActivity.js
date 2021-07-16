@@ -9,7 +9,7 @@ import CustomCheckBox from '../../components/shared/CustomCheckBox';
 import {useDispatch, useSelector} from 'react-redux';
 import {CREATE_ASSESSMENT_ACTION} from '../../constants/actions';
 import Analytics from '../../utils/Analytics';
-import { SCREEN_NAMES } from '../../constants/navigation';
+import {SCREEN_NAMES} from '../../constants/navigation';
 
 const {width, height} = Dimensions.get('window');
 let startTime = 0;
@@ -19,27 +19,28 @@ const PainCausingActivity = ({gotoNext, gotoPrevious}) => {
   const [selectedActivities, setSelectedActivities] = useState([]);
   const dispatch = useDispatch();
   const painCausingActivity = useSelector(
-    (state) => state.painAssessmentData.selectedActivities
+    (state) => state.painAssessmentData.selectedActivities,
   );
-  const pain_impact_activities = useSelector((state) => state.createAsseement?.pain_impact_activiy);
+  const pain_impact_activities = useSelector(
+    (state) => state.createAsseement?.pain_impact_activiy,
+  );
   const pain_activity = useSelector((state) => state.lookupData.lookup_data);
 
   const activity_data = pain_activity.find((item) => {
     return item.name === 'PainImpact';
   })?.lookup_data;
-  useEffect(()=>{
-    startTime = new Date().getTime()
-  },[])
-  useEffect(()=>{
-    if(pain_impact_activities?.length){
-      setSelectedActivities(pain_impact_activities)
+  useEffect(() => {
+    startTime = new Date().getTime();
+  }, []);
+  useEffect(() => {
+    if (pain_impact_activities?.length) {
+      setSelectedActivities(pain_impact_activities);
     }
-  },[pain_impact_activities?.length])
-
+  }, [pain_impact_activities?.length]);
 
   const handlePrevious = () => {
     gotoPrevious();
-    endTime = new Date().getTime()
+    endTime = new Date().getTime();
     /* Analytics.setCurrentScreen(
         SCREEN_NAMES.PAINASSESSMENT,
         (endTime-startTime)/1000,
@@ -48,17 +49,16 @@ const PainCausingActivity = ({gotoNext, gotoPrevious}) => {
     ) */
   };
 
-
   const handleContinue = () => {
     gotoNext();
 
     dispatch({
       type: CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
       payload: {
-        pain_impact_activiy : selectedActivities
+        pain_impact_activiy: selectedActivities,
       },
     });
-    endTime = new Date().getTime()
+    endTime = new Date().getTime();
     /* Analytics.setCurrentScreen(
         SCREEN_NAMES.PAINASSESSMENT,
         (endTime-startTime)/1000,
@@ -119,19 +119,22 @@ const PainCausingActivity = ({gotoNext, gotoPrevious}) => {
           </View>
 
           {activity_data.map((item, index) => {
+            let selectedData = selectedActivities?.find((data) => {
+              return data?.id === item?.id;
+            });
             return (
               <CustomCheckBox
                 key={index}
                 label={item.label}
-                value={selectedActivities.includes(item.label)}
-                onValueChange ={(value)=>{
-                  if(value){
-                    setSelectedActivities([...selectedActivities,item.label])
-                  }
-                  else{
-                    let activites = [...selectedActivities]
-                    activites.splice(activites.indexOf(item.label),1)
-                    setSelectedActivities(activites)
+                value={Boolean(selectedData)}
+                onValueChange={(value) => {
+                  if (value) {
+                    setSelectedActivities([...selectedActivities, item]);
+                  } else {
+                    let activites = [...selectedActivities];
+                    let index = activites.findIndex((d) => d.id === item?.id);
+                    activites.splice(index, 1);
+                    setSelectedActivities(activites);
                   }
                 }}
                 containerStyle={{

@@ -12,7 +12,8 @@ const SummaryChartReport = ({
   all_medication_data,
   lookup_data,
   patientData,
-  data
+  data,
+  scrollRef
 }) => {
   const last_assessment = useSelector(
     (state) => state.getLastAssesmentAndMedication.assessment,
@@ -71,6 +72,13 @@ const SummaryChartReport = ({
       </View>
       <View style={styles.summaryChatReportButtonView}>
         <CustomTouchableOpacity
+        onPress ={()=>{
+          if(scrollRef?.current){
+            scrollRef?.current?.scrollToEnd({
+              animated:true
+            })
+          }
+        }}
           style={{
             borderBottomWidth: 0.5,
             borderColor: COLORS.PRIMARY_MAIN,

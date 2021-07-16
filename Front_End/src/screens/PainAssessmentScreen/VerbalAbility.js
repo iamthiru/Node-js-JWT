@@ -27,12 +27,14 @@ const VerbalAbility = ({gotoNext, verbalAbility, setVerbalAbility}) => {
   useEffect(() => {
     startTime = new Date().getTime();
   }, []);
-
   useEffect(() => {
     if (selectedAssessmentData && selectedAssessmentData?.type) {
       setVerbalAbility(selectedAssessmentData?.type);
     }
-  }, [selectedAssessmentData?.type]);
+    if(selectedAssessmentData?.otherText?.length){
+      setOtherText(selectedAssessmentData?.otherText)
+    }
+  }, [selectedAssessmentData?.type,selectedAssessmentData?.otherText?.length]);
 
   const [otherText, setOtherText] = useState('');
   const dispatch = useDispatch();
@@ -53,6 +55,7 @@ const VerbalAbility = ({gotoNext, verbalAbility, setVerbalAbility}) => {
           type: verbalAbility,
           patient_id: patientData?.patient_id,
           patient_name: patientData?.patient_name,
+          otherText : Boolean(otherText?.length) ? otherText : ''
         },
       });
     }
@@ -103,13 +106,19 @@ const VerbalAbility = ({gotoNext, verbalAbility, setVerbalAbility}) => {
             containerStyle={{marginBottom: 15}}
             label={VERBAL_ABILITY.VERBAL.label}
             selected={verbalAbility === VERBAL_ABILITY.VERBAL.value}
-            onPress={() => setVerbalAbility(VERBAL_ABILITY.VERBAL.value)}
+          onPress={() => {
+            setVerbalAbility(VERBAL_ABILITY.VERBAL.value)
+            setOtherText('')
+          }}
           />
           <CustomRadioButton
             containerStyle={{marginBottom: 15}}
             label={VERBAL_ABILITY.NON_VERBAL.label}
             selected={verbalAbility === VERBAL_ABILITY.NON_VERBAL.value}
-            onPress={() => setVerbalAbility(VERBAL_ABILITY.NON_VERBAL.value)}
+            onPress={() => {
+              setVerbalAbility(VERBAL_ABILITY.NON_VERBAL.value)
+              setOtherText('')
+            }}
           />
           <View style={{flexDirection: 'row', width: width - 60}}>
             <CustomRadioButton
@@ -119,7 +128,10 @@ const VerbalAbility = ({gotoNext, verbalAbility, setVerbalAbility}) => {
             />
             <CustomTextInput
               value={otherText}
-              onChangeText={(value) => setOtherText(value)}
+              onChangeText={(value) =>{ 
+                setOtherText(value)
+                setVerbalAbility(VERBAL_ABILITY.OTHER.value)
+              }}
               containerStyle={{paddingBottom: 0, marginLeft: 8}}
               inputStyle={{
                 height: 24,

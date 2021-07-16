@@ -122,20 +122,21 @@ const PainQuality = ({gotoNext, gotoPrevious}) => {
           </Text>
 
           {quality_data.map((item, index) => {
+            let selectedData =selectedPainQualities?.find((pain)=>{
+              return pain?.id === item?.id
+            })
             return (
               <CustomCheckBox
                 key={index}
                 label={item?.label}
-                value={selectedPainQualities?.includes(item.label)}
-                onValueChange={(data) => {
-                  if (data) {
-                    setSelectedPainQualities([
-                      ...selectedPainQualities,
-                      item.label,
-                    ]);
+                value = {Boolean(selectedData)}
+                onValueChange={(value) => {
+                  if (value) {
+                    setSelectedPainQualities([...selectedPainQualities,item])
                   } else {
                     let qualities = [...selectedPainQualities];
-                    qualities.splice(qualities.indexOf(item.label), 1);
+                    let index = qualities.findIndex((data)=>data?.id ===item?.id)
+                    qualities.splice(index,1)
                     setSelectedPainQualities(qualities);
                   }
                 }}

@@ -116,7 +116,7 @@ const HomeScreen = ({navigation}) => {
       setUser(userName);
     }
     if (token) {
-      getPatientListAPI(token, userId)
+      getPatientListAPI(token)
         .then((res) => {
           if (res.data.isError) {
             Alert.alert('all patinets  data error');

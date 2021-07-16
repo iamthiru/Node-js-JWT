@@ -111,7 +111,7 @@ const PainAssessmentScreen = ({navigation}) => {
         painLocation_id: 0,
         pain_activity_id: 0,
         pain_activity_name: '',
-        description: PAIN_FREQUENCY[0].value,
+        description: [],
         painDate: null,
         painTime: null,
         remainder_date: null,
@@ -119,6 +119,7 @@ const PainAssessmentScreen = ({navigation}) => {
         isRemainder: true,
         assessment_date: null,
         pain_qualities: [],
+        pain_impact_activiy:[],
         // frequence: 0,
         // pain_frequency_id: 0,
         frequencyData:null,
@@ -179,9 +180,10 @@ const PainAssessmentScreen = ({navigation}) => {
             width: width,
             paddingHorizontal: 16,
           }}>
-          <CustomTouchableOpacity onPress={handleBackPress}>
+          {/* <CustomTouchableOpacity onPress={handleBackPress}>
             <AntDesignIcon name={'arrowleft'} color={COLORS.WHITE} size={22} />
-          </CustomTouchableOpacity>
+          </CustomTouchableOpacity> */}
+          <View></View>
           <Text
             style={{
               fontSize: 20,

@@ -24,12 +24,18 @@ function addPatient(req, res, next) {
         .catch(next);
 }
 
+// function getPatienList(req, res, next) {
+//     const userId = req.query.userId;
+//     patientService.getPatientListByUserId(userId)
+//         .then(users => res.json(users))
+//         .catch(next);
+// }
 function getPatienList(req, res, next) {
-    const userId = req.query.userId;
-    patientService.getPatientListByUserId(userId)
+    patientService.getAllPatientList()
         .then(users => res.json(users))
         .catch(next);
 }
+
 
 function newAssessment(req, res, next) {
     patientService.createAssessment(req.body)

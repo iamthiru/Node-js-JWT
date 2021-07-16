@@ -110,7 +110,7 @@ export const FRONT_SIDE_BODY_PART_DATA = [
   },
   {
     key: '16',
-    part_name: 'Groin',
+    part_name: 'penis/vagina',
     value: 16,
     top: Boolean(height > 750) ? height * 0.425 : height * 0.423,
     left: Boolean(height > 750) ? width * 0.36 : width * 0.3,

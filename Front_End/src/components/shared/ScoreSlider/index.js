@@ -29,7 +29,7 @@ const ScoreSlider = ({ sliderWidth, minValue = 0, maxValue = 10, step = 1, value
                 </Text>
             </View>
             <View style={{
-                width: sliderWidth-14,
+                width: sliderWidth-15,
                 height: 14,
                 borderRadius: 14,
                 backgroundColor: COLORS.GRAY_40,
@@ -44,7 +44,7 @@ const ScoreSlider = ({ sliderWidth, minValue = 0, maxValue = 10, step = 1, value
                     justifyContent: "center"
                 }}>
                     <Slider
-                        style={{ width: sliderWidth - 10 }}
+                        style={{ width: sliderWidth-10 }}
                         thumbTintColor={COLORS.WHITE}
                         step={step}
                         minimumValue={minValue}

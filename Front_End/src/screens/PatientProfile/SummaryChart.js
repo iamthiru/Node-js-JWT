@@ -36,8 +36,10 @@ const SummaryChart = ({
   last_medication,
   lookup_data,
   handleSummaryChartData,
-  summaryChartData,
+  summaryChartLabels,
+  scrollRef
 }) => {
+
   const [selectedTime, setSelectedTime] = useState(TIME_FILTER_OPTIONS[0]);
   const [xPoint, setXPoint] = useState(0);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -54,8 +56,15 @@ const SummaryChart = ({
     ? last_assessment?.medication
     : null;
 
+  
+  //   const labels = useMemo(()=>{
+  //  return  patientData?.map((data)=>{
+  //       return `${padNumber(new Date (data?.time).getMonth()+1)}_${padNumber(new Date(data?.time).getDate())}`
+  //     })
+  //   },[patientData])
+
   const data = {
-    labels: [],
+    labels:summaryChartLabels || [],
     datasets: [
       {
         data: patientData?.map((data) => {
@@ -93,7 +102,7 @@ const SummaryChart = ({
   }, [xPoint, slideValue, barSlideValue, sliderXValue]);
 
   useEffect(() => {
-    handleSummaryChartData(0);
+    handleSummaryChartData(0,setShowMarker);
   }, []);
   return (
     <View
@@ -129,7 +138,7 @@ const SummaryChart = ({
                 }}
                 onPress={() => {
                   setSelectedTime(timeOption);
-                  handleSummaryChartData(index);
+                  handleSummaryChartData(index,setShowMarker);
                 }}>
                 <Text
                   style={{
@@ -168,7 +177,7 @@ const SummaryChart = ({
                 ? `${padNumber(
                     new Date(
                        patientData?.[currentIndex]?.time,
-                    ).getMonth(),
+                    ).getMonth()+1,
                   )}/${padNumber(
                     new Date(
                        patientData?.[currentIndex]?.time,
@@ -249,7 +258,7 @@ const SummaryChart = ({
         <LineChart
           data={data || []}
           width={width - 30}
-          height={300}
+          height={450}
           chartConfig={chartConfig}
           withHorizontalLines={false}
           withVerticalLines={false}
@@ -360,6 +369,7 @@ const SummaryChart = ({
         lookup_data={lookup_data}
         patientData={patientData}
         chartDataPresent={chartDataPresent}
+        scrollRef ={scrollRef}
       />
     </View>
   );

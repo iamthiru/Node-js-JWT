@@ -110,7 +110,6 @@ const FacialExpressionScreen = ({navigation}) => {
 
   const dispatch = useDispatch();
 
-  console.log('----assessment---data----',assessment_data)
 
   // var pressOut;
 
@@ -633,11 +632,24 @@ const FacialExpressionScreen = ({navigation}) => {
         {
           patient_id: (patientData && patientData.patient_id) || 0,
           assessment_datetime: date.getTime(),
-          type: assessment_data.type,
-          current_pain_score: assessment_data.current_pain,
-          least_pain_score: assessment_data.least_pain,
-          most_pain_score: assessment_data.most_pain,
-          description: assessment_data.description,
+          type: Boolean(assessment_data.type) ? assessment_data.type : '',
+          current_pain_score: Boolean(assessment_data.current_pain)
+            ? assessment_data.current_pain
+            : 0,
+          least_pain_score: Boolean(assessment_data.least_pain)
+            ? assessment_data.least_pain
+            : 0,
+          most_pain_score: Boolean(assessment_data.most_pain)
+            ? assessment_data.most_pain
+            : 0,
+          // description: assessment_data.description, // change to array of data
+          description: Boolean(assessment_data?.description?.length)
+            ? JSON.stringify(
+                assessment_data?.description.map((desc) => {
+                  return desc?.label;
+                }),
+              )
+            : '',
           pain_location_id: Boolean(assessment_data.painLocationId?.length)
             ? JSON.stringify(
                 assessment_data.painLocationId.map(
@@ -645,22 +657,31 @@ const FacialExpressionScreen = ({navigation}) => {
                 ),
               )
             : '',
-           pain_quality_id: assessment_data.pain_activity_id,
+          //  pain_quality_id: assessment_data.pain_activity_id, // change to  array of data
+          pain_quality_id: Boolean(assessment_data?.pain_qualities?.length)
+            ? JSON.stringify(
+                assessment_data?.pain_qualities?.map((pain) => pain?.id),
+              )
+            : [],
           pain_frequency_id: assessment_data?.frequencyData
             ? assessment_data?.frequencyData?.value
             : 0,
           // pain_frequency_id : assessment_data?.pain_frequency_id ? assessment_data?.pain_frequency_id : 0,
-          note: assessment_data.notes,
-          total_score: total_score,
+          note: Boolean(assessment_data.notes) ? assessment_data.notes : '',
+          total_score: Boolean(total_score) ? total_score : 0,
           createdAt: new Date().getTime(),
           createdBy: userId,
-          isReminder: assessment_data.isRemainder,
-          reminder_datetime: reminder_date.getTime(),
+          isReminder: Boolean(assessment_data.isRemainder)
+            ? assessment_data.isRemainder
+            : true,
+          reminder_datetime: Boolean(reminder_date.getTime())
+            ? reminder_date.getTime()
+            : 0,
           frequency: assessment_data?.frequencyData
             ? assessment_data?.frequencyData?.label
             : '',
           // frequency : assessment_data?.frequency ? assessment_data?.frequency : '',
-          pain_impact_id: assessment_data.painImpactId,
+          pain_impact_id:Boolean( assessment_data.pain_impact_activiy?.length) ?  JSON.stringify(assessment_data?.pain_impact_activiy?.map((pain)=>pain?.id)) : '',       
           pupillary_dilation: assessment_data.pupillary_dilation,
           facial_expresssion: Number(facial_exp_result),
         },
@@ -689,11 +710,23 @@ const FacialExpressionScreen = ({navigation}) => {
         {
           patient_id: (patientData && patientData.patient_id) || 0,
           assessment_datetime: date.getTime(),
-          type: assessment_data.type,
-          current_pain_score: assessment_data.current_pain,
-          least_pain_score: assessment_data.least_pain,
-          most_pain_score: assessment_data.most_pain,
-          description: assessment_data.description,
+          type: Boolean(assessment_data.type) ? assessment_data.type : '',
+          current_pain_score: Boolean(assessment_data.current_pain)
+            ? assessment_data.current_pain
+            : 0,
+          least_pain_score: Boolean(assessment_data.least_pain)
+            ? assessment_data.least_pain
+            : 0,
+          most_pain_score: Boolean(assessment_data.most_pain)
+            ? assessment_data.most_pain
+            : 0,
+          description: Boolean(assessment_data?.description?.length)
+            ? JSON.stringify(
+                assessment_data?.description.map((desc) => {
+                  return desc?.label;
+                }),
+              )
+            : '',
           pain_location_id: Boolean(assessment_data.painLocationId?.length)
             ? JSON.stringify(
                 assessment_data.painLocationId.map(
@@ -701,14 +734,22 @@ const FacialExpressionScreen = ({navigation}) => {
                 ),
               )
             : '',
-          pain_quality_id: assessment_data.pain_activity_id,
+          pain_quality_id: Boolean(assessment_data?.pain_qualities?.length)
+            ? JSON.stringify(
+                assessment_data?.pain_qualities?.map((pain) => pain?.id),
+              )
+            : [],
+
           // pain_frequency_id: assessment_data.pain_frequency_id,
-          note: assessment_data.notes,
-          total_score: total_score,
+          note: Boolean(assessment_data.notes) ? assessment_data.notes : '',
+          total_score: Boolean(total_score) ? total_score : 0,
           createdAt: new Date().getTime(),
           createdBy: userId,
-          isReminder: assessment_data.isRemainder,
-          pain_impact_id: assessment_data.painImpactId,
+          isReminder: Boolean(assessment_data.isRemainder)
+            ? assessment_data.isRemainder
+            : false,
+          // pain_impact_id: assessment_data.painImpactId,
+          pain_impact_id:Boolean( assessment_data.pain_impact_activiy?.length) ?  JSON.stringify(assessment_data?.pain_impact_activiy?.map((pain)=>pain?.id)) : '',       
           pupillary_dilation: assessment_data.pupillary_dilation,
           facial_expresssion: Number(facial_exp_result),
         },
