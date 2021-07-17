@@ -2,7 +2,7 @@
 # Proprietary: Benten Technologies, Inc.
 # Author: Pranav H. Deo { pdeo@bententech.com }
 # (C) Copyright Content
-# Date: 07/13/2021
+# Date: 07/17/2021
 # Version: v1.11
 
 # Code Description:
@@ -252,7 +252,7 @@ def Upload_Process_Pupil():
                 Upload_2_S3(BUCKET_NAME, f, pic, res_img_fold_s3)
                 Upload_2_S3(BUCKET_NAME, img_name + '.mp4', vid_file, res_img_fold_s3)
                 Upload_2_S3(BUCKET_NAME, file, csv_file, res_img_fold_s3)
-                print('\n*************** DONE ****************\n')
+                print('\n***************************** DONE *****************************\n')
                 return render_template('Pupil_Success.html', user=user, image_file=pic,
                                        video_file=vid_file, score=PUAL_SCORE)
             else:
@@ -317,7 +317,7 @@ def UploadFacial():
                 Upload_2_S3(BUCKET_NAME, f, pic, res_img_fold_s3)
                 Upload_2_S3(BUCKET_NAME, file, csv_file, res_img_fold_s3)
                 Upload_2_S3(BUCKET_NAME, img_name + '_LabelFile.csv', label_file_csv, res_img_fold_s3)
-                print('\n*************** DONE ****************\n')
+                print('\n***************************** DONE *****************************\n')
                 return render_template('Facial_Success.html', user=user, image_file=pic, max_pain=max_pain_score,
                                        mean_pain=mean_pain_score, min_pain=min_pain_score,
                                        time=time_sec, label=label_sec)
@@ -347,8 +347,6 @@ def pupil_api(filename):
         app.config['PUPIL_OUTPUT_FOLDER'] = res_img_fold
         app.config['PUPIL_VID_OUT_FOLDER'] = res_vid_fold
         img_name = str(os.path.splitext(filename)[0])
-        file = img_name + '_Ratio_Dilation.csv'
-        csv_file = os.path.join(app.config['PUPIL_OUTPUT_FOLDER'], file)
         file = 'PUAL_' + img_name + '.csv'
         csv_f = os.path.join(app.config['PUPIL_OUTPUT_FOLDER'], file)
         df = pd.read_csv(csv_f)
@@ -358,10 +356,10 @@ def pupil_api(filename):
         pic = os.path.join(app.config['PUPIL_OUTPUT_FOLDER'], f)
         Upload_2_S3(BUCKET_NAME, f, pic, upload_folder_s3)
         Upload_2_S3(BUCKET_NAME, img_name + '.mp4', vid_file, upload_folder_s3)
-        Upload_2_S3(BUCKET_NAME, file, csv_file, upload_folder_s3)
+        Upload_2_S3(BUCKET_NAME, file, csv_f, upload_folder_s3)
         table_userData.put_item(Item={'timestamp': str(st), 'Request': 'API', 'user-metric': 'Pupil Pain',
                                       's3-filepath': 's3://impact-benten/' + download_folder_s3 + filename})
-        print('PUAL : ', PUAL_SCORE)
+        # print('PUAL : ', PUAL_SCORE)
         return str(PUAL_SCORE)
     else:
         print('\n*************** TOKEN : BAD ****************\n')
