@@ -66,7 +66,7 @@ size = ()
 
 # Fetching Plugins from Configuration Files:
 if len(sys.argv) >= 2:
-    print("\n************************* IMPACT: PUPIL DETECTION *************************\n")
+    print("\n******************** IMPACT: PUPIL DETECTION ********************")
     filename = str(sys.argv[1])
     video_type = str(sys.argv[2])
     # Running the Brightness Adjustor:
@@ -155,15 +155,15 @@ if flag == 1 and token == 'Good':
     Data_Processing.Grapher_Plot_Dilations(filename)
 
     # Computing the PUAL Score for the data-points collected
-    print('\n***************************** PUAL *****************************')
+    print('***************************** PUAL *****************************')
     new_DF = pd.read_csv('./static/Pupil_Output_Images/' + filename.split(".")[0] + '_Ratio_Dilation.csv', usecols=['Frame', 'Processed Ratio'])
     PUAL_Score, Noise, Corrected_PUAL_Score = PUAL_Gen.Calculate_PUAL(filename, np.array(new_DF['Processed Ratio'])[0:512], fps)
-    print('\n> PUAL: ', PUAL_Score, ' ; ', 'Noise: ', Noise, ' ; ', 'Corrected PUAL: ', Corrected_PUAL_Score)
+    print('\n# ~ PUAL: ', PUAL_Score, '\n# ~ Noise: ', Noise, '\n# ~ Corrected PUAL: ', Corrected_PUAL_Score)
 
 ########################################################################################################################
 
 # Compute Resources being used or utilized
-print('\n***************************************************************************')
+print('\n****************************************************************')
 Data_Processing.Compute_Resources(start_time)
 
 video.release()
