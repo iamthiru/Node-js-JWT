@@ -37,7 +37,6 @@ def List_Processing(frame_num, Pupil_Dilation, Iris_Dilation):
     print('Frames : ', len(frame_num))
     print('Iris Dilation : ', len(Iris_Dilation))
     print('Pupil Dilation : ', len(Pupil_Dilation))
-    print('\n')
 
     if len(Pupil_Dilation) < len(frame_num):
         amt = len(frame_num) - len(Pupil_Dilation)
