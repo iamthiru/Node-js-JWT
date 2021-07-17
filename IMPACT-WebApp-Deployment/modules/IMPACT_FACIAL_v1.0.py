@@ -39,9 +39,9 @@ start_time = time.time()
 
 # Function to Detect Faces and get the AU values from the video. Output would be a csv file with frame wise scores
 def OpenFace_API_Call(ipath, opath):
-    print("> OpenFace Feature Extraction Command Executed !!")
+    print("# ~ OpenFace Feature Extraction...")
     cmd = "OpenFace/build/bin/FeatureExtraction -f " + ipath + " -out_dir " + opath + " -aus"
-    print("> Command : ", cmd)
+    # print("> Command : ", cmd)
     subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True).communicate()
 
 
@@ -82,6 +82,7 @@ def Calculate_AU43(x_data, num_steps):
 
 # Computing PSPI, AU43 and SUM_AUs and adding them to the final processed csv file and saving the file
 def Compute_PSPI_AUs(opath, fpath, D):
+    print('# ~ Computing PSPI-AUs...')
     df = pd.read_csv(fpath)
 
     Final_DF = pd.DataFrame()
@@ -149,7 +150,7 @@ def Compute_PSPI_AUs(opath, fpath, D):
 
     Final_DF.to_csv(opath + '/' + D + '_PSPI_AUs.csv', index=False)
     # print("     # Read Complete! Attempting to write CSV files...")
-    print("# CSV written successfully !!")
+    # print("# CSV written successfully !!")
 
 
 #######################################################################################################################
@@ -252,7 +253,7 @@ def Video_Labeler(opath, D, label_list):
     label_file = pd.read_csv(opath + '/' + D + '_LabelFile.csv')
     label_file['Video Score'] = score
     label_file.to_csv(opath + '/' + D + '_LabelFile.csv', index=False)
-    print("Final score for the video is : ", score)
+    print("# ~ Facial Pain Score : ", score)
     return score
 
 
@@ -260,7 +261,7 @@ def Video_Labeler(opath, D, label_list):
 
 # Plotting the Pain graph
 def Graph_Plot(opath, fname, fl, flag):
-    print("> Plotting Pain...")
+    print("# ~ Plotting Frame-wise Graph...")
     df = pd.read_csv(opath + fname)
     b = df['sum_AU_r']
     a = df['frames']
@@ -271,7 +272,6 @@ def Graph_Plot(opath, fname, fl, flag):
         plt.savefig(opath + fl + '_Pain_Plot.png')
     else:
         plt.savefig(opath + '_Pain_Plot.png')
-    print("# Pain Plot Complete")
     plt.close()
 
 
@@ -284,22 +284,21 @@ if __name__ == "__main__":
     tag = 0
 
     if len(sys.argv) > 1:
-        print("\n############################## IMPACT FACIAL ##############################")
+        print("\n****************************** IMPACT FACIAL ******************************")
         global filenm
         filenm = str(sys.argv[1])
         in_path = "static/Face_Input_Videos/" + filenm
         tag = 1
     else:
-        print("\n############################## IMPACT FACIAL ##############################")
+        print("\n****************************** IMPACT FACIAL ******************************")
         filenm = "face.mp4"
         in_path = "static/Face_Input_Videos/" + filenm
 
-    print("\n************* Video Capture Complete *************")
-    print("> Extracting Features...")
+    print("# ~ Extracting Features...")
     video_fps = fps_calculator(in_path)
 
     if tag == 1:
-        print('> FPS: ', video_fps)
+        print('# ~ FPS: ', video_fps)
         OpenFace_API_Call(in_path, out_path)
         Compute_PSPI_AUs(out_path, out_path + os.path.splitext(filenm)[0] + '.csv', os.path.splitext(filenm)[0])
         video_label_list = Calculate_Pain_Labeler(out_path, out_path + os.path.splitext(filenm)[0] + '_PSPI_AUs.csv',
@@ -313,10 +312,9 @@ if __name__ == "__main__":
         final_video_label = Video_Labeler(out_path, os.path.splitext(filenm)[0], video_label_list)
         Graph_Plot(out_path, 'face_PSPI_AUs.csv', 'face', 0)
 
-    print("\n############################## END OF EXECUTION ##############################")
 ########################################################################################################################
 
 # Compute Resources being used or utilized
-print('\n***************************************************************************')
+print('***************************************************************************')
 Data_Processing.Compute_Resources(start_time)
 ########################################################################################################################
