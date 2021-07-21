@@ -9,6 +9,7 @@
 # Web Simulation (Beta Version) for Pupil and Facial Pain Analysis.
 
 # UPDATES:
+# Returning PUAL + AVG PUPIL RATIO
 # Updated Patient Search Functionality
 # Patient Pupil Record - Pupillometer Data Uploader
 # Mobile APIs for Pupil and Facial integrated.
@@ -251,12 +252,14 @@ def Upload_Process_Pupil():
                 csv_file = os.path.join(app.config['PUPIL_OUTPUT_FOLDER'], file)
                 df = pd.read_csv(csv_file)
                 PUAL_SCORE = round(df['PUAL_Score'][0], 3)
+                avg_pupil_ratio = sum(df['Raw_Data']) / len(df['Raw_Data'])
                 f = img_name + '_Dilation_Plot.png'
                 vid_file = os.path.join(app.config['PUPIL_VID_OUT_FOLDER'], img_name + '.mp4')
                 pic = os.path.join(app.config['PUPIL_OUTPUT_FOLDER'], f)
                 Upload_2_S3(BUCKET_NAME, f, pic, res_img_fold_s3)
                 Upload_2_S3(BUCKET_NAME, img_name + '.mp4', vid_file, res_img_fold_s3)
                 Upload_2_S3(BUCKET_NAME, file, csv_file, res_img_fold_s3)
+                print('PUAL : ', PUAL_SCORE, ' ; AVG RATIO : ', avg_pupil_ratio)
                 print('\n***************************** DONE *****************************\n')
                 return render_template('Pupil_Success.html', user=user, image_file=pic,
                                        video_file=vid_file, score=PUAL_SCORE)
@@ -356,6 +359,7 @@ def pupil_api(filename):
         csv_f = os.path.join(app.config['PUPIL_OUTPUT_FOLDER'], file)
         df = pd.read_csv(csv_f)
         PUAL_SCORE = round(df['PUAL_Score'][0], 3)
+        avg_pupil_ratio = round((sum(df['Raw_Data'])/len(df['Raw_Data'])), 3)
         f = img_name + '_Dilation_Plot.png'
         vid_file = os.path.join(app.config['PUPIL_VID_OUT_FOLDER'], img_name + '.mp4')
         pic = os.path.join(app.config['PUPIL_OUTPUT_FOLDER'], f)
@@ -364,8 +368,10 @@ def pupil_api(filename):
         Upload_2_S3(BUCKET_NAME, file, csv_f, upload_folder_s3)
         table_userData.put_item(Item={'timestamp': str(st), 'Request': 'API', 'user-metric': 'Pupil Pain',
                                       's3-filepath': 's3://impact-benten/' + download_folder_s3 + filename})
-        # print('PUAL : ', PUAL_SCORE)
-        return str(PUAL_SCORE)
+        print('PUAL : ', PUAL_SCORE, ' ; AVG RATIO : ', avg_pupil_ratio)
+        pupil_list = [PUAL_SCORE, avg_pupil_ratio]
+        # return str(PUAL_SCORE)
+        return str(pupil_list)
     else:
         print('\n*************** TOKEN : BAD ****************\n')
         return "Retake"
