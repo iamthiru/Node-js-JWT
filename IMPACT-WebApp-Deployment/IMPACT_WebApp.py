@@ -2,13 +2,14 @@
 # Proprietary: Benten Technologies, Inc.
 # Author: Pranav H. Deo { pdeo@bententech.com }
 # (C) Copyright Content
-# Date: 07/17/2021
+# Date: 07/21/2021
 # Version: v1.11
 
 # Code Description:
 # Web Simulation (Beta Version) for Pupil and Facial Pain Analysis.
 
 # UPDATES:
+# Updated Patient Search Functionality
 # Patient Pupil Record - Pupillometer Data Uploader
 # Mobile APIs for Pupil and Facial integrated.
 # Login/Registration Changed from DynamoDB to RDS-MySQL.
@@ -125,8 +126,12 @@ def Register():
 def PupilRecords():
     global user
     if 'user_email' in session:
+        if request.method == 'POST':
+            patient_name = request.form['text']
+        else:
+            patient_name = ''
         page_header = 'Pupil'
-        pupil_csv_list = S3_record_fetcher()
+        pupil_csv_list = S3_record_fetcher(patient_name)
         return render_template('ShowRecord.html', user=user, pupil_csv_list=pupil_csv_list, page_header=page_header)
     else:
         session.pop('user_email', None)
@@ -428,7 +433,7 @@ def Download_from_S3(buck, KEY, Local_fp):
 
 
 # [Function] Fetch S3 Records from Pupil Folder in Bucket
-def S3_record_fetcher():
+def S3_record_fetcher(pat_name):
     s3 = boto3.resource('s3', aws_access_key_id=key_db['AWSAccessKeyId'], aws_secret_access_key=key_db['AWSSecretKey'])
     my_bucket = s3.Bucket(BUCKET_NAME)
     all_pupil_csv_files = {}
@@ -436,12 +441,14 @@ def S3_record_fetcher():
         filename = file.key
         last_mod_date = file.last_modified
         if filename.find('.csv') != -1:
-            _, fl = os.path.split(filename)
-            head, tail = os.path.splitext(fl)
-            fn = head.split('PUAL_')
-            csv_url = f'https://{BUCKET_NAME}.s3.amazonaws.com/' + filename
-            video_url = f'https://{BUCKET_NAME}.s3.amazonaws.com/Pupil_Data/Results-Output/' + str(fn[1]) + '.mp4'
-            all_pupil_csv_files[fl] = (last_mod_date, csv_url, video_url)
+            if filename.find(pat_name) != -1:
+                _, fl = os.path.split(filename)
+                head, tail = os.path.splitext(fl)
+                fn = head.split('PUAL_')
+                csv_url = f'https://{BUCKET_NAME}.s3.amazonaws.com/' + filename
+                video_url = f'https://{BUCKET_NAME}.s3.amazonaws.com/Pupil_Data/Results-Output/' + str(fn[1]) + '.mp4'
+                all_pupil_csv_files[fl] = (last_mod_date, csv_url, video_url)
+
     sorted_list = sorted(all_pupil_csv_files.items(), key=lambda x: x[1][0], reverse=True)
     return sorted_list
 
