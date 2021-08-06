@@ -498,13 +498,13 @@ def S3_record_fetcher(pat_name):
         new_last_mod_date = time.strptime(str(new_last_mod_date), "%Y-%m-%d %H:%M:%S")
         new_last_mod_date = datetime.fromtimestamp(mktime(new_last_mod_date))
         if filename.find('.csv') != -1:
-            if filename.find(pat_name) != -1:
-                _, fl = os.path.split(filename)
-                head, tail = os.path.splitext(fl)
-                fn = head.split('PUAL_')
-                csv_url = f'https://{BUCKET_NAME}.s3.amazonaws.com/' + filename
-                video_url = f'https://{BUCKET_NAME}.s3.amazonaws.com/Pupil_Data/Results-Output/' + str(fn[1]) + '.mp4'
-                all_pupil_csv_files[fl] = (str(fn[1])+'.mp4', last_mod_date, new_last_mod_date, csv_url, video_url)
+            if (str.upper(filename).find(str.upper(pat_name)) or str.lower(filename).find(str.lower(pat_name))) != -1:
+                    _, fl = os.path.split(filename)
+                    head, tail = os.path.splitext(fl)
+                    fn = head.split('PUAL_')
+                    csv_url = f'https://{BUCKET_NAME}.s3.amazonaws.com/' + filename
+                    video_url = f'https://{BUCKET_NAME}.s3.amazonaws.com/Pupil_Data/Results-Output/' + str(fn[1]) + '.mp4'
+                    all_pupil_csv_files[fl] = (str(fn[1])+'.mp4', last_mod_date, new_last_mod_date, csv_url, video_url)
 
     sorted_list = sorted(all_pupil_csv_files.items(), key=lambda x: x[1][1], reverse=True)
     return sorted_list
