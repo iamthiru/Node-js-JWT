@@ -2,13 +2,14 @@
 # Proprietary: Benten Technologies, Inc.
 # Author: Pranav H. Deo { pdeo@bententech.com }
 # (C) Copyright Content
-# Date: 07/21/2021
+# Date: 08/07/2021
 # Version: v1.11
 
 # Code Description:
 # Web Simulation (Beta Version) for Pupil and Facial Pain Analysis.
 
 # UPDATES:
+# Datetime functionality
 # Returning PUAL + AVG PUPIL RATIO
 # Updated Patient Search Functionality
 # Patient Pupil Record - Pupillometer Data Uploader
@@ -33,11 +34,15 @@
 import os
 import time
 import yaml
+import pytz
 import boto3
 import pymysql
 from flask import *
 import pandas as pd
 import datetime as dt
+from dateutil.tz import tzutc, tzlocal
+from time import mktime
+from datetime import datetime
 
 ##############################################################
 # --------------------- AMAZON-S3 -------------------------- #
@@ -133,7 +138,10 @@ def PupilRecords():
             patient_name = ''
         page_header = 'Pupil'
         pupil_csv_list = S3_record_fetcher(patient_name)
-        return render_template('ShowRecord.html', user=user, pupil_csv_list=pupil_csv_list, page_header=page_header)
+        return render_template('ShowRecord.html',
+                               user=user,
+                               pupil_csv_list=pupil_csv_list,
+                               page_header=page_header)
     else:
         session.pop('user_email', None)
         return render_template('Login.html')
@@ -423,6 +431,46 @@ def facial_api(filename):
         return "Retake"
 
 
+@app.template_filter('ESTdatetimefilter')
+def ESTdatetimefilter(value, format='%b %d %I:%M %p'):
+    tz = pytz.timezone('US/Eastern')  # timezone you want to convert to from UTC (US/Eastern)
+    utc = pytz.timezone('UTC')
+    value = utc.localize(value, is_dst=None).astimezone(pytz.utc)
+    local_dt = value.astimezone(tz)
+    return local_dt.strftime(format)
+
+
+@app.template_filter('ISTdatetimefilter')
+def ISTdatetimefilter(value, format='%b %d %I:%M %p'):
+    tz = pytz.timezone('Asia/Calcutta')   # timezone you want to convert to from UTC (Asia/Calcutta)
+    utc = pytz.timezone('UTC')
+    value = utc.localize(value, is_dst=None).astimezone(pytz.utc)
+    local_dt = value.astimezone(tz)
+    return local_dt.strftime(format)
+
+
+@app.template_filter('CTdatetimefilter')
+def CTdatetimefilter(value, format='%b %d %I:%M %p'):
+    tz = pytz.timezone('US/Central')   # timezone you want to convert to from UTC (US/Central)
+    utc = pytz.timezone('UTC')
+    value = utc.localize(value, is_dst=None).astimezone(pytz.utc)
+    local_dt = value.astimezone(tz)
+    return local_dt.strftime(format)
+
+
+@app.template_filter('datetimefilter')
+def datetimefilter(value, format='%b %d %I:%M %p'):
+    utc = pytz.timezone('UTC')
+    value = utc.localize(value, is_dst=None).astimezone(pytz.utc)
+    return value.strftime(format)
+
+
+@app.template_filter('ms_converter')
+def ms_converter(value):
+    ms = value.timestamp() * 1000
+    return ms
+
+
 # [Function] Upload to S3 Bucket Routine
 def Upload_2_S3(buck, f, fp, s3_to_path):
     s3 = boto3.resource('s3', aws_access_key_id=key_db['AWSAccessKeyId'], aws_secret_access_key=key_db['AWSSecretKey'])
@@ -446,6 +494,9 @@ def S3_record_fetcher(pat_name):
     for file in my_bucket.objects.filter(Prefix='Pupil_Data/Results-Output/'):
         filename = file.key
         last_mod_date = file.last_modified
+        new_last_mod_date = str(last_mod_date).split('+')[0]
+        new_last_mod_date = time.strptime(str(new_last_mod_date), "%Y-%m-%d %H:%M:%S")
+        new_last_mod_date = datetime.fromtimestamp(mktime(new_last_mod_date))
         if filename.find('.csv') != -1:
             if filename.find(pat_name) != -1:
                 _, fl = os.path.split(filename)
@@ -453,9 +504,9 @@ def S3_record_fetcher(pat_name):
                 fn = head.split('PUAL_')
                 csv_url = f'https://{BUCKET_NAME}.s3.amazonaws.com/' + filename
                 video_url = f'https://{BUCKET_NAME}.s3.amazonaws.com/Pupil_Data/Results-Output/' + str(fn[1]) + '.mp4'
-                all_pupil_csv_files[fl] = (last_mod_date, csv_url, video_url)
+                all_pupil_csv_files[fl] = (str(fn[1])+'.mp4', last_mod_date, new_last_mod_date, csv_url, video_url)
 
-    sorted_list = sorted(all_pupil_csv_files.items(), key=lambda x: x[1][0], reverse=True)
+    sorted_list = sorted(all_pupil_csv_files.items(), key=lambda x: x[1][1], reverse=True)
     return sorted_list
 
 
