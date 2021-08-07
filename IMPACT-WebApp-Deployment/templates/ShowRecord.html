@@ -150,16 +150,24 @@ tr:hover {
         </tr>
         {% for value in pupil_csv_list %}
             <tr>
-                <td>{{ value[1][0] }}</td>
                 <td>
-                    <p align="left"><b>[UTC] &nbsp;</b>{{ value[1][2] | datetimefilter }}</p>
-                    <p align="left"><b>[EST] &nbsp;</b>{{ value[1][2] | ESTdatetimefilter }}</p>
-                    <p align="left"><b>[IST] &nbsp;</b>{{ value[1][2] | ISTdatetimefilter }}</p>
-                    <p align="left"><b>[CST] &nbsp;</b>{{ value[1][2] | CTdatetimefilter }}</p>
+                    <p>{{ value[1][0] }}</p>
+                    <p>{{ value[1][1] }}</p>
                 </td>
                 <td>
-                    <p><a href={{ value[1][3] }}>Download CSV</a></p>
-                    <p><a href={{ value[1][4] }}>Download Video</a></p>
+                    <p id="{{ value[1][0] }}"></p>
+                    <script>
+                        var elem = document.getElementById("{{ value[1][0] }}");
+                        var dateVar = new Date(parseInt({{ value[1][3] }}))
+                        var str = dateVar.toDateString().substring(4,10);
+                        str += " "+(dateVar.getHours() < 10 ? "0" : "")+(dateVar.getHours() < 12 ? dateVar.getHours() : dateVar.getHours() - 12)+":"+(dateVar.getMinutes() < 10 ? "0" : "")+dateVar.getMinutes();
+                        elem.innerHTML = "<b>[Local]</b> "+str+(dateVar.getHours() < 12 ? " AM" : " PM");
+                    </script>
+                    <p align="left"><b>[Central]&nbsp;</b>{{ value[1][2] | CTdatetimefilter }}</p>
+                </td>
+                <td>
+                    <p><a href={{ value[1][4] }}>Download CSV</a></p>
+                    <p><a href={{ value[1][5] }}>Download Video</a></p>
                 </td>
                 <td>
                     <form action="/Upload_Device_Data" method="post" enctype="multipart/form-data" class="form-wrap">
