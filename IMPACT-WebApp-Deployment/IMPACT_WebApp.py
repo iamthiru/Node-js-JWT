@@ -431,24 +431,6 @@ def facial_api(filename):
         return "Retake"
 
 
-@app.template_filter('ESTdatetimefilter')
-def ESTdatetimefilter(value, format='%b %d %I:%M %p'):
-    tz = pytz.timezone('US/Eastern')  # timezone you want to convert to from UTC (US/Eastern)
-    utc = pytz.timezone('UTC')
-    value = utc.localize(value, is_dst=None).astimezone(pytz.utc)
-    local_dt = value.astimezone(tz)
-    return local_dt.strftime(format)
-
-
-@app.template_filter('ISTdatetimefilter')
-def ISTdatetimefilter(value, format='%b %d %I:%M %p'):
-    tz = pytz.timezone('Asia/Calcutta')   # timezone you want to convert to from UTC (Asia/Calcutta)
-    utc = pytz.timezone('UTC')
-    value = utc.localize(value, is_dst=None).astimezone(pytz.utc)
-    local_dt = value.astimezone(tz)
-    return local_dt.strftime(format)
-
-
 @app.template_filter('CTdatetimefilter')
 def CTdatetimefilter(value, format='%b %d %I:%M %p'):
     tz = pytz.timezone('US/Central')   # timezone you want to convert to from UTC (US/Central)
@@ -456,19 +438,6 @@ def CTdatetimefilter(value, format='%b %d %I:%M %p'):
     value = utc.localize(value, is_dst=None).astimezone(pytz.utc)
     local_dt = value.astimezone(tz)
     return local_dt.strftime(format)
-
-
-@app.template_filter('datetimefilter')
-def datetimefilter(value, format='%b %d %I:%M %p'):
-    utc = pytz.timezone('UTC')
-    value = utc.localize(value, is_dst=None).astimezone(pytz.utc)
-    return value.strftime(format)
-
-
-@app.template_filter('ms_converter')
-def ms_converter(value):
-    ms = value.timestamp() * 1000
-    return ms
 
 
 # [Function] Upload to S3 Bucket Routine
@@ -497,6 +466,9 @@ def S3_record_fetcher(pat_name):
         new_last_mod_date = str(last_mod_date).split('+')[0]
         new_last_mod_date = time.strptime(str(new_last_mod_date), "%Y-%m-%d %H:%M:%S")
         new_last_mod_date = datetime.fromtimestamp(mktime(new_last_mod_date))
+        timestamp_jay_mp4 = str(filename).split("_")[-1]
+        timestamp_jay_final = timestamp_jay_mp4.split(".")[0]
+
         if filename.find('.csv') != -1:
             if (str.upper(filename).find(str.upper(pat_name)) or str.lower(filename).find(str.lower(pat_name))) != -1:
                     _, fl = os.path.split(filename)
@@ -504,9 +476,9 @@ def S3_record_fetcher(pat_name):
                     fn = head.split('PUAL_')
                     csv_url = f'https://{BUCKET_NAME}.s3.amazonaws.com/' + filename
                     video_url = f'https://{BUCKET_NAME}.s3.amazonaws.com/Pupil_Data/Results-Output/' + str(fn[1]) + '.mp4'
-                    all_pupil_csv_files[fl] = (str(fn[1])+'.mp4', last_mod_date, new_last_mod_date, csv_url, video_url)
+                    all_pupil_csv_files[fl] = (str(fn[1])+'.csv', str(fn[1])+'.mp4', new_last_mod_date, timestamp_jay_final, csv_url, video_url)
 
-    sorted_list = sorted(all_pupil_csv_files.items(), key=lambda x: x[1][1], reverse=True)
+    sorted_list = sorted(all_pupil_csv_files.items(), key=lambda x: x[1][2], reverse=True)
     return sorted_list
 
 
@@ -523,6 +495,6 @@ def est_conn_rds():
 
 # [MAIN] Runner Call
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
 
 # **********************************************************************************************************************
