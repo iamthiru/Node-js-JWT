@@ -141,6 +141,16 @@ tr:hover {
     </form>
     <br>
 
+     <p>
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            {% for message in messages %}
+                <h2 style="color:green;font-size:25px;" align="center">{{ message }}</h2>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+    </p>
+
     <table align="center" cellspacing="15px" cellpadding="25px">
         <tr>
             <th>Video File</th>
@@ -176,7 +186,7 @@ tr:hover {
                         </label>
                         <br>
                         <br>
-                        <input id="file-upload" type="file" type="file" name="file" accept=".csv"/>
+                        <input id="file-upload" type="file" type="file" name="file" accept="*"/>
                         <input type="text" name="text" placeholder="Enter Filename" style="width:340px">
                         <br>
                         <br>
