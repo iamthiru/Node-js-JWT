@@ -2,7 +2,7 @@
 # Proprietary: Benten Technologies, Inc.
 # Author: Pranav H. Deo { pdeo@bententech.com }
 # (C) Copyright Content
-# Date: 08/07/2021
+# Date: 08/08/2021
 # Version: v1.11
 
 # Code Description:
@@ -40,14 +40,15 @@ import pymysql
 from flask import *
 import pandas as pd
 import datetime as dt
-from dateutil.tz import tzutc, tzlocal
 from time import mktime
 from datetime import datetime
+from dateutil.tz import tzutc, tzlocal
+from werkzeug.utils import secure_filename
 
 ##############################################################
 # --------------------- AMAZON-S3 -------------------------- #
 BUCKET_NAME = 'impact-benten'
-key_db = yaml.load(open('config/Keys.yaml'))
+key_db = yaml.load(open('aws/config/Keys.yaml'))
 ##############################################################
 # -------------------- AMAZON-DynamoDB --------------------- #
 # Dynamo_DB = boto3.resource('dynamodb', region_name="us-east-1")
@@ -155,8 +156,9 @@ def Upload_Device_Data():
         if request.method == 'POST':
             f = request.files['file']
             txt_fname = request.form['text']
-            head, tail = txt_fname.split('.')
-            new_filename = head + '_device.' + tail
+            # head, tail = txt_fname.split('.')
+            ext = os.path.splitext(secure_filename(f.filename))[1]
+            new_filename = txt_fname + '_PUP_Device' + ext
             f.filename = str(new_filename)
             PUPIL_UPLOAD_FOLDER_S3 = 'Pupil_Data/Pupillometer_Data/'
             PUPIL_UPLOAD_FOLDER = './static/Device_Data/'
@@ -164,7 +166,13 @@ def Upload_Device_Data():
             pth = os.path.join(app.config['PUPIL_UPLOAD_FOLDER'], f.filename)
             f.save(os.path.join(app.config['PUPIL_UPLOAD_FOLDER'], f.filename))
             Upload_2_S3(BUCKET_NAME, f.filename, pth, PUPIL_UPLOAD_FOLDER_S3)
-            return render_template('HomePage.html', user=user)
+            flash("Success! Uploaded File As: " + f.filename)
+            page_header = 'Pupil'
+            pupil_csv_list = S3_record_fetcher('')
+            return render_template('ShowRecord.html',
+                                   user=user,
+                                   pupil_csv_list=pupil_csv_list,
+                                   page_header=page_header)
         return render_template('HomePage.html', user=user)
     else:
         session.pop('user_email', None)
@@ -484,7 +492,7 @@ def S3_record_fetcher(pat_name):
 
 # [Function] Establishing new connection with RDS-MySQL DB-Server
 def est_conn_rds():
-    db = yaml.load(open('config/db.yaml'))
+    db = yaml.load(open('aws/config/db.yaml'))
     conn = pymysql.connect(host=db['mysql_host'],
                            user=db['mysql_user'],
                            password=db['mysql_password'],
@@ -495,6 +503,6 @@ def est_conn_rds():
 
 # [MAIN] Runner Call
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()
 
 # **********************************************************************************************************************
