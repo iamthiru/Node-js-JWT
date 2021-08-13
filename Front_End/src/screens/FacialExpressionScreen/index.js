@@ -333,7 +333,7 @@ const FacialExpressionScreen = ({navigation}) => {
           : height < 700 && resolution > 540 && resolution <= 720
           ? RNCamera.Constants.VideoQuality['720p']
           : resolution > 1080
-          ? RNCamera.Constants.VideoQuality['1080p']
+          ? RNCamera.Constants.VideoQuality['2160p']
           : RNCamera.Constants.VideoQuality['1080p'],
     };
 
@@ -424,7 +424,14 @@ const FacialExpressionScreen = ({navigation}) => {
         ),
       };
     } else {
-      if (height > 700) {
+      if(height > 850 && resolution > 1080){
+        options = {
+          cropWidth: resolution - 40,
+          cropHeight: ((resolution - 40) * (height-220)/width),
+          cropOffsetX: 20,
+          cropOffsetY: 40
+        }
+      } else if (height > 700) {
         options = {
           cropWidth: parseInt(screen - paddingValue),
           cropHeight: parseInt(screen + screen * 0.25),
