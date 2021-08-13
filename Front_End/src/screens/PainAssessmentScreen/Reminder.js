@@ -78,7 +78,7 @@ const Reminder = ({gotoNext, gotoPrevious}) => {
           remainder_date: selectedDate,
           reminder_time: selectedTime,
           isRemainder: needReminder,
-          assessment_date: new Date(),
+          // assessment_date: new Date().getTime(),
           // frequence: '1',
           // pain_frequency_id: '1',
           // total_score: '1',
@@ -91,7 +91,7 @@ const Reminder = ({gotoNext, gotoPrevious}) => {
           remainder_date: selectedDate,
           reminder_time: selectedTime,
           isRemainder: needReminder,
-          assessment_date: new Date(),
+          // assessment_date: new Date().getTime(),
           // frequence: '1',
           // pain_frequency_id: '1',
           // total_score: '1',
@@ -136,13 +136,13 @@ const Reminder = ({gotoNext, gotoPrevious}) => {
               }}>
               {'Would you like to set a reminder for the next assessment?'}
             </Text>
-            <CustomTouchableOpacity style={{marginLeft: 15}}>
+            {/* <CustomTouchableOpacity style={{marginLeft: 15}}>
               <AntDesignIcon
                 name={'questioncircle'}
                 size={15}
                 color={COLORS.PRIMARY_MAIN}
               />
-            </CustomTouchableOpacity>
+            </CustomTouchableOpacity> */}
           </View>
 
           <CustomRadioButton
@@ -185,13 +185,13 @@ const Reminder = ({gotoNext, gotoPrevious}) => {
               }}>
               {'Next Assessment'}
             </Text>
-            <CustomTouchableOpacity style={{marginLeft: 15}}>
+            {/* <CustomTouchableOpacity style={{marginLeft: 15}}>
               <AntDesignIcon
                 name={'questioncircle'}
                 size={15}
                 color={COLORS.PRIMARY_MAIN}
               />
-            </CustomTouchableOpacity>
+            </CustomTouchableOpacity> */}
           </View>
 
           <CustomTouchableOpacity
@@ -317,12 +317,17 @@ const Reminder = ({gotoNext, gotoPrevious}) => {
           isVisible={showDatePicker || showTimePicker}
           onDismiss={() => hideDateTimePickers()}
           onBackdropPress={() => hideDateTimePickers()}>
-          <View style={{alignItems: 'center', justifyContent: 'center'}}>
+          <View style={{
+            alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: 'white',
+              borderRadius: 10,
+              padding: 10,}}>
             <DateTimePicker
               style={{width: '100%', backgroundColor: 'white'}}
               value={showDatePicker ? selectedDate : selectedTime}
               mode={showDatePicker ? 'date' : 'time'}
-              display="default"
+              display="inline"
               onChange={(event, value) => {
                 if (showDatePicker) {
                   setSelectedDate(value);

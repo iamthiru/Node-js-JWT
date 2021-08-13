@@ -5,6 +5,7 @@ import {
   useWindowDimensions,
   SafeAreaView,
   Platform,
+  Alert,
 } from 'react-native';
 import ReactNativeModal from 'react-native-modal';
 import CustomButton from '../../components/shared/CustomButton';
@@ -18,7 +19,7 @@ import {useNavigation, useRoute} from '@react-navigation/native';
 import {useSelector, useDispatch} from 'react-redux';
 import CustomTextInput from '../../components/shared/CustomTextInput';
 import {SCREEN_NAMES} from '../../constants/navigation';
-import {PATIENT_NAME_ACTION} from '../../constants/actions';
+import {CREATE_ASSESSMENT_ACTION, PATIENT_NAME_ACTION} from '../../constants/actions';
 import Analytics from '../../utils/Analytics';
 import { padNumber } from '../../utils/date';
 
@@ -42,6 +43,19 @@ const PainAssessment = ({route}) => {
   });
   const [assementDate, setAssessmentDate] = useState({});
   const selectedAssessmentData = useSelector((state) => state.createAsseement);
+  const startAssessment = ()=>{
+    if (Boolean(patient === '')) {
+      Alert.alert('Please add the patient');
+      return;
+    }
+    navigation.navigate(SCREEN_NAMES.PAIN_ASSESSMENT, assementDate);
+    dispatch({
+      type: CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
+      payload: {
+        assessment_date: selectedDate.getTime(),
+      },
+    });
+  }
 
   useEffect(() => {
     let startTime = 0;
@@ -61,7 +75,6 @@ const PainAssessment = ({route}) => {
         endTime,
       );
     });
-
     const unsubscribeBeforeRemove = navigation.addListener(
       'beforeRemove',
       (e) => {
@@ -282,8 +295,13 @@ const PainAssessment = ({route}) => {
         {Boolean(Platform.OS === 'ios') ? (
           <View style={styles.buttonView}>
             <CustomButton
-              disabled={Boolean(patient === '')}
+              // disabled={Boolean(patient === '')}
               onPress={() => {
+                if(Boolean(patient===''))
+                {
+                  Alert.alert('Please add the patient')
+                  return
+                }
                 navigation.navigate(SCREEN_NAMES.PAIN_ASSESSMENT);
               }}
               title="Start"
@@ -291,9 +309,7 @@ const PainAssessment = ({route}) => {
               style={[
                 styles.startButton,
                 {
-                  backgroundColor: Boolean(patient === '')
-                    ? COLORS.SECONDARY_LIGHTER
-                    : COLORS.SECONDARY_MAIN,
+                  backgroundColor:COLORS.SECONDARY_MAIN,
                 },
               ]}
             />
@@ -302,10 +318,8 @@ const PainAssessment = ({route}) => {
           <View style={styles.satrtButtonView}>
             <TouchableOpacity
               style={styles.startButtonTouch}
-              disabled={Boolean(patient === '')}
-              onPress={() => {
-                navigation.navigate(SCREEN_NAMES.PAIN_ASSESSMENT, assementDate);
-              }}>
+              onPress={startAssessment}
+              >
               <Text style={styles.startText}>START</Text>
             </TouchableOpacity>
           </View>

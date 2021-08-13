@@ -50,6 +50,8 @@ import {CREATE_ASSESSMENT_ACTION} from '../../constants/actions';
 import Analytics from '../../utils/Analytics';
 
 const {width, height} = Dimensions.get('window');
+const screenDimension = Dimensions.get('screen');
+const screenResolution = screenDimension?.width * screenDimension?.scale;
 const {VideoCropper} = NativeModules;
 
 let camera = null;
@@ -247,7 +249,6 @@ const PupillaryDilationScreen = ({navigation}) => {
     } else {
       setZoom(fixZoom);
     }
-
     const recordOptions = {
       mute: true,
       quality: RNCamera.Constants.VideoQuality['1080p'],
@@ -260,7 +261,7 @@ const PupillaryDilationScreen = ({navigation}) => {
         setShowSpinner(true);
         setSpinnerMessage('Cropping...');
         startProcessingTimer();
-        setZoom(fixZoom)
+        setZoom(fixZoom);
 
         cropVideo(
           data.uri,
@@ -281,14 +282,12 @@ const PupillaryDilationScreen = ({navigation}) => {
                   clearProcessingTimer();
                   setIsRecording(false);
                   setVideoURL(resultPath);
-                  // setZoom(fixZoom)
                 } else {
                   setShowSpinner(false);
                   setSpinnerMessage('');
                   clearProcessingTimer();
                   setIsRecording(false);
                   setVideoURL(resultPath);
-                  // setZoom(fixZoom)
                 }
               })
               .catch((err) => {
@@ -316,19 +315,70 @@ const PupillaryDilationScreen = ({navigation}) => {
 
   const cropVideo = async (videoURI, successCallback, errorCallback) => {
     const deviceModel = await DeviceInfo.getModel();
-
     let screenWidth = 1080;
     const paddingValue = screenWidth * (60 / width);
-    const offSetY = width > 550 ? 300 : 100;
-    let options = {
-      cropWidth: screenWidth,
-      cropHeight: parseInt((screenWidth + paddingValue) / 2),
-      cropOffsetX: 0,
-      cropOffsetY:
-        parseInt((screenWidth - (screenWidth + paddingValue) / 2) / 2) +
-        offSetY +
-        (['iPhone 7 Plus', 'IN2025'].includes(deviceModel) ? 195 : 0),
-    };
+    const offSetYIos = width > 550 ? 300 : 100;
+    let options = {};
+
+    if (Platform.OS === 'ios') {
+      options = {
+        cropWidth: screenWidth,
+        cropHeight: parseInt((screenWidth + paddingValue) / 2),
+        cropOffsetX: 0,
+        cropOffsetY:
+          parseInt((screenWidth - (screenWidth + paddingValue) / 2) / 2) +
+          offSetYIos +
+          (['iPhone 7 Plus', 'IN2025'].includes(deviceModel) ? 195 : 0),
+      };
+    } else {
+      const extraPaddingValue =
+        height < 700 && screenResolution > 540 && screenResolution <= 720
+          ? 80
+          : height < 700 && screenResolution <= 540
+          ? 200
+          : height > 900
+          ? -70
+          : height >= 800 && height <= 900
+          ? 0
+          : 30;
+      const offSetY =
+        screenResolution > 1080
+          ? height >= 850
+            ? 110 - (screenResolution - 1080) * 0.66
+            : height >= 600
+            ? 160 - (screenResolution - 1080) * 0.66
+            : height > 550
+            ? 300 - (screenResolution - 1080) * 0.66
+            : 100 - (screenResolution - 1080) * 0.66
+          : screenWidth <= 1080 && height >= 850
+          ? 110
+          : screenWidth <= 1080 && screenWidth > 600
+          ? 160
+          : width > 550
+          ? 300
+          : 100;
+      const extraHeight =
+        height < 700 && screenResolution > 540 && screenResolution <= 720
+          ? parseInt(width / 5)
+          : 0;
+      const extraOffSet = height < 600 ? -150 : 0;
+      options = {
+        cropWidth: screenWidth,
+        cropHeight:
+          screenResolution > 1080
+            ? parseInt((screenWidth + paddingValue) / 2) +
+              parseInt(screenResolution - 1080) * 0.2
+            : parseInt((screenWidth + paddingValue) / 2) + extraHeight,
+        cropOffsetX: 0,
+        cropOffsetY:
+          parseInt(
+            (screenWidth - (screenWidth + paddingValue + extraOffSet) / 2) / 2,
+          ) +
+          offSetY +
+          extraPaddingValue +
+          (['iPhone 7 Plus', 'IN2025'].includes(deviceModel) ? 195 : 0),
+      };
+    }
 
     if (Platform.OS === 'ios') {
       options.quality = '1920x1080';
@@ -338,7 +388,6 @@ const PupillaryDilationScreen = ({navigation}) => {
       if (Platform.OS === 'ios') {
         VideoCropper.crop(videoURI, options, (error, croppedVideoPath) => {
           if (!error) {
-            console.log('VideoCropper - Crop Success', croppedVideoPath);
             successCallback(croppedVideoPath);
           } else {
             console.log('VideoCropper - Crop Error', error);
@@ -418,7 +467,7 @@ const PupillaryDilationScreen = ({navigation}) => {
           // resetStates();
         })
         .catch((err) => {
-          Alert.alert('Error', 'Download Failed!');
+          Alert.alert('Error', 'Download Failed!'+err?.message);
           // resetStates();
         });
     }
@@ -445,10 +494,33 @@ const PupillaryDilationScreen = ({navigation}) => {
           patientData.patient_name
         ).replace(/ /g, '_')}_${Date.now().toString()}.mp4`;
       }
-      let contentType = 'video/mp4';
-      let contentDeposition = 'inline;filename="' + filename + '"';
-      const base64 = await fs.readFile(videoURL, 'base64');
-      const arrayBuffer = decode(base64);
+      let contentType = '';
+      let contentDeposition = '';
+      let arrayBuffer = '';
+      let base64 = '';
+
+      try {
+        if (filename && videoURL) {
+          contentType = 'video/mp4';
+          contentDeposition = 'inline;filename="' + filename + '"';
+          base64 = await fs.readFile(videoURL, 'base64');
+          arrayBuffer = decode(base64);
+        } else {
+          Alert.alert(' please retake the video');
+          setShowSpinner(false);
+          setSpinnerMessage('');
+          clearProcessingTimer();
+          return;
+        }
+      } catch (err) {
+        Alert.alert('error while reading file' + err.message);
+        setSpinnerMessage('');
+        setShowSpinner(false);
+        setResultReady(false);
+        setShowProcessedResult(false);
+        clearProcessingTimer();
+        return;
+      }
 
       s3bucket.createBucket(() => {
         const params = {
@@ -459,31 +531,48 @@ const PupillaryDilationScreen = ({navigation}) => {
           ContentType: contentType,
           ACL: 'public-read',
         };
-        s3bucket.upload(params, (err, data) => {
+        //TODO discuss with pranav for publib/private ACL
+        let abortTimeout = null;
+        const uploadBucket = s3bucket.upload(params, (err, data) => {
+          if (abortTimeout) {
+            clearTimeout(abortTimeout);
+          }
           if (err) {
+            if (
+              err?.message === 'Request aborted' ||
+              err?.message === 'Request aborted by user'
+            ) {
+              Alert.alert(
+                'Timeout for video uploading  in s3:  ' + err?.message,
+              );
+              setShowSpinner(false)
+              setSpinnerMessage('')
+              clearProcessingTimer();
+              setResultReady(false);
+              return;
+            }
             console.log('error in callback', err);
-            Alert.alert('Error', 'Error in uploading the video');
+            Alert.alert('Error', 'Error in uploading the video in s3: '+err?.message);
             setShowSpinner(false);
             setSpinnerMessage('');
+            setResultReady(false);
+            setShowProcessedResult(false);
             clearProcessingTimer();
-            resetStates();
+            // resetStates();
           } else {
-            console.log('success', data);
-            console.log('Respomse URL : ' + data.Location);
 
             setSpinnerMessage('Processing...');
             initiatePupilVideoProcessingAPI(filename)
               .then((result) => {
-                console.log('initiatePupilVideoProcessingAPI: ', result);
+                // console.log('initiatePupilVideoProcessingAPI: ', result);
                 if (result && result.data === 'Retake') {
                   Alert.alert('Error', 'Please retake the video');
-                  // setResultReady(true);
-                  // setShowProcessedResult(true);
+                  setResultReady(false);
+                  setShowProcessedResult(false);
                   setShowSpinner(false);
                   setSpinnerMessage('');
                   clearProcessingTimer();
-                  resetStates('');
-                  return;
+                  // resetStates('');
                 }
                 setResultValue(result.data);
                 setResultReady(true);
@@ -501,23 +590,29 @@ const PupillaryDilationScreen = ({navigation}) => {
                             }, 100); */
               })
               .catch((err) => {
-                Alert.alert('Error', 'Error in processing the video');
+                Alert.alert('Error', 'Error in processing the video: '+ err?.message);
                 setShowSpinner(false);
-                // setResultReady(true);
-                // setShowProcessedResult(true);
-                setSpinnerMessage('');
+                setResultReady(false);
+                setShowProcessedResult(false);
+                // setSpinnerMessage('');
                 clearProcessingTimer();
-                resetStates('');
+                // resetStates('');
               });
           }
         });
+        abortTimeout = setTimeout(
+          uploadBucket.abort.bind(uploadBucket),
+          100000,
+        );
       });
     } catch (err) {
-      Alert.alert('Error', 'Error in uploading the video');
+      Alert.alert('Error', 'Error in uploading the video: '+err?.message);
       setShowSpinner(false);
       setSpinnerMessage('');
+      setResultReady(false);
+      setShowProcessedResult(false);
       clearProcessingTimer();
-      resetStates();
+      // resetStates();
     }
   };
 
@@ -571,6 +666,7 @@ const PupillaryDilationScreen = ({navigation}) => {
   };
 
   const onRetakePress = () => {
+    setZoom(fixZoom);
     resetStates();
   };
 
@@ -611,7 +707,6 @@ const PupillaryDilationScreen = ({navigation}) => {
     });
     navigation.navigate(SCREEN_NAMES.FACIAL_EXPRESSION);
   };
-
   const getCameraComponent = () => {
     return (
       <>
@@ -641,7 +736,7 @@ const PupillaryDilationScreen = ({navigation}) => {
             //     ? RNCamera.Constants.AutoFocus.off
             //     : RNCamera.Constants.AutoFocus.on
             // }
-            autoFocusPointOfInterest={foucsPoints || {}}
+            autoFocusPointOfInterest={foucsPoints}
             defaultVideoQuality={RNCamera.Constants.VideoQuality['1080p']}
             onCameraReady={() => setIsCameraReady(true)}
             onRecordingStart={() => {
@@ -650,7 +745,7 @@ const PupillaryDilationScreen = ({navigation}) => {
             onRecordingEnd={() => {
               handleStopRecording();
             }}
-            zoom={Platform.OS === 'ios' ? zoom / 100 : zoom}
+            zoom={Platform.OS === 'ios' ? zoom / 1000 : zoom / 10}
             focusDepth={focusDepth}
             exposure={exposure < 0.15 ? 0.15 : exposure}
             flashMode={
@@ -836,7 +931,7 @@ const PupillaryDilationScreen = ({navigation}) => {
         </View>
 
         {!isRecording && (
-          <View style={styles.scrollViewStyle}>
+          <ScrollView style={styles.scrollViewStyle}>
             <View style={{height: 8}} />
             <View
               style={{
@@ -858,8 +953,8 @@ const PupillaryDilationScreen = ({navigation}) => {
                   style={{
                     alignItems: 'center',
                     justifyContent: 'center',
-                    width: height > 850 ? 30 : 20,
-                    height: height > 850 ? 30 : 20,
+                    width: height > 800 ? 30 : 20,
+                    height: height > 800 ? 30 : 20,
                     borderRadius: 5,
                     backgroundColor:
                       selectedSetting === SETTINGS.ZOOM
@@ -876,7 +971,7 @@ const PupillaryDilationScreen = ({navigation}) => {
                   }}>
                   <Fontisto
                     name="zoom"
-                    size={height > 850 ? 18 : 10}
+                    size={height > 800 ? 18 : 10}
                     color={
                       selectedSetting === SETTINGS.ZOOM
                         ? COLORS.WHITE
@@ -889,8 +984,8 @@ const PupillaryDilationScreen = ({navigation}) => {
                     marginLeft: 15,
                     alignItems: 'center',
                     justifyContent: 'center',
-                    width: height > 850 ? 30 : 20,
-                    height: height > 850 ? 30 : 20,
+                    width: height > 800 ? 30 : 20,
+                    height: height > 800 ? 30 : 20,
                     borderRadius: 5,
                     backgroundColor:
                       selectedSetting === SETTINGS.FOCUS_DEPTH
@@ -909,7 +1004,7 @@ const PupillaryDilationScreen = ({navigation}) => {
                   }}>
                   <MaterialIcons
                     name="center-focus-strong"
-                    size={height > 850 ? 18 : 10}
+                    size={height > 800 ? 18 : 10}
                     color={
                       selectedSetting === SETTINGS.FOCUS_DEPTH
                         ? COLORS.WHITE
@@ -922,8 +1017,8 @@ const PupillaryDilationScreen = ({navigation}) => {
                     marginLeft: 15,
                     alignItems: 'center',
                     justifyContent: 'center',
-                    width: height > 850 ? 30 : 20,
-                    height: height > 850 ? 30 : 20,
+                    width: height > 800 ? 30 : 20,
+                    height: height > 800 ? 30 : 20,
                     borderRadius: 5,
                     backgroundColor:
                       selectedSetting === SETTINGS.EXPOSURE
@@ -940,7 +1035,7 @@ const PupillaryDilationScreen = ({navigation}) => {
                   }}>
                   <MaterialIcons
                     name="brightness-5"
-                    size={height > 850 ? 18 : 12}
+                    size={height > 800 ? 18 : 12}
                     color={
                       selectedSetting === SETTINGS.EXPOSURE
                         ? COLORS.WHITE
@@ -965,9 +1060,9 @@ const PupillaryDilationScreen = ({navigation}) => {
               <View>
                 <Text
                   style={{
-                    marginBottom: height >= 850 ? 10 : 14,
-                    fontSize: height >= 850 ? 16 : 12,
-                    lineHeight: height >= 850 ? 16 : 12,
+                    marginBottom: height >= 850 ? 10 : height < 800 ? 5 : 14,
+                    fontSize: height >= 850 ? 16 : height < 800 ? 10 : 16,
+                    lineHeight: height >= 850 ? 16 : height < 800 ? 10 : 16,
                     fontWeight: '400',
                     color: COLORS.GRAY_90,
                   }}>
@@ -975,9 +1070,9 @@ const PupillaryDilationScreen = ({navigation}) => {
                 </Text>
                 <Text
                   style={{
-                    marginBottom: height >= 850 ? 10 : 14,
-                    fontSize: height >= 850 ? 16 : 12,
-                    lineHeight: height >= 850 ? 16 : 12,
+                    marginBottom: height >= 850 ? 10 : height < 800 ? 5 : 14,
+                    fontSize: height >= 850 ? 16 : height < 800 ? 10 : 16,
+                    lineHeight: height >= 850 ? 16 : height < 800 ? 10 : 16,
                     fontWeight: '400',
                     color: COLORS.GRAY_90,
                   }}>
@@ -986,27 +1081,18 @@ const PupillaryDilationScreen = ({navigation}) => {
                 {/* <Text style={{ marginBottom: 14, fontSize: 16, fontWeight: '400', color: COLORS.GRAY_90 }}>3. Turn your device  horizontally if needed.</Text> */}
                 <Text
                   style={{
-                    marginBottom: height >= 850 ? 10 : 14,
-                    fontSize: height >= 850 ? 16 : 12,
-                    lineHeight: height >= 850 ? 16 : 12,
+                    marginBottom: height >= 850 ? 10 : height < 800 ? 5 : 14,
+                    fontSize: height >= 850 ? 16 : height < 800 ? 10 : 16,
+                    lineHeight: height >= 850 ? 16 : height < 800 ? 10 : 16,
                     fontWeight: '400',
                     color: COLORS.GRAY_90,
                   }}>
                   {/* 3. Get ready to not blink for 10 seconds. */}
                   3. Recording eye atleast 10 seconds without blinking
                 </Text>
-                {/* <Text
-                  style={{
-                    marginBottom: height >=850  ? 10 : 14,
-                    fontSize: height >=850 ? 16 : 12,
-                    lineHeight: height >=850 ? 16 : 12,
-                    fontWeight: '400',
-                    color: COLORS.GRAY_90,
-                  }}>
-                  4. Record the eye for at least 10 seconds.
-                </Text> */}
               </View>
             </View>
+            {/* close text view */}
 
             <View
               style={{
@@ -1023,14 +1109,14 @@ const PupillaryDilationScreen = ({navigation}) => {
                   justifyContent: 'flex-start',
                   alignItems: 'center',
                   marginHorizontal: 10,
-                  paddingTop: height > 850 ? 20 : 0,
+                  paddingTop: height > 800 ? 20 : 0,
                 }}>
                 <Text
                   style={{
                     fontWeight: '700',
                     color: COLORS.GRAY_90,
-                    fontSize: height > 850 ? 12 : 10,
-                    lineHeight: height > 850 ? 12 : 17,
+                    fontSize: height > 800 ? 12 : 10,
+                    lineHeight: height > 800 ? 12 : 17,
                   }}>
                   {'Eye Color: '}
                 </Text>
@@ -1038,9 +1124,9 @@ const PupillaryDilationScreen = ({navigation}) => {
                   style={{
                     flexDirection: 'row',
                     backgroundColor: `${COLORS.PRIMARY_MAIN}50`,
-                    width: height > 850 ? 240 : 200,
+                    width: height > 800 ? 240 : 200,
                     justifyContent: 'space-between',
-                    height: height > 850 ? 30 : 20,
+                    height: height > 800 ? 30 : 20,
                     alignItems: 'center',
                     borderRadius: 10,
                     alignSelf: 'center',
@@ -1050,8 +1136,8 @@ const PupillaryDilationScreen = ({navigation}) => {
                       backgroundColor: isDarkBrownEyes
                         ? COLORS.SECONDARY_MAIN
                         : `${COLORS.GRAY_40}`,
-                      width: height < 850 ? 100 : 120,
-                      height: height < 850 ? 20 : 30,
+                      width: height < 800 ? 100 : 120,
+                      height: height < 800 ? 20 : 30,
                       borderTopLeftRadius: 10,
                       borderBottomLeftRadius: 10,
                       alignItems: 'center',
@@ -1063,8 +1149,8 @@ const PupillaryDilationScreen = ({navigation}) => {
                       style={{
                         color: isDarkBrownEyes ? COLORS.GRAY_90 : COLORS.WHITE,
                         fontWeight: '700',
-                        fontSize: height < 850 ? 10 : 14,
-                        lineHeight: height < 850 ? 12 : 17,
+                        fontSize: height < 800 ? 10 : 14,
+                        lineHeight: height < 800 ? 12 : 17,
                         textTransform: 'uppercase',
                       }}>
                       {'Dark Brown'}
@@ -1075,8 +1161,8 @@ const PupillaryDilationScreen = ({navigation}) => {
                       backgroundColor: isDarkBrownEyes
                         ? `${COLORS.GRAY_40}`
                         : COLORS.SECONDARY_MAIN,
-                      width: height < 850 ? 100 : 120,
-                      height: height < 850 ? 20 : 30,
+                      width: height < 800 ? 100 : 120,
+                      height: height < 800 ? 20 : 30,
                       borderTopRightRadius: 10,
                       borderBottomRightRadius: 10,
                       alignItems: 'center',
@@ -1088,8 +1174,8 @@ const PupillaryDilationScreen = ({navigation}) => {
                       style={{
                         color: !isDarkBrownEyes ? COLORS.GRAY_90 : COLORS.WHITE,
                         fontWeight: '700',
-                        fontSize: height < 850 ? 10 : 14,
-                        lineHeight: height < 850 ? 12 : 17,
+                        fontSize: height < 800 ? 10 : 14,
+                        lineHeight: height < 800 ? 12 : 17,
                         lineHeight: 17,
                         textTransform: 'uppercase',
                       }}>
@@ -1098,23 +1184,23 @@ const PupillaryDilationScreen = ({navigation}) => {
                   </CustomTouchableOpacity>
                 </View>
               </View>
+              {/* other button view */}
 
               <View
                 style={{
-                  height: height < 850 ? 50 : 80,
-                  marginBottom: 30,
+                  height: height < 800 ? 50 : 80,
                 }}>
                 <View
                   style={{
                     flexDirection: 'row',
                     backgroundColor: `${COLORS.PRIMARY_MAIN}50`,
                     justifyContent: 'space-between',
-                    height: height < 850 ? 20 : 30,
+                    height: height < 800 ? 20 : 30,
                     alignItems: 'center',
                     borderRadius: 10,
                     marginLeft: width > 600 ? 10 : 30,
-                    bottom: height > 850 ? 0 : 5,
-                    top: height > 850 ? 20 : 0,
+                    bottom: height > 800 ? 0 : 5,
+                    top: height > 800 ? 20 : 0,
                   }}>
                   <CustomTouchableOpacity
                     style={{
@@ -1123,15 +1209,14 @@ const PupillaryDilationScreen = ({navigation}) => {
                           ? COLORS.SECONDARY_MAIN
                           : `${COLORS.GRAY_40}`,
                       width: 100,
-                      height: height < 850 ? 20 : 30,
+                      height: height < 800 ? 20 : 30,
                       borderTopLeftRadius: 10,
                       borderBottomLeftRadius: 10,
                       alignItems: 'center',
                       justifyContent: 'center',
                       borderWidth: captureMode === CAPTURE_MODE.AUTO ? 1 : 0,
                     }}
-                    onPress={() => setCaptureMode(CAPTURE_MODE.AUTO)}
-                    >
+                    onPress={() => setCaptureMode(CAPTURE_MODE.AUTO)}>
                     <Text
                       style={{
                         color:
@@ -1139,8 +1224,8 @@ const PupillaryDilationScreen = ({navigation}) => {
                             ? COLORS.GRAY_90
                             : COLORS.WHITE,
                         fontWeight: '700',
-                        fontSize: height < 850 ? 10 : 14,
-                        lineHeight: height < 850 ? 12 : 17,
+                        fontSize: height < 800 ? 10 : 14,
+                        lineHeight: height < 800 ? 12 : 17,
                         textTransform: 'uppercase',
                       }}>
                       {'Auto'}
@@ -1153,7 +1238,7 @@ const PupillaryDilationScreen = ({navigation}) => {
                           ? COLORS.SECONDARY_MAIN
                           : `${COLORS.GRAY_40}`,
                       width: 100,
-                      height: height < 850 ? 20 : 30,
+                      height: height < 800 ? 20 : 30,
                       borderTopRightRadius: 10,
                       borderBottomRightRadius: 10,
                       alignItems: 'center',
@@ -1168,16 +1253,80 @@ const PupillaryDilationScreen = ({navigation}) => {
                             ? COLORS.GRAY_90
                             : COLORS.WHITE,
                         fontWeight: '700',
-                        fontSize: height < 850 ? 10 : 14,
-                        lineHeight: height < 850 ? 12 : 17,
+                        fontSize: height < 800 ? 10 : 14,
+                        lineHeight: height < 800 ? 12 : 17,
                         textTransform: 'uppercase',
                       }}>
                       {'Manual'}
                     </Text>
                   </CustomTouchableOpacity>
                 </View>
+                <View></View>
               </View>
             </View>
+            {/* <View>
+              <Text>hhh</Text>
+            </View>
+             */}
+            {/* <View
+              style={{
+                flex: 1,
+                width: width - 40,
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                paddingHorizontal: 20,
+                bottom: height> 850 ? 40 :0,
+                top:height >850 ? 0 : 10
+              }}>
+              <CustomTouchableOpacity
+                disabled={processing}
+                style={{alignItems: 'center', justifyContent: 'center'}}
+                onPress={() => {
+                  setFlashOn(!flashOn);
+                }}>
+                <Ionicons */}
+            {/* name={flashOn ? 'md-flash-off' : 'md-flash'}
+                  size={height < 850 ? 20 : 25}
+                  color={flashOn ? COLORS.GRAY_60 : COLORS.GRAY_90}
+                /> */}
+            {/* </CustomTouchableOpacity> */}
+
+            {/* <CustomButton
+                // onPress={onStartRecordingPress}
+                onPress={()=>{
+                  navigation.navigate(SCREEN_NAMES.FACIAL_EXPRESSION)
+                }}
+                title="Start Recording"
+                textStyle={{
+                  color: COLORS.WHITE,
+                  textAlign: 'center',
+                  fontSize: height < 850 ? 12 : 16,
+                }}
+                disabled={processing}
+                style={{
+                  width: width * 0.5,
+                  height: height < 850 ? 30 : 50,
+                  backgroundColor: processing
+                    ? COLORS.GRAY_40
+                    : COLORS.PRIMARY_MAIN,
+                  borderColor: COLORS.PRIMARY_MAIN,
+                  borderWidth: 1,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              /> */}
+            {/* <CustomTouchableOpacity
+                disabled={processing}
+                style={{alignItems: 'center', justifyContent: 'center'}}
+                onPress={() => switchCamera()}>
+                <Ionicons
+                  name="camera-reverse-outline"
+                  size={height < 850 ? 20 : 25}
+                />
+              </CustomTouchableOpacity>
+            </View>
+            <View style ={{height:40}}></View> */}
             {/* </View> */}
 
             {/* <View
@@ -1332,7 +1481,7 @@ const PupillaryDilationScreen = ({navigation}) => {
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 paddingHorizontal: 20,
-                bottom: 40,
+                bottom: height > 850 ? 10 : height < 800 ? 15 : 15,
               }}>
               {/* <CustomTouchableOpacity style={{ alignItems: "center", justifyContent: "center" }} onPress={() => switchEyeBorderType()}>
                         {eyeBorderType === EYE_BORDER_TYPE.OVAL && <View style={{ width: 30, height: 15, borderWidth: 2, borderColor: COLORS.BLACK }}></View>}
@@ -1346,7 +1495,7 @@ const PupillaryDilationScreen = ({navigation}) => {
                 }}>
                 <Ionicons
                   name={flashOn ? 'md-flash-off' : 'md-flash'}
-                  size={height < 850 ? 20 : 25}
+                  size={height < 800 ? 20 : 25}
                   color={flashOn ? COLORS.GRAY_60 : COLORS.GRAY_90}
                 />
               </CustomTouchableOpacity>
@@ -1362,12 +1511,13 @@ const PupillaryDilationScreen = ({navigation}) => {
                 textStyle={{
                   color: COLORS.WHITE,
                   textAlign: 'center',
-                  fontSize: height < 850 ? 12 : 16,
+                  fontSize: height < 800 ? 12 : 16,
                 }}
                 disabled={processing}
                 style={{
+                  minHeight: 30,
                   width: width * 0.5,
-                  height: height < 850 ? 30 : 50,
+                  height: height < 800 ? 30 : 50,
                   backgroundColor: processing
                     ? COLORS.GRAY_40
                     : COLORS.PRIMARY_MAIN,
@@ -1383,12 +1533,12 @@ const PupillaryDilationScreen = ({navigation}) => {
                 onPress={() => switchCamera()}>
                 <Ionicons
                   name="camera-reverse-outline"
-                  size={height < 850 ? 20 : 25}
+                  size={height < 800 ? 20 : 25}
                 />
               </CustomTouchableOpacity>
             </View>
-            <View style={{height: 20}} />
-          </View>
+            <View style={{height: 70}} />
+          </ScrollView>
         )}
 
         {
@@ -1465,9 +1615,9 @@ const PupillaryDilationScreen = ({navigation}) => {
             )} */}
               {selectedSetting === SETTINGS.ZOOM && (
                 <>
-                  <Text style={{width: 40, textAlign: 'center'}}>{`${parseInt(
-                    zoom * 100,
-                  )}%`}</Text>
+                  <Text style={{width: 40, textAlign: 'center'}}>
+                    {`${parseInt(zoom * 100)}%`}
+                  </Text>
                   <Slider
                     //   style={{width: width - 120}}
                     style={{
@@ -1527,7 +1677,9 @@ const PupillaryDilationScreen = ({navigation}) => {
                     minimumValue={0}
                     maximumValue={1}
                     value={focusDepth}
-                    onValueChange={(value) => setFocusDepth(value)}
+                    onValueChange={(value) => {
+                      setFocusDepth(value);
+                    }}
                     minimumTrackTintColor={COLORS.WHITE}
                     maximumTrackTintColor={COLORS.BLACK}
                   />
@@ -1681,6 +1833,50 @@ const PupillaryDilationScreen = ({navigation}) => {
                   {'RETAKE'}
                 </Text>
               </CustomTouchableOpacity>
+              <View
+                style={{
+                  width: width,
+                  justifyContent: 'flex-end',
+                  alignItems: 'flex-end',
+                  paddingHorizontal: 30,
+                  paddingTop: height < 600 ? 0 : 20,
+                  bottom: height < 600 ? 30 : 0,
+                  zIndex: 10,
+                }}>
+                <CustomTouchableOpacity
+                  disabled={processing}
+                  style={{
+                    backgroundColor: COLORS.SECONDARY_MAIN,
+                    borderRadius: 10,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    height: 48,
+                    width: width * 0.3,
+                    paddingHorizontal: 28,
+                    marginBottom: 12,
+                    borderColor: COLORS.PRIMARY_DARKER,
+                    borderWidth: 1,
+                  }}
+                  onPress={async () => {
+                    await dispatch({
+                      type: CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
+                      payload: {
+                        pupillary_dilation: [0.0],
+                      },
+                    });
+                    navigation.navigate(SCREEN_NAMES.FACIAL_EXPRESSION);
+                  }}>
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      fontWeight: '700',
+                      color: COLORS.PRIMARY_DARKER,
+                      textAlign: 'center',
+                    }}>
+                    {'SKIP'}
+                  </Text>
+                </CustomTouchableOpacity>
+              </View>
             </>
           )}
 
@@ -1699,7 +1895,7 @@ const PupillaryDilationScreen = ({navigation}) => {
                   color: COLORS.GRAY_90,
                   textAlign: 'center',
                   marginBottom: 15,
-                }}>{`RESULT: ${resultValue}`}</Text>
+                }}>{`RESULT:  PUAL:${resultValue[0]},Ratio:${resultValue[1]}`}</Text>
               <CustomTouchableOpacity
                 disabled={processing}
                 style={{

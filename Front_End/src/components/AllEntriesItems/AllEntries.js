@@ -7,8 +7,7 @@ import styles from '../../screens/PatientProfile/styles';
 import { formatAMPM } from '../../utils/date';
 
 const AllEntries = ({data}) => {
-
-  const date = new Date((data.assessment_datetime))
+  const date = new Date(data.assessment_datetime)
   const dateFormat = `${date.toDateString()} ${formatAMPM(date)}`
   return (
     <View style={styles.allEntriesContainer}>
@@ -31,7 +30,7 @@ const AllEntries = ({data}) => {
               style={{
                 color: COLORS.WHITE,
               }}>
-              {data.total_score}
+              {Boolean(data.total_score) ? data.total_score : 0}
             </Text>
           </View>
         </CustomTouchableOpacity>

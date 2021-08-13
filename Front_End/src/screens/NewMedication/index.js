@@ -20,10 +20,29 @@ import CustomTextInput from '../../components/shared/CustomTextInput';
 import {useSelector, useDispatch} from 'react-redux';
 import createMedicationAPI from '../../api/createMedication';
 import {
+  CREATE_ASSESSMENT_ACTION,
   CREATE_MEDICATION_ACTION,
   LATEST_ENTRY_ACTION,
+  PATIENT_PROFILE_UPDATE_ACTION,
 } from '../../constants/actions';
 import Analytics from '../../utils/Analytics';
+
+const createSectionListData = (data) => {
+  let lookup = []
+  data.forEach(item => {
+    let currentItem = lookup.find(l => l.title === item.heading);
+    if(currentItem){
+      currentItem.data.push(item);
+    } else {
+      lookup.push({
+        title: item.heading,
+        data: [item]
+      })
+    }
+  }
+  )
+  return  lookup
+}
 
 const NewMedication = () => {
   const window = useWindowDimensions();
@@ -45,6 +64,10 @@ const NewMedication = () => {
   const token = useSelector((state) => state.user.authToken);
   const userId = useSelector((state) => state.user.loggedInUserId);
   const latestData = useSelector((state) => state.latestEntry);
+  const forceUpdate = useSelector((state) => state.patientProfileUpdate.update)
+
+ 
+  
 
   useEffect(() => {
     let startTime = 0;
@@ -230,6 +253,10 @@ const NewMedication = () => {
             createdAt: new Date().getTime(),
           },
         });
+        dispatch({
+          type : PATIENT_PROFILE_UPDATE_ACTION.PATIENT_PROFILE_UPDATE,
+          payload : !forceUpdate
+        })
 
         dispatch({
           type: CREATE_MEDICATION_ACTION.CREATE_MEDICATION,
@@ -276,13 +303,13 @@ const NewMedication = () => {
             alignItems: 'center',
             flexDirection: 'row',
             paddingHorizontal: 16,
-            paddingVertical: 8,
-          }}>
+            paddingVertical: window.height > 900 ? 20 : 8,
+            }}>
           <CustomTouchableOpacity
             onPress={() => {
               navigation.goBack();
             }}>
-            <AntDesignIcon name={'arrowleft'} color={COLORS.WHITE} size={22} />
+            <AntDesignIcon name={'arrowleft'} color={COLORS.WHITE} size={22}  style ={{ paddingTop:window.height > 900 ? 10 : 0}}/>
           </CustomTouchableOpacity>
           <Text
             style={{
@@ -290,6 +317,7 @@ const NewMedication = () => {
               lineHeight: 28,
               textAlign: 'center',
               color: COLORS.WHITE,
+              paddingTop:window.height > 900 ? 10 : 0
             }}>
             {SCREEN_NAMES.NEW_MEDICATION}
           </Text>
@@ -389,7 +417,8 @@ const NewMedication = () => {
               </Text>
             </View>
             <CustomDropDown
-              items={medicationClassData?.lookup_data || []}
+              items={createSectionListData(medicationClassData?.lookup_data || [])}
+              // items = {medicationClassData?.lookup_data || []}
               value={medicationName}
               onChangeValue={(item) => {
                 if (item.dispalyValue) {
@@ -405,6 +434,7 @@ const NewMedication = () => {
                 marginBottom: showmedicationInput ? 10 : 20,
                 width: window.width * 0.8,
               }}
+              heading = {true}
               placeholder={'Choose a medication name'}
             />
             {showmedicationInput && (
@@ -516,11 +546,15 @@ const NewMedication = () => {
               onChangeValue={(item) => {
                 setFrequency(item.label);
                 dispatch({
-                  type:CREATE_MEDICATION_ACTION.CREATE_MEDICATION,
-                  payload : {
-                    frequencyData : item
-                  }
+                  type: CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
+                  frequency : item.label
                 })
+                // dispatch({
+                //   type:CREATE_MEDICATION_ACTION.CREATE_MEDICATION,
+                //   payload : {
+                //     frequencyData : item
+                //   }
+                // })
               }}
               containerStyle={{marginBottom: 20, width: window.width * 0.8}}
             />

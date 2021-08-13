@@ -183,8 +183,6 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     width: width * 0.55,
     color: COLORS.GRAY_90,
-    fontSize: 16,
-    lineHeight: 24,
   },
   noEntryMainLabel: {
     color: COLORS.PRIMARY_DARKER,

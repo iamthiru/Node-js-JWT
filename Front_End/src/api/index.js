@@ -6,7 +6,6 @@ const axiosInstance = axios.create({
   baseURL:'https://test.impact.bentenlab.com/'
   // baseURL:'http://localhost:3004/'
 });
-
 export const setAxiosBaseURL = (url) => {
   axiosInstance.defaults.baseURL = url;
 }

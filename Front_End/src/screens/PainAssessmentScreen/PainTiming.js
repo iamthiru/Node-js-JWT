@@ -14,6 +14,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import {CREATE_ASSESSMENT_ACTION} from '../../constants/actions';
 import Analytics from '../../utils/Analytics';
 import {SCREEN_NAMES} from '../../constants/navigation';
+import CustomCheckBox from '../../components/shared/CustomCheckBox';
 
 const {width, height} = Dimensions.get('window');
 
@@ -25,9 +26,7 @@ const PainTiming = ({gotoNext, gotoPrevious}) => {
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedTime, setSelectedTime] = useState(new Date());
-  const [painFrequency, setPainFrequency] = useState([PAIN_FREQUENCY[0]]);
-
-  console.log(painFrequency);
+  const [painFrequency, setPainFrequency] = useState([]);
 
   const dispatch = useDispatch();
 
@@ -40,9 +39,10 @@ const PainTiming = ({gotoNext, gotoPrevious}) => {
   useEffect(() => {
     startTime = new Date().getTime();
   }, []);
+
   useEffect(() => {
-    if (selectedAssessmentData?.description) {
-      setPainFrequency(selectedAssessmentData?.description);
+    if (selectedAssessmentData?.painFrequency) {
+      setPainFrequency(selectedAssessmentData?.painFrequency);
     }
     if (selectedAssessmentData?.painDate) {
       setSelectedDate(selectedAssessmentData?.painDate);
@@ -53,7 +53,7 @@ const PainTiming = ({gotoNext, gotoPrevious}) => {
   }, [
     selectedAssessmentData?.painDate,
     selectedAssessmentData?.painTime,
-    selectedAssessmentData?.description,
+    selectedAssessmentData?.painFrequency,
   ]);
 
   /* useEffect(() => {
@@ -86,7 +86,7 @@ const PainTiming = ({gotoNext, gotoPrevious}) => {
     dispatch({
       type: CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
       payload: {
-        description: painFrequency,
+        painFrequency: painFrequency,
         painDate: selectedDate,
         painTime: selectedTime,
       },
@@ -131,13 +131,13 @@ const PainTiming = ({gotoNext, gotoPrevious}) => {
               }}>
               {'When did the pain start?'}
             </Text>
-            <CustomTouchableOpacity style={{marginLeft: 15}}>
+            {/* <CustomTouchableOpacity style={{marginLeft: 15}}>
               <AntDesignIcon
                 name={'questioncircle'}
                 size={15}
                 color={COLORS.PRIMARY_MAIN}
               />
-            </CustomTouchableOpacity>
+            </CustomTouchableOpacity> */}
           </View>
 
           <CustomTouchableOpacity
@@ -235,31 +235,53 @@ const PainTiming = ({gotoNext, gotoPrevious}) => {
                 fontWeight: '700',
                 maxWidth: width - 60,
               }}>
-              {'Choose a description'}
+              {'Choose all that applies'}
             </Text>
           </View>
-          {PAIN_FREQUENCY.map((item) => {
-            let  selectedData = painFrequency?.find((data)=>{
-              return data?.label === item?.label
-            })
+          {PAIN_FREQUENCY.map((item, index) => {
+            let selectedData = (painFrequency || [])?.find((data) => {
+              return data?.label === item?.label;
+            });
             return (
-              <CustomRadioButton
-                key={item.value}
-                containerStyle={{marginBottom: 15}}
-                label={item.label}
-                selected = {Boolean(selectedData)}
-                onPress={() => {
-                  let alreadySelected =  painFrequency?.find((data)=>{
-                    return data?.label === item?.label
-                  })
-                  if (Boolean(alreadySelected)) {
-                    let painFreq = [...painFrequency];
-                    let index = painFreq?.findIndex((freq)=>freq.label===item?.label)
-                    painFreq.splice(index,1)
-                    setPainFrequency(painFreq);
-                  } else {
+              // <CustomRadioButton
+              //   key={item.value}
+              //   containerStyle={{marginBottom: 15}}
+              //   label={item.label}
+              //   selected = {Boolean(selectedData)}
+              //   onPress={() => {
+              //     let alreadySelected =  painFrequency?.find((data)=>{
+              //       return data?.label === item?.label
+              //     })
+              //     if (Boolean(alreadySelected)) {
+              //       let painFreq = [...painFrequency];
+              //       let index = painFreq?.findIndex((freq)=>freq.label===item?.label)
+              //       painFreq.splice(index,1)
+              //       setPainFrequency(painFreq);
+              //     } else {
+              //       setPainFrequency([...painFrequency, item]);
+              //     }
+              //   }}
+              // />
+              <CustomCheckBox
+                key={index}
+                label={item?.label}
+                value={Boolean(selectedData)}
+                onValueChange={(value) => {
+                  if (value) {
                     setPainFrequency([...painFrequency, item]);
+                  } else {
+                    let qualities = [...painFrequency];
+                    let index = qualities.findIndex(
+                      (data) => data?.label === item?.label,
+                    );
+                    qualities.splice(index, 1);
+                    setPainFrequency(qualities);
                   }
+                }}
+                containerStyle={{
+                  flexDirection: 'row',
+                  width: width - 60,
+                  marginBottom: 16,
                 }}
               />
             );

@@ -10,7 +10,7 @@ import {VERBAL_ABILITY} from '../../constants/painAssessment';
 import {getStatusBarHeight} from 'react-native-status-bar-height';
 import {useDispatch, useSelector} from 'react-redux';
 import {CREATE_ASSESSMENT_ACTION} from '../../constants/actions';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import Analytics from '../../utils/Analytics';
 import {SCREEN_NAMES} from '../../constants/navigation';
 
@@ -24,6 +24,8 @@ const VerbalAbility = ({gotoNext, verbalAbility, setVerbalAbility}) => {
   const selectedAssessmentData = useSelector((state) => state.createAsseement);
   const navigation = useNavigation();
 
+
+
   useEffect(() => {
     startTime = new Date().getTime();
   }, []);
@@ -31,10 +33,24 @@ const VerbalAbility = ({gotoNext, verbalAbility, setVerbalAbility}) => {
     if (selectedAssessmentData && selectedAssessmentData?.type) {
       setVerbalAbility(selectedAssessmentData?.type);
     }
-    if(selectedAssessmentData?.otherText?.length){
-      setOtherText(selectedAssessmentData?.otherText)
+    if (selectedAssessmentData?.otherText?.length) {
+      setOtherText(selectedAssessmentData?.otherText);
     }
-  }, [selectedAssessmentData?.type,selectedAssessmentData?.otherText?.length]);
+  }, [selectedAssessmentData?.type, selectedAssessmentData?.otherText?.length]);
+
+  
+
+  useEffect(()=>{
+    if(patientData){
+      dispatch({
+        type: CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
+        payload : {
+          patient_id: patientData?.patient_id,
+          patient_name: patientData?.patient_name,
+        }
+      })
+    }
+  },[patientData?.patient_id,patientData?.patient_name])
 
   const [otherText, setOtherText] = useState('');
   const dispatch = useDispatch();
@@ -53,9 +69,7 @@ const VerbalAbility = ({gotoNext, verbalAbility, setVerbalAbility}) => {
         type: CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
         payload: {
           type: verbalAbility,
-          patient_id: patientData?.patient_id,
-          patient_name: patientData?.patient_name,
-          otherText : Boolean(otherText?.length) ? otherText : ''
+          otherText: Boolean(otherText?.length) ? otherText : '',
         },
       });
     }
@@ -94,30 +108,30 @@ const VerbalAbility = ({gotoNext, verbalAbility, setVerbalAbility}) => {
               }}>
               {'Is this patient currently verbal or not ?'}
             </Text>
-            <CustomTouchableOpacity style={{marginLeft: 15}}>
+            {/* <CustomTouchableOpacity style={{marginLeft: 15}}>
               <AntDesignIcon
                 name={'questioncircle'}
                 size={15}
                 color={COLORS.PRIMARY_MAIN}
               />
-            </CustomTouchableOpacity>
+            </CustomTouchableOpacity> */}
           </View>
           <CustomRadioButton
             containerStyle={{marginBottom: 15}}
             label={VERBAL_ABILITY.VERBAL.label}
             selected={verbalAbility === VERBAL_ABILITY.VERBAL.value}
-          onPress={() => {
-            setVerbalAbility(VERBAL_ABILITY.VERBAL.value)
-            setOtherText('')
-          }}
+            onPress={() => {
+              setVerbalAbility(VERBAL_ABILITY.VERBAL.value);
+              setOtherText('');
+            }}
           />
           <CustomRadioButton
             containerStyle={{marginBottom: 15}}
             label={VERBAL_ABILITY.NON_VERBAL.label}
             selected={verbalAbility === VERBAL_ABILITY.NON_VERBAL.value}
             onPress={() => {
-              setVerbalAbility(VERBAL_ABILITY.NON_VERBAL.value)
-              setOtherText('')
+              setVerbalAbility(VERBAL_ABILITY.NON_VERBAL.value);
+              setOtherText('');
             }}
           />
           <View style={{flexDirection: 'row', width: width - 60}}>
@@ -126,21 +140,23 @@ const VerbalAbility = ({gotoNext, verbalAbility, setVerbalAbility}) => {
               selected={verbalAbility === VERBAL_ABILITY.OTHER.value}
               onPress={() => setVerbalAbility(VERBAL_ABILITY.OTHER.value)}
             />
-            <CustomTextInput
-              value={otherText}
-              onChangeText={(value) =>{ 
-                setOtherText(value)
-                setVerbalAbility(VERBAL_ABILITY.OTHER.value)
-              }}
-              containerStyle={{paddingBottom: 0, marginLeft: 8}}
-              inputStyle={{
-                height: 24,
-                borderRadius: 0,
-                borderWidth: 0,
-                borderBottomWidth: 1,
-                paddingLeft: 0,
-              }}
-            />
+            <View>
+              <CustomTextInput
+                value={otherText}
+                onChangeText={(value) => {
+                  setOtherText(value);
+                  setVerbalAbility(VERBAL_ABILITY.OTHER.value);
+                }}
+                containerStyle={{paddingBottom: 0, marginLeft: 8}}
+                inputStyle={{
+                  height: Platform.OS === 'ios' ? 24 : 40, 
+                  paddingLeft: 0,
+                  borderWidth: 0,
+                  borderBottomWidth: 1,
+                  fontSize:17
+                }}
+              />
+            </View>
           </View>
         </View>
         <View
@@ -168,7 +184,7 @@ const VerbalAbility = ({gotoNext, verbalAbility, setVerbalAbility}) => {
               backgroundColor: COLORS.SECONDARY_MAIN,
             }}
           />
-        </View>
+        </View> 
       </ScrollView>
       <View
         style={{

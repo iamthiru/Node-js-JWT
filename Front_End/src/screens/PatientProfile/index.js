@@ -52,15 +52,16 @@ const reportData = {
 };
 
 const PatientProfile = ({navigation}) => {
-  const params = useRoute()?.params;
-  const {item} = params;
+  const params = useRoute();
+  const {item} = params || {};
+  const patientDetailsData = useSelector((state) => state.patientDetails);
   const entry = false;
   const dispatch = useDispatch();
   const token = useSelector((state) => state.user.authToken);
   const userId = useSelector((state) => state.user.loggedInUserId);
   const selectedPatient = useSelector(
     (state) => state?.allPatients?.all_patients,
-  )?.find((patient) => patient.id === item.id);
+  )?.find((patient) => patient.id === patientDetailsData.item.id);
   const [latestMedicationData, setLatestMedicationData] = useState({});
   const [last_medication, setLast_medication] = useState([]);
   const [last_assessment, setLastAssessment] = useState([]);
@@ -73,6 +74,7 @@ const PatientProfile = ({navigation}) => {
   const [summaryChartDataPresent, setSummaryChartDataPresent] = useState(false);
   const [summaryChartLabels, setSummaryChartLabels] = useState([]);
   const scrollRef = useRef(null);
+  const forceUpdate = useSelector((state) => state.patientProfileUpdate.update);
   const [showMarker, setShowMarker] = useState(false);
 
   useEffect(() => {
@@ -115,6 +117,12 @@ const PatientProfile = ({navigation}) => {
       unsubscribeBeforeRemove();
     };
   }, [navigation]);
+
+  useEffect(() => {
+    if (allAssessmentList?.length) {
+      handleSummaryChartData(0, setShowMarker);
+    }
+  }, [allAssessmentList?.length]);
 
   useEffect(() => {
     if (token && selectedPatient.id) {
@@ -169,7 +177,7 @@ const PatientProfile = ({navigation}) => {
           console.log('------last medication error------', err);
         });
     }
-  }, [token, selectedPatient]);
+  }, [token, selectedPatient, forceUpdate]);
 
   useEffect(() => {
     if (token) {
@@ -193,6 +201,7 @@ const PatientProfile = ({navigation}) => {
     }
   }, [token]);
 
+
   useEffect(() => {
     if (token) {
       assessmentListAPI(token)
@@ -206,18 +215,17 @@ const PatientProfile = ({navigation}) => {
             type: ALL_ASSESSMENTS_LIST_ACTION.ALL_ASSESSMENT_LIST,
             payload: res.data.result,
           });
+          let data = res.data.result.filter((item) => {
+            return item?.patient_id === selectedPatient?.id;
+          });
 
-          setAllAssessmentList(
-            res.data.result.filter((item) => {
-              return item.patient_id === selectedPatient?.id;
-            }),
-          );
+          setAllAssessmentList(data);
         })
         .catch((err) => {
           console.log('----assessment lsit error-----', err);
         });
     }
-  }, [token, selectedPatient]);
+  }, [token, forceUpdate, selectedPatient]);
 
   const medicationList = useMemo(() => {
     return lookup_data
@@ -260,11 +268,11 @@ const PatientProfile = ({navigation}) => {
         (item1, item2) =>
           item1?.assessment_datetime - item2?.assessment_datetime,
       );
-      setSummaryChartData(basedOnDateData);
+      setSummaryChartData(basedOnDateData || []);
       let labels = basedOnDateData?.map((label) => {
         return `${formatAMPM(new Date(label?.assessment_datetime))}`;
       });
-      setSummaryChartLabels(labels);
+      setSummaryChartLabels(labels || []);
       return;
     }
     if (index === 1) {
@@ -294,8 +302,7 @@ const PatientProfile = ({navigation}) => {
       let labels = basedOnDateData?.map((label) => {
         return `${padNumber(
           new Date(label?.assessment_datetime).getMonth() + 1,
-        )}-${padNumber(new Date(label?.assessment_datetime).getDate())}`;
-        //  + '\n'+ `${formatAMPM(new Date(label?.assessment_datetime))}`;
+        )}_${padNumber(new Date(label?.assessment_datetime).getDate())}`;
       });
       setSummaryChartLabels(labels);
       return;
@@ -312,7 +319,7 @@ const PatientProfile = ({navigation}) => {
       let labels = basedOnDateData?.map((label) => {
         return `${padNumber(
           new Date(label?.assessment_datetime).getMonth() + 1,
-        )}-${padNumber(new Date(label?.assessment_datetime).getDate())}`;
+        )}_${padNumber(new Date(label?.assessment_datetime).getDate())}`;
       });
       setSummaryChartLabels(labels);
       return;
@@ -325,9 +332,7 @@ const PatientProfile = ({navigation}) => {
       let labels = basedOnDateData?.map((label) => {
         return `${padNumber(
           new Date(label?.assessment_datetime).getMonth() + 1,
-        )}-${padNumber(new Date(label?.assessment_datetime).getDate())}${'\n'}`;
-        // +
-        // '\n'+`${formatAMPM(new Date(label?.assessment_datetime))}`;
+        )}_${padNumber(new Date(label?.assessment_datetime).getDate())}`;
       });
       setSummaryChartLabels(labels);
     }
@@ -352,8 +357,13 @@ const PatientProfile = ({navigation}) => {
         <View style={styles.patient_main_view}>
           <View style={styles.main_view_position}>
             <CustomTouchableOpacity
-              onPress={() => {
-                navigation.goBack();
+              onPress={async() => {
+                // navigation.goBack();
+               await dispatch({
+                  type:PATIENT_NAME_ACTION.PATIENT,
+                  payload: null
+                })
+                navigation.navigate(SCREEN_NAMES.HOME)
               }}>
               <AntDesignIcon
                 name={'arrowleft'}
@@ -382,8 +392,11 @@ const PatientProfile = ({navigation}) => {
               dispatch({
                 type: PATIENT_NAME_ACTION.PATIENT,
                 payload: {
-                  patient_id: item.id,
-                  patient_name: item.first_name + ' ' + item.last_name,
+                  patient_id: patientDetailsData.item.id,
+                  patient_name:
+                    patientDetailsData.item.first_name +
+                    ' ' +
+                    patientDetailsData.item.last_name,
                 },
               });
             }}
@@ -408,8 +421,11 @@ const PatientProfile = ({navigation}) => {
               dispatch({
                 type: PATIENT_NAME_ACTION.PATIENT,
                 payload: {
-                  patient_id: item.id,
-                  patient_name: item.first_name + ' ' + item.last_name,
+                  patient_id: patientDetailsData.item.id,
+                  patient_name:
+                    patientDetailsData.item.first_name +
+                    ' ' +
+                    patientDetailsData.item.last_name,
                 },
               });
             }}
@@ -439,7 +455,7 @@ const PatientProfile = ({navigation}) => {
               last_medication={last_medication}
               scrollRef={scrollRef}
             />
-            {Boolean(allAssessmentList?.length) && (
+            {Boolean(allAssessmentList?.length > 0) && (
               <SummaryChart
                 last_assessment={last_assessment}
                 last_medication={last_medication}
@@ -467,6 +483,8 @@ const PatientProfile = ({navigation}) => {
                 summaryChartData={summaryChartData}
                 summaryChartLabels={summaryChartLabels}
                 scrollRef={scrollRef}
+                showMarker={showMarker}
+                setShowMarker={setShowMarker}
               />
             )}
             <AllEntryCard allEntries={allAssessmentList} />

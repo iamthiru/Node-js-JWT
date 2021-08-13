@@ -9,7 +9,12 @@ import {formatAMPM} from '../../utils/date';
 import {useSelector, useDispatch} from 'react-redux';
 import {SCREEN_NAMES} from '../../constants/navigation';
 import Analytics from '../../utils/Analytics';
-import {CREATE_ASSESSMENT_ACTION} from '../../constants/actions';
+import {
+  CREATE_ASSESSMENT_ACTION,
+  PAIN_LOCATIONS_ACTION,
+  PATIENT_NAME_ACTION,
+  PATIENT_PROFILE_UPDATE_ACTION,
+} from '../../constants/actions';
 import {PAIN_FREQUENCY, VERBAL_ABILITY} from '../../constants/painAssessment';
 
 const {width, height} = Dimensions.get('window');
@@ -22,7 +27,10 @@ const Result = (props) => {
   const [patient, setPatient] = useState('');
   const [impactScore, setImpactScore] = useState(0);
   const assessment_data = useSelector((state) => state.createAsseement);
+  const forceUpdate = useSelector((state) => state.patientProfileUpdate.update)
   const screenName = useSelector((state) => state.routeName.route);
+  const patient_id  = useSelector((state)=>state.patientDetails.item.id)
+  console.log('---patient --- id details---',patient_id)
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -66,6 +74,8 @@ const Result = (props) => {
     };
   }, [props.navigation]);
 
+  useEffect
+
   const hideDateTimePickers = () => {
     setShowDatePicker(false);
     setShowTimePicker(false);
@@ -75,10 +85,10 @@ const Result = (props) => {
       setPatient(assessment_data?.patient_name);
     }
     if (assessment_data?.assessment_date) {
-      setSelectedDate(assessment_data.assessment_date);
+      setSelectedDate(new Date(assessment_data.assessment_date));
     }
     if (assessment_data?.assessment_date) {
-      setSelectedTime(assessment_data.assessment_date);
+      setSelectedTime(new Date(assessment_data.assessment_date));
     }
     if (assessment_data?.total_score) {
       setImpactScore(assessment_data?.total_score);
@@ -88,6 +98,54 @@ const Result = (props) => {
     assessment_data?.assessment_date,
     assessment_data?.total_score,
   ]);
+ 
+
+  const clearAssessmentStoreData = () => {
+    dispatch({
+      type:PATIENT_NAME_ACTION.PATIENT,
+      payload:{
+        patient_id: patient_id,
+       patient_name:''
+      }
+
+    })
+    dispatch({
+      type: PAIN_LOCATIONS_ACTION.PAIN_LOCATION,
+      payload: [],
+    });
+
+    dispatch({
+      type: CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
+      payload: {
+        type: VERBAL_ABILITY.VERBAL.value,
+        patient_name: '',
+        current_pain: 0,
+        most_pain: 0,
+        least_pain: 0,
+        painImpactId: 0,
+        painImapctName: '',
+        painLocationId: [],
+        pain_activity_id: 0,
+        pain_activity_name: '',
+        painFrequency: [],
+        painDate: null,
+        painTime: null,
+        remainder_date: null,
+        reminder_time: null,
+        isRemainder: true,
+        assessment_date: null,
+        pain_qualities: [],
+        pain_impact_activiy: [],
+        // frequence: 0,
+        // pain_frequency_id: 0,
+        frequencyData: null,
+        total_score: 0,
+        notes: '',
+        pupillary_dilation : [],
+        otherText : ''
+      },
+    });
+  };
 
   return (
     <>
@@ -291,43 +349,17 @@ const Result = (props) => {
               marginBottom: 12,
             }}
             onPress={() => {
-              props.navigation.navigate(SCREEN_NAMES.HOME);
+              dispatch({
+                type : PATIENT_PROFILE_UPDATE_ACTION.PATIENT_PROFILE_UPDATE,
+                payload : !forceUpdate
+              })
+              clearAssessmentStoreData();
+              props.navigation.navigate(SCREEN_NAMES.PATIENT_PROFILE);
               /* if (screenName === SCREEN_NAMES.HOME) {
                 props.navigation.navigate(SCREEN_NAMES.HOME);
               } else {
                 props.navigation.navigate(SCREEN_NAMES.ASSIGN_PATIENT);
               } */
-
-              dispatch({
-                type: CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
-                payload: {
-                  type: VERBAL_ABILITY.VERBAL.value,
-                  patient_id: 0,
-                  patient_name: '',
-                  current_pain: 0,
-                  most_pain: 0,
-                  least_pain: 0,
-                  painImpactId: 0,
-                  painImapctName: '',
-                  painLocation_id: 0,
-                  pain_activity_id: 0,
-                  pain_activity_name: '',
-                  description: PAIN_FREQUENCY[0].value,
-                  painDate: null,
-                  painTime: null,
-                  remainder_date: null,
-                  reminder_time: null,
-                  isRemainder: true,
-                  assessment_date: null,
-                  pain_qualities: [],
-                  pain_impact_activiy: [],
-                  // frequence: 0,
-                  // pain_frequency_id: 0,
-                  frequencyData: null,
-                  total_score: 0,
-                  notes: '',
-                },
-              });
             }}>
             <Text
               style={{
@@ -347,13 +379,13 @@ const Result = (props) => {
           isVisible={showDatePicker || showTimePicker}
           onDismiss={() => hideDateTimePickers()}
           onBackdropPress={() => hideDateTimePickers()}>
-          <View style={{alignItems: 'center', justifyContent: 'center'}}>
+          <View style={{alignItems: 'center', justifyContent: 'center',backgroundColor:'white',padding:10,borderRadius:5}}>
             <DateTimePicker
               disabled={true}
               style={{width: '100%', backgroundColor: 'white'}}
               value={showDatePicker ? selectedDate : selectedTime}
               mode={showDatePicker ? 'date' : 'time'}
-              display="default"
+              display='inline'
               onChange={(event, value) => {
                 if (showDatePicker) {
                   setSelectedDate(value);

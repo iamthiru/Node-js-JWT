@@ -1,10 +1,11 @@
 import React, {useState} from 'react';
-import {View, Text, Platform} from 'react-native';
+import {View, Text, Platform, Dimensions} from 'react-native';
 import CustomTouchableOpacity from '../shared/CustomTouchableOpacity';
 import {COLORS} from '../../constants/colors';
 import {TouchableOpacity} from 'react-native';
 import {useDispatch} from 'react-redux';
 import {PAIN_LOCATIONS_ACTION} from '../../constants/actions';
+const {width,height} = Dimensions.get('window')
 
 const Locations = ({body, showFrontImage, selectedPainLocations}) => {
   const select = selectedPainLocations.find((item) => {
@@ -19,10 +20,13 @@ const Locations = ({body, showFrontImage, selectedPainLocations}) => {
         <View
           style={{
             position: 'absolute',
+            justifyContent: "center",
+            alignItems: "center",
+            width:height <600 ? 20 : height > 800 ? 40 : 30,
+            height:height <600 ? 20 : height > 800 ? 40 : 30,
             zIndex: 10,
-            padding: 5,
             borderWidth: 1,
-            borderRadius: 15,
+            borderRadius: height <600 ? 10 : height > 800 ? 20 : 15,
             top: body.top,
             left: body.left,
             backgroundColor: Boolean(select)
@@ -31,6 +35,13 @@ const Locations = ({body, showFrontImage, selectedPainLocations}) => {
           }}>
           {Boolean(Platform.OS !== 'ios') ? (
             <CustomTouchableOpacity
+            style={{
+              justifyContent:'center',
+              alignItems:'center',
+              width:height <600 ? 20 : height > 800 ? 40 : 30,
+            height:height <600 ? 20 : height > 800 ? 40 : 30,
+            borderRadius: height <600 ? 10 : height > 800 ? 20 : 15,
+            }}
               onPress={() => {
                 if (select) {
                   const filterData = selectedPainLocations.filter((item) => {
@@ -54,12 +65,20 @@ const Locations = ({body, showFrontImage, selectedPainLocations}) => {
               <Text
                 style={{
                   textAlign: 'center',
+                  fontSize : height > 600 ? 16:10
                 }}>
                 {body.key}
               </Text>
             </CustomTouchableOpacity>
           ) : (
             <CustomTouchableOpacity
+            style ={{
+              justifyContent:'center',
+              alignItems:'center',
+              width:height <600 ? 20 : height > 800 ? 40 : 30,
+            height:height <600 ? 20 : height > 800 ? 40 : 30,
+            borderRadius: height <600 ? 10 : height > 800 ? 20 : 15,
+            }}
               onPress={() => {
                 if (select) {
                   const filterData = selectedPainLocations.filter((item) => {
@@ -83,6 +102,7 @@ const Locations = ({body, showFrontImage, selectedPainLocations}) => {
               <Text
                 style={{
                   textAlign: 'center',
+                  fontSize : height > 600 ? 16:10
                 }}>
                 {body.key}
               </Text>
@@ -93,10 +113,13 @@ const Locations = ({body, showFrontImage, selectedPainLocations}) => {
         <View
           style={{
             position: 'absolute',
+            justifyContent: "center",
+            alignItems: "center",
+            width:height <600 ? 20 : height > 800 ? 40 : 30,
+            height:height <600 ? 20 : height > 800 ? 40 : 30,
+            borderRadius: height <600 ? 10 : height > 800 ? 20 : 15,
             zIndex: 10,
-            padding: 5,
             borderWidth: 1,
-            borderRadius: 15,
             top: body.top,
             left: body.left,
             backgroundColor: Boolean(select)
@@ -105,6 +128,13 @@ const Locations = ({body, showFrontImage, selectedPainLocations}) => {
           }}>
           {Boolean(Platform.OS === 'ios') ? (
             <CustomTouchableOpacity
+            style={{
+              justifyContent:'center',
+              alignItems:'center',
+              width:height <600 ? 20 : 40,
+              height:height <600 ? 20 : 40,
+              borderRadius: height <600 ? 10 : 20,
+            }}
               onPress={() => {
                 if (select) {
                   const filterData = selectedPainLocations.filter((item) => {
@@ -128,12 +158,20 @@ const Locations = ({body, showFrontImage, selectedPainLocations}) => {
               <Text
                 style={{
                   textAlign: 'center',
+                  fontSize: height > 600 ? 16 : 10
                 }}>
                 {body.key}
               </Text>
             </CustomTouchableOpacity>
           ) : (
             <TouchableOpacity
+            style={{
+              justifyContent:'center',
+              alignItems:'center',
+              width:height <600 ? 20 : 40,
+              height:height <600 ? 20 : 40,
+              borderRadius: height <600 ? 10 : 20,
+            }}
               onPress={() => {
                 if (select) {
                   const filterData = selectedPainLocations.filter((item) => {
@@ -157,6 +195,7 @@ const Locations = ({body, showFrontImage, selectedPainLocations}) => {
               <Text
                 style={{
                   textAlign: 'center',
+                 fontSize : height > 600 ? 16:10
                 }}>
                 {body.key}
               </Text>

@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import {
   View,
   ScrollView,
@@ -46,7 +46,10 @@ import {
 } from '../../constants/actions';
 import Analytics from '../../utils/Analytics';
 import {useNavigation} from '@react-navigation/native';
+import {PAIN_FREQUENCY, VERBAL_ABILITY} from '../../constants/painAssessment';
 const {width, height} = Dimensions.get('window');
+const screenDimentions = Dimensions.get('screen');
+const resolution = screenDimentions.width * screenDimentions.scale;
 const {VideoCropper} = NativeModules;
 
 let camera = null;
@@ -69,6 +72,9 @@ const SETTINGS = {
   FOCUS_DEPTH: 'focusDepth',
 };
 
+const DEFAULT_DARK_BROWN_EXPOSURE = 0.8;
+const DEFAULT_OTHER_EXPOSURE = 0.6; //0.0; //0.2
+
 const FacialExpressionScreen = ({navigation}) => {
   const [eyeBorderType, setEyeBorderType] = useState(EYE_BORDER_TYPE.OVAL);
   const [timer, setTimer] = useState('0');
@@ -87,12 +93,14 @@ const FacialExpressionScreen = ({navigation}) => {
   const [fps, setFps] = useState(60);
   const [flashOn, setFlashOn] = useState(false);
   const [exposure, setExposure] = useState(0.0);
-  const [zoom, setZoom] = useState(0);
+  const [zoom, setZoom] = useState(Platform.OS === 'ios' ? 0.002 : 0.0);
+  const [fixZoom, setFixZoom] = useState(Platform.OS === 'ios' ? 0.002 : 0.0);
   const [focusDepth, setFocusDepth] = useState(0.0);
   const [processingTimer, setProcessingTimer] = useState('0');
   const [resultReady, setResultReady] = useState(false);
   const [resultValue, setResultValue] = useState('');
   // const [showBrightnessSlider, setShowBrightnessSlider] = useState(false);
+  const [showEnableButton, setShowEnableButton] = useState(false);
   const [spinnerState, setShowSpinner] = useState({
     open: false,
     message: '',
@@ -110,9 +118,7 @@ const FacialExpressionScreen = ({navigation}) => {
 
   const dispatch = useDispatch();
 
-
   // var pressOut;
-
   useEffect(() => {
     let startTime = 0;
     let endTime = 0;
@@ -153,6 +159,13 @@ const FacialExpressionScreen = ({navigation}) => {
       unsubscribeBeforeRemove();
     };
   }, [navigation]);
+
+  useEffect(() => {
+    if (captureMode === CAPTURE_MODE.MANUAL) {
+      setEnableRecording(true);
+      setToastText('');
+    }
+  }, [captureMode, showEnableButton]);
 
   useEffect(() => {
     setTimeout(() => checkStoragePermission(), 3000);
@@ -197,6 +210,9 @@ const FacialExpressionScreen = ({navigation}) => {
   };
 
   const onFaceDetected = ({faces}) => {
+    if (captureMode === CAPTURE_MODE.MANUAL) {
+      return;
+    }
     if (faces[0]) {
       let faceData = {
         width: faces[0].bounds.size.width,
@@ -210,7 +226,6 @@ const FacialExpressionScreen = ({navigation}) => {
         rightEyePosition: faces[0].rightEyePosition,
         leftEyePosition: faces[0].leftEyePosition,
       };
-
       let faceAreaWidth = width - 40;
       let faceAreaX = (width - faceAreaWidth) / 2;
       let faceAreaY = (width + width * 0.25 - (width - 40)) / 2;
@@ -303,10 +318,23 @@ const FacialExpressionScreen = ({navigation}) => {
     if (!isCameraReady) {
       return;
     }
-
+    if (Platform.OS === 'ios') {
+      setZoom(fixZoom * 10);
+    } else {
+      setZoom(fixZoom);
+    }
     const recordOptions = {
       mute: true,
-      quality: RNCamera.Constants.VideoQuality['1080p'],
+      quality:
+        Platform.OS === 'ios'
+          ? RNCamera.Constants.VideoQuality['1080p']
+          : height < 700 && resolution <= 540
+          ? RNCamera.Constants.VideoQuality['480p']
+          : height < 700 && resolution > 540 && resolution <= 720
+          ? RNCamera.Constants.VideoQuality['720p']
+          : resolution > 1080
+          ? RNCamera.Constants.VideoQuality['1080p']
+          : RNCamera.Constants.VideoQuality['1080p'],
     };
 
     camera
@@ -381,15 +409,65 @@ const FacialExpressionScreen = ({navigation}) => {
   };
 
   const cropVideo = async (videoURI, successCallback, errorCallback) => {
-    const paddingValue = 1080 * (15 / width);
-    let options = {
-      cropWidth: parseInt(1080 - paddingValue),
-      cropHeight: parseInt(1080 + 1080 * 0.25),
-      cropOffsetX: parseInt((1080 - (1080 - paddingValue)) / 2),
-      cropOffsetY: parseInt(
-        (1080 + 1080 * 0.25 - (1080 - paddingValue)) / 2 - 1080 * (10 / width),
-      ),
-    };
+    let options = {};
+    let screen = 1080;
+    const paddingValue =
+      Platform.OS === 'ios' ? screen * (5 / width) : screen * (15 / width);
+    if (Platform.OS === 'ios') {
+      options = {
+        cropWidth: parseInt(1080 - paddingValue),
+        cropHeight: parseInt(1080 + 1080 * 0.25),
+        cropOffsetX: parseInt((1080 - (1080 - paddingValue)) / 2),
+        cropOffsetY: parseInt(
+          (1080 + 1080 * 0.25 - (1080 - paddingValue)) / 2 -
+            1080 * (10 / width),
+        ),
+      };
+    } else {
+      if (height > 700) {
+        options = {
+          cropWidth: parseInt(screen - paddingValue),
+          cropHeight: parseInt(screen + screen * 0.25),
+          cropOffsetX: parseInt((screen - (screen - paddingValue)) / 2),
+          cropOffsetY: parseInt(
+            (screen + screen * 0.25 - (screen - paddingValue)) / 2 -
+              screen * (10 / width),
+          ),
+        };
+      } else {
+        const screenWidth = resolution > 540 ? 480 : 300;
+        if (resolution > 540) {
+          // j3 device
+          options = {
+            cropWidth: parseInt(screenWidth + width / 2),
+            cropHeight: parseInt(
+              screenWidth * screenDimentions.scale + width / 3,
+            ),
+            cropOffsetX: parseInt(screenWidth + width / 3),
+            cropOffsetY: parseInt(
+              screenWidth +
+                (width + width * screenDimentions.scale) -
+                width / 4,
+            ),
+          };
+        } else {
+          // j2
+          options = {
+            cropWidth: parseInt(screenWidth + width / 2),
+            cropHeight: parseInt(
+              screenWidth * screenDimentions.scale + width / 2.5,
+            ),
+            cropOffsetX: parseInt(screenWidth + width),
+            cropOffsetY: parseInt(
+              screenWidth +
+                (width + width * screenDimentions.scale) -
+                width / 4,
+            ),
+          };
+        }
+      }
+    }
+
     if (Platform.OS === 'ios') {
       options.quality = '1920x1080';
     }
@@ -479,7 +557,7 @@ const FacialExpressionScreen = ({navigation}) => {
           // resetStates();
         })
         .catch((err) => {
-          Alert.alert('Error', 'Download Failed!');
+          Alert.alert('Error', 'Download Failed!' + err?.message);
           // resetStates();
         });
     }
@@ -509,10 +587,35 @@ const FacialExpressionScreen = ({navigation}) => {
           patientData.patient_name
         ).replace(/ /g, '_')}_${Date.now().toString()}.mp4`;
       }
-      let contentType = 'video/mp4';
-      let contentDeposition = 'inline;filename="' + filename + '"';
-      const base64 = await fs.readFile(videoURL, 'base64');
-      const arrayBuffer = decode(base64);
+      let contentType = '';
+      let contentDeposition = '';
+      let arrayBuffer = '';
+      let base64 = '';
+      try {
+        if (filename && videoURL) {
+          contentType = 'video/mp4';
+          contentDeposition = 'inline;filename="' + filename + '"';
+          base64 = await fs.readFile(videoURL, 'base64');
+          arrayBuffer = decode(base64);
+        } else {
+          Alert.alert('please retake video');
+          setShowSpinner({
+            open: false,
+            message: '',
+          });
+          clearProcessingTimer();
+          return;
+        }
+      } catch (err) {
+        Alert.alert('error while reading file');
+        setShowSpinner({
+          open: false,
+          message: '',
+        });
+
+        clearProcessingTimer();
+        return;
+      }
 
       s3bucket.createBucket(() => {
         const params = {
@@ -523,19 +626,41 @@ const FacialExpressionScreen = ({navigation}) => {
           ContentType: contentType,
           ACL: 'public-read',
         };
-        s3bucket.upload(params, (err, data) => {
+        //TODO discuss with pranav for ACL public/private
+        let abortTimeout = null;
+        const uploadBucket = s3bucket.upload(params, (err, data) => {
+          if (abortTimeout) {
+            clearTimeout(abortTimeout);
+          }
           if (err) {
+            if (
+              err?.message === 'Request aborted' ||
+              err?.message === 'Request aborted by user'
+            ) {
+              Alert.alert(
+                'Timeout for video uploading  in s3  ' + err?.message,
+              );
+              setShowSpinner({
+                open: false,
+                message: '',
+              });
+              clearProcessingTimer();
+              setResultReady(false);
+              return;
+            }
             console.log('error in callback', err);
-            Alert.alert('Error', 'Error in uploading the video');
+            Alert.alert(
+              'Error',
+              'Error in uploading the video in s3' + err?.message,
+            );
             setShowSpinner({
               open: false,
               message: '',
             });
             clearProcessingTimer();
-            resetStates();
+            // resetStates();
+            setResultReady(false);
           } else {
-            console.log('success', data);
-            console.log('Respomse URL : ' + data.Location);
             // handleCreateAssessmentAPI()
 
             setShowSpinner({
@@ -550,18 +675,18 @@ const FacialExpressionScreen = ({navigation}) => {
                 );
                 if (result && result.data === 'Retake') {
                   Alert.alert('Error', 'Please retake the video');
-                  // setResultReady(true);
+                  setResultReady(false);
                   // setShowProcessedResult(true);
                   setShowSpinner({
                     open: false,
                     message: '',
                   });
                   clearProcessingTimer();
-                  resetStates('');
+                  // resetStates('');
                   return;
                 }
-
-                setResultValue(result.data);
+                // clearAssessmentStoreData();
+                setResultValue(result?.data);
                 setResultReady(true);
                 setShowSpinner({
                   open: false,
@@ -579,19 +704,26 @@ const FacialExpressionScreen = ({navigation}) => {
                             }, 100); */
               })
               .catch((err) => {
-                Alert.alert('Error', 'Error in processing the video');
+                Alert.alert(
+                  'Error',
+                  'Error in processing the video' + err?.message,
+                );
                 console.log('Err:', err);
                 setShowSpinner({
                   open: false,
                   message: '',
                 });
-                // setResultReady(true);
+                setResultReady(false);
                 // setShowProcessedResult(true);
                 clearProcessingTimer();
-                resetStates('');
+                // resetStates('');
               });
           }
         });
+        abortTimeout = setTimeout(
+          uploadBucket.abort.bind(uploadBucket),
+          100000,
+        );
       });
     } catch (err) {
       Alert.alert('Error', 'Error in uploading the video');
@@ -606,19 +738,34 @@ const FacialExpressionScreen = ({navigation}) => {
 
   const onRetakePress = () => {
     // setVideoURL("");
+    setShowEnableButton(!showEnableButton);
+    setZoom(fixZoom);
     resetStates();
   };
 
   const handleCreateAssessmentAPI = () => {
-    let date = new Date(assessment_data.assessment_date);
-    let reminder_date = assessment_data.remainder_date
-      ? new Date(assessment_data.remainder_date)
-      : new Date();
-    let facial_exp_parsed_value = JSON.parse(resultValue.replace(/'/g, '"'));
-    let facial_exp_result =
-      facial_exp_parsed_value[facial_exp_parsed_value.length - 1];
-    let total_score =
-      Number(assessment_data.pupillary_dilation) + Number(facial_exp_result);
+    let facialMaxValue = 0;
+    let facial_exp_parsed_value = Boolean(resultValue)
+      ? JSON.parse(resultValue.replace(/'/g, '"'))
+      : [0];
+    const facialResultData = facial_exp_parsed_value.map((res) =>
+      parseInt(res),
+    );
+    facialResultData.map((score) => {
+      if (score !== NaN) {
+        if (score > facialMaxValue) {
+          facialMaxValue = score;
+        }
+      }
+    });
+    let date = assessment_data.assessment_date
+      ? assessment_data.assessment_date
+      : new Date().getTime();
+    let pupilary_data = Boolean(assessment_data?.pupillary_dilation?.length)
+      ? assessment_data?.pupillary_dilation
+      : [0];
+    let pupilary_data_result = pupilary_data[pupilary_data.length - 1];
+    let total_score = facialMaxValue; //  Number(pupilary_data_result)
 
     dispatch({
       type: CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
@@ -631,7 +778,7 @@ const FacialExpressionScreen = ({navigation}) => {
       createAssessmentAPI(
         {
           patient_id: (patientData && patientData.patient_id) || 0,
-          assessment_datetime: date.getTime(),
+          assessment_datetime: date,
           type: Boolean(assessment_data.type) ? assessment_data.type : '',
           current_pain_score: Boolean(assessment_data.current_pain)
             ? assessment_data.current_pain
@@ -642,10 +789,9 @@ const FacialExpressionScreen = ({navigation}) => {
           most_pain_score: Boolean(assessment_data.most_pain)
             ? assessment_data.most_pain
             : 0,
-          // description: assessment_data.description, // change to array of data
-          description: Boolean(assessment_data?.description?.length)
+          description: Boolean(assessment_data?.painFrequency?.length)
             ? JSON.stringify(
-                assessment_data?.description.map((desc) => {
+                assessment_data?.painFrequency.map((desc) => {
                   return desc?.label;
                 }),
               )
@@ -657,33 +803,28 @@ const FacialExpressionScreen = ({navigation}) => {
                 ),
               )
             : '',
-          //  pain_quality_id: assessment_data.pain_activity_id, // change to  array of data
           pain_quality_id: Boolean(assessment_data?.pain_qualities?.length)
             ? JSON.stringify(
                 assessment_data?.pain_qualities?.map((pain) => pain?.id),
               )
-            : [],
-          pain_frequency_id: assessment_data?.frequencyData
+            : '',
+          pain_frequency_id: Boolean(assessment_data?.frequencyData)
             ? assessment_data?.frequencyData?.value
             : 0,
-          // pain_frequency_id : assessment_data?.pain_frequency_id ? assessment_data?.pain_frequency_id : 0,
           note: Boolean(assessment_data.notes) ? assessment_data.notes : '',
-          total_score: Boolean(total_score) ? total_score : 0,
+          total_score: total_score,
           createdAt: new Date().getTime(),
           createdBy: userId,
           isReminder: Boolean(assessment_data.isRemainder)
             ? assessment_data.isRemainder
-            : true,
-          reminder_datetime: Boolean(reminder_date.getTime())
-            ? reminder_date.getTime()
-            : 0,
-          frequency: assessment_data?.frequencyData
-            ? assessment_data?.frequencyData?.label
+            : false,
+          pain_impact_id: Boolean(assessment_data.pain_impact_activiy?.length)
+            ? JSON.stringify(
+                assessment_data?.pain_impact_activiy?.map((pain) => pain?.id),
+              )
             : '',
-          // frequency : assessment_data?.frequency ? assessment_data?.frequency : '',
-          pain_impact_id:Boolean( assessment_data.pain_impact_activiy?.length) ?  JSON.stringify(assessment_data?.pain_impact_activiy?.map((pain)=>pain?.id)) : '',       
-          pupillary_dilation: assessment_data.pupillary_dilation,
-          facial_expresssion: Number(facial_exp_result),
+          pupillary_dilation: Number(pupilary_data_result),
+          facial_expression: facialMaxValue,
         },
         token,
       )
@@ -695,11 +836,10 @@ const FacialExpressionScreen = ({navigation}) => {
           dispatch({
             type: LATEST_ENTRY_ACTION.LATEST_ENTRY,
             payload: {
-              assessmentDateAndTime: date.getTime(),
+              assessmentDateAndTime: date,
               impactScore: total_score,
             },
           });
-          console.log('----assessment sucessful----', res);
           navigation.navigate(SCREEN_NAMES.RESULT);
         })
         .catch((err) => {
@@ -709,7 +849,7 @@ const FacialExpressionScreen = ({navigation}) => {
       createAssessmentAPI(
         {
           patient_id: (patientData && patientData.patient_id) || 0,
-          assessment_datetime: date.getTime(),
+          assessment_datetime: date,
           type: Boolean(assessment_data.type) ? assessment_data.type : '',
           current_pain_score: Boolean(assessment_data.current_pain)
             ? assessment_data.current_pain
@@ -720,9 +860,9 @@ const FacialExpressionScreen = ({navigation}) => {
           most_pain_score: Boolean(assessment_data.most_pain)
             ? assessment_data.most_pain
             : 0,
-          description: Boolean(assessment_data?.description?.length)
+          description: Boolean(assessment_data?.painFrequency?.length)
             ? JSON.stringify(
-                assessment_data?.description.map((desc) => {
+                assessment_data?.painFrequency.map((desc) => {
                   return desc?.label;
                 }),
               )
@@ -738,20 +878,21 @@ const FacialExpressionScreen = ({navigation}) => {
             ? JSON.stringify(
                 assessment_data?.pain_qualities?.map((pain) => pain?.id),
               )
-            : [],
-
-          // pain_frequency_id: assessment_data.pain_frequency_id,
+            : '',
           note: Boolean(assessment_data.notes) ? assessment_data.notes : '',
-          total_score: Boolean(total_score) ? total_score : 0,
+          total_score: total_score,
           createdAt: new Date().getTime(),
           createdBy: userId,
-          isReminder: Boolean(assessment_data.isRemainder)
-            ? assessment_data.isRemainder
-            : false,
-          // pain_impact_id: assessment_data.painImpactId,
-          pain_impact_id:Boolean( assessment_data.pain_impact_activiy?.length) ?  JSON.stringify(assessment_data?.pain_impact_activiy?.map((pain)=>pain?.id)) : '',       
-          pupillary_dilation: assessment_data.pupillary_dilation,
-          facial_expresssion: Number(facial_exp_result),
+          isReminder: assessment_data.isRemainder,
+          pain_impact_id: Boolean(assessment_data.pain_impact_activiy?.length)
+            ? JSON.stringify(
+                assessment_data?.pain_impact_activiy?.map((pain) => pain?.id),
+              )
+            : '',
+          pupillary_dilation: pupilary_data_result
+            ? Number(pupilary_data_result)
+            : 0,
+          facial_expresssion: facialMaxValue, //facial_exp_result ? Number(facial_exp_result) : 0,
         },
         token,
       )
@@ -760,7 +901,14 @@ const FacialExpressionScreen = ({navigation}) => {
             Alert.alert('------invalid assessment-----', res);
             return;
           }
-          console.log('----assessment sucessful----', res);
+          dispatch({
+            type: LATEST_ENTRY_ACTION.LATEST_ENTRY,
+            payload: {
+              assessmentDateAndTime: date,
+              impactScore: total_score,
+            },
+          });
+          navigation.navigate(SCREEN_NAMES.RESULT);
         })
         .catch((err) => {
           console.log('assessment error', err);
@@ -777,16 +925,11 @@ const FacialExpressionScreen = ({navigation}) => {
     setToastText('');
   };
 
-  const handleOnNextPress = () => {
-    handleCreateAssessmentAPI();
-    navigation.navigate(SCREEN_NAMES.RESULT);
-  };
-
   const getCameraComponent = () => {
     return (
       <>
         <TouchableOpacity
-          // activeOpacity={1}
+          activeOpacity={1}
           // onPressOut={() => {
           //   pressOut = setTimeout(() => {
           //     setShowBrightnessSlider(false);
@@ -835,17 +978,18 @@ const FacialExpressionScreen = ({navigation}) => {
             onRecordingStart={() => {
               handleStartRecording();
             }}
+            on
             onRecordingEnd={() => {
               handleStopRecording();
             }}
-            autoFocus={
-              Platform.OS === 'ios'
-                ? RNCamera.Constants.AutoFocus.off
-                : RNCamera.Constants.AutoFocus.on
-              //  RNCamera.Constants.AutoFocus.off
-            }
+            // autoFocus={
+            //   Platform.OS === 'ios'
+            //     ? RNCamera.Constants.AutoFocus.off
+            //     : RNCamera.Constants.AutoFocus.on
+            //   //  RNCamera.Constants.AutoFocus.off
+            // }
             autoFocusPointOfInterest={foucsPoints || {}}
-            zoom={zoom}
+            zoom={Platform.OS === 'ios' ? zoom / 1000 : zoom / 10}
             focusDepth={focusDepth}
             exposure={exposure < 0.15 ? 0.15 : exposure}
             flashMode={
@@ -901,14 +1045,14 @@ const FacialExpressionScreen = ({navigation}) => {
             style={{
               width: width,
               height: height - (width + width * 0.25),
-              paddingHorizontal: 20,
+              paddingHorizontal: 10,
             }}>
             <View
               style={{
                 flexDirection: 'row',
                 width: width - 40,
                 justifyContent: 'space-between',
-                marginTop: 8,
+                marginTop: height > 800 ? 8 : 10,
               }}>
               <View>
                 <Text>FPS: {fps}</Text>
@@ -921,8 +1065,11 @@ const FacialExpressionScreen = ({navigation}) => {
                   style={{
                     alignItems: 'center',
                     justifyContent: 'center',
-                    width: 30,
-                    height: 30,
+                    // width: 30,
+                    // height: 30,
+                    // borderRadius: 5,
+                    width: height > 850 ? 30 : 20,
+                    height: height > 850 ? 30 : 20,
                     borderRadius: 5,
                     backgroundColor:
                       selectedSetting === SETTINGS.ZOOM
@@ -939,7 +1086,7 @@ const FacialExpressionScreen = ({navigation}) => {
                   }}>
                   <Fontisto
                     name="zoom"
-                    size={18}
+                    size={height > 850 ? 18 : 10}
                     color={
                       selectedSetting === SETTINGS.ZOOM
                         ? COLORS.WHITE
@@ -952,8 +1099,11 @@ const FacialExpressionScreen = ({navigation}) => {
                     marginLeft: 15,
                     alignItems: 'center',
                     justifyContent: 'center',
-                    width: 30,
-                    height: 30,
+                    // width: 30,
+                    // height: 30,
+                    // borderRadius: 5,
+                    width: height > 850 ? 30 : 20,
+                    height: height > 850 ? 30 : 20,
                     borderRadius: 5,
                     backgroundColor:
                       selectedSetting === SETTINGS.FOCUS_DEPTH
@@ -971,7 +1121,7 @@ const FacialExpressionScreen = ({navigation}) => {
                   }}>
                   <MaterialIcons
                     name="center-focus-strong"
-                    size={18}
+                    size={height > 850 ? 18 : 10}
                     color={
                       selectedSetting === SETTINGS.FOCUS_DEPTH
                         ? COLORS.WHITE
@@ -984,8 +1134,11 @@ const FacialExpressionScreen = ({navigation}) => {
                     marginLeft: 15,
                     alignItems: 'center',
                     justifyContent: 'center',
-                    width: 30,
-                    height: 30,
+                    // width: 30,
+                    // height: 30,
+                    // borderRadius: 5,
+                    width: height > 850 ? 30 : 20,
+                    height: height > 850 ? 30 : 20,
                     borderRadius: 5,
                     backgroundColor:
                       selectedSetting === SETTINGS.EXPOSURE
@@ -1002,7 +1155,7 @@ const FacialExpressionScreen = ({navigation}) => {
                   }}>
                   <MaterialIcons
                     name="brightness-5"
-                    size={18}
+                    size={height > 850 ? 18 : 12}
                     color={
                       selectedSetting === SETTINGS.EXPOSURE
                         ? COLORS.WHITE
@@ -1012,11 +1165,16 @@ const FacialExpressionScreen = ({navigation}) => {
                 </CustomTouchableOpacity>
               </View>
             </View>
-            <View style={{height: 10}} />
+            <View style={{height: 5}} />
             <Text
               style={{
-                marginBottom: 14,
-                fontSize: 16,
+                // marginBottom: 14,
+                // fontSize: 16,
+                // fontWeight: '400',
+                // color: COLORS.GRAY_90,
+                marginBottom: height >= 850 ? 10 : height < 800 ? 5 : 14,
+                fontSize: height >= 850 ? 16 : height < 800 ? 10 : 12,
+                lineHeight: height >= 850 ? 16 : height < 800 ? 10 : 14,
                 fontWeight: '400',
                 color: COLORS.GRAY_90,
               }}>
@@ -1024,8 +1182,13 @@ const FacialExpressionScreen = ({navigation}) => {
             </Text>
             <Text
               style={{
-                marginBottom: 14,
-                fontSize: 16,
+                // marginBottom: 14,
+                // fontSize: 16,
+                // fontWeight: '400',
+                // color: COLORS.GRAY_90,
+                marginBottom: height >= 850 ? 10 : height < 800 ? 5 : 14,
+                fontSize: height >= 850 ? 16 : height < 800 ? 10 : 12,
+                lineHeight: height >= 850 ? 16 : height < 800 ? 10 : 14,
                 fontWeight: '400',
                 color: COLORS.GRAY_90,
               }}>
@@ -1033,8 +1196,13 @@ const FacialExpressionScreen = ({navigation}) => {
             </Text>
             <Text
               style={{
-                marginBottom: 0,
-                fontSize: 16,
+                // marginBottom: 0,
+                // fontSize: 16,
+                // fontWeight: '400',
+                // color: COLORS.GRAY_90,
+                marginBottom: height >= 850 ? 10 : height < 800 ? 5 : 14,
+                fontSize: height >= 850 ? 16 : height < 800 ? 10 : 12,
+                lineHeight: height >= 850 ? 16 : height < 800 ? 10 : 14,
                 fontWeight: '400',
                 color: COLORS.GRAY_90,
               }}>
@@ -1079,7 +1247,7 @@ const FacialExpressionScreen = ({navigation}) => {
               style={{
                 width: width - 40,
                 height: 30,
-                marginTop: 20,
+                // marginTop: 20,
                 marginBottom: 30,
               }}>
               <View
@@ -1088,7 +1256,7 @@ const FacialExpressionScreen = ({navigation}) => {
                   backgroundColor: `${COLORS.PRIMARY_MAIN}50`,
                   width: 200,
                   justifyContent: 'space-between',
-                  height: 30,
+                  height: height < 850 ? 20 : 30,
                   alignItems: 'center',
                   borderRadius: 10,
                   alignSelf: 'center',
@@ -1100,14 +1268,17 @@ const FacialExpressionScreen = ({navigation}) => {
                         ? COLORS.SECONDARY_MAIN
                         : `${COLORS.GRAY_40}`,
                     width: 100,
-                    height: 30,
+                    height: height < 850 ? 20 : 30,
                     borderTopLeftRadius: 10,
                     borderBottomLeftRadius: 10,
                     alignItems: 'center',
                     justifyContent: 'center',
                     borderWidth: captureMode === CAPTURE_MODE.AUTO ? 1 : 0,
                   }}
-                  onPress={() => setCaptureMode(CAPTURE_MODE.AUTO)}>
+                  onPress={() => {
+                    setCaptureMode(CAPTURE_MODE.AUTO);
+                    setEnableRecording(false);
+                  }}>
                   <Text
                     style={{
                       color:
@@ -1115,8 +1286,8 @@ const FacialExpressionScreen = ({navigation}) => {
                           ? COLORS.GRAY_90
                           : COLORS.WHITE,
                       fontWeight: '700',
-                      fontSize: 14,
-                      lineHeight: 17,
+                      fontSize: height < 850 ? 10 : 14,
+                      lineHeight: height < 850 ? 12 : 17,
                       textTransform: 'uppercase',
                     }}>
                     {'Auto'}
@@ -1129,14 +1300,18 @@ const FacialExpressionScreen = ({navigation}) => {
                         ? COLORS.SECONDARY_MAIN
                         : `${COLORS.GRAY_40}`,
                     width: 100,
-                    height: 30,
+                    height: height < 850 ? 20 : 30,
                     borderTopRightRadius: 10,
                     borderBottomRightRadius: 10,
                     alignItems: 'center',
                     justifyContent: 'center',
                     borderWidth: captureMode === CAPTURE_MODE.MANUAL ? 1 : 0,
                   }}
-                  onPress={() => setCaptureMode(CAPTURE_MODE.MANUAL)}>
+                  onPress={() => {
+                    setCaptureMode(CAPTURE_MODE.MANUAL);
+                    setEnableRecording(true);
+                    setToastText('');
+                  }}>
                   <Text
                     style={{
                       color:
@@ -1144,8 +1319,8 @@ const FacialExpressionScreen = ({navigation}) => {
                           ? COLORS.GRAY_90
                           : COLORS.WHITE,
                       fontWeight: '700',
-                      fontSize: 14,
-                      lineHeight: 17,
+                      fontSize: height < 850 ? 10 : 14,
+                      lineHeight: height < 850 ? 12 : 17,
                       textTransform: 'uppercase',
                     }}>
                     {'Manual'}
@@ -1162,6 +1337,7 @@ const FacialExpressionScreen = ({navigation}) => {
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 paddingHorizontal: 20,
+                bottom: height > 850 ? 17 : 28,
               }}>
               <CustomTouchableOpacity
                 disabled={processing}
@@ -1171,17 +1347,23 @@ const FacialExpressionScreen = ({navigation}) => {
                 }}>
                 <Ionicons
                   name={flashOn ? 'md-flash-off' : 'md-flash'}
-                  size={25}
+                  size={height > 850 ? 25 : 18}
                   color={flashOn ? COLORS.GRAY_60 : COLORS.GRAY_90}
                 />
               </CustomTouchableOpacity>
               <CustomButton
                 onPress={onStartRecordingPress}
                 title="Start Recording"
-                textStyle={{color: COLORS.WHITE, textAlign: 'center'}}
+                textStyle={{
+                  color: COLORS.WHITE,
+                  textAlign: 'center',
+                  fontSize: height > 850 ? 16 : 10,
+                }}
                 disabled={processing || !enableRecording}
                 style={{
+                  minHeight: 30,
                   width: width * 0.5,
+                  height: height < 850 ? 20 : 50,
                   backgroundColor:
                     processing || !enableRecording
                       ? COLORS.GRAY_40
@@ -1196,7 +1378,10 @@ const FacialExpressionScreen = ({navigation}) => {
                 disabled={processing}
                 style={{alignItems: 'center', justifyContent: 'center'}}
                 onPress={() => switchCamera()}>
-                <Ionicons name="camera-reverse-outline" size={25} />
+                <Ionicons
+                  name="camera-reverse-outline"
+                  size={height > 850 ? 25 : 18}
+                />
               </CustomTouchableOpacity>
             </View>
             <View style={{height: 20}} />
@@ -1276,13 +1461,15 @@ const FacialExpressionScreen = ({navigation}) => {
                     style={{
                       width: 40,
                       textAlign: 'center',
-                    }}>{`${parseInt(zoom * 100)}%`}</Text>
+                    }}>{`${parseInt(exposure * 100)}%`}</Text>
                   <Slider
                     style={{width: width - 120}}
                     minimumValue={0}
                     maximumValue={1}
                     value={exposure}
-                    onValueChange={(value) => setExposure(value)}
+                    onValueChange={(value) => {
+                      setExposure(value);
+                    }}
                     minimumTrackTintColor={COLORS.WHITE}
                     maximumTrackTintColor={COLORS.BLACK}
                   />
@@ -1301,7 +1488,10 @@ const FacialExpressionScreen = ({navigation}) => {
                     minimumValue={0}
                     maximumValue={1}
                     value={zoom}
-                    onValueChange={(value) => setZoom(value)}
+                    onValueChange={(value) => {
+                      setZoom(value);
+                      setFixZoom(value);
+                    }}
                     minimumTrackTintColor={COLORS.WHITE}
                     maximumTrackTintColor={COLORS.BLACK}
                   />
@@ -1469,6 +1659,42 @@ const FacialExpressionScreen = ({navigation}) => {
                   {'RETAKE'}
                 </Text>
               </CustomTouchableOpacity>
+              <View
+                style={{
+                  width: width,
+                  height: 50,
+                  justifyContent: 'flex-end',
+                  alignItems: 'flex-end',
+                  paddingHorizontal: 30,
+                  paddingBottom: height > 810 ? 30 : 0,
+                  bottom: height < 700 ? 25 : 0,
+                }}>
+                <CustomTouchableOpacity
+                  disabled={processing}
+                  style={{
+                    backgroundColor: COLORS.SECONDARY_MAIN,
+                    borderRadius: 10,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    height: 48,
+                    width: width * 0.3,
+                    paddingHorizontal: 28,
+                    marginBottom: 12,
+                    borderColor: COLORS.PRIMARY_DARKER,
+                    borderWidth: 1,
+                  }}
+                  onPress={handleCreateAssessmentAPI}>
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      fontWeight: '700',
+                      color: COLORS.WHITE,
+                      textAlign: 'center',
+                    }}>
+                    {'SKIP'}
+                  </Text>
+                </CustomTouchableOpacity>
+              </View>
             </>
           )}
 
@@ -1494,7 +1720,7 @@ const FacialExpressionScreen = ({navigation}) => {
                   paddingHorizontal: 28,
                   marginBottom: 12,
                 }}
-                onPress={() => handleOnNextPress()}>
+                onPress={() => handleCreateAssessmentAPI()}>
                 <Text
                   style={{
                     fontSize: 14,

@@ -12,10 +12,11 @@ import Analytics from '../../utils/Analytics';
 import {SCREEN_NAMES} from '../../constants/navigation';
 
 const {width, height} = Dimensions.get('window');
-let startTime = 0;
-let endTime = 0;
+
 
 const PainQuality = ({gotoNext, gotoPrevious}) => {
+  let startTime = 0;
+let endTime = 0;
   const [selectedPainQualities, setSelectedPainQualities] = useState([]);
   const painQuality = useSelector(
     (state) => state.painAssessmentData.selectedPainQualities,
@@ -101,13 +102,13 @@ const PainQuality = ({gotoNext, gotoPrevious}) => {
               }}>
               {'What is the quality of the pain?'}
             </Text>
-            <CustomTouchableOpacity style={{marginLeft: 15}}>
+            {/* <CustomTouchableOpacity style={{marginLeft: 15}}>
               <AntDesignIcon
                 name={'questioncircle'}
                 size={15}
                 color={COLORS.PRIMARY_MAIN}
               />
-            </CustomTouchableOpacity>
+            </CustomTouchableOpacity> */}
           </View>
           <Text
             style={{

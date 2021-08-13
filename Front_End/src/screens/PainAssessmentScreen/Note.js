@@ -99,13 +99,13 @@ const Note = ({gotoNext, gotoPrevious}) => {
               }}>
               {'Any additional note to add?'}
             </Text>
-            <CustomTouchableOpacity style={{marginLeft: 15}}>
+            {/* <CustomTouchableOpacity style={{marginLeft: 15}}>
               <AntDesignIcon
                 name={'questioncircle'}
                 size={15}
                 color={COLORS.PRIMARY_MAIN}
               />
-            </CustomTouchableOpacity>
+            </CustomTouchableOpacity> */}
           </View>
           <CustomTextArea
             placeholder="Enter Notes"

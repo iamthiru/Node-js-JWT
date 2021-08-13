@@ -89,14 +89,14 @@ const PainAssessmentScreen = ({navigation}) => {
   };
 
   const handleBackPress = () => {
-    if(showResult) {
+    if (showResult) {
       setShowResult(false);
     }
     closeScreen();
     dispatch({
-      type:PAIN_LOCATIONS_ACTION.PAIN_LOCATION,
-      payload:[]
-    })
+      type: PAIN_LOCATIONS_ACTION.PAIN_LOCATION,
+      payload: [],
+    });
     dispatch({
       type: CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
       payload: {
@@ -111,7 +111,7 @@ const PainAssessmentScreen = ({navigation}) => {
         painLocation_id: 0,
         pain_activity_id: 0,
         pain_activity_name: '',
-        description: [],
+        painFrequency: [],
         painDate: null,
         painTime: null,
         remainder_date: null,
@@ -119,18 +119,20 @@ const PainAssessmentScreen = ({navigation}) => {
         isRemainder: true,
         assessment_date: null,
         pain_qualities: [],
-        pain_impact_activiy:[],
+        pain_impact_activiy: [],
         // frequence: 0,
         // pain_frequency_id: 0,
-        frequencyData:null,
+        frequencyData: null,
         total_score: 0,
-        notes: ''
+        notes: '',
+        otherText: '',
       },
     });
   };
 
   const closeScreen = () => {
     navigation.goBack();
+    // handleBackPress()
   };
 
   const getHeading = () => {
@@ -194,7 +196,11 @@ const PainAssessmentScreen = ({navigation}) => {
             {showResult ? 'Pain Assessment' : getHeading()}
           </Text>
           {!showResult && (
-            <CustomTouchableOpacity onPress={closeScreen}>
+            <CustomTouchableOpacity
+              onPress={() => {
+                closeScreen();
+                handleBackPress();
+              }}>
               <AntDesignIcon name={'close'} color={COLORS.WHITE} size={22} />
             </CustomTouchableOpacity>
           )}
@@ -269,9 +275,7 @@ const PainAssessmentScreen = ({navigation}) => {
             <PainLocation gotoNext={gotoNext} gotoPrevious={gotoPrevious} />
           )}
           {currentStep === 4 && (
-            <PainQuality 
-            gotoNext={gotoNext}
-            gotoPrevious={gotoPrevious} />
+            <PainQuality gotoNext={gotoNext} gotoPrevious={gotoPrevious} />
           )}
           {currentStep === 5 && (
             <PainTiming gotoNext={gotoNext} gotoPrevious={gotoPrevious} />

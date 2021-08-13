@@ -8,16 +8,28 @@ import {COLORS} from '../../constants/colors';
 import {SCREEN_NAMES} from '../../constants/navigation';
 import styles from './styles';
 import {formatAMPM} from '../../utils/date';
+import {useDispatch, useSelector} from 'react-redux';
+import { PATIENT_DETAILS_ACTION, PATIENT_PROFILE_UPDATE_ACTION } from '../../constants/actions';
+
 
 const PatientListItem = ({item, index}) => {
   const navigation = useNavigation();
-
+  const dispatch = useDispatch()
+  
   return (
     <CustomTouchableOpacity
     key ={index}
       style={styles.patientItemContainer}
       onPress={() => {
-        navigation.navigate(SCREEN_NAMES.PATIENT_PROFILE, {item});
+        navigation.navigate(SCREEN_NAMES.PATIENT_PROFILE);
+        dispatch({
+          type : PATIENT_DETAILS_ACTION.PATIENT_DETAILS,
+          payload : item
+        })
+        dispatch({
+          type : PATIENT_PROFILE_UPDATE_ACTION.PATIENT_PROFILE_UPDATE,
+          payload : true
+        })
       }}>
       <Text
         style={[

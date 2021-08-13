@@ -26,6 +26,7 @@ import {
   ALL_PATIENTS_ACTIONS,
   PATIENT_NAME_ACTION,
 } from '../../constants/actions';
+import Analytics from '../../utils/Analytics'
 import {addPatientAPI, getPatientListAPI} from '../../api/patientsData';
 import patientUpdateApi from '../../api/patientUpdate';
 
@@ -52,6 +53,46 @@ const NewPatientPopUp = ({
   const token = useSelector((state) => state.user.authToken);
   const patientType = updateApiIntegrate ? 'Edit Patient' : 'New Patient';
   const [patientId, setPatientId] = useState(0);
+
+  // useEffect(() => {
+  //   let startTime = 0;
+  //   let endTime = 0;
+  //   const unsubscribeFocus = navigation.addListener('focus', () => {
+  //     startTime = new Date().getTime();
+  //   });
+
+  //   const unsubscribeBlur = navigation.addListener('blur', (e) => {
+  //     endTime = new Date().getTime();
+  //     let screenName =
+  //       e && e.target && e.target.substring(0, e.target.indexOf('-'));
+  //     Analytics.setCurrentScreen(
+  //       screenName,
+  //       (endTime - startTime) / 1000,
+  //       startTime,
+  //       endTime,
+  //     );
+  //   });
+  //   const unsubscribeBeforeRemove = navigation.addListener(
+  //     'beforeRemove',
+  //     (e) => {
+  //       endTime = new Date().getTime();
+  //       let screenName =
+  //         e && e.target && e.target.substring(0, e.target.indexOf('-'));
+  //       Analytics.setCurrentScreen(
+  //         screenName,
+  //         (endTime - startTime) / 1000,
+  //         startTime,
+  //         endTime,
+  //       );
+  //     },
+  //   );
+
+  //   return () => {
+  //     unsubscribeFocus();
+  //     unsubscribeBlur();
+  //     unsubscribeBeforeRemove();
+  //   };
+  // }, [navigation]);
 
   useEffect(() => {
     if (patientData?.first_name) {

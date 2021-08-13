@@ -8,13 +8,11 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import styles from './styles';
 import { SCREEN_NAMES } from '../../constants/navigation';
 import { useDispatch } from 'react-redux';
-import { PAIN_ASSESSMENT_DATA_ACTION, PATIENT_NAME_ACTION } from '../../constants/actions';
+import { PAIN_ASSESSMENT_DATA_ACTION, PATIENT_DETAILS_ACTION, PATIENT_NAME_ACTION } from '../../constants/actions';
 
 const {width, height} = Dimensions.get('window');
 
 const PatientDetailModal = ({open, onClose, patientData}) => {
-  console.log('-----patient data------',patientData)
-
     const navigation = useNavigation()
     const  dispatch = useDispatch()
   const age =
@@ -67,6 +65,10 @@ const PatientDetailModal = ({open, onClose, patientData}) => {
                 }
 
               })
+              dispatch({
+                type: PATIENT_DETAILS_ACTION.PATIENT_DETAILS,
+                payload: patientData,
+              });
                 navigation.navigate(SCREEN_NAMES.PAINASSESSMENT,{
                     name:patientData.name
                 })

@@ -34,6 +34,7 @@ import {useRoute} from '@react-navigation/native';
 const greetingTime = new Date().getHours();
 
 const {width, height} = Dimensions.get('window');
+const screenDimentions = Dimensions.get('screen')
 
 const HomeScreen = ({navigation}) => {
   const screenName = useRoute()?.name;
@@ -148,11 +149,12 @@ const HomeScreen = ({navigation}) => {
           }
           lookupDataAPI(token)
             .then((res) => {
-              console.log('-----lookup--data--res--', res);
+             
               if (res.data.isError) {
                 Alert.alert('-------invalid lookup data--------');
                 return;
               }
+               console.log('-----lookup--data--res--', res);
               let lookupAllData = res.data.result;
               let lookup_data = result.data.result
                 .filter((type) => !type.parentLookupTypeId)
@@ -169,8 +171,10 @@ const HomeScreen = ({navigation}) => {
                           label: data.displayValue,
                           value: data.id,
                           key: data.id,
+                          
                         };
                       }),
+        
                   };
                 });
               result.data.result
@@ -194,6 +198,7 @@ const HomeScreen = ({navigation}) => {
                             label: data.displayValue,
                             value: data.id,
                             key: data.id,
+                            heading : data.categoryName
                           };
                         }),
                     });

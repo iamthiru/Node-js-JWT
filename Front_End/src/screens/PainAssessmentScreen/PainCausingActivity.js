@@ -25,7 +25,7 @@ const PainCausingActivity = ({gotoNext, gotoPrevious}) => {
     (state) => state.createAsseement?.pain_impact_activiy,
   );
   const pain_activity = useSelector((state) => state.lookupData.lookup_data);
-
+  const data = useSelector((state)=>state.createAsseement)
   const activity_data = pain_activity.find((item) => {
     return item.name === 'PainImpact';
   })?.lookup_data;
@@ -109,13 +109,13 @@ const PainCausingActivity = ({gotoNext, gotoPrevious}) => {
               }}>
               {'Choose all that applies'}
             </Text>
-            <CustomTouchableOpacity style={{marginLeft: 15}}>
+            {/* <CustomTouchableOpacity style={{marginLeft: 15}}>
               <AntDesignIcon
                 name={'questioncircle'}
                 size={15}
                 color={COLORS.PRIMARY_MAIN}
               />
-            </CustomTouchableOpacity>
+            </CustomTouchableOpacity> */}
           </View>
 
           {activity_data.map((item, index) => {

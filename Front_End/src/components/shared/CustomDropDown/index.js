@@ -1,5 +1,11 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {ScrollView, Text, useWindowDimensions, View} from 'react-native';
+import {
+  ScrollView,
+  Text,
+  useWindowDimensions,
+  View,
+  SectionList,
+} from 'react-native';
 // import DropDownPicker from 'react-native-dropdown-picker'
 import AntDesignIcon from 'react-native-vector-icons/AntDesign';
 import ReactNativeModal from 'react-native-modal';
@@ -30,6 +36,7 @@ const CustomDropDown = ({
   medicationClass,
   medicationType,
   dropDownMaxHeight = 165,
+  heading,
 }) => {
   const window = useWindowDimensions();
   const [topLeft, setTopLeft] = useState({
@@ -42,8 +49,6 @@ const CustomDropDown = ({
   const dropDownRef = useRef(null);
   const label =
     items.find((item) => item.value === value)?.label || value || '';
-
-
 
   return (
     // <DropDownPicker
@@ -179,48 +184,101 @@ const CustomDropDown = ({
               ? {bottom: window.height - topLeft.top + 20}
               : {top: topLeft.top}),
           }}>
-          <ScrollView
-            showsHorizontalScrollIndicator={false}
-            showsVerticalScrollIndicator={false}
-            style={{
-              width: topLeft.width,
-            }}>
-             {Boolean(items?.length) &&
-              items.map((item) => {
-                const active = item.value === value;
+          {Boolean(!heading) ? (
+            <ScrollView
+              showsHorizontalScrollIndicator={false}
+              showsVerticalScrollIndicator={false}
+              style={{
+                width: topLeft.width,
+              }}>
+              {Boolean(items?.length) &&
+                items.map((item) => {
+                  const active = item.value === value;
 
+                  return (
+                    <View>
+                      <CustomTouchableOpacity
+                        key={item.value}
+                        style={{
+                          width: topLeft.width,
+                          paddingHorizontal: topLeft.width * 0.07,
+                          backgroundColor: active
+                            ? COLORS.PRIMARY_MAIN
+                            : COLORS.WHITE,
+                          paddingVertical: 5,
+                        }}
+                        onPress={() => {
+                          if (onChangeValue) {
+                            onChangeValue(item);
+                          }
+                          setShowPopUp(false);
+                        }}>
+                        <Text
+                          numberOfLines={1}
+                          style={{
+                            ...styles.labelStyle,
+                            ...labelStyle,
+                            ...(active ? styles.activeLabelStyle : {}),
+                          }}>
+                          {Boolean(medicationClass) ? item?.name : item?.label}
+                        </Text>
+                      </CustomTouchableOpacity>
+                    </View>
+                  );
+                })}
+            </ScrollView>
+          ) : (
+            <SectionList
+            showsHorizontalScrollIndicator={false}
+              sections={items}
+              renderItem={({item, index}) => {
+                const active = item.value === value;
                 return (
                   <View>
-                  <CustomTouchableOpacity
-                    key={item.value}
-                    style={{
-                      width: topLeft.width,
-                      paddingHorizontal: topLeft.width * 0.07,
-                      backgroundColor: active
-                        ? COLORS.PRIMARY_MAIN
-                        : COLORS.WHITE,
-                      paddingVertical: 5,
-                    }}
-                    onPress={() => {
-                      if (onChangeValue) {
-                        onChangeValue(item);
-                      }
-                      setShowPopUp(false);
-                    }}>
-                    <Text
-                      numberOfLines={1}
+                    <CustomTouchableOpacity
+                      key={item.value}
                       style={{
-                        ...styles.labelStyle,
-                        ...labelStyle,
-                        ...(active ? styles.activeLabelStyle : {}),
+                        width: topLeft.width,
+                        paddingHorizontal: topLeft.width * 0.07,
+                        backgroundColor: active
+                          ? COLORS.PRIMARY_MAIN
+                          : COLORS.WHITE,
+                        paddingVertical: 5,
+                      }}
+                      onPress={() => {
+                        if (onChangeValue) {
+                          onChangeValue(item);
+                        }
+                        setShowPopUp(false);
                       }}>
-                      {Boolean(medicationClass) ? item?.name : item?.label}
-                    </Text>
-                  </CustomTouchableOpacity>
+                      <Text
+                        numberOfLines={1}
+                        style={{
+                          ...styles.labelStyle,
+                          ...labelStyle,
+                          ...(active ? styles.activeLabelStyle : {}),
+                        }}>
+                        {Boolean(medicationClass) ? item?.name : item?.label}
+                      </Text>
+                    </CustomTouchableOpacity>
                   </View>
                 );
-              })} 
-          </ScrollView>
+              }}
+              renderSectionHeader={({section: {title}}) => {
+                
+              if(!Boolean(title)){
+                return null
+              }
+                return <View style ={{
+                  backgroundColor:COLORS.PRIMARY_MAIN,
+                  paddingVertical:6,
+                  paddingHorizontal:10
+                }} >
+                  <Text style={[styles.labelStyle,{color:COLORS.WHITE, fontWeight: "600"}]}>{title}</Text>
+                </View>
+              }}
+            />
+          )}
         </View>
       </ReactNativeModal>
     </>

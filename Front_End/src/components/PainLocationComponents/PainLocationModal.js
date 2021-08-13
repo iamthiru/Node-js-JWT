@@ -95,7 +95,9 @@ const PainLocationModal = ({
             //   evt.nativeEvent.locationY,
             // );
             return false;
-          }}>
+          }}
+         
+          >
           {bodyPartsPositions.map((body, index) => {
             return (
               <Locations

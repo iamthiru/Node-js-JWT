@@ -20,7 +20,7 @@ const NoEntryCard = ({}) => {
           padding: 20,
         }}>
         <Text style={styles.noEntryMainLabel}>No Entry Yet</Text>
-        <Text numberOfLines={3} style={styles.noEntrySubLabel}>
+        <Text numberOfLines={3} style={[styles.noEntrySubLabel,{fontSize : height>850 ? 16 : 14,lineHeight:height>850 ? 24 : 20,}]}>
           You don’t have any entry yet. Start a new pain assessment or
           medication.
         </Text>
