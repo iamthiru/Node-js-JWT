@@ -1,22 +1,22 @@
 # Algorithmic Flow
-### IMPACT PUPIL v1.3
+## IMPACT PUPIL v1.3
 
 ***
 
-#### Package Imports
+### Package Imports
 > Lines 30-34
 * OpenCV (For Computer Vision)
 * Time, System
 * NumPy (Numerical Python - Numerical Computation)
 * Pandas (For creating / reading dataframes)
 
-#### Module Imports
+### Module Imports
 > Lines 37-39
 * Detector (Functions for Iris & Pupil Detection)
 * Data_Processing (Functions to Process Detected Data)
 * PUAL_Gen (Function to convert Raw Data to Frequency Data)
 
-#### Global Lists
+### Global Lists
 > Lines 42-52
 * **Iris Dilation** (To store frame-wise Iris Radius)
 * **Pupil Dilation** (To store frame-wise Pupil Radius)
@@ -30,7 +30,7 @@
 * **ratio** (To store unfiltered & unprocessed frame-wise Pupil/Iris Ratio)
 * **processed_ratio** (To store filtered & processed frame-wise Pupil/Iris Ratio)
 
-#### Variable Initializations
+### Variable Initializations
 > Lines 55-62
 * **start_time** (Gets the current time)
 * **flag** (For condition checking purposes)
