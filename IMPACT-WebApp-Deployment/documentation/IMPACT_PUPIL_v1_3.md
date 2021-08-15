@@ -1,6 +1,8 @@
 # Algorithmic Flow
 ## IMPACT PUPIL v1.3
 
+(C) Copyright: Benten Technologies, Inc.
+
 ***
 
 ### Package Imports
