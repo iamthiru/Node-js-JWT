@@ -41,7 +41,17 @@
 `Function parameters: { AU_45c_Col, num_steps=fps*Avg_Human_Eye_Blink (0.45s ~ "Medical Standard") }`
 > Lines 63-78
 * Create a new dataframe with null entries under column AU_45c
-* 
+* Start a For Loop with 'i' from 0-length of AU_45c column
+  * Initialize 'end_ix' to be window (i to i+num_steps)
+  * If 'end_ix' goes out of range & greater than size of AU_45c column
+    * Break the Loop
+  * Get data out from the window into the score variable
+  * Since 'c' in AU_45c indicates 'Absence'/'Presence' of AU_45c, if 1 occurs in all the frames in that window, it is considered as an eye-closure, else an eye-blink (hence we take the product)
+  * Eye closure means '1' in all the frames for that window duration
+  * 'mult' will be '1' if product of frame values inside the window is 1 else 0
+  * If 'mult' variable is '1'
+    * We mark that window inside the new dataframe as '1' else '0'
+* Return the new dataframe (This is the AU_43c dataframe)
 
 
 ***
