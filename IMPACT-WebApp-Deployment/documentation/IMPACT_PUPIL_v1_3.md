@@ -46,7 +46,7 @@
   * Load the name of the video file
   * Load the video type (Color or NIR)
   * Open video capturing from specified video file & from specific location (/static/Pupil_Input_Videos)
-* If no arguments:
+* If no arguments
   * Exit the process
 
 > Lines 79-83
@@ -54,8 +54,18 @@
 * Load the Static-Dynamic Pupil & Iris Threshold Detector for the video into Pupil_Thresh & Iris_Thresh variables
 
 > Lines 88-141
-* 
-
+* While Video is not over
+  * Open one frame at a time inside ret, frame variables
+  * If the frame can be opened & is readable
+    * Append the frame count into frame_num list
+    * Increment the counter
+    * Check what kind of video it is (NIR/Color)
+      * Retrieve the file extension (mp4/avi/mov)
+      * Retrieve the dimensions of the frame
+      * Copy the original frame (We do not want to process on top of the original frame)
+      * Use the Iris cropping function in the Detector module to crop the original frame to get only the Iris
+      * Use Gaussian Blur with (5, 5) weights to blur the frame (Helps in Noise removal)
+      * 
 
 
 ***
