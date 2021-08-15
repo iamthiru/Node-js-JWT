@@ -1,6 +1,8 @@
 # Algorithmic Flow
 ## IMPACT FACIAL v1.0
 
+(C) Copyright: Benten Technologies, Inc.
+
 ***
 
 ### Package Imports
@@ -29,12 +31,17 @@
 * Popen will run the command in shell CLI
 
 #### B. fps_calculator
-`Function parameters: { input_path, output_path }`
+`Function parameters: { video-path }`
 > Lines 51-56
+* Open the video from the video-path using OpenCV video capture mode
+* Calculate the fps of the video
+* Return the fps of the video
 
-
-
-
+#### C. Calculate_AU43
+`Function parameters: { AU_45c_Col, num_steps=fps*Avg_Human_Eye_Blink (0.45s ~ "Medical Standard") }`
+> Lines 63-78
+* Create a new dataframe with null entries under column AU_45c
+* 
 
 
 ***
