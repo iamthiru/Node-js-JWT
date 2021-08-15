@@ -40,4 +40,22 @@
 * **frame_array** (An array which stores the frames with Iris and Pupil circles drawn post-processing)
 * **size** (A tuple which stores the frame dimensions)
 
+### Main Algorithm
+> Lines 68-76
+* Checking if the required system arguments are provided (filename + video-type)
+  * Load the name of the video file
+  * Load the video type (Color or NIR)
+  * Open video capturing from specified video file & from specific location (/static/Pupil_Input_Videos)
+* If no arguments:
+  * Exit the process
+
+> Lines 79-83
+* Calculate the FPS of Video
+* Load the Static-Dynamic Pupil & Iris Threshold Detector for the video into Pupil_Thresh & Iris_Thresh variables
+
+> Lines 88-141
+* 
+
+
+
 ***
