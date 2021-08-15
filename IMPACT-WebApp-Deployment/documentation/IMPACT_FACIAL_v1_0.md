@@ -71,5 +71,32 @@
 * Append the 'SUM_AUs_r' into 'Final_DF' dataframe
 * Convert this dataframe 'Final_DF' into a CSV file and save the CSV as {filename}_PSPI_AUs.csv
 
+#### E. Calculate_Pain_Labeler
+`Function parameters: { out-path, file-path, filename_wo_extension, num_steps=video_fps }`
+> Lines 161-216
+* Read the PSPI_AUs CSV file from given filepath
+* This is a Bucket creation and mapping function 
+* The variables 'no_pain_UL', 'pain_1_UL' and 'pain_2_UL' are calculated after processing ML/DL models from Delaware Pain DB, BioVid etc.
+* Set start_index as '0' and end_index as num_steps (num_steps = fps of video)
+* Gather the 'SUM_AUs_r' column data from PSPI_AUs CSV file into 'x_data'
+* Initialize Word_Label list to be empty
+* For the first sequence (0-60 if 60 FPS or 0-30 if 30 FPS), 'seq_X' = x_data[0:60] or x_data[0:30]
+* Set the 'slider_value' as mean of 'seq_X'
+* Label the first second (60 frames / 30 frames based on FPS) as "No Pain", "Pain Level 1", "Pain Level 2" or "Pain Level 3" based on under which bucket this 'slider_value' falls
+* Append the Label to 'Word_Label'
+* Loop 'i' over the entire 'x_data' column with sliding window index technique
+* Since we calculated for the first 30/60 frames (=1second), we set 'start_index' = 'start_index' (initially 0) + FPS
+* 'end_index' = previous 'end_index' + FPS { Try to visualize this window }
+* If the 'end_index' goes over the size of the column, then we break out of the For Loop
+* Get the 'seq_X' from the current 'start_index' and 'end_index' range
+* Set the slider value as mean of this current 'seq_X'
+* Again Label this 'second' (60 frames / 30 frames) as "No Pain", "Pain Level 1", "Pain Level 2" or "Pain Level 3" based on under which bucket this 'slider_value' falls
+* Create a Label CSV file after converting the 'Word_Label' column into a dataframe
+* Name the column as 'Label' and also add columns 'Time (sec)' and 'Video Score'
+* Save this CSV to the out-path provided
+* Return the 'Word_Label' list
+
+**NOTE: This Function is labelling every second (time) with a word label**
+
 
 ***
