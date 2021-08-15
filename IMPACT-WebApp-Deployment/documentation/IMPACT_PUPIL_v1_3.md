@@ -30,4 +30,14 @@
 * **ratio** (To store unfiltered & unprocessed frame-wise Pupil/Iris Ratio)
 * **processed_ratio** (To store filtered & processed frame-wise Pupil/Iris Ratio)
 
+#### Variable Initializations
+> Lines 55-62
+* **start_time** (Gets the current time)
+* **flag** (For condition checking purposes)
+* **token** (Monitors and labels a video as 'Good' or 'Bad' based on results after processing)
+* **count** (For counting purposes)
+* **counter** (For counting purposes)
+* **frame_array** (An array which stores the frames with Iris and Pupil circles drawn post-processing)
+* **size** (A tuple which stores the frame dimensions)
+
 ***
