@@ -854,8 +854,8 @@
 				CODE_SIGN_ENTITLEMENTS = Impact/Impact.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 61;
-				DEVELOPMENT_TEAM = "";
+				CURRENT_PROJECT_VERSION = 63;
+				DEVELOPMENT_TEAM = 4LDRLS6A7A;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Impact/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
@@ -885,8 +885,8 @@
 				CODE_SIGN_ENTITLEMENTS = Impact/Impact.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 61;
-				DEVELOPMENT_TEAM = "";
+				CURRENT_PROJECT_VERSION = 63;
+				DEVELOPMENT_TEAM = 4LDRLS6A7A;
 				INFOPLIST_FILE = Impact/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";

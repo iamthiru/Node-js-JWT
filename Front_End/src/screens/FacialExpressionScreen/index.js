@@ -424,7 +424,7 @@ const FacialExpressionScreen = ({navigation}) => {
         ),
       };
     } else {
-      if(height > 850 && resolution > 1080){
+      if (height > 850 && resolution >1080) {
         options = {
           cropWidth: resolution - 40,
           cropHeight: ((resolution - 40) * (height-220)/width),
@@ -680,6 +680,16 @@ const FacialExpressionScreen = ({navigation}) => {
                   'initiateFacialExpressionVideoProcessingAPI: ',
                   result,
                 );
+                if (result?.data?.status === 'Failure') {
+                  Alert.alert('Error  : ' + result?.data?.msg + ' '+ result?.data?.code);
+                  setResultReady(false);
+                  setShowSpinner({
+                    open: false,
+                    message: '',
+                  });
+                  clearProcessingTimer();
+                  return;
+                }
                 if (result && result.data === 'Retake') {
                   Alert.alert('Error', 'Please retake the video');
                   setResultReady(false);
@@ -693,7 +703,7 @@ const FacialExpressionScreen = ({navigation}) => {
                   return;
                 }
                 // clearAssessmentStoreData();
-                setResultValue(result?.data);
+                setResultValue(result?.data?.result);
                 setResultReady(true);
                 setShowSpinner({
                   open: false,
@@ -752,14 +762,17 @@ const FacialExpressionScreen = ({navigation}) => {
 
   const handleCreateAssessmentAPI = () => {
     let facialMaxValue = 0;
-    let facial_exp_parsed_value = Boolean(resultValue)
-      ? JSON.parse(resultValue.replace(/'/g, '"'))
+    // let facial_exp_parsed_value = Boolean(resultValue)
+    //   ? JSON.parse(resultValue.replace(/'/g, '"'))
+    //   : [0];
+    let facial_exp_parsed_value = Boolean(resultValue?.length)
+      ? resultValue
       : [0];
     const facialResultData = facial_exp_parsed_value.map((res) =>
       parseInt(res),
     );
     facialResultData.map((score) => {
-      if (score !== NaN) {
+      if (score !== NaN || score !== undefined) {
         if (score > facialMaxValue) {
           facialMaxValue = score;
         }
@@ -772,7 +785,7 @@ const FacialExpressionScreen = ({navigation}) => {
       ? assessment_data?.pupillary_dilation
       : [0];
     let pupilary_data_result = pupilary_data[pupilary_data.length - 1];
-    let total_score = facialMaxValue; //  Number(pupilary_data_result)
+    let total_score = facialMaxValue; 
 
     dispatch({
       type: CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,

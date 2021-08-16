@@ -150,7 +150,6 @@ const PupillaryDilationScreen = ({navigation}) => {
         endTime,
       );
     });
-
     const unsubscribeBeforeRemove = navigation.addListener(
       'beforeRemove',
       (e) => {
@@ -565,6 +564,16 @@ const PupillaryDilationScreen = ({navigation}) => {
             initiatePupilVideoProcessingAPI(filename)
               .then((result) => {
                 // console.log('initiatePupilVideoProcessingAPI: ', result);
+                if (result?.data?.status === 'Failure') {
+                  Alert.alert(
+                    'Error :' + result?.data?.msg + ' ' + result?.data?.code
+                  );
+                  setShowSpinner(false);
+                  setSpinnerMessage('');
+                  setResultReady(false);
+                  clearProcessingTimer();
+                  return 
+                }
                 if (result && result.data === 'Retake') {
                   Alert.alert('Error', 'Please retake the video');
                   setResultReady(false);
@@ -574,7 +583,7 @@ const PupillaryDilationScreen = ({navigation}) => {
                   clearProcessingTimer();
                   // resetStates('');
                 }
-                setResultValue(result.data);
+                setResultValue(result.data?.result);
                 setResultReady(true);
                 setShowSpinner(false);
                 setSpinnerMessage('');
@@ -612,6 +621,7 @@ const PupillaryDilationScreen = ({navigation}) => {
       setResultReady(false);
       setShowProcessedResult(false);
       clearProcessingTimer();
+      return 
       // resetStates();
     }
   };
@@ -699,10 +709,12 @@ const PupillaryDilationScreen = ({navigation}) => {
   };
 
   const handleOnNextPress = () => {
+    let resultData= []
+     resultData = resultValue.map((res)=>parseInt(res))
     dispatch({
       type: CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
       payload: {
-        pupillary_dilation: Number(resultValue),
+        pupillary_dilation:resultData,
       },
     });
     navigation.navigate(SCREEN_NAMES.FACIAL_EXPRESSION);
@@ -1840,7 +1852,7 @@ const PupillaryDilationScreen = ({navigation}) => {
                   alignItems: 'flex-end',
                   paddingHorizontal: 30,
                   paddingTop: height < 600 ? 0 : 20,
-                  bottom: height < 600 ? 30 : 0,
+                  bottom: height < 700 ? 30 : 0,
                   zIndex: 10,
                 }}>
                 <CustomTouchableOpacity
@@ -1895,7 +1907,7 @@ const PupillaryDilationScreen = ({navigation}) => {
                   color: COLORS.GRAY_90,
                   textAlign: 'center',
                   marginBottom: 15,
-                }}>{`RESULT:  PUAL:${resultValue[0]},Ratio:${resultValue[1]}`}</Text>
+                }}>{`PUAL:${resultValue[0]} , Ratio:${resultValue[1]}`}</Text>
               <CustomTouchableOpacity
                 disabled={processing}
                 style={{

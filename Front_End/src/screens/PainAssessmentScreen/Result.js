@@ -30,7 +30,6 @@ const Result = (props) => {
   const forceUpdate = useSelector((state) => state.patientProfileUpdate.update)
   const screenName = useSelector((state) => state.routeName.route);
   const patient_id  = useSelector((state)=>state.patientDetails.item.id)
-  console.log('---patient --- id details---',patient_id)
   const dispatch = useDispatch();
 
   useEffect(() => {
