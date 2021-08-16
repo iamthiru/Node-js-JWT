@@ -98,5 +98,51 @@
 
 **NOTE: This Function is labelling every second (time) with a word label**
 
+#### F. Video_Labeler
+`Function parameters: { out-path, filename_wo_extension, label_list=Word_Label }`
+> Lines 223-257
+* Each Pain Level (0/1/2/3) here are finalized after application of ML/DL techniques over BioVid Dataset
+* Initialize count variables for no-pain, pain1, pain2, pain3 as '0'
+* Count the no-pains, pain1s, pain2s, pain3s from the Label_List generated
+* Score calculated is the weighted mean; it will be based on count of different levels of pain
+* Normalize the Pain Score by removing No Pain part and dividing by Pain part and multiply by 10 to map it to scale of 0-10
+* Append this 'Final Video Score' as a column in the label_file
+* Save this as a CSV file {filename}_LabelFile.csv
+* Return the computed score
+
+#### G. Graph_Plot
+`Function parameters: { out-path, file-path, filename, 0 }`
+> Lines 263-275
+* Load the CSV using pandas into a dataframe
+* Grab hold of two columns ('sum_AU_r' or 'PSPI_AU_r') & 'frames'
+* Plot graph with 'frames' on x-axis and 'sum_AU_r' or 'PSPI_AU_r' on y-axis
+* Save plotted figure
+* Close plots
+
+### Main Algorithm
+* Set input-path and out-path
+* Set tag as '0'
+* If the code is called using system arguments { filename }
+  * Set 'filenm' as global
+  * Get 'filenm' from provided system argument variable
+  * Set input-path as '/static/Face_Input_Videos/'; this is where the video-file will be placed
+  * Set tag as '1'
+* Else if nothing is provided in system argument variables
+  * Use a default face.mp4 file loaded inside '/static/Face_Input_Videos/'
+  * Load the input-path as the file-path
+* Calculate the FPS of the video by passing it to fps_calculator function
+* If tag is '1' (system argument variables are provided)
+  * Make OpenFace_API_Call on file provided from system arguments
+  * Compute and produce PSPI_AUs CSV file from the main CSV file from OpenFace_API_Call result
+  * Pipe the PSPI_AUs CSV file to Calculate_Pain_Labeler function to produce Word Labels
+  * Pipe the Word Label list to Video_Labeler to generate a final video score
+  * Plot the Graph using the CSV file
+* Else (if not arguments provided)
+  * Make OpenFace_API_Call on default file present in system
+  * Compute and produce PSPI_AUs CSV file from the main CSV file from OpenFace_API_Call result
+  * Pipe the PSPI_AUs CSV file to Calculate_Pain_Labeler function to produce Word Labels
+  * Pipe the Word Label list to Video_Labeler to generate a final video score
+  * Plot the Graph using the CSV file
+* Compute the resources (time/memory/cpu) used to run this entire process
 
 ***
