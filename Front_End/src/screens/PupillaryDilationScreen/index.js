@@ -243,11 +243,11 @@ const PupillaryDilationScreen = ({navigation}) => {
     if (!isCameraReady) {
       return;
     }
-    if (Platform.OS === 'ios') {
-      setZoom(fixZoom * 11.5);
-    } else {
-      setZoom(fixZoom);
-    }
+    // if (Platform.OS === 'ios') {
+    //   setZoom(fixZoom * 11.5);
+    // } else {
+    //   setZoom(fixZoom);
+    // }
     const recordOptions = {
       mute: true,
       quality: RNCamera.Constants.VideoQuality['1080p'],
@@ -581,6 +581,7 @@ const PupillaryDilationScreen = ({navigation}) => {
                   setShowSpinner(false);
                   setSpinnerMessage('');
                   clearProcessingTimer();
+                  return 
                   // resetStates('');
                 }
                 setResultValue(result.data?.result);
@@ -676,7 +677,7 @@ const PupillaryDilationScreen = ({navigation}) => {
   };
 
   const onRetakePress = () => {
-    setZoom(fixZoom);
+    // setZoom(fixZoom);
     resetStates();
   };
 
@@ -760,6 +761,7 @@ const PupillaryDilationScreen = ({navigation}) => {
             zoom={Platform.OS === 'ios' ? zoom / 1000 : zoom / 10}
             focusDepth={focusDepth}
             exposure={exposure < 0.15 ? 0.15 : exposure}
+            videoStabilizationMode = {'standard'}
             flashMode={
               flashOn && isCameraReady
                 ? RNCamera.Constants.FlashMode.torch
@@ -1907,7 +1909,7 @@ const PupillaryDilationScreen = ({navigation}) => {
                   color: COLORS.GRAY_90,
                   textAlign: 'center',
                   marginBottom: 15,
-                }}>{`PUAL:${resultValue[0]} , Ratio:${resultValue[1]}`}</Text>
+                }}>{`PUAL:${resultValue[0]}   Ratio:${resultValue[1]}`}</Text>
               <CustomTouchableOpacity
                 disabled={processing}
                 style={{

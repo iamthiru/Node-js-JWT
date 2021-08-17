@@ -318,11 +318,11 @@ const FacialExpressionScreen = ({navigation}) => {
     if (!isCameraReady) {
       return;
     }
-    if (Platform.OS === 'ios') {
-      setZoom(fixZoom * 10);
-    } else {
-      setZoom(fixZoom);
-    }
+    // if (Platform.OS === 'ios') {
+    //   setZoom(fixZoom * 10);
+    // } else {
+    //   setZoom(fixZoom);
+    // }
     const recordOptions = {
       mute: true,
       quality:
@@ -332,8 +332,8 @@ const FacialExpressionScreen = ({navigation}) => {
           ? RNCamera.Constants.VideoQuality['480p']
           : height < 700 && resolution > 540 && resolution <= 720
           ? RNCamera.Constants.VideoQuality['720p']
-          : resolution > 1080
-          ? RNCamera.Constants.VideoQuality['2160p']
+          : resolution >1080
+          ? RNCamera.Constants.VideoQuality['1080p']
           : RNCamera.Constants.VideoQuality['1080p'],
     };
 
@@ -426,11 +426,11 @@ const FacialExpressionScreen = ({navigation}) => {
     } else {
       if (height > 850 && resolution >1080) {
         options = {
-          cropWidth: resolution - 40,
-          cropHeight: ((resolution - 40) * (height-220)/width),
+          cropWidth: 1080 - 40,
+          cropHeight: (height-220)*1.77,
           cropOffsetX: 20,
           cropOffsetY: 40
-        }
+        }          
       } else if (height > 700) {
         options = {
           cropWidth: parseInt(screen - paddingValue),
@@ -446,30 +446,18 @@ const FacialExpressionScreen = ({navigation}) => {
         if (resolution > 540) {
           // j3 device
           options = {
-            cropWidth: parseInt(screenWidth + width / 2),
-            cropHeight: parseInt(
-              screenWidth * screenDimentions.scale + width / 3,
-            ),
-            cropOffsetX: parseInt(screenWidth + width / 3),
-            cropOffsetY: parseInt(
-              screenWidth +
-                (width + width * screenDimentions.scale) -
-                width / 4,
-            ),
-          };
+              cropWidth: screenWidth + height /3,
+              cropHeight: ( height - 220) * 1.8, 
+              cropOffsetX: 20,
+              cropOffsetY: 220
+            }
         } else {
           // j2
           options = {
             cropWidth: parseInt(screenWidth + width / 2),
-            cropHeight: parseInt(
-              screenWidth * screenDimentions.scale + width / 2.5,
-            ),
-            cropOffsetX: parseInt(screenWidth + width),
-            cropOffsetY: parseInt(
-              screenWidth +
-                (width + width * screenDimentions.scale) -
-                width / 4,
-            ),
+            cropHeight:  ( height -220) * 1.6,
+            cropOffsetX: 30 ,
+            cropOffsetY : 250
           };
         }
       }
@@ -756,7 +744,7 @@ const FacialExpressionScreen = ({navigation}) => {
   const onRetakePress = () => {
     // setVideoURL("");
     setShowEnableButton(!showEnableButton);
-    setZoom(fixZoom);
+    // setZoom(fixZoom);
     resetStates();
   };
 
@@ -1012,6 +1000,7 @@ const FacialExpressionScreen = ({navigation}) => {
             zoom={Platform.OS === 'ios' ? zoom / 1000 : zoom / 10}
             focusDepth={focusDepth}
             exposure={exposure < 0.15 ? 0.15 : exposure}
+           videoStabilizationMode = {'standard'}
             flashMode={
               flashOn && isCameraReady
                 ? RNCamera.Constants.FlashMode.torch
@@ -1587,6 +1576,7 @@ const FacialExpressionScreen = ({navigation}) => {
         <View style={{height: width + width * 0.25, width: width}}>
           <Video
             source={{uri: videoURL}}
+            resizeMode='contain'
             controls={true}
             style={{
               position: 'absolute',

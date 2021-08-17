@@ -69,3 +69,4 @@ Front_End/ios/Pods/
 # Excluding venv and AWS Keys
 venv
 /IMPACT-WebApp-Deployment/Keys.yaml
+/Front_End/android/app/release
