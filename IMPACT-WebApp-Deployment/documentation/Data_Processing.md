@@ -1,5 +1,5 @@
 # Algorithmic Flow
-## Data Prcoessing
+## Data Processing
 
 (C) Copyright: Benten Technologies, Inc.
 
@@ -18,14 +18,23 @@
 #### A. Output_Visual_Video_Generate
 `Function parameters: { filename, fps, size, frame_array }`
 > Lines 26-31
-* Defines the output path for the file sent as input
-* VideoWriter will write frames to a mp4 video file
+* Path where we will save the Output Video file
+* VideoWriter in-built function will convert frames to a mp4 video file
+* We create a video by stitching all the frames together
 
 #### B. List_Processing
-`Function parameters: {frame number, Pupil Dilation, Iris Dilation }`
+`Function parameters: { frame number, Pupil Dilation, Iris Dilation }`
 > Lines 36-63
-* Initially prints the length of frame number, Pupil Dilation and Iris Dilation
-* Return the Pupil Dilation and Iris Dilation value
+* This function is used to check if we missed detections for Pupil and Iris
+* Case1: if we have 500 frames but the Pupil list contains lesser frames, this means some frames went undetected
+  * In this case compute the difference in two lists and replicate the detection value for the last frame from Pupil List for all missing frames
+* Case2: if we have 500 frames but the Pupil list contains more than 500 frames, this means we have multiple detections inside frames
+  * In this case we get rid of the surplus frames in the Pupil List
+* Case1: if we have 500 frames but the Iris list contains lesser frames, this means some frames went undetected
+  * In this case compute the difference in two lists and replicate the detection value for the last frame from Iris List for all missing frames
+* Case2: if we have 500 frames but the Iris list contains more than 500 frames, this means we have multiple detections inside frames
+  * In this case we get rid of the surplus frames in the Iris List
+* Return the Pupil Dilation and Iris Dilation Lists
 
 #### C. Make_DFS
 `Function parameters: { filename, frame_num, Iris_Dilation, Pupil_Dilation, ratio, processed_ratio }`
