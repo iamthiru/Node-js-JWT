@@ -40,21 +40,23 @@
 `Function parameters: { filename, frame_num, Iris_Dilation, Pupil_Dilation, ratio, processed_ratio }`
 > Lines 68-111
 * Create a new dataframe with Pupil and Iris dilation values
-* Start a For Loop with 'i' from 0-length of last frame
+* Start a For Loop with 'i' from 0 to no. of frames
   * Initialize 'dt_P' to be Pupil_Dilation[current_frame(i)]
-  * Initialize 'dt_I' to be Iris_Dilation[current_frame(i)]  
-  * Appending dt_P and dt_I to Pupil_memory and Iris_memory respectively
-  * Computing 'drop_P' as '0.80 * np.mean(Pupil_Dilation)'
-  * Computing 'Surge_P' as '(0.20 + 1) * np.mean(Pupil_Dilation)'
-  * Computing 'drop_I' as '0.90 * np.mean(Iris_Dilation)'
-  * Computing 'Surge_I' as '(1 + 0.10) * np.mean(Iris_Dilation)'  
-  * IF ('i' is between '0' and length of frame number) AND ('dt_P' is below 'drop_P') OR ('dt_P'  is above 'surge_P'))
-    * current_frame(i) is assigned mean of all previous Pupil_Dilation values
-  * IF ('i' is between '0' and length of frame number) AND (('dt_I' is below 'drop_I') OR ('dt_I' is above 'surge_I'))
-    * current_frame(i) is assigned mean of all previous Iris_Dilation values 
-* Dataframes - Processed Iris Dilation and Processed Pupil Dilation     
-* Defining dataframe columns as - 'Frame', 'Iris Dilation', 'Pupil Dilation', 'Ratio', 'Processed Iris Dilation', 'Processed Pupil Dilation', 'Processed Ratio'
+  * Initialize 'dt_I' to be Iris_Dilation[current_frame(i)]
+  * For Pupil, we try to monitor for false detections / noise; We are looking out for sudden drop / surge in Pupil value
+  * 'drop_P' and 'surge_P' mark the allowable drops / surges in the value of the Pupil detection in the current frame
+  * * For Pupil, we try to monitor for false detections / noise; We are looking out for sudden drop / surge in Pupil value
+  * 'drop_I' and 'surge_I' mark the allowable drops / surges in the value of the Iris detection in the current frame
+  * IF current pupil detected value 'dt_P', has dropped more than allowed drop value 'drop_P' OR current pupil detected value 'dt_P', has surged more than allowed surge value 'surge_P'
+    * current pupil detection will be assigned the mean of all previously detected Pupil values
+  * IF current iris detected value 'dt_I', has dropped more than allowed drop value 'drop_I' OR current iris detected value 'dt_I', has surged more than allowed surge value 'surge_I'
+    * current iris detection will be assigned the mean of all previously detected Iris values
+* New Column is created named 'Processed Iris Dilation' and 'Processed Pupil Dilation'     
+* 'processed_ratio' list will be appended ratio of Pupil / Iris with up to 5 points after the decimal
+* This 'processed_ratio' list is appended to the new Dataframe column
+* Defining Dataframe columns as - 'Frame', 'Iris Dilation', 'Pupil Dilation', 'Ratio', 'Processed Iris Dilation', 'Processed Pupil Dilation', 'Processed Ratio'
 * Converting the dataframe into two CSV files - 'Dilation.csv' and 'Ratio_Dilation.csv'
+* Dilation.csv will contain all columns while Ratio_Dilation.csv will contain only 'Frames' & 'Processed Ratio' (Smaller File)
 * Return 'ratio' and 'processed_ratio'
 
 
