@@ -1,13 +1,16 @@
 # Docker will ignore these files for the build
+.git
+venv
 .idea
+OpenFace
 .DS_Store
 __pycache__
-static/Pupil_Input_Videos/Test*
+documentation/*
+aws/aws-arch-diag
+static/Device_Data/*
+static/Face_Output_Images/*
 static/Pupil_Output_Images/*
 static/Pupil_Output_Videos/*
+static/clinical_pupil_videos/*
 static/Face_Input_Videos/Test*
-static/Face_Output_Images/*
-static/tempData/*
-venv
-.git
-OpenFace
+static/Pupil_Input_Videos/Test*
