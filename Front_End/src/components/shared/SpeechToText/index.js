@@ -47,7 +47,7 @@ const SpeechToText = ({setPartialResults}) => {
           textAlign: 'center',
           marginBottom: 10,
         }}>
-        Press and hold the mic to enter notes by voice{' '}
+        Press the mic to enter notes by voice{' '}
       </Text>
       <TouchableOpacity
         activeOpacity={0.5}

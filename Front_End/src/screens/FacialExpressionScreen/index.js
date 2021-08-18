@@ -71,6 +71,8 @@ const SETTINGS = {
   EXPOSURE: 'exposure',
   FOCUS_DEPTH: 'focusDepth',
 };
+let uploadingTime = 0;
+let processingTime = 0;
 
 const DEFAULT_DARK_BROWN_EXPOSURE = 0.8;
 const DEFAULT_OTHER_EXPOSURE = 0.6; //0.0; //0.2
@@ -284,10 +286,15 @@ const FacialExpressionScreen = ({navigation}) => {
     }
   };
 
-  const startProcessingTimer = () => {
+  const startProcessingTimer = (uploading) => {
     let timerValue = 0;
     processingIntervalId = setInterval(() => {
       timerValue += 1;
+      if (uploading) {
+        uploadingTime += 1;
+      } else {
+        processingTime += 1;
+      }
       setProcessingTimer(timerValue.toString());
     }, 1000);
   };
@@ -332,7 +339,7 @@ const FacialExpressionScreen = ({navigation}) => {
           ? RNCamera.Constants.VideoQuality['480p']
           : height < 700 && resolution > 540 && resolution <= 720
           ? RNCamera.Constants.VideoQuality['720p']
-          : resolution >1080
+          : resolution > 1080
           ? RNCamera.Constants.VideoQuality['1080p']
           : RNCamera.Constants.VideoQuality['1080p'],
     };
@@ -424,13 +431,13 @@ const FacialExpressionScreen = ({navigation}) => {
         ),
       };
     } else {
-      if (height > 850 && resolution >1080) {
+      if (height > 850 && resolution > 1080) {
         options = {
           cropWidth: 1080 - 40,
-          cropHeight: (height-220)*1.77,
+          cropHeight: (height - 220) * 1.77,
           cropOffsetX: 20,
-          cropOffsetY: 40
-        }          
+          cropOffsetY: 40,
+        };
       } else if (height > 700) {
         options = {
           cropWidth: parseInt(screen - paddingValue),
@@ -446,18 +453,18 @@ const FacialExpressionScreen = ({navigation}) => {
         if (resolution > 540) {
           // j3 device
           options = {
-              cropWidth: screenWidth + height /3,
-              cropHeight: ( height - 220) * 1.8, 
-              cropOffsetX: 20,
-              cropOffsetY: 220
-            }
+            cropWidth: screenWidth + height / 3,
+            cropHeight: (height - 220) * 1.8,
+            cropOffsetX: 20,
+            cropOffsetY: 220,
+          };
         } else {
           // j2
           options = {
             cropWidth: parseInt(screenWidth + width / 2),
-            cropHeight:  ( height -220) * 1.6,
-            cropOffsetX: 30 ,
-            cropOffsetY : 250
+            cropHeight: (height - 220) * 1.6,
+            cropOffsetX: 30,
+            cropOffsetY: 250,
           };
         }
       }
@@ -564,7 +571,8 @@ const FacialExpressionScreen = ({navigation}) => {
       open: true,
       message: 'Uploading...',
     });
-    startProcessingTimer();
+    uploadingTime = 0;
+    startProcessingTimer(true);
 
     try {
       const s3bucket = new S3({
@@ -622,27 +630,27 @@ const FacialExpressionScreen = ({navigation}) => {
           ACL: 'public-read',
         };
         //TODO discuss with pranav for ACL public/private
-        let abortTimeout = null;
+        // let abortTimeout = null;
         const uploadBucket = s3bucket.upload(params, (err, data) => {
-          if (abortTimeout) {
-            clearTimeout(abortTimeout);
-          }
+          // if (abortTimeout) {
+          //   clearTimeout(abortTimeout);
+          // }
           if (err) {
-            if (
-              err?.message === 'Request aborted' ||
-              err?.message === 'Request aborted by user'
-            ) {
-              Alert.alert(
-                'Timeout for video uploading  in s3  ' + err?.message,
-              );
-              setShowSpinner({
-                open: false,
-                message: '',
-              });
-              clearProcessingTimer();
-              setResultReady(false);
-              return;
-            }
+            // if (
+            //   err?.message === 'Request aborted' ||
+            //   err?.message === 'Request aborted by user'
+            // ) {
+            //   Alert.alert(
+            //     'Timeout for video uploading  in s3  ' + err?.message,
+            //   );
+            //   setShowSpinner({
+            //     open: false,
+            //     message: '',
+            //   });
+            //   clearProcessingTimer();
+            //   setResultReady(false);
+            //   return;
+            // }
             console.log('error in callback', err);
             Alert.alert(
               'Error',
@@ -657,11 +665,14 @@ const FacialExpressionScreen = ({navigation}) => {
             setResultReady(false);
           } else {
             // handleCreateAssessmentAPI()
+            clearProcessingTimer();
 
             setShowSpinner({
               open: true,
               message: 'Processing...',
             });
+            processingTime = 0;
+            startProcessingTimer();
             initiateFacialExpressionVideoProcessingAPI(filename)
               .then((result) => {
                 console.log(
@@ -669,7 +680,9 @@ const FacialExpressionScreen = ({navigation}) => {
                   result,
                 );
                 if (result?.data?.status === 'Failure') {
-                  Alert.alert('Error  : ' + result?.data?.msg + ' '+ result?.data?.code);
+                  Alert.alert(
+                    'Error  : ' + result?.data?.msg + ' ' + result?.data?.code,
+                  );
                   setResultReady(false);
                   setShowSpinner({
                     open: false,
@@ -725,10 +738,10 @@ const FacialExpressionScreen = ({navigation}) => {
               });
           }
         });
-        abortTimeout = setTimeout(
-          uploadBucket.abort.bind(uploadBucket),
-          100000,
-        );
+        // abortTimeout = setTimeout(
+        //   uploadBucket.abort.bind(uploadBucket),
+        //   400000,
+        // );
       });
     } catch (err) {
       Alert.alert('Error', 'Error in uploading the video');
@@ -773,7 +786,7 @@ const FacialExpressionScreen = ({navigation}) => {
       ? assessment_data?.pupillary_dilation
       : [0];
     let pupilary_data_result = pupilary_data[pupilary_data.length - 1];
-    let total_score = facialMaxValue; 
+    let total_score = facialMaxValue;
 
     dispatch({
       type: CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
@@ -1000,7 +1013,7 @@ const FacialExpressionScreen = ({navigation}) => {
             zoom={Platform.OS === 'ios' ? zoom / 1000 : zoom / 10}
             focusDepth={focusDepth}
             exposure={exposure < 0.15 ? 0.15 : exposure}
-           videoStabilizationMode = {'standard'}
+            videoStabilizationMode={'standard'}
             flashMode={
               flashOn && isCameraReady
                 ? RNCamera.Constants.FlashMode.torch
@@ -1576,7 +1589,7 @@ const FacialExpressionScreen = ({navigation}) => {
         <View style={{height: width + width * 0.25, width: width}}>
           <Video
             source={{uri: videoURL}}
-            resizeMode='contain'
+            resizeMode="contain"
             controls={true}
             style={{
               position: 'absolute',
@@ -1718,6 +1731,32 @@ const FacialExpressionScreen = ({navigation}) => {
                   textAlign: 'center',
                   marginBottom: 15,
                 }}>{`RESULT: ${resultValue}`}</Text>
+                <View style ={{flexDirection:'row'}}>
+                <Text
+                style={{
+                  fontSize: 16,
+                  fontWeight: '700',
+                  color: COLORS.GRAY_90,
+                  textAlign: 'center',
+                  marginBottom: 15,
+                }}>{`DURATION: `}</Text>
+                 <Text
+                style={{
+                  fontSize: 16,
+                  fontWeight: '700',
+                  color: COLORS.GRAY_90,
+                  textAlign: 'center',
+                  marginBottom: 15,
+                }}>{`Uploading:${uploadingTime}`}</Text>
+                 <Text
+                style={{
+                  fontSize: 16,
+                  fontWeight: '700',
+                  color: COLORS.GRAY_90,
+                  textAlign: 'center',
+                  marginBottom: 15,
+                }}>{` Processing:${processingTime}`}</Text>
+                </View>
               <CustomTouchableOpacity
                 disabled={processing}
                 style={{

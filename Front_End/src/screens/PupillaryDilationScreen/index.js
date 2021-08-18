@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import {
   View,
   Text,
@@ -25,7 +25,7 @@ import Video from 'react-native-video';
 import DeviceInfo from 'react-native-device-info';
 import CustomTouchableOpacity from '../../components/shared/CustomTouchableOpacity';
 import styles from './styles';
-import {secondsToMinsAndSecs} from '../../utils/date';
+import {padNumber, secondsToMinsAndSecs} from '../../utils/date';
 import {COLORS} from '../../constants/colors';
 
 import S3 from 'aws-sdk/clients/s3';
@@ -48,6 +48,8 @@ import {useSelector, useDispatch} from 'react-redux';
 // import FocusDepthSliderModal from '../../components/FocusDepthSlider';
 import {CREATE_ASSESSMENT_ACTION} from '../../constants/actions';
 import Analytics from '../../utils/Analytics';
+import { decryptData, encryptData } from '../../helpers/encryption';
+import { ENCRIPTION_KEY, ENCRIPTION_MSG } from '../../constants/encryption';
 
 const {width, height} = Dimensions.get('window');
 const screenDimension = Dimensions.get('screen');
@@ -82,6 +84,9 @@ const DEFAULT_DARK_BROWN_EXPOSURE = 0.8;
 const DEFAULT_OTHER_EXPOSURE = 0.6; //0.0; //0.2
 
 const MIN_HEIGHT = Dimensions.get('window').height;
+const estDateOffset = -300; // EST Timezoon offset
+let uploadingTime = 0;
+let processingTime = 0;
 
 const PupillaryDilationScreen = ({navigation}) => {
   const deviceModel = DeviceInfo.getModel();
@@ -121,6 +126,7 @@ const PupillaryDilationScreen = ({navigation}) => {
     y: 0.5,
     autoExposure: true,
   });
+  console.log(foucsPoints)
 
   const patientData = useSelector((state) => state.patientData.patient);
 
@@ -209,10 +215,16 @@ const PupillaryDilationScreen = ({navigation}) => {
     );
   };
 
-  const startProcessingTimer = () => {
+  const startProcessingTimer = (uploading) => {
     let timerValue = 0;
     processingIntervalId = setInterval(() => {
       timerValue += 1;
+      if(uploading){
+        uploadingTime += 1
+      }
+      else{
+        processingTime += 1
+      }
       setProcessingTimer(timerValue.toString());
     }, 1000);
   };
@@ -418,6 +430,7 @@ const PupillaryDilationScreen = ({navigation}) => {
     }
   };
 
+
   const handleStartRecording = () => {
     setIsRecording(true);
     let durationValue = 0;
@@ -444,7 +457,7 @@ const PupillaryDilationScreen = ({navigation}) => {
     setDuration('00:00');
     clearInterval(intervalId);
   };
-
+ 
   const onDownloadPress = () => {
     if (false && Platform.OS === 'ios') {
       const filename = `VID_${Date.now().toString()}`;
@@ -466,7 +479,7 @@ const PupillaryDilationScreen = ({navigation}) => {
           // resetStates();
         })
         .catch((err) => {
-          Alert.alert('Error', 'Download Failed!'+err?.message);
+          Alert.alert('Error', 'Download Failed!' + err?.message);
           // resetStates();
         });
     }
@@ -475,7 +488,8 @@ const PupillaryDilationScreen = ({navigation}) => {
   const onUploadPress = async () => {
     setShowSpinner(true);
     setSpinnerMessage('Uploading...');
-    startProcessingTimer();
+    uploadingTime = 0;
+    startProcessingTimer(true);
 
     try {
       const s3bucket = new S3({
@@ -531,27 +545,30 @@ const PupillaryDilationScreen = ({navigation}) => {
           ACL: 'public-read',
         };
         //TODO discuss with pranav for publib/private ACL
-        let abortTimeout = null;
-        const uploadBucket = s3bucket.upload(params, (err, data) => {
-          if (abortTimeout) {
-            clearTimeout(abortTimeout);
-          }
+        // let abortTimeout = null;
+        const uploadBucket = s3bucket.upload(params, async (err, data) => {
+          // if (abortTimeout) {
+          //   clearTimeout(abortTimeout);
+          // }
           if (err) {
-            if (
-              err?.message === 'Request aborted' ||
-              err?.message === 'Request aborted by user'
-            ) {
-              Alert.alert(
-                'Timeout for video uploading  in s3:  ' + err?.message,
-              );
-              setShowSpinner(false)
-              setSpinnerMessage('')
-              clearProcessingTimer();
-              setResultReady(false);
-              return;
-            }
+            // if (
+            //   err?.message === 'Request aborted' ||
+            //   err?.message === 'Request aborted by user'
+            // ) {
+            //   Alert.alert(
+            //     'Timeout for video uploading  in s3:  ' + err?.message,
+            //   );
+            //   setShowSpinner(false)
+            //   setSpinnerMessage('')
+            //   clearProcessingTimer();
+            //   setResultReady(false);
+            //   return;
+            // }
             console.log('error in callback', err);
-            Alert.alert('Error', 'Error in uploading the video in s3: '+err?.message);
+            Alert.alert(
+              'Error',
+              'Error in uploading the video in s3: ' + err?.message,
+            );
             setShowSpinner(false);
             setSpinnerMessage('');
             setResultReady(false);
@@ -559,20 +576,39 @@ const PupillaryDilationScreen = ({navigation}) => {
             clearProcessingTimer();
             // resetStates();
           } else {
+            // Here Write Encryped data
+             let getDate = new Date().getTime();
+             let estDate = new Date(getDate);
+             estDate.setTime(estDate.getTime() + estDateOffset * 60 * 1000);
+             let year = estDate.getFullYear();
+             let month = padNumber(estDate.getMonth()+1);
+             let encryptedMessage = `${ENCRIPTION_MSG}${year}${month}#`;
+             try{
+               const encryption_data = await encryptData(encryptedMessage,ENCRIPTION_KEY)
+               console.log('----encryption data------*****',encryption_data)
+               const decryption_data = await decryptData(encryption_data,ENCRIPTION_KEY)
+              //  console.log('-----decryption data----****',decryption_data)
+             }
+             catch(err){
+               console.log('----encryption/decvrption error----',err)
 
+             }
+            clearProcessingTimer();
             setSpinnerMessage('Processing...');
+            processingTime = 0;
+            startProcessingTimer();
             initiatePupilVideoProcessingAPI(filename)
               .then((result) => {
                 // console.log('initiatePupilVideoProcessingAPI: ', result);
                 if (result?.data?.status === 'Failure') {
                   Alert.alert(
-                    'Error :' + result?.data?.msg + ' ' + result?.data?.code
+                    'Error :' + result?.data?.msg + ' ' + result?.data?.code,
                   );
                   setShowSpinner(false);
                   setSpinnerMessage('');
                   setResultReady(false);
                   clearProcessingTimer();
-                  return 
+                  return;
                 }
                 if (result && result.data === 'Retake') {
                   Alert.alert('Error', 'Please retake the video');
@@ -581,7 +617,7 @@ const PupillaryDilationScreen = ({navigation}) => {
                   setShowSpinner(false);
                   setSpinnerMessage('');
                   clearProcessingTimer();
-                  return 
+                  return;
                   // resetStates('');
                 }
                 setResultValue(result.data?.result);
@@ -600,7 +636,10 @@ const PupillaryDilationScreen = ({navigation}) => {
                             }, 100); */
               })
               .catch((err) => {
-                Alert.alert('Error', 'Error in processing the video: '+ err?.message);
+                Alert.alert(
+                  'Error',
+                  'Error in processing the video: ' + err?.message,
+                );
                 setShowSpinner(false);
                 setResultReady(false);
                 setShowProcessedResult(false);
@@ -610,19 +649,19 @@ const PupillaryDilationScreen = ({navigation}) => {
               });
           }
         });
-        abortTimeout = setTimeout(
-          uploadBucket.abort.bind(uploadBucket),
-          100000,
-        );
+        // abortTimeout = setTimeout(
+        //   uploadBucket.abort.bind(uploadBucket),
+        //   400000,
+        // );
       });
     } catch (err) {
-      Alert.alert('Error', 'Error in uploading the video: '+err?.message);
+      Alert.alert('Error', 'Error in uploading the video: ' + err?.message);
       setShowSpinner(false);
       setSpinnerMessage('');
       setResultReady(false);
       setShowProcessedResult(false);
       clearProcessingTimer();
-      return 
+      return;
       // resetStates();
     }
   };
@@ -710,12 +749,12 @@ const PupillaryDilationScreen = ({navigation}) => {
   };
 
   const handleOnNextPress = () => {
-    let resultData= []
-     resultData = resultValue.map((res)=>parseInt(res))
+    let resultData = [];
+    resultData = resultValue.map((res) => parseInt(res));
     dispatch({
       type: CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
       payload: {
-        pupillary_dilation:resultData,
+        pupillary_dilation: resultData,
       },
     });
     navigation.navigate(SCREEN_NAMES.FACIAL_EXPRESSION);
@@ -761,7 +800,7 @@ const PupillaryDilationScreen = ({navigation}) => {
             zoom={Platform.OS === 'ios' ? zoom / 1000 : zoom / 10}
             focusDepth={focusDepth}
             exposure={exposure < 0.15 ? 0.15 : exposure}
-            videoStabilizationMode = {'standard'}
+            videoStabilizationMode={'standard'}
             flashMode={
               flashOn && isCameraReady
                 ? RNCamera.Constants.FlashMode.torch
@@ -787,9 +826,9 @@ const PupillaryDilationScreen = ({navigation}) => {
                     y: parseFloat(1 - (evt.nativeEvent.pageY - 60) / width),
                     autoExposure: true,
                   });
-                  setTimeout(() => {
-                    setExposure(autoAdjust);
-                  }, 3000);
+                  // setTimeout(() => {
+                  //   setExposure(autoAdjust);
+                  // }, 3000);
                 }}
                 // <View
                 style={{
@@ -1910,6 +1949,35 @@ const PupillaryDilationScreen = ({navigation}) => {
                   textAlign: 'center',
                   marginBottom: 15,
                 }}>{`PUAL:${resultValue[0]}   Ratio:${resultValue[1]}`}</Text>
+              <View
+                style={{
+                  flexDirection: 'row',
+                }}>
+                <Text
+                  style={{
+                    fontSize: 16,
+                    fontWeight: '700',
+                    color: COLORS.GRAY_90,
+                    textAlign: 'center',
+                    marginBottom: 15,
+                  }}>{`DURATION: `}</Text>
+                <Text
+                  style={{
+                    fontSize: 16,
+                    fontWeight: '700',
+                    color: COLORS.GRAY_90,
+                    textAlign: 'center',
+                    marginBottom: 15,
+                  }}>{`Uploading:${uploadingTime}`}</Text>
+                <Text
+                  style={{
+                    fontSize: 16,
+                    fontWeight: '700',
+                    color: COLORS.GRAY_90,
+                    textAlign: 'center',
+                    marginBottom: 15,
+                  }}>{`  Processing:${processingTime}`}</Text>
+              </View>
               <CustomTouchableOpacity
                 disabled={processing}
                 style={{

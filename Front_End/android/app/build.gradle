@@ -132,7 +132,7 @@ android {
         applicationId "com.bententech.impact"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 65
+        versionCode 66
         versionName "1.0"
         missingDimensionStrategy 'react-native-camera', 'mlkit'
         multiDexEnabled true
@@ -188,6 +188,7 @@ android {
 
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
+    compile project(':react-native-aes-crypto')
     //noinspection GradleDynamicVersion
     implementation "com.facebook.react:react-native:+"  // From node_modules
 
