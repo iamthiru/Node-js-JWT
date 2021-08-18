@@ -1,0 +1,28 @@
+{
+  "name": "jwt_crud",
+  "version": "1.0.0",
+  "description": "JSON Web Token with Rest API",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon index.js"
+  },
+  "keywords": [
+    "Node",
+    "js",
+    "Express",
+    "Js",
+    "MySql",
+    "JWT"
+  ],
+  "author": "thiru",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^5.0.1",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "jsonwebtoken": "^8.5.1",
+    "mysql": "^2.18.1",
+    "nodemon": "^2.0.12"
+  }
+}
