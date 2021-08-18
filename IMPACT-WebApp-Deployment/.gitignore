@@ -1,7 +1,13 @@
+venv
 .idea
 *.yaml
+OpenFace
 .DS_Store
 __pycache__
-static/Pupil_Input_Videos/Test*
-static/Face_Input_Videos/Test*
-venv
+static/Device_Data
+static/Face_Input_Videos
+static/Pupil_Input_Videos
+static/Face_Output_Images
+static/Pupil_Output_Images
+static/Pupil_Output_Videos
+static/clinical_pupil_videos
