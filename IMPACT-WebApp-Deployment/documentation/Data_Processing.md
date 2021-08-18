@@ -66,14 +66,12 @@
 * Read the CSV file 'Dilation.csv generated after running Make_DFS into dataframe 'df'
 * Create 7 new lists and append all the columns from dataframe 'df' in these lists respectively.
 * Plotting 4 graphs -
-  * Algorithm Generated - 
-    * 'frames' on x-axis and 'Radius (px)' on y-axis
-    * 'frames' on x-axis and 'Ratio' on y-axis
-  * Processed - 
-    * 'frames' on x-axis and 'Radius (px)' on y-axis
-    * 'frames' on x-axis and 'Ratio' on y-axis
-* Save plotted figure
-* Close plots
+* First plot: Raw Data - [ Iris Radius vs Frames & Pupil Radius vs Frames ]
+* Second plot: Processed Data - [ Processed Iris Radius vs Frames & Processed Pupil Radius vs Frames ]
+* Third plot: Raw Data Ratio - [ Pupil/Iris vs Frames ]
+* Fourth plot: Processed Data Ratio - [ Processed Pupil/Iris vs Frames ]
+* Save the plots as .png file
+* Close all plots
 
 #### E. Computer_Resources
 `Function parameters: { start_time }`
