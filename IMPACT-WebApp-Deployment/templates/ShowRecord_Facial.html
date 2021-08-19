@@ -1,0 +1,211 @@
+<!--
+# Proprietary: Benten Technologies, Inc.
+Author: Pranav H. Deo { pdeo@bententech.com }
+(C) Copyright Content
+-->
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>IMPACT: {{ page_header }} Records</title>
+  <link rel = "icon" href ="/static/Images/favicon.ico" />
+<style>
+
+body {
+  margin: 0;
+}
+
+/* Style the header */
+.header {
+  background-color: #f1f1f1;
+  padding: 5px;
+  text-align: center;
+}
+
+.navbar {
+  background-color: #333;
+  overflow: hidden;
+}
+
+/* Style the links inside the navigation bar */
+.navbar a {
+  float: left;
+  color: #f2f2f2;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+  font-size: 17px;
+}
+
+/* Change the color of links on hover */
+.navbar a:hover {
+  background-color: #ddd;
+  color: black;
+}
+
+/* Add a color to the active/current link */
+.navbar a.active {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.column {
+float: left;
+width: 48%;
+padding: 10px;
+}
+
+.buttonstyle{
+    background: black;
+    background-position: 0px -401px;
+    border: solid 1px #000000;
+    color: #00ffff;
+    height: 40px;
+    margin-top: -1px;
+    padding-bottom: 4px;
+    border-radius: 10px;
+    font-size: 20px;
+}
+.buttonstyle:hover {background: white;background-position: 0px -501px;color: #000000; }
+
+input[type=text] {
+  width: 200px;
+  padding: 12px 20px;
+  margin: 8px 0;
+  box-sizing: border-box;
+  border: 2px solid blue;
+  border-radius: 8px;
+}
+
+input[type="file"] {
+    display: none;
+}
+.custom-file-upload {
+    border: 2px solid black;
+    display: inline-block;
+    padding: 6px 12px;
+    cursor: pointer;
+}
+.custom-file-upload:active {
+  background: -webkit-linear-gradient(top, #e3e3e3, green);
+}
+
+table {
+    border-collapse: collapse;
+}
+
+th {
+    background-color: #339933;
+    color: white;
+    font-size: 24px;
+}
+
+td {
+    font-size: 18px;
+}
+
+td, th {
+    text-align: center;
+    border-bottom: 1px solid black;
+}
+
+tr {
+    background-color: #f5f5f5;
+}
+
+tr:hover {
+    background-color: LightGrey;
+}
+
+.alert-error {
+  text-align: center;
+  padding: 7px;
+  border-radius: 3px;
+  font-size: 1.5rem;
+  margin-bottom: 16px;
+  border: 1px solid darkred;
+  background-color: red;
+  color: white;
+}
+
+.alert-success {
+  text-align: center;
+  padding: 7px;
+  border-radius: 3px;
+  font-size: 1.5rem;
+  margin-bottom: 16px;
+  border: 1px solid #097969;
+  background-color: #AFE1AF;
+  color: #4F7942;
+}
+
+</style>
+</head>
+<body>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <div class="navbar" id="Topnav">
+        <a href="{{url_for('HomePage')}}" style="font-size: 20px">Home</a>
+        <a href="{{url_for('PupilPain')}}" style="font-size: 20px">Pupil-Pain</a>
+        <a href="{{url_for('FacialPain')}}" style="font-size: 20px">Facial-Pain</a>
+        <a href="{{url_for('PupilRecords')}}" style="font-size: 20px">Pupil-Records</a>
+        <a href="{{url_for('FacialRecords')}}" style="font-size: 20px">Facial-Records</a>
+        <a href="{{url_for('Logout')}}" style="font-size: 20px; float: right;">Logout</a>
+        <a href="{{url_for('HomePage')}}" style="font-size: 20px; float: right;">Hello, {{ user }}</a>
+    </div>
+
+    <div class="header">
+        <h1>IMPACT PATIENT RECORDS : {{ page_header }}</h1>
+    </div>
+
+    <br>
+    <form action="/FacialRecords" method="post" align="center">
+        <input type="text" name="text" placeholder="Enter Patient ID / Name Here!" style="width:350px;height:45px;font-size:20px;">
+        <input type="submit" name="submit" class="buttonstyle" value="Search..." style="width:120px;height:45px;">
+    </form>
+
+    <br>
+     <p>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        <span>{{ message }}</span>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </p>
+    <br>
+
+    <table align="center" cellspacing="60px" cellpadding="40px">
+        <tr>
+            <th>Files</th>
+            <th>Date Modified</th>
+            <th>Download</th>
+        </tr>
+        {% for value in facial_csv_list %}
+            <tr>
+                <td>
+                    <p>{{ value[1][0] }}</p>
+                    <p>{{ value[1][1] }}</p>
+                </td>
+                <td>
+                    <p id="{{ value[1][0] }}"></p>
+                    <script>
+                        var elem = document.getElementById("{{ value[1][0] }}");
+                        var dateVar = new Date(parseInt({{ value[1][3] }}))
+                        var str = dateVar.toDateString().substring(4,10);
+                        str += " "+(dateVar.getHours() < 10 ? "0" : "")+(dateVar.getHours() < 12 ? dateVar.getHours() : dateVar.getHours() - 12)+":"+(dateVar.getMinutes() < 10 ? "0" : "")+dateVar.getMinutes();
+                        elem.innerHTML = "<b>[Local]</b> "+str+(dateVar.getHours() < 12 ? " AM" : " PM");
+                    </script>
+                    <p align="left"><b>[Central]&nbsp;</b>{{ value[1][2] | CTdatetimefilter }}</p>
+                </td>
+                <td>
+                    <p><a href={{ value[1][4] }}>Download CSV</a></p>
+                    <p><a href={{ value[1][5] }}>Download Plot</a></p>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
