@@ -163,7 +163,7 @@
 >   * Remove user from session
 >   * Render HTML script for 'Login'
 
-> **8. Route ['/FacialRecords'](http://3.213.134.99:5000/FacialRecords) ['GET', 'POST']**
+> **9. Route ['/FacialRecords'](http://3.213.134.99:5000/FacialRecords) ['GET', 'POST']**
 > * Shows the Facial output records for all the scans / assessments conducted
 > #### FacialRecords()
 > `Function parameters: { }`
