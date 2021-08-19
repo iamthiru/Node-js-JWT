@@ -69,15 +69,37 @@ Author: Pranav H. Deo { pdeo@bententech.com }
       background-color: #474e5d;
       color: white;
     }
+
+    .alert-success {
+      text-align: center;
+      padding: 7px;
+      border-radius: 3px;
+      font-size: 1.2rem;
+      margin-bottom: 16px;
+      border: 1px solid #097969;
+      background-color: #AFE1AF;
+      color: #4F7942;
+    }
+
     </style>
 </head>
 <body>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    <span>{{ message }}</span>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <div class="navbar" id="Topnav">
         <a href="{{url_for('HomePage')}}" style="font-size: 20px">Home</a>
         <a href="{{url_for('PupilPain')}}" style="font-size: 20px">Pupil-Pain</a>
         <a href="{{url_for('FacialPain')}}" style="font-size: 20px">Facial-Pain</a>
         <a href="{{url_for('PupilRecords')}}" style="font-size: 20px">Pupil-Records</a>
+        <a href="{{url_for('FacialRecords')}}" style="font-size: 20px">Facial-Records</a>
         <a href="{{url_for('Logout')}}" style="font-size: 20px; float: right;">Logout</a>
         <a href="{{url_for('HomePage')}}" style="font-size: 20px; float: right;">Hello, {{ user }}</a>
     </div>
