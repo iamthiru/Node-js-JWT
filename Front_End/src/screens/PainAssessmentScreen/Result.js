@@ -131,7 +131,7 @@ const Result = (props) => {
         painTime: null,
         remainder_date: null,
         reminder_time: null,
-        isRemainder: true,
+        isRemainder: false,
         assessment_date: null,
         pain_qualities: [],
         pain_impact_activiy: [],
@@ -332,7 +332,7 @@ const Result = (props) => {
                 fontWeight: '700',
                 paddingLeft: 10,
               }}>
-              {impactScore}
+              {Boolean(impactScore===99) ? 0 : impactScore}
             </Text>
           </View>
           <CustomTouchableOpacity

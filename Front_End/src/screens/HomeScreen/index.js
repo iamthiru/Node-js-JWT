@@ -50,8 +50,7 @@ const HomeScreen = ({navigation}) => {
   const userId = useSelector((state) => state.user.loggedInUserId);
   const userName = useSelector((state) => state.user.userName);
   const dispatch = useDispatch();
-  const [greetingText,setGreetingText] = useState('')
-  
+  const [greetingText,setGreetingText] = useState('')  
 
   useEffect(()=>{
     if(greetingTime >= 4 && greetingTime <= 11){
@@ -123,7 +122,6 @@ const HomeScreen = ({navigation}) => {
             Alert.alert('all patinets  data error');
             return;
           }
-          console.log('result', res);
           dispatch({
             type: ALL_PATIENTS_ACTIONS.ALL_PATIENTS,
             payload: res.data.result.sort(
@@ -142,7 +140,6 @@ const HomeScreen = ({navigation}) => {
     if (token) {
       lookupTypeAPI(token)
         .then((result) => {
-          console.log('-------lookup---type-- reult------', result);
           if (result.data.isError) {
             Alert.alert('-------invalid lookup type--------');
             return;
@@ -154,7 +151,6 @@ const HomeScreen = ({navigation}) => {
                 Alert.alert('-------invalid lookup data--------');
                 return;
               }
-               console.log('-----lookup--data--res--', res);
               let lookupAllData = res.data.result;
               let lookup_data = result.data.result
                 .filter((type) => !type.parentLookupTypeId)

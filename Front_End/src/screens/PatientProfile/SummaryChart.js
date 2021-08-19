@@ -69,7 +69,11 @@ const SummaryChart = ({
       {
         data: patientData?.map((data) => {
           impact.push(data.value);
-          return data?.value || 0;
+          if (data?.value === 99) {
+            return 0;
+          } else {
+            return data?.value || 0;
+          }
         }),
         color: (opacity = 1) => COLORS.SECONDARY_MAIN, // optional
         strokeWidth: 2, // optional,
@@ -113,8 +117,19 @@ const SummaryChart = ({
     handleSummaryChartData(0, setShowMarker);
   }, [allAssessmentList?.length, forceUpdate]);
 
+  const impactScoreData = useMemo(() => {
+    if (impact[currentIndex] === 99) {
+      return `IMPACT N/A`;
+    } else {
+      return `IMPACT  ${impact[currentIndex]}`;
+    }
+  }, [currentIndex]);
+  
   const handleOnDataPointClick = (x, index, dataset, value) => {
-    if (impact[index] === value && nrs[index] === value) {
+    if (
+      (impact[index] === value && nrs[index] === value) ||
+      (impact[index] === 99 && nrs[index] === 0)
+    ) {
       setShowAllChartData(true);
     } else if (JSON.stringify(dataset.data) == JSON.stringify(nrs)) {
       setShowNrsData(true);
@@ -231,7 +246,7 @@ const SummaryChart = ({
                     lineHeight: 22,
                     backgroundColor: COLORS.SECONDARY_MAIN,
                   }}>
-                  {'IMPACT ' + impact?.[currentIndex]}
+                  {impactScoreData}
                 </Text>
               </>
             )}
@@ -252,7 +267,7 @@ const SummaryChart = ({
                   lineHeight: 22,
                   backgroundColor: COLORS.SECONDARY_MAIN,
                 }}>
-                {'IMPACT ' + impact?.[currentIndex]}
+                {impactScoreData}
               </Text>
             )}
             <Text

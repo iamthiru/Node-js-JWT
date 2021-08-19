@@ -26,7 +26,7 @@ import {
   ALL_PATIENTS_ACTIONS,
   PATIENT_NAME_ACTION,
 } from '../../constants/actions';
-import Analytics from '../../utils/Analytics'
+import Analytics from '../../utils/Analytics';
 import {addPatientAPI, getPatientListAPI} from '../../api/patientsData';
 import patientUpdateApi from '../../api/patientUpdate';
 
@@ -139,7 +139,6 @@ const NewPatientPopUp = ({
       token,
     )
       .then((res) => {
-        console.log('-------new Patient Added sucessfully------', res);
         setFirstName('');
         setLastName('');
         setGender(null);
@@ -216,14 +215,12 @@ const NewPatientPopUp = ({
         token,
       )
         .then((res) => {
-          console.log('--------update data sucessfully-----', res);
           getPatientListAPI(token)
             .then((res) => {
               if (res.data.isError) {
                 Alert.alert('all patinets  data error');
                 return;
               }
-              console.log('result', res);
               setFirstName('');
               setLastName('');
               setGender(null);
@@ -265,10 +262,10 @@ const NewPatientPopUp = ({
       if (name.length < 50) {
         setName(name);
       } else {
-        console.log('please enter uptp 50 charectors');
+        Alert.alert('please enter upto 50 charectors');
       }
     } else {
-      console.log('accepts alphabets letters only');
+      Alert.alert('accepts alphabets letters only');
     }
   };
 

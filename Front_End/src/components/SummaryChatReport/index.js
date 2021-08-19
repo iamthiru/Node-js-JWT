@@ -30,8 +30,8 @@ const SummaryChartReport = ({
           {/* {(impact_score) ?impact_score : '-'} */}
           {Boolean(impact_score === undefined)
             ? '-'
-            : Boolean(impact_score === 0)
-            ? 0
+            : Boolean(impact_score === 99)
+            ? 'N/A'
             : impact_score}
         </Text>
       </View>

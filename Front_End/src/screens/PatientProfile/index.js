@@ -131,8 +131,6 @@ const PatientProfile = ({navigation}) => {
           if (res.data.isError) {
             Alert.alert('-----invalid medication list-------');
           }
-          console.log('-----medication list------', res.data.result);
-
           setLast_medication(res.data.result);
         })
         .catch((err) => {
@@ -145,7 +143,6 @@ const PatientProfile = ({navigation}) => {
               '-------invalid last medication Assessment data---------',
             );
           }
-          console.log('----last medication all list ------', result);
           setLastAssessment(result.data.result);
           dispatch({
             type: GET_ASSESSMENT_ACTION.GET_ASSESSMENT,
@@ -187,7 +184,6 @@ const PatientProfile = ({navigation}) => {
             Alert.alert('all patinets  data error');
             return;
           }
-          console.log('result', res);
           dispatch({
             type: ALL_PATIENTS_ACTIONS.ALL_PATIENTS,
             payload: res.data.result.sort(
@@ -210,7 +206,6 @@ const PatientProfile = ({navigation}) => {
             Alert.alert('-----invalid assessment list');
             return;
           }
-          console.log('----all assessment list-----', res);
           dispatch({
             type: ALL_ASSESSMENTS_LIST_ACTION.ALL_ASSESSMENT_LIST,
             payload: res.data.result,

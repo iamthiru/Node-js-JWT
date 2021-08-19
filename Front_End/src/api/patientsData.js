@@ -12,7 +12,6 @@ export const addPatientAPI = (newPatientData, token) => {
     })
       .then((res) => {
         resolve(res);
-        console.log('-----Newly Added Patient-----', res);
       })
       .catch((err) => {
         reject(err);
@@ -23,18 +22,16 @@ export const addPatientAPI = (newPatientData, token) => {
 export const getPatientListAPI = (token, userId) => {
   return new Promise((resolve, reject) => {
     // Api.get(`patient/getPatientList?userId=${userId}`
-    Api.get('patient/getPatientList'
-    ,{
-      headers :{
+    Api.get('patient/getPatientList', {
+      headers: {
         'Access-Control-Allow-Origin': '*',
         'Content-Type': 'application/json',
         Accept: 'application/json',
-         authorization: `Bearer ${token}`,
-      }
+        authorization: `Bearer ${token}`,
+      },
     })
       .then((res) => {
         resolve(res);
-        console.log('------All Patient List Success---', res);
       })
       .catch((err) => {
         reject(err);

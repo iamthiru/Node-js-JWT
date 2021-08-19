@@ -9,12 +9,12 @@ export const FRONT_SIDE_BODY_PART_DATA = [
     value: 1,
     top: Boolean(height > 800)
       ? height * 0.03
-      : height > 600
+      : height > 700
       ? height * 0.0
       : height * 0.03,
     left: Boolean(height > 800)
       ? width * 0.29
-      : height > 600
+      : height > 700
       ? height * 0.15
       : width * 0.24,
   },
@@ -24,12 +24,12 @@ export const FRONT_SIDE_BODY_PART_DATA = [
     value: 2,
     top: Boolean(height > 800)
       ? height * 0.03
-      : height > 600
+      : height > 700
       ? height * 0.0
       : height * 0.03,
     left: Boolean(height > 800)
       ? width * 0.4
-      : height > 600
+      : height > 700
       ? height * 0.2
       : width * 0.33,
   },
@@ -38,13 +38,15 @@ export const FRONT_SIDE_BODY_PART_DATA = [
     part_name: 'Neck',
     value: 3,
     top: Boolean(height > 800 && Platform.OS === 'ios')
-      ? height * 0.13 : height > 800 ? height * 0.12
-      : height > 600
+      ? height * 0.13
+      : height > 800
+      ? height * 0.12
+      : height > 700
       ? height * 0.1
       : height * 0.13,
     left: Boolean(height > 800)
       ? width * 0.34
-      : height > 600
+      : height > 700
       ? width * 0.35
       : width * 0.3,
   },
@@ -54,9 +56,9 @@ export const FRONT_SIDE_BODY_PART_DATA = [
     value: 4,
     top: Boolean(height > 800)
       ? height * 0.17
-      : height > 600
+      : height > 700
       ? height * 0.16
-      : height * 0.18,
+      : height * 0.17,
     left: Boolean(height > 800) ? width * 0.25 : width * 0.2,
   },
   {
@@ -65,12 +67,12 @@ export const FRONT_SIDE_BODY_PART_DATA = [
     value: 5,
     top: Boolean(height > 800)
       ? height * 0.17
-      : height > 600
+      : height > 700
       ? height * 0.16
-      : height * 0.18,
+      : height * 0.17,
     left: Boolean(height > 800)
       ? width * 0.5
-      : height > 600
+      : height > 700
       ? width * 0.5
       : width * 0.4,
   },
@@ -80,14 +82,14 @@ export const FRONT_SIDE_BODY_PART_DATA = [
     value: 6,
     top: Boolean(height > 800)
       ? height * 0.25
-      : height > 600
+      : height > 700
       ? height * 0.23
       : height * 0.25,
     left: Boolean(height > 800)
       ? width * 0.11
-      : height > 600
+      : height > 700
       ? width * 0.13
-      : width * 0.11,
+      : width * 0.085,
   },
   {
     key: '07',
@@ -95,12 +97,12 @@ export const FRONT_SIDE_BODY_PART_DATA = [
     value: 7,
     top: Boolean(height > 800)
       ? height * 0.25
-      : height > 600
+      : height > 700
       ? height * 0.23
       : height * 0.25,
     left: Boolean(height > 800)
       ? width * 0.57
-      : height > 600
+      : height > 700
       ? width * 0.59
       : width * 0.485,
   },
@@ -110,14 +112,14 @@ export const FRONT_SIDE_BODY_PART_DATA = [
     value: 8,
     top: Boolean(height > 800)
       ? height * 0.38
-      : height > 600
+      : height > 700
       ? height * 0.35
       : height * 0.38,
     left: Boolean(height > 800)
       ? width * 0.09
-      : height > 600
+      : height > 700
       ? width * 0.115
-      : width * 0.085,
+      : width * 0.06,
   },
   {
     key: '09',
@@ -125,12 +127,12 @@ export const FRONT_SIDE_BODY_PART_DATA = [
     value: 9,
     top: Boolean(height > 800)
       ? height * 0.38
-      : height > 600
+      : height > 700
       ? height * 0.35
       : height * 0.38,
     left: Boolean(height > 800)
       ? width * 0.63
-      : height > 600
+      : height > 700
       ? width * 0.625
       : width * 0.52,
   },
@@ -140,12 +142,12 @@ export const FRONT_SIDE_BODY_PART_DATA = [
     value: 10,
     top: Boolean(height > 800)
       ? height * 0.46
-      : height > 600
+      : height > 700
       ? height * 0.46
       : height * 0.46,
     left: Boolean(height > 800)
       ? width * 0.05
-      : height > 600
+      : height > 700
       ? width * 0.065
       : width * 0.04,
   },
@@ -155,12 +157,12 @@ export const FRONT_SIDE_BODY_PART_DATA = [
     value: 11,
     top: Boolean(height > 800)
       ? height * 0.46
-      : height > 600
+      : height > 700
       ? height * 0.46
       : height * 0.46,
     left: Boolean(height > 800)
       ? width * 0.68
-      : height > 600
+      : height > 700
       ? width * 0.68
       : width * 0.56,
   },
@@ -170,14 +172,14 @@ export const FRONT_SIDE_BODY_PART_DATA = [
     value: 12,
     top: Boolean(height > 800)
       ? height * 0.25
-      : height > 600
+      : height > 700
       ? height * 0.23
-      : height * 0.25,
+      : height * 0.24,
     left: Boolean(height > 800)
       ? width * 0.45
-      : height > 600
+      : height > 700
       ? width * 0.48
-      : width * 0.4,
+      : width * 0.38,
   },
   {
     key: '13',
@@ -185,12 +187,12 @@ export const FRONT_SIDE_BODY_PART_DATA = [
     value: 13,
     top: Boolean(height > 800)
       ? height * 0.25
-      : height > 600
+      : height > 700
       ? height * 0.23
-      : height * 0.25,
+      : height * 0.24,
     left: Boolean(height > 800)
       ? width * 0.22
-      : height > 600
+      : height > 700
       ? width * 0.25
       : width * 0.2,
   },
@@ -200,12 +202,12 @@ export const FRONT_SIDE_BODY_PART_DATA = [
     value: 14,
     top: Boolean(height > 800)
       ? height * 0.35
-      : height > 600
+      : height > 700
       ? height * 0.35
       : height * 0.35,
     left: Boolean(height > 800)
       ? width * 0.26
-      : height > 600
+      : height > 700
       ? width * 0.26
       : width * 0.2,
   },
@@ -215,14 +217,14 @@ export const FRONT_SIDE_BODY_PART_DATA = [
     value: 15,
     top: Boolean(height > 800)
       ? height * 0.35
-      : height > 600
+      : height > 700
       ? height * 0.35
       : height * 0.35,
     left: Boolean(height > 800)
       ? width * 0.46
-      : height > 600
+      : height > 700
       ? width * 0.45
-      : width * 0.4,
+      : width * 0.36,
   },
   {
     key: '16',
@@ -230,14 +232,14 @@ export const FRONT_SIDE_BODY_PART_DATA = [
     value: 16,
     top: Boolean(height > 800)
       ? height * 0.415
-      : height > 600
+      : height > 700
       ? height * 0.42
-      : height * 0.423,
+      : height * 0.42,
     left: Boolean(height > 800)
       ? width * 0.345
-      : height > 600
+      : height > 700
       ? width * 0.356
-      : width * 0.3,
+      : width * 0.28,
   },
   {
     key: '17',
@@ -245,14 +247,14 @@ export const FRONT_SIDE_BODY_PART_DATA = [
     value: 17,
     top: Boolean(height > 800)
       ? height * 0.5
-      : height > 600
+      : height > 700
       ? height * 0.5
       : height * 0.5,
     left: Boolean(height > 800)
       ? width * 0.25
-      : height > 600
+      : height > 700
       ? height * 0.13
-      : width * 0.23,
+      : width * 0.2,
   },
   {
     key: '18',
@@ -260,12 +262,12 @@ export const FRONT_SIDE_BODY_PART_DATA = [
     value: 18,
     top: Boolean(height > 800)
       ? height * 0.5
-      : height > 600
+      : height > 700
       ? height * 0.5
       : height * 0.5,
     left: Boolean(height > 800)
       ? width * 0.45
-      : height > 600
+      : height > 700
       ? width * 0.46
       : width * 0.37,
   },
@@ -275,12 +277,12 @@ export const FRONT_SIDE_BODY_PART_DATA = [
     value: 19,
     top: Boolean(height > 800)
       ? height * 0.7
-      : height > 600
+      : height > 700
       ? height * 0.7
       : height * 0.7,
     left: Boolean(height > 800)
       ? width * 0.26
-      : height > 600
+      : height > 700
       ? width * 0.27
       : width * 0.21,
   },
@@ -290,12 +292,12 @@ export const FRONT_SIDE_BODY_PART_DATA = [
     value: 20,
     top: Boolean(height > 800)
       ? height * 0.7
-      : height > 600
+      : height > 700
       ? height * 0.7
       : height * 0.7,
     left: Boolean(height > 800)
       ? width * 0.435
-      : height > 600
+      : height > 700
       ? width * 0.46
       : width * 0.375,
   },
@@ -305,12 +307,12 @@ export const FRONT_SIDE_BODY_PART_DATA = [
     value: 21,
     top: Boolean(height > 800)
       ? height * 0.83
-      : height > 600
+      : height > 700
       ? height * 0.855
       : height * 0.83,
     left: Boolean(height > 800)
       ? width * 0.25
-      : height > 600
+      : height > 700
       ? width * 0.3
       : width * 0.2,
   },
@@ -320,12 +322,12 @@ export const FRONT_SIDE_BODY_PART_DATA = [
     value: 22,
     top: Boolean(height > 800)
       ? height * 0.85
-      : height > 600
+      : height > 700
       ? height * 0.86
       : height * 0.85,
     left: Boolean(height > 800)
       ? width * 0.47
-      : height > 600
+      : height > 700
       ? width * 0.45
       : width * 0.4,
   },
@@ -337,14 +339,14 @@ export const BACK_SIDE_BODY_PARTS = [
     value: 23,
     top: Boolean(height > 800)
       ? height * 0.02
-      : height > 600
+      : height > 700
       ? height * 0.0
-      : height * 0.0,
+      : height * 0.035,
     left: Boolean(height > 800)
       ? width * 0.31
-      : height > 600
+      : height > 700
       ? width * 0.34
-      : width * 0.27,
+      : width * 0.25,
   },
   {
     key: '24',
@@ -352,12 +354,12 @@ export const BACK_SIDE_BODY_PARTS = [
     value: 24,
     top: Boolean(height > 800)
       ? height * 0.02
-      : height > 600
+      : height > 700
       ? height * 0.0
-      : height * 0.0,
+      : height * 0.035,
     left: Boolean(height > 800)
       ? width * 0.41
-      : height > 600
+      : height > 700
       ? width * 0.43
       : width * 0.35,
   },
@@ -365,14 +367,16 @@ export const BACK_SIDE_BODY_PARTS = [
     key: '25',
     part_name: 'nape',
     value: 25,
-    top:Boolean(height > 800 && Platform.OS === 'ios')
-      ? height * 0.105 : height > 800 ? height * 0.08
-      : height > 600
+    top: Boolean(height > 800 && Platform.OS === 'ios')
+      ? height * 0.105
+      : height > 800
+      ? height * 0.08
+      : height > 700
       ? height * 0.07
       : height * 0.11,
     left: Boolean(height > 800)
       ? width * 0.38
-      : height > 600
+      : height > 700
       ? width * 0.4
       : width * 0.32,
   },
@@ -381,13 +385,15 @@ export const BACK_SIDE_BODY_PARTS = [
     part_name: 'Back Side Left Sholder',
     value: 26,
     top: Boolean(height > 800 && Platform.OS === 'ios')
-      ? height * 0.155: height > 800 ? height * 0.13
-      : height > 600
+      ? height * 0.155
+      : height > 800
+      ? height * 0.13
+      : height > 700
       ? height * 0.125
-      : height * 0.13,
+      : height * 0.16,
     left: Boolean(height > 800)
       ? width * 0.23
-      : height > 600
+      : height > 700
       ? width * 0.25
       : width * 0.2,
   },
@@ -395,14 +401,16 @@ export const BACK_SIDE_BODY_PARTS = [
     key: '27',
     part_name: 'Back Side Right Sholder',
     value: 27,
-    top:  Boolean(height > 800 && Platform.OS === 'ios')
-      ? height * 0.16: height > 800 ? height * 0.14
-      : height > 600
+    top: Boolean(height > 800 && Platform.OS === 'ios')
+      ? height * 0.16
+      : height > 800
+      ? height * 0.14
+      : height > 700
       ? height * 0.125
-      : height * 0.13,
+      : height * 0.16,
     left: Boolean(height > 800)
       ? width * 0.55
-      : height > 600
+      : height > 700
       ? width * 0.55
       : width * 0.43,
   },
@@ -412,12 +420,12 @@ export const BACK_SIDE_BODY_PARTS = [
     value: 28,
     top: Boolean(height > 800)
       ? height * 0.22
-      : height > 600
+      : height > 700
       ? height * 0.21
       : height * 0.22,
     left: Boolean(height > 800)
       ? width * 0.27
-      : height > 600
+      : height > 700
       ? width * 0.28
       : width * 0.2,
   },
@@ -427,12 +435,12 @@ export const BACK_SIDE_BODY_PARTS = [
     value: 29,
     top: Boolean(height > 800)
       ? height * 0.22
-      : height > 600
+      : height > 700
       ? height * 0.21
       : height * 0.22,
     left: Boolean(height > 800)
       ? width * 0.48
-      : height > 600
+      : height > 700
       ? width * 0.48
       : width * 0.4,
   },
@@ -442,14 +450,14 @@ export const BACK_SIDE_BODY_PARTS = [
     value: 30,
     top: Boolean(height > 800)
       ? height * 0.25
-      : height > 600
+      : height > 700
       ? height * 0.22
       : height * 0.25,
     left: Boolean(height > 800)
       ? width * 0.135
-      : height > 600
+      : height > 700
       ? width * 0.15
-      : width * 0.13,
+      : width * 0.11,
   },
   {
     key: '31',
@@ -457,12 +465,12 @@ export const BACK_SIDE_BODY_PARTS = [
     value: 31,
     top: Boolean(height > 800)
       ? height * 0.25
-      : height > 600
+      : height > 700
       ? height * 0.22
       : height * 0.25,
     left: Boolean(height > 800)
       ? width * 0.6
-      : height > 600
+      : height > 700
       ? width * 0.63
       : width * 0.51,
   },
@@ -472,12 +480,12 @@ export const BACK_SIDE_BODY_PARTS = [
     value: 32,
     top: Boolean(height > 800)
       ? height * 0.38
-      : height > 600
+      : height > 700
       ? height * 0.35
       : height * 0.38,
     left: Boolean(height > 800)
       ? width * 0.1
-      : height > 600
+      : height > 700
       ? width * 0.115
       : width * 0.085,
   },
@@ -487,12 +495,12 @@ export const BACK_SIDE_BODY_PARTS = [
     value: 33,
     top: Boolean(height > 800)
       ? height * 0.38
-      : height > 600
+      : height > 700
       ? height * 0.35
       : height * 0.38,
     left: Boolean(height > 800)
       ? width * 0.63
-      : height > 600
+      : height > 700
       ? width * 0.65
       : width * 0.52,
   },
@@ -502,14 +510,14 @@ export const BACK_SIDE_BODY_PARTS = [
     value: 34,
     top: Boolean(height > 800)
       ? height * 0.46
-      : height > 600
+      : height > 700
       ? height * 0.46
       : height * 0.46,
     left: Boolean(height > 800)
       ? width * 0.06
-      : height > 600
+      : height > 700
       ? width * 0.07
-      : width * 0.06,
+      : width * 0.04,
   },
   {
     key: '35',
@@ -517,12 +525,12 @@ export const BACK_SIDE_BODY_PARTS = [
     value: 35,
     top: Boolean(height > 800)
       ? height * 0.46
-      : height > 600
+      : height > 700
       ? height * 0.46
       : height * 0.46,
     left: Boolean(height > 800)
       ? width * 0.68
-      : height > 600
+      : height > 700
       ? width * 0.7
       : width * 0.56,
   },
@@ -532,12 +540,12 @@ export const BACK_SIDE_BODY_PARTS = [
     value: 36,
     top: Boolean(height > 800)
       ? height * 0.315
-      : height > 600
+      : height > 700
       ? height * 0.305
       : height * 0.32,
     left: Boolean(height > 800)
       ? width * 0.3
-      : height > 600
+      : height > 700
       ? width * 0.28
       : width * 0.25,
   },
@@ -547,12 +555,12 @@ export const BACK_SIDE_BODY_PARTS = [
     value: 37,
     top: Boolean(height > 800)
       ? height * 0.315
-      : height > 600
+      : height > 700
       ? height * 0.305
       : height * 0.32,
     left: Boolean(height > 800)
       ? width * 0.46
-      : height > 600
+      : height > 700
       ? width * 0.48
       : width * 0.4,
   },
@@ -562,12 +570,12 @@ export const BACK_SIDE_BODY_PARTS = [
     value: 38,
     top: Boolean(height > 800)
       ? height * 0.41
-      : height > 600
+      : height > 700
       ? height * 0.4
       : height * 0.4,
     left: Boolean(height > 800)
       ? width * 0.3
-      : height > 600
+      : height > 700
       ? width * 0.28
       : width * 0.24,
   },
@@ -577,12 +585,12 @@ export const BACK_SIDE_BODY_PARTS = [
     value: 39,
     top: Boolean(height > 800)
       ? height * 0.41
-      : height > 600
+      : height > 700
       ? height * 0.4
       : height * 0.4,
     left: Boolean(height > 800)
       ? width * 0.5
-      : height > 600
+      : height > 700
       ? width * 0.5
       : width * 0.42,
   },
@@ -592,12 +600,12 @@ export const BACK_SIDE_BODY_PARTS = [
     value: 40,
     top: Boolean(height > 800)
       ? height * 0.5
-      : height > 600
+      : height > 700
       ? height * 0.55
       : height * 0.5,
     left: Boolean(height > 800)
       ? width * 0.25
-      : height > 600
+      : height > 700
       ? width * 0.28
       : width * 0.23,
   },
@@ -607,12 +615,12 @@ export const BACK_SIDE_BODY_PARTS = [
     value: 41,
     top: Boolean(height > 800)
       ? height * 0.5
-      : height > 600
+      : height > 700
       ? height * 0.55
       : height * 0.5,
     left: Boolean(height > 800)
       ? width * 0.48
-      : height > 600
+      : height > 700
       ? width * 0.5
       : width * 0.4,
   },
@@ -622,12 +630,12 @@ export const BACK_SIDE_BODY_PARTS = [
     value: 42,
     top: Boolean(height > 800)
       ? height * 0.7
-      : height > 600
+      : height > 700
       ? height * 0.73
       : height * 0.7,
     left: Boolean(height > 800)
       ? width * 0.28
-      : height > 600
+      : height > 700
       ? width * 0.3
       : width * 0.23,
   },
@@ -637,12 +645,12 @@ export const BACK_SIDE_BODY_PARTS = [
     value: 43,
     top: Boolean(height > 800)
       ? height * 0.7
-      : height > 600
+      : height > 700
       ? height * 0.73
       : height * 0.7,
     left: Boolean(height > 800)
       ? width * 0.48
-      : height > 600
+      : height > 700
       ? width * 0.5
       : width * 0.4,
   },
@@ -652,14 +660,14 @@ export const BACK_SIDE_BODY_PARTS = [
     value: 44,
     top: Boolean(height > 800)
       ? height * 0.84
-      : height > 600
+      : height > 700
       ? height * 0.86
-      : height * 0.85,
+      : height * 0.82,
     left: Boolean(height > 800)
       ? width * 0.3
-      : height > 600
+      : height > 700
       ? width * 0.3
-      : width * 0.26,
+      : width * 0.25,
   },
   {
     key: '45',
@@ -667,12 +675,12 @@ export const BACK_SIDE_BODY_PARTS = [
     value: 45,
     top: Boolean(height > 800)
       ? height * 0.83
-      : height > 600
+      : height > 700
       ? height * 0.87
-      : height * 0.83,
+      : height * 0.82,
     left: Boolean(height > 800)
       ? width * 0.48
-      : height > 600
+      : height > 700
       ? width * 0.49
       : width * 0.41,
   },

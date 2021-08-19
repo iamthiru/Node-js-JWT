@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useCallback} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -48,8 +48,8 @@ import {useSelector, useDispatch} from 'react-redux';
 // import FocusDepthSliderModal from '../../components/FocusDepthSlider';
 import {CREATE_ASSESSMENT_ACTION} from '../../constants/actions';
 import Analytics from '../../utils/Analytics';
-import { decryptData, encryptData } from '../../helpers/encryption';
-import { ENCRIPTION_KEY, ENCRIPTION_MSG } from '../../constants/encryption';
+// import { decryptData, encryptData } from '../../helpers/encryption';
+// import { ENCRIPTION_KEY, ENCRIPTION_MSG } from '../../constants/encryption';
 
 const {width, height} = Dimensions.get('window');
 const screenDimension = Dimensions.get('screen');
@@ -126,7 +126,6 @@ const PupillaryDilationScreen = ({navigation}) => {
     y: 0.5,
     autoExposure: true,
   });
-  console.log(foucsPoints)
 
   const patientData = useSelector((state) => state.patientData.patient);
 
@@ -268,7 +267,6 @@ const PupillaryDilationScreen = ({navigation}) => {
     camera
       .recordAsync(recordOptions)
       .then(async (data) => {
-        console.log('videoData: ', data);
         setShowSpinner(true);
         setSpinnerMessage('Cropping...');
         startProcessingTimer();
@@ -286,7 +284,6 @@ const PupillaryDilationScreen = ({navigation}) => {
               `-i ${croppedVideoPath} -filter:v fps=${fps} -preset ultrafast ${resultPath}`,
             )
               .then(async (res) => {
-                console.log('RRFFMPEG - FPS Conversion Success', resultPath);
                 if (Platform.OS === 'ios') {
                   setShowSpinner(false);
                   setSpinnerMessage('');
@@ -416,7 +413,6 @@ const PupillaryDilationScreen = ({navigation}) => {
           `-y -i ${videoURI} -vf "crop=${options.cropWidth}:${options.cropHeight}:${options.cropOffsetX}:${options.cropOffsetY}" -preset ultrafast -c:a copy -strict -2 ${croppedResultPath}`,
         )
           .then(async (result) => {
-            console.log('RRFFMPEG - Crop Success', croppedResultPath);
             successCallback(croppedResultPath);
           })
           .catch((error) => {
@@ -577,29 +573,29 @@ const PupillaryDilationScreen = ({navigation}) => {
             // resetStates();
           } else {
             // Here Write Encryped data
-             let getDate = new Date().getTime();
-             let estDate = new Date(getDate);
-             estDate.setTime(estDate.getTime() + estDateOffset * 60 * 1000);
-             let year = estDate.getFullYear();
-             let month = padNumber(estDate.getMonth()+1);
-             let encryptedMessage = `${ENCRIPTION_MSG}${year}${month}#`;
-             try{
-               const encryption_data = await encryptData(encryptedMessage,ENCRIPTION_KEY)
-               console.log('----encryption data------*****',encryption_data)
-               const decryption_data = await decryptData(encryption_data,ENCRIPTION_KEY)
-              //  console.log('-----decryption data----****',decryption_data)
-             }
-             catch(err){
-               console.log('----encryption/decvrption error----',err)
+            //  let getDate = new Date().getTime();
+            //  let estDate = new Date(getDate);
+            //  estDate.setTime(estDate.getTime() + estDateOffset * 60 * 1000);
+            //  let year = estDate.getFullYear();
+            //  let month = padNumber(estDate.getMonth()+1);
+            //  let encryptedMessage = `${ENCRIPTION_MSG}${year}${month}#`;
+            //  try{
+            //    const encryption_data = await encryptData(encryptedMessage,ENCRIPTION_KEY)
+            //    console.log('----encryption data------*****',encryption_data)
+            //   // const decryption_data = await decryptData(encryption_data,ENCRIPTION_KEY)
+            //    //console.log('-----decryption data----****',decryption_data)
+            //  }
+            //  catch(err){
+            //    console.log('----encryption/decvrption error----',err)
 
-             }
+            //  }
             clearProcessingTimer();
             setSpinnerMessage('Processing...');
             processingTime = 0;
             startProcessingTimer();
             initiatePupilVideoProcessingAPI(filename)
               .then((result) => {
-                // console.log('initiatePupilVideoProcessingAPI: ', result);
+                console.log('initiatePupilVideoProcessingAPI: ', result);
                 if (result?.data?.status === 'Failure') {
                   Alert.alert(
                     'Error :' + result?.data?.msg + ' ' + result?.data?.code,

@@ -43,6 +43,17 @@ const LatestEntryCard = ({last_assessment, last_medication, scrollRef}) => {
         });
     }
   }, [lookup_data, latestData?.dosage_unit_id]);
+  const impactScoreData = useMemo(() => {
+    if (latestData?.impactScore === 99) {
+      return 'N/A';
+    } else if (latestData?.impactScore === undefined) {
+      return '-';
+    } else if (latestData?.impactScore === 0) {
+      return '' + 0;
+    } else {
+      return '' + latestData?.impactScore;
+    }
+  }, [latestData?.impactScore]);
 
   return (
     <View
@@ -92,7 +103,7 @@ const LatestEntryCard = ({last_assessment, last_medication, scrollRef}) => {
               style={{
                 color: COLORS.WHITE,
               }}>
-              {(latestData?.impactScore && latestData?.impactScore) || '-'}
+              {impactScoreData}
             </Text>
           </View>
         </CustomTouchableOpacity>

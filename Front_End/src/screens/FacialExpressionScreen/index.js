@@ -22,7 +22,7 @@ import MovToMp4 from 'react-native-mov-to-mp4';
 import Video from 'react-native-video';
 import CustomTouchableOpacity from '../../components/shared/CustomTouchableOpacity';
 import styles from './styles';
-import {secondsToMinsAndSecs} from '../../utils/date';
+import {padNumber, secondsToMinsAndSecs} from '../../utils/date';
 import EyeBoundary from './EyeBoundary';
 import {COLORS} from '../../constants/colors';
 import {SCREEN_NAMES} from '../../constants/navigation';
@@ -47,10 +47,13 @@ import {
 import Analytics from '../../utils/Analytics';
 import {useNavigation} from '@react-navigation/native';
 import {PAIN_FREQUENCY, VERBAL_ABILITY} from '../../constants/painAssessment';
+// import { ENCRIPTION_KEY, ENCRIPTION_MSG } from '../../constants/encryption';
+// import { decryptData, encryptData } from '../../helpers/encryption';
 const {width, height} = Dimensions.get('window');
 const screenDimentions = Dimensions.get('screen');
 const resolution = screenDimentions.width * screenDimentions.scale;
 const {VideoCropper} = NativeModules;
+// const estDateOffset = -300
 
 let camera = null;
 let intervalId = null;
@@ -664,7 +667,24 @@ const FacialExpressionScreen = ({navigation}) => {
             // resetStates();
             setResultReady(false);
           } else {
-            // handleCreateAssessmentAPI()
+            // Start of the encryption
+            // let getDate = new Date().getTime()
+            // let estDate = new Date(getDate)
+            // estDate.setTime(estDate.getTime()+estDateOffset*60*1000)
+            // let year = estDate.getFullYear()
+            // let month = padNumber(estDate.getMonth()+1)
+            // let encryptedMessage = `${ENCRIPTION_MSG}${year}${month}#`
+            // try{
+            //   const encryptedDataResult =   encryptData(encryptedMessage,ENCRIPTION_KEY)
+            //   console.log('-----encrypton data---',encryptedDataResult)
+            //   // const decryptedResult =  decryptData(encryptedDataResult,ENCRIPTION_KEY)
+            //   // console.log('----decryption result----',decryptedResult)
+            // }
+            // catch(err){
+            //   console.log('----encryption/decvrption error----',err)
+
+            // }
+             // End of the Encryption
             clearProcessingTimer();
 
             setShowSpinner({
@@ -768,7 +788,7 @@ const FacialExpressionScreen = ({navigation}) => {
     //   : [0];
     let facial_exp_parsed_value = Boolean(resultValue?.length)
       ? resultValue
-      : [0];
+      : [99];
     const facialResultData = facial_exp_parsed_value.map((res) =>
       parseInt(res),
     );

@@ -24,7 +24,7 @@ const Reminder = ({gotoNext, gotoPrevious}) => {
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedTime, setSelectedTime] = useState(new Date());
-  const [needReminder, setNeedReminder] = useState(true);
+  const [needReminder, setNeedReminder] = useState(false);
   const navigation = useNavigation();
   const dispatch = useDispatch();
 
@@ -37,6 +37,9 @@ const Reminder = ({gotoNext, gotoPrevious}) => {
 
   useEffect(() => {
     if (selectedAssessmentData?.isRemainder) {
+      setNeedReminder(selectedAssessmentData?.isRemainder);
+    }
+    else{
       setNeedReminder(selectedAssessmentData?.isRemainder);
     }
     if (selectedAssessmentData.remainder_date) {

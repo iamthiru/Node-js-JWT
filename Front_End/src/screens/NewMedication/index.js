@@ -240,8 +240,6 @@ const NewMedication = () => {
           Alert.alert('invalid data', res);
           return;
         }
-        console.log('-------  medication created successfully------', res);
-
         dispatch({
           type: LATEST_ENTRY_ACTION.LATEST_ENTRY,
           payload: {

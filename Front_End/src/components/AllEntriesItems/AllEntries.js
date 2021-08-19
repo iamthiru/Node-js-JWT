@@ -1,14 +1,21 @@
-import React from 'react';
+import React, {useMemo} from 'react';
 import {View, Text} from 'react-native';
 import CustomTouchableOpacity from '../shared/CustomTouchableOpacity';
 import {COLORS} from '../../constants/colors';
 import AntDesignIcon from 'react-native-vector-icons/AntDesign';
 import styles from '../../screens/PatientProfile/styles';
-import { formatAMPM } from '../../utils/date';
+import {formatAMPM} from '../../utils/date';
 
 const AllEntries = ({data}) => {
-  const date = new Date(data.assessment_datetime)
-  const dateFormat = `${date.toDateString()} ${formatAMPM(date)}`
+  const date = new Date(data.assessment_datetime);
+  const dateFormat = `${date.toDateString()} ${formatAMPM(date)}`;
+  const impactScoreData = useMemo(() => {
+    if (data.total_score === 99) {
+      return 'N/A';
+    } else {
+      return '' + data?.total_score;
+    }
+  }, [data.total_score]);
   return (
     <View style={styles.allEntriesContainer}>
       <View
@@ -30,7 +37,7 @@ const AllEntries = ({data}) => {
               style={{
                 color: COLORS.WHITE,
               }}>
-              {Boolean(data.total_score) ? data.total_score : 0}
+              {impactScoreData}
             </Text>
           </View>
         </CustomTouchableOpacity>

@@ -36,7 +36,6 @@ const LoginScreen = ({navigation, updateAuthData}) => {
     setIsLoggingIn(true);
     loginAPI({email: email, password: password})
       .then(async (res) => {
-        console.log(res);
         if (res.data.isError) {
           Alert.alert(
             'Invalid Login',
