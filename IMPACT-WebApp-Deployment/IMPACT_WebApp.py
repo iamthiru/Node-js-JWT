@@ -2,13 +2,15 @@
 # Proprietary: Benten Technologies, Inc.
 # Author: Pranav H. Deo { pdeo@bententech.com }
 # (C) Copyright Content
-# Date: 08/08/2021
+# Date: 08/19/2021
 # Version: v1.11
 
 # Code Description:
-# Web Simulation (Beta Version) for Pupil and Facial Pain Analysis.
+# Website and API (Beta Version) for Pupil and Facial Pain Analysis.
 
 # UPDATES:
+# Added Facial Record Search Feature
+# JSONified APIs, Security Token
 # Datetime functionality
 # Returning PUAL + AVG PUPIL RATIO
 # Updated Patient Search Functionality
@@ -39,10 +41,11 @@ import boto3
 import pymysql
 from flask import *
 import pandas as pd
+import base64 as bsf
 import datetime as dt
 from time import mktime
+from Crypto.Cipher import AES
 from datetime import datetime
-from dateutil.tz import tzutc, tzlocal
 from werkzeug.utils import secure_filename
 
 ##############################################################
@@ -95,10 +98,12 @@ def Login():
             session['user_email'] = email
             cursor.close()
             user = email.split("@")[0]
+            flash("Login Success!", "success")
             return render_template('HomePage.html', user=user)
         else:
             cursor.close()
-            return render_template('Register.html')
+            flash("Login Failed!", "error")
+            return render_template('Login.html')
     return render_template('Login.html')
 
 
@@ -126,57 +131,6 @@ def Register():
         cursor.close()
         return render_template('Login.html')
     return render_template('Register.html')
-
-
-# [Routing] Routine to Fetch Pupil Records [CSV and Video]
-@app.route('/PupilRecords', methods=['GET', 'POST'])
-def PupilRecords():
-    global user
-    if 'user_email' in session:
-        if request.method == 'POST':
-            patient_name = request.form['text']
-        else:
-            patient_name = ''
-        page_header = 'Pupil'
-        pupil_csv_list = S3_record_fetcher(patient_name)
-        return render_template('ShowRecord.html',
-                               user=user,
-                               pupil_csv_list=pupil_csv_list,
-                               page_header=page_header)
-    else:
-        session.pop('user_email', None)
-        return render_template('Login.html')
-
-
-# [Routing] Upload Pupillometer Data Routine
-@app.route('/Upload_Device_Data', methods=['GET', 'POST'])
-def Upload_Device_Data():
-    global user
-    if 'user_email' in session:
-        if request.method == 'POST':
-            f = request.files['file']
-            txt_fname = request.form['text']
-            # head, tail = txt_fname.split('.')
-            ext = os.path.splitext(secure_filename(f.filename))[1]
-            new_filename = txt_fname + '_PUP_Device' + ext
-            f.filename = str(new_filename)
-            PUPIL_UPLOAD_FOLDER_S3 = 'Pupil_Data/Pupillometer_Data/'
-            PUPIL_UPLOAD_FOLDER = './static/Device_Data/'
-            app.config['PUPIL_UPLOAD_FOLDER'] = PUPIL_UPLOAD_FOLDER
-            pth = os.path.join(app.config['PUPIL_UPLOAD_FOLDER'], f.filename)
-            f.save(os.path.join(app.config['PUPIL_UPLOAD_FOLDER'], f.filename))
-            Upload_2_S3(BUCKET_NAME, f.filename, pth, PUPIL_UPLOAD_FOLDER_S3)
-            flash("Success! Uploaded File As: " + f.filename)
-            page_header = 'Pupil'
-            pupil_csv_list = S3_record_fetcher('')
-            return render_template('ShowRecord.html',
-                                   user=user,
-                                   pupil_csv_list=pupil_csv_list,
-                                   page_header=page_header)
-        return render_template('HomePage.html', user=user)
-    else:
-        session.pop('user_email', None)
-        return render_template('Login.html')
 
 
 # [Routing] HomePage
@@ -216,7 +170,90 @@ def PupilPain():
 @app.route('/Logout')
 def Logout():
     session.pop('user_email', None)
+    flash("Logged Out!", "success")
     return render_template('Login.html')
+
+
+# [Routing] Routine to Fetch Pupil Records [CSV and Video]
+@app.route('/PupilRecords', methods=['GET', 'POST'])
+def PupilRecords():
+    global user
+    if 'user_email' in session:
+        if request.method == 'POST':
+            patient_name = request.form['text']
+        else:
+            patient_name = ''
+        page_header = 'Pupil'
+        bucket_prefix = 'Pupil_Data/Results-Output/'
+        pupil_csv_list = S3_record_fetcher(patient_name, bucket_prefix)
+        if patient_name != '':
+            if len(pupil_csv_list) != 0:
+                flash("Searched Patient/Term: '" + patient_name + "'", "success")
+            else:
+                flash("Searched Patient/Term: '" + patient_name + "'", "error")
+        return render_template('ShowRecord_Pupil.html',
+                               user=user,
+                               pupil_csv_list=pupil_csv_list,
+                               page_header=page_header)
+    else:
+        session.pop('user_email', None)
+        return render_template('Login.html')
+
+
+# [Routing] Routine to Fetch Pupil Records [CSV and Video]
+@app.route('/FacialRecords', methods=['GET', 'POST'])
+def FacialRecords():
+    global user
+    if 'user_email' in session:
+        if request.method == 'POST':
+            patient_name = request.form['text']
+        else:
+            patient_name = ''
+        page_header = 'Facial'
+        bucket_prefix = 'Facial_Data/Results-Output/'
+        facial_csv_list = S3_record_fetcher(patient_name, bucket_prefix)
+        if patient_name != '':
+            if len(facial_csv_list) != 0:
+                flash("Searched Patient/Term: '" + patient_name + "'", "success")
+            else:
+                flash("Searched Patient/Term: '" + patient_name + "'", "error")
+        return render_template('ShowRecord_Facial.html',
+                               user=user,
+                               facial_csv_list=facial_csv_list,
+                               page_header=page_header)
+    else:
+        session.pop('user_email', None)
+        return render_template('Login.html')
+
+
+# [Routing] Upload Pupillometer Data Routine
+@app.route('/Upload_Device_Data', methods=['GET', 'POST'])
+def Upload_Device_Data():
+    global user
+    if 'user_email' in session:
+        if request.method == 'POST':
+            f = request.files['file']
+            txt_fname = request.form['text']
+            page_header = 'Pupil'
+            pupil_csv_list = S3_record_fetcher('')
+            ext = os.path.splitext(secure_filename(f.filename))[1]
+            new_filename = txt_fname + '_PUP_Device' + ext
+            f.filename = str(new_filename)
+            PUPIL_UPLOAD_FOLDER_S3 = 'Pupil_Data/Pupillometer_Data/'
+            PUPIL_UPLOAD_FOLDER = './static/Device_Data/'
+            app.config['PUPIL_UPLOAD_FOLDER'] = PUPIL_UPLOAD_FOLDER
+            pth = os.path.join(app.config['PUPIL_UPLOAD_FOLDER'], f.filename)
+            f.save(os.path.join(app.config['PUPIL_UPLOAD_FOLDER'], f.filename))
+            Upload_2_S3(BUCKET_NAME, f.filename, pth, PUPIL_UPLOAD_FOLDER_S3)
+            flash("Success! Uploaded File As: '" + f.filename + "'", "info")
+            return render_template('ShowRecord_Pupil.html',
+                                   user=user,
+                                   pupil_csv_list=pupil_csv_list,
+                                   page_header=page_header)
+        return render_template('HomePage.html', user=user)
+    else:
+        session.pop('user_email', None)
+        return render_template('Login.html')
 
 
 # [Routing] File Upload Routine
@@ -356,87 +393,203 @@ def UploadFacial():
 # [API] Pupil Processing Algorithm Routine (Routing)
 @app.route('/mobile_pupil_api/<filename>', methods=['GET', 'POST'])
 def pupil_api(filename):
-    upload_folder_s3 = 'Pupil_Data/Results-Output/'
-    download_folder_s3 = 'Pupil_Data/Uploads-VideoFiles/'
-    PUPIL_UPLOAD_FOLDER = './static/Pupil_Input_Videos/'
-    Download_from_S3(BUCKET_NAME, download_folder_s3 + filename, PUPIL_UPLOAD_FOLDER + filename)
-    ts = time.time()
-    st = dt.datetime.fromtimestamp(ts).strftime('%Y-%m-%d_%H:%M:%S')
-    os.system('python modules/IMPACT_PUPIL_v1_3.py ' + str(filename) + ' Color')
-    token = os.path.exists('./static/Pupil_Output_Images/' + 'PUAL_' + str(os.path.splitext(filename)[0]) + '.csv')
-    if token:
-        print('\n*************** TOKEN : GOOD ****************\n')
-        res_img_fold = os.path.join('static', 'Pupil_Output_Images')
-        res_vid_fold = os.path.join('static', 'Pupil_Output_Videos')
-        app.config['PUPIL_OUTPUT_FOLDER'] = res_img_fold
-        app.config['PUPIL_VID_OUT_FOLDER'] = res_vid_fold
-        img_name = str(os.path.splitext(filename)[0])
-        file = 'PUAL_' + img_name + '.csv'
-        csv_f = os.path.join(app.config['PUPIL_OUTPUT_FOLDER'], file)
-        df = pd.read_csv(csv_f)
-        PUAL_SCORE = round(df['PUAL_Score'][0], 3)
-        avg_pupil_ratio = round((sum(df['Raw_Data'])/len(df['Raw_Data'])), 3)
-        f = img_name + '_Dilation_Plot.png'
-        vid_file = os.path.join(app.config['PUPIL_VID_OUT_FOLDER'], img_name + '.mp4')
-        pic = os.path.join(app.config['PUPIL_OUTPUT_FOLDER'], f)
-        Upload_2_S3(BUCKET_NAME, f, pic, upload_folder_s3)
-        Upload_2_S3(BUCKET_NAME, img_name + '.mp4', vid_file, upload_folder_s3)
-        Upload_2_S3(BUCKET_NAME, file, csv_f, upload_folder_s3)
-        table_userData.put_item(Item={'timestamp': str(st), 'Request': 'API', 'user-metric': 'Pupil Pain',
-                                      's3-filepath': 's3://impact-benten/' + download_folder_s3 + filename})
-        print('PUAL : ', PUAL_SCORE, ' ; AVG RATIO : ', avg_pupil_ratio)
-        pupil_list = [PUAL_SCORE, avg_pupil_ratio]
-        # return str(PUAL_SCORE)
-        return str(pupil_list)
+    if filename == '':
+        status = 'Failure'
+        msg = 'Error! File Not Provided'
+        code = '500'
+        return jsonify(status=status, msg=msg, code=code)
     else:
-        print('\n*************** TOKEN : BAD ****************\n')
-        return "Retake"
+        upload_folder_s3 = 'Pupil_Data/Results-Output/'
+        download_folder_s3 = 'Pupil_Data/Uploads-VideoFiles/'
+        PUPIL_UPLOAD_FOLDER = './static/Pupil_Input_Videos/'
+        status = Download_from_S3(BUCKET_NAME, download_folder_s3 + filename, PUPIL_UPLOAD_FOLDER + filename)
+        if status == 'Absent':
+            status = 'Failure'
+            msg = 'Error! Pupil API Failure. File Non-Existent on S3'
+            code = '404'
+            return jsonify(status=status, msg=msg, code=code)
+        else:
+            ts = time.time()
+            st = dt.datetime.fromtimestamp(ts).strftime('%Y-%m-%d_%H:%M:%S')
+            os.system('python modules/IMPACT_PUPIL_v1_3.py ' + str(filename) + ' Color')
+            token = os.path.exists('./static/Pupil_Output_Images/' + 'PUAL_' + str(os.path.splitext(filename)[0]) + '.csv')
+            if token:
+                print('\n*************** TOKEN : GOOD ****************\n')
+                res_img_fold = os.path.join('static', 'Pupil_Output_Images')
+                res_vid_fold = os.path.join('static', 'Pupil_Output_Videos')
+                app.config['PUPIL_OUTPUT_FOLDER'] = res_img_fold
+                app.config['PUPIL_VID_OUT_FOLDER'] = res_vid_fold
+                img_name = str(os.path.splitext(filename)[0])
+                file = 'PUAL_' + img_name + '.csv'
+                csv_f = os.path.join(app.config['PUPIL_OUTPUT_FOLDER'], file)
+                df = pd.read_csv(csv_f)
+                PUAL_SCORE = round(df['PUAL_Score'][0], 3)
+                avg_pupil_ratio = round((sum(df['Raw_Data'])/len(df['Raw_Data'])), 3)
+                f = img_name + '_Dilation_Plot.png'
+                vid_file = os.path.join(app.config['PUPIL_VID_OUT_FOLDER'], img_name + '.mp4')
+                pic = os.path.join(app.config['PUPIL_OUTPUT_FOLDER'], f)
+                Upload_2_S3(BUCKET_NAME, f, pic, upload_folder_s3)
+                Upload_2_S3(BUCKET_NAME, img_name + '.mp4', vid_file, upload_folder_s3)
+                Upload_2_S3(BUCKET_NAME, file, csv_f, upload_folder_s3)
+                table_userData.put_item(Item={'timestamp': str(st), 'Request': 'API', 'user-metric': 'Pupil Pain',
+                                              's3-filepath': 's3://impact-benten/' + download_folder_s3 + filename})
+                print('PUAL : ', PUAL_SCORE, ' ; AVG RATIO : ', avg_pupil_ratio)
+                pupil_list = [PUAL_SCORE, avg_pupil_ratio]
+                status = 'Success'
+                msg = 'Pupil API Success'
+                code = '200'
+                return jsonify(status=status, msg=msg, code=code, result=pupil_list)
+            else:
+                print('\n*************** TOKEN : BAD ****************\n')
+                status = 'Failure'
+                msg = 'Pupil API Failed'
+                reasons_failure = {'Bad Video Quality', 'Pupil OR Iris Undetected',
+                                   'Bad Lighting', 'Video Did Not Meet Requirements'}
+                code = '400'
+                return jsonify(status=status, msg=msg, reasons_failure=reasons_failure, code=code)
+
+
+# [API] Pupil Processing Algorithm Routine (Routing)
+@app.route('/mobile_pupil_api2/<token>/<filename>', methods=['GET', 'POST'])
+def pupil_api2(token, filename):
+    # Using AES decrypt the token
+    print(token)
+    SHA = yaml.load(open('aws/config/apiAES256key.yaml'))
+    private_key = SHA['key']
+    cipher, IV = str(token).split('####')
+    IV = bytes.fromhex(IV)
+    print('Cipher: ', cipher, ' - IV: ', IV)
+    cipher_obj = AES.new(private_key, AES.MODE_CFB, IV)
+    decrypted_token = cipher_obj.decrypt(cipher)
+    dt_bytes = base64.decode(decrypted_token)
+    Hex_DT = dt_bytes.hex()
+    print('DT_bytes : ', dt_bytes, ' ; ', 'Hex DT : ', Hex_DT)
+    year, month, _ = str(dt.date.today()).split('-')
+    expected_token = 'APIIMP@CTB10' + year + month + '#'
+    print('Decrypted Token: ', decrypted_token)
+    if Hex_DT == expected_token:
+        print('\n*************** Authentication Passed ****************\n')
+        if filename == '':
+            status = 'Failure'
+            msg = 'Error! File Not Provided'
+            code = '500'
+            return jsonify(status=status, msg=msg, code=code)
+        else:
+            upload_folder_s3 = 'Pupil_Data/Results-Output/'
+            download_folder_s3 = 'Pupil_Data/Uploads-VideoFiles/'
+            PUPIL_UPLOAD_FOLDER = './static/Pupil_Input_Videos/'
+            status = Download_from_S3(BUCKET_NAME, download_folder_s3 + filename, PUPIL_UPLOAD_FOLDER + filename)
+            if status == 'Absent':
+                status = 'Failure'
+                msg = 'Error! Pupil API Failure. File Non-Existent on S3'
+                code = '404'
+                return jsonify(status=status, msg=msg, code=code)
+            else:
+                ts = time.time()
+                st = dt.datetime.fromtimestamp(ts).strftime('%Y-%m-%d_%H:%M:%S')
+                os.system('python modules/IMPACT_PUPIL_v1_3.py ' + str(filename) + ' Color')
+                token = os.path.exists('./static/Pupil_Output_Images/' + 'PUAL_' + str(os.path.splitext(filename)[0]) + '.csv')
+                if token:
+                    print('\n*************** TOKEN : GOOD ****************\n')
+                    res_img_fold = os.path.join('static', 'Pupil_Output_Images')
+                    res_vid_fold = os.path.join('static', 'Pupil_Output_Videos')
+                    app.config['PUPIL_OUTPUT_FOLDER'] = res_img_fold
+                    app.config['PUPIL_VID_OUT_FOLDER'] = res_vid_fold
+                    img_name = str(os.path.splitext(filename)[0])
+                    file = 'PUAL_' + img_name + '.csv'
+                    csv_f = os.path.join(app.config['PUPIL_OUTPUT_FOLDER'], file)
+                    df = pd.read_csv(csv_f)
+                    PUAL_SCORE = round(df['PUAL_Score'][0], 3)
+                    avg_pupil_ratio = round((sum(df['Raw_Data'])/len(df['Raw_Data'])), 3)
+                    f = img_name + '_Dilation_Plot.png'
+                    vid_file = os.path.join(app.config['PUPIL_VID_OUT_FOLDER'], img_name + '.mp4')
+                    pic = os.path.join(app.config['PUPIL_OUTPUT_FOLDER'], f)
+                    Upload_2_S3(BUCKET_NAME, f, pic, upload_folder_s3)
+                    Upload_2_S3(BUCKET_NAME, img_name + '.mp4', vid_file, upload_folder_s3)
+                    Upload_2_S3(BUCKET_NAME, file, csv_f, upload_folder_s3)
+                    table_userData.put_item(Item={'timestamp': str(st), 'Request': 'API', 'user-metric': 'Pupil Pain',
+                                                  's3-filepath': 's3://impact-benten/' + download_folder_s3 + filename})
+                    print('PUAL : ', PUAL_SCORE, ' ; AVG RATIO : ', avg_pupil_ratio)
+                    pupil_list = [PUAL_SCORE, avg_pupil_ratio]
+                    status = 'Success'
+                    msg = 'Pupil API Success'
+                    code = '200'
+                    return jsonify(status=status, msg=msg, code=code, result=pupil_list)
+                else:
+                    print('\n*************** TOKEN : BAD ****************\n')
+                    return "Retake"
+    else:
+        print('\n*************** Authentication Failed ****************\n')
+        status = 'Authentication Failure'
+        msg = 'Authentication Error! Token Incorrect'
+        code = '401'
+        return jsonify(status=status, msg=msg, code=code)
 
 
 # [API] Facial Pain Processing Algorithm Routine (Routing)
 @app.route('/mobile_facial_api/<filename>', methods=['GET', 'POST'])
 def facial_api(filename):
-    upload_folder_s3 = 'Facial_Data/Results-Output/'
-    download_folder_s3 = 'Facial_Data/Uploads-VideoFiles/'
-    FACIAL_UPLOAD_FOLDER = './static/Face_Input_Videos/'
-    Download_from_S3(BUCKET_NAME, download_folder_s3 + filename, FACIAL_UPLOAD_FOLDER + filename)
-    ts = time.time()
-    st = dt.datetime.fromtimestamp(ts).strftime('%Y-%m-%d_%H:%M:%S')
-    os.system('python modules/IMPACT_FACIAL_v1_0.py ' + str(filename))
-    token = os.path.exists('./static/Face_Output_Images/' + str(os.path.splitext(filename)[0]) + '.csv')
-    if token:
-        print('\n*************** TOKEN : GOOD ****************\n')
-        res_img_fold = os.path.join('static', 'Face_Output_Images')
-        res_img_fold_s3 = upload_folder_s3
-        app.config['FACIAL_OUTPUT_FOLDER'] = res_img_fold
-        img_name = str(os.path.splitext(filename)[0])
-        file = img_name + '_PSPI_AUs.csv'
-        csv_file = os.path.join(app.config['FACIAL_OUTPUT_FOLDER'], file)
-        df = pd.read_csv(csv_file)
-        pain_score = df['sum_AU_r']
-        max_pain_score = round(pain_score.max(), 2)
-        min_pain_score = round(pain_score.min(), 2)
-        mean_pain_score = round(sum(pain_score) / len(pain_score), 2)
-        f = img_name + '_Pain_Plot.png'
-        pic = os.path.join(app.config['FACIAL_OUTPUT_FOLDER'], f)
-        label_file_csv = os.path.join(app.config['FACIAL_OUTPUT_FOLDER'], img_name + '_LabelFile.csv')
-        bucket_df = pd.read_csv(label_file_csv)
-        # time_sec = bucket_df['Time (sec)']
-        label_sec = list(bucket_df['Label'])
-        video_score = round(float(bucket_df['Video Score'][0]), 3)
-        label_sec.append(str(min_pain_score))
-        label_sec.append(str(mean_pain_score))
-        label_sec.append(str(max_pain_score))
-        label_sec.append(str(video_score))
-        Upload_2_S3(BUCKET_NAME, f, pic, res_img_fold_s3)
-        Upload_2_S3(BUCKET_NAME, file, csv_file, res_img_fold_s3)
-        Upload_2_S3(BUCKET_NAME, img_name + '_LabelFile.csv', label_file_csv, res_img_fold_s3)
-        table_userData.put_item(Item={'timestamp': str(st), 'Request': 'API', 'user-metric': 'Facial Pain',
-                                      's3-filepath': 's3://impact-benten/' + download_folder_s3 + filename})
-        return str(label_sec)
+    if filename == '':
+        status = 'Failure'
+        msg = 'Error! File Not Provided'
+        code = '500'
+        return jsonify(status=status, msg=msg, code=code)
     else:
-        print('\n*************** TOKEN : BAD ****************\n')
-        return "Retake"
+        upload_folder_s3 = 'Facial_Data/Results-Output/'
+        download_folder_s3 = 'Facial_Data/Uploads-VideoFiles/'
+        FACIAL_UPLOAD_FOLDER = './static/Face_Input_Videos/'
+        status = Download_from_S3(BUCKET_NAME, download_folder_s3 + filename, FACIAL_UPLOAD_FOLDER + filename)
+        if status == 'Absent':
+            status = 'Failure'
+            msg = 'Error! Facial API Failure. File Non-Existent on S3'
+            code = '404'
+            return jsonify(status=status, msg=msg, code=code)
+        else:
+            ts = time.time()
+            st = dt.datetime.fromtimestamp(ts).strftime('%Y-%m-%d_%H:%M:%S')
+            os.system('python modules/IMPACT_FACIAL_v1_0.py ' + str(filename))
+            token = os.path.exists('./static/Face_Output_Images/' + str(os.path.splitext(filename)[0]) + '.csv')
+            if token:
+                print('\n*************** TOKEN : GOOD ****************\n')
+                res_img_fold = os.path.join('static', 'Face_Output_Images')
+                res_img_fold_s3 = upload_folder_s3
+                app.config['FACIAL_OUTPUT_FOLDER'] = res_img_fold
+                img_name = str(os.path.splitext(filename)[0])
+                file = img_name + '_PSPI_AUs.csv'
+                csv_file = os.path.join(app.config['FACIAL_OUTPUT_FOLDER'], file)
+                df = pd.read_csv(csv_file)
+                pain_score = df['sum_AU_r']
+                max_pain_score = round(pain_score.max(), 2)
+                min_pain_score = round(pain_score.min(), 2)
+                mean_pain_score = round(sum(pain_score) / len(pain_score), 2)
+                f = img_name + '_Pain_Plot.png'
+                pic = os.path.join(app.config['FACIAL_OUTPUT_FOLDER'], f)
+                label_file_csv = os.path.join(app.config['FACIAL_OUTPUT_FOLDER'], img_name + '_LabelFile.csv')
+                bucket_df = pd.read_csv(label_file_csv)
+                # time_sec = bucket_df['Time (sec)']
+                label_sec = list(bucket_df['Label'])
+                video_score = round(float(bucket_df['Video Score'][0]), 3)
+                label_sec.append(str(min_pain_score))
+                label_sec.append(str(mean_pain_score))
+                label_sec.append(str(max_pain_score))
+                label_sec.append(str(video_score))
+                Upload_2_S3(BUCKET_NAME, f, pic, res_img_fold_s3)
+                Upload_2_S3(BUCKET_NAME, file, csv_file, res_img_fold_s3)
+                Upload_2_S3(BUCKET_NAME, img_name + '_LabelFile.csv', label_file_csv, res_img_fold_s3)
+                table_userData.put_item(Item={'timestamp': str(st), 'Request': 'API', 'user-metric': 'Facial Pain',
+                                              's3-filepath': 's3://impact-benten/' + download_folder_s3 + filename})
+                status = 'Success'
+                msg = 'Facial API Success'
+                code = '200'
+                return jsonify(status=status, msg=msg, code=code, result=label_sec)
+            else:
+                print('\n*************** TOKEN : BAD ****************\n')
+                status = 'Failure'
+                msg = 'Facial API Failed'
+                reasons_failure = {'Bad Video Quality', 'Face Undetected',
+                                   'Bad Lighting', 'Video Did Not Meet Requirements'}
+                code = '400'
+                return jsonify(status=status, msg=msg, reasons_failure=reasons_failure, code=code)
 
 
 @app.template_filter('CTdatetimefilter')
@@ -458,17 +611,28 @@ def Upload_2_S3(buck, f, fp, s3_to_path):
 
 # [Function] Download from S3 Bucket Routine
 def Download_from_S3(buck, KEY, Local_fp):
+    flag = 0
     s3 = boto3.resource('s3', aws_access_key_id=key_db['AWSAccessKeyId'], aws_secret_access_key=key_db['AWSSecretKey'])
-    s3.Bucket(buck).download_file(KEY, Local_fp)
-    return 'Download Done'
+    prefix = str(KEY).split('/')[0] + '/' + str(KEY).split('/')[1]
+    for file in s3.Bucket(buck).objects.filter(Prefix=prefix):
+        bucket_filename = str(file.key).split('/')[2]
+        search_filename = str(KEY).split('/')[2]
+        if search_filename == bucket_filename:
+            s3.Bucket(buck).download_file(KEY, Local_fp)
+            flag = 1
+            break
+    if flag == 1:
+        return 'Present'
+    else:
+        return 'Absent'
 
 
 # [Function] Fetch S3 Records from Pupil Folder in Bucket
-def S3_record_fetcher(pat_name):
+def S3_record_fetcher(pat_name, prefix):
     s3 = boto3.resource('s3', aws_access_key_id=key_db['AWSAccessKeyId'], aws_secret_access_key=key_db['AWSSecretKey'])
     my_bucket = s3.Bucket(BUCKET_NAME)
-    all_pupil_csv_files = {}
-    for file in my_bucket.objects.filter(Prefix='Pupil_Data/Results-Output/'):
+    all_csv_files = {}
+    for file in my_bucket.objects.filter(Prefix=prefix):
         filename = file.key
         last_mod_date = file.last_modified
         new_last_mod_date = str(last_mod_date).split('+')[0]
@@ -477,16 +641,27 @@ def S3_record_fetcher(pat_name):
         timestamp_jay_mp4 = str(filename).split("_")[-1]
         timestamp_jay_final = timestamp_jay_mp4.split(".")[0]
 
-        if filename.find('.csv') != -1:
-            if (str.upper(filename).find(str.upper(pat_name)) or str.lower(filename).find(str.lower(pat_name))) != -1:
+        if prefix == 'Pupil_Data/Results-Output/':
+            if filename.find('.csv') != -1:
+                if (str.upper(filename).find(str.upper(pat_name)) or str.lower(filename).find(str.lower(pat_name))) != -1:
                     _, fl = os.path.split(filename)
                     head, tail = os.path.splitext(fl)
-                    fn = head.split('PUAL_')
+                    fn = head.split('PUAL_')[1]
                     csv_url = f'https://{BUCKET_NAME}.s3.amazonaws.com/' + filename
-                    video_url = f'https://{BUCKET_NAME}.s3.amazonaws.com/Pupil_Data/Results-Output/' + str(fn[1]) + '.mp4'
-                    all_pupil_csv_files[fl] = (str(fn[1])+'.csv', str(fn[1])+'.mp4', new_last_mod_date, timestamp_jay_final, csv_url, video_url)
+                    video_url = f'https://{BUCKET_NAME}.s3.amazonaws.com/' + str(prefix) + str(fn) + '.mp4'
+                    all_csv_files[fl] = (str(fn) + '.csv', str(fn) + '.mp4', new_last_mod_date, timestamp_jay_final, csv_url, video_url)
+        else:
+            if filename.find('_PSPI_AUs.csv') != -1:
+                if (str.upper(filename).find(str.upper(pat_name)) or str.lower(filename).find(str.lower(pat_name))) != -1:
+                    _, fl = os.path.split(filename)
+                    head, tail = os.path.splitext(fl)
+                    fn = head.split('_PSPI_AUs')[0]
+                    timestamp_jay_final = str(fn).split("_")[-1]
+                    csv_url = f'https://{BUCKET_NAME}.s3.amazonaws.com/' + str(prefix) + str(head) + '.csv'
+                    plot_url = f'https://{BUCKET_NAME}.s3.amazonaws.com/' + str(prefix) + str(fn) + '_Pain_Plot.png'
+                    all_csv_files[fl] = (str(head) + '.csv', str(fn) + '_Pain_Plot.png', new_last_mod_date, timestamp_jay_final, csv_url, plot_url)
 
-    sorted_list = sorted(all_pupil_csv_files.items(), key=lambda x: x[1][2], reverse=True)
+    sorted_list = sorted(all_csv_files.items(), key=lambda x: x[1][2], reverse=True)
     return sorted_list
 
 
