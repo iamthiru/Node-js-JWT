@@ -47,7 +47,7 @@ Author: Pranav H. Deo { pdeo@bententech.com }
 
     .form-wrap{
         width: 700px;
-        height: 450px;
+        height: 480px;
         background: white;
         padding: 30px 80px;
         box-sizing: border-box;
@@ -173,6 +173,7 @@ Author: Pranav H. Deo { pdeo@bententech.com }
         border-radius: 50%;
         background: white;
     }
+
     </style>
 </head>
 <body>
@@ -182,6 +183,7 @@ Author: Pranav H. Deo { pdeo@bententech.com }
         <a href="{{url_for('PupilPain')}}" style="font-size: 20px">Pupil-Pain</a>
         <a href="{{url_for('FacialPain')}}" style="font-size: 20px">Facial-Pain</a>
         <a href="{{url_for('PupilRecords')}}" style="font-size: 20px">Pupil-Records</a>
+        <a href="{{url_for('FacialRecords')}}" style="font-size: 20px">Facial-Records</a>
         <a href="{{url_for('Logout')}}" style="font-size: 20px; float: right;">Logout</a>
         <a href="{{url_for('HomePage')}}" style="font-size: 20px; float: right;">Hello, {{ user }}</a>
     </div>
@@ -193,35 +195,35 @@ Author: Pranav H. Deo { pdeo@bententech.com }
     <form action="/Upload_Process_Facial" method="post" enctype="multipart/form-data" class="form-wrap">
         <h2 align="center">Facial Upload Form</h2>
         <p>
-        <input type="text" name="firstname" placeholder="FIRST NAME" />
-        <input type="text" name="lastname" placeholder="LAST NAME" />
+        <input type="text" name="firstname" placeholder="FIRST NAME" required/>
+        <input type="text" name="lastname" placeholder="LAST NAME" required/>
         <br>
         <h3>Select Pain Type</h3>
         <label class="container">Neutral
-          <input type="radio" name="radio" value="NeutralVideo">
+          <input type="radio" name="radio" value="NeutralVideo" required/>
           <span class="checkmark"></span>
         </label>
         &nbsp;
         &nbsp;
         <label class="container">Pain
-          <input type="radio" name="radio" value="PainVideo">
+          <input type="radio" name="radio" value="PainVideo" required/>
           <span class="checkmark"></span>
         </label>
         &nbsp;
         &nbsp;
         <label class="container">Neutral & Pain
-          <input type="radio" name="radio" value="MixedVideo">
+          <input type="radio" name="radio" value="MixedVideo" required/>
           <span class="checkmark"></span>
         </label>
         <br>
         <br>
         <br>
         <div class="upload-btn-wrapper">
-            <input class="btn" value="Choose File">
-            <input type="file" name="file" accept=".jpg, .png, .avi, .mp4, .MOV"/> Upload Your File Here!
+            <input class="btn" value="Choose File" required>
+            <input type="file" name="file" accept=".avi, .mp4, .MOV" required/> Upload Your File Here!
         </div>
         <br><br>
-        <p><input class="buttonstyle" type="submit" value="UPLOAD & PROCESS" style="width:540px"></p>
+        <p><input class="buttonstyle" type="submit" value="UPLOAD & PROCESS" style="width:540px" required></p>
     </form>
 
 </body>
