@@ -7,7 +7,7 @@ Author: Pranav H. Deo { pdeo@bententech.com }
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>IMPACT: Pupil Records</title>
+  <title>IMPACT: {{ page_header }} Records</title>
   <link rel = "icon" href ="/static/Images/favicon.ico" />
 <style>
 
@@ -117,6 +117,28 @@ tr:hover {
     background-color: LightGrey;
 }
 
+.alert-error {
+  text-align: center;
+  padding: 7px;
+  border-radius: 3px;
+  font-size: 1.5rem;
+  margin-bottom: 16px;
+  border: 1px solid darkred;
+  background-color: red;
+  color: white;
+}
+
+.alert-success {
+  text-align: center;
+  padding: 7px;
+  border-radius: 3px;
+  font-size: 1.5rem;
+  margin-bottom: 16px;
+  border: 1px solid #097969;
+  background-color: #AFE1AF;
+  color: #4F7942;
+}
+
 </style>
 </head>
 <body>
@@ -126,6 +148,7 @@ tr:hover {
         <a href="{{url_for('PupilPain')}}" style="font-size: 20px">Pupil-Pain</a>
         <a href="{{url_for('FacialPain')}}" style="font-size: 20px">Facial-Pain</a>
         <a href="{{url_for('PupilRecords')}}" style="font-size: 20px">Pupil-Records</a>
+        <a href="{{url_for('FacialRecords')}}" style="font-size: 20px">Facial-Records</a>
         <a href="{{url_for('Logout')}}" style="font-size: 20px; float: right;">Logout</a>
         <a href="{{url_for('HomePage')}}" style="font-size: 20px; float: right;">Hello, {{ user }}</a>
     </div>
@@ -136,24 +159,27 @@ tr:hover {
 
     <br>
     <form action="/PupilRecords" method="post" align="center">
-        <input type="text" name="text" placeholder="Enter Patient Name Here!" style="width:300px;height:45px;font-size:20px;">
+        <input type="text" name="text" placeholder="Enter Patient ID / Name Here!" style="width:350px;height:45px;font-size:20px;">
         <input type="submit" name="submit" class="buttonstyle" value="Search..." style="width:120px;height:45px;">
     </form>
-    <br>
 
+    <br>
      <p>
-        {% with messages = get_flashed_messages() %}
-          {% if messages %}
-            {% for message in messages %}
-                <h2 style="color:green;font-size:25px;" align="center">{{ message }}</h2>
-            {% endfor %}
-          {% endif %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        <span>{{ message }}</span>
+                    </div>
+                {% endfor %}
+            {% endif %}
         {% endwith %}
     </p>
+    <br>
 
     <table align="center" cellspacing="15px" cellpadding="25px">
         <tr>
-            <th>Video File</th>
+            <th>Files</th>
             <th>Date Modified</th>
             <th>Download</th>
             <th>Upload</th>
@@ -186,11 +212,11 @@ tr:hover {
                         </label>
                         <br>
                         <br>
-                        <input id="file-upload" type="file" type="file" name="file" accept="*"/>
-                        <input type="text" name="text" placeholder="Enter Filename" style="width:340px">
+                        <input id="file-upload" type="file" type="file" name="file" accept="*" required />
+                        <input type="text" name="text" placeholder="Enter Filename" style="width:340px" required />
                         <br>
                         <br>
-                        <input class="buttonstyle" type="submit" value="UPLOAD" style="width:340px">
+                        <input class="buttonstyle" type="submit" value="UPLOAD" style="width:340px" required />
                     </form>
                 </td>
             </tr>
