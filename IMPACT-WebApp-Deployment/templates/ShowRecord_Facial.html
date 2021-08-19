@@ -195,7 +195,27 @@ tr:hover {
                         var elem = document.getElementById("{{ value[1][0] }}");
                         var dateVar = new Date(parseInt({{ value[1][3] }}))
                         var str = dateVar.toDateString().substring(4,10);
-                        str += " "+(dateVar.getHours() < 10 ? "0" : "")+(dateVar.getHours() < 12 ? dateVar.getHours() : dateVar.getHours() - 12)+":"+(dateVar.getMinutes() < 10 ? "0" : "")+dateVar.getMinutes();
+                        str += " "
+                        if (dateVar.getHours() < 12) {
+                            if (dateVar.getHours() < 10) {
+                                str += "0" + dateVar.getHours()
+                            }
+                            else {
+                                str += dateVar.getHours()
+                            }
+                        } else if (dateVar.getHours() == 12) {
+                            str += "12"
+                        } else if (dateVar.getHours() == 24) {
+                            str += "00"
+                        } else {
+                            str += "0"
+                            str += dateVar.getHours() - 12
+                        }
+                        if (dateVar.getMinutes() < 10) {
+                            str += ":0" + dateVar.getMinutes()
+                        } else {
+                            str += ":" + dateVar.getMinutes()
+                        }
                         elem.innerHTML = "<b>[Local]</b> "+str+(dateVar.getHours() < 12 ? " AM" : " PM");
                     </script>
                     <p align="left"><b>[Central]&nbsp;</b>{{ value[1][2] | CTdatetimefilter }}</p>
