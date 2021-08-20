@@ -30,16 +30,7 @@ const PainCausingActivity = ({gotoNext, gotoPrevious}) => {
   const activity_data = pain_activity.find((item) => {
     return item.name === 'PainImpact';
   })?.lookup_data;
-  // useEffect(() => {
-  //   if (activity_data?.length) {
-  //     dispatch({
-  //       type: PAIN_ASSESSMENT_LIST_DATA_ACTION.PAIN_ASSESSMENT_LIST_DATA,
-  //       payload: {
-  //         pain_activity: activity_data,
-  //       },
-  //     });
-  //   }
-  // }, [activity_data]);
+
   
   useEffect(() => {
     startTime = new Date().getTime();

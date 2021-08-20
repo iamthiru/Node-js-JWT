@@ -31,16 +31,7 @@ let endTime = 0;
     return item.name === 'PainQuality';
   })?.lookup_data;
 
-  useEffect(()=>{
-    if(quality_data?.length){
-      dispatch({
-        type:PAIN_ASSESSMENT_LIST_DATA_ACTION.PAIN_ASSESSMENT_LIST_DATA,
-        payload :{
-          painQuality : quality_data
-        }
-      })
-    }
-  },[quality_data])
+  
   
   useEffect(() => {
     startTime = new Date().getTime();
