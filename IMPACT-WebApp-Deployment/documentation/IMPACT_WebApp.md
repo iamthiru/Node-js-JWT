@@ -185,3 +185,5 @@
 > * ELSE IF user is not in session
 >   * Remove user from session
 >   * Render HTML script for 'Login'
+
+## ONGOING EDITING
