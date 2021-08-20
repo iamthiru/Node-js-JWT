@@ -38,6 +38,7 @@ import PainAssessment from './src/screens/PainAssessment';
 import PatientDetailModal from './src/components/PatientDetailsModal';
 import Result from './src/screens/PainAssessmentScreen/Result';
 import * as firebaseAPI from './src/api/firebase';
+import AssessmentDetailsScreen from './src/screens/AssessmentDetailsScreen';
 
 const Stack = createStackNavigator();
 
@@ -373,6 +374,11 @@ function App() {
                     name={SCREEN_NAMES.PATIENT_DEATAIL_MODAL}
                     component={PatientDetailModal}
                     options={{headerShown: false}}
+                  />
+                  <Stack.Screen
+                  name = {SCREEN_NAMES.ASSESSMENT_DETAILS}
+                  component= {AssessmentDetailsScreen}
+                  options ={{headerShown:false}}
                   />
                 </>
               )}

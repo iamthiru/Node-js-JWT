@@ -120,6 +120,7 @@ const PainAssessmentScreen = ({navigation}) => {
         assessment_date: null,
         pain_qualities: [],
         pain_impact_activiy: [],
+        pupilary_result_data:[],
         // frequence: 0,
         // pain_frequency_id: 0,
         frequencyData: null,

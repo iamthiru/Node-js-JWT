@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import {View, Text, Dimensions, ScrollView, Platform} from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Modal from 'react-native-modal';
@@ -27,11 +27,11 @@ const Result = (props) => {
   const [patient, setPatient] = useState('');
   const [impactScore, setImpactScore] = useState(0);
   const assessment_data = useSelector((state) => state.createAsseement);
-  const forceUpdate = useSelector((state) => state.patientProfileUpdate.update)
+  const forceUpdate = useSelector((state) => state.patientProfileUpdate.update);
   const screenName = useSelector((state) => state.routeName.route);
-  const patient_id  = useSelector((state)=>state.patientDetails.item.id)
+  const patient_id = useSelector((state) => state.patientDetails.item.id);
   const dispatch = useDispatch();
-
+  let pupilary_result = assessment_data?.pupilary_result_data;
   useEffect(() => {
     let startTime = 0;
     let endTime = 0;
@@ -73,8 +73,6 @@ const Result = (props) => {
     };
   }, [props.navigation]);
 
-  useEffect
-
   const hideDateTimePickers = () => {
     setShowDatePicker(false);
     setShowTimePicker(false);
@@ -97,17 +95,15 @@ const Result = (props) => {
     assessment_data?.assessment_date,
     assessment_data?.total_score,
   ]);
- 
 
   const clearAssessmentStoreData = () => {
     dispatch({
-      type:PATIENT_NAME_ACTION.PATIENT,
-      payload:{
+      type: PATIENT_NAME_ACTION.PATIENT,
+      payload: {
         patient_id: patient_id,
-       patient_name:''
-      }
-
-    })
+        patient_name: '',
+      },
+    });
     dispatch({
       type: PAIN_LOCATIONS_ACTION.PAIN_LOCATION,
       payload: [],
@@ -120,6 +116,7 @@ const Result = (props) => {
         patient_name: '',
         current_pain: 0,
         most_pain: 0,
+        pupilary_result_data: [],
         least_pain: 0,
         painImpactId: 0,
         painImapctName: '',
@@ -140,8 +137,8 @@ const Result = (props) => {
         frequencyData: null,
         total_score: 0,
         notes: '',
-        pupillary_dilation : [],
-        otherText : ''
+        pupillary_dilation: [],
+        otherText: '',
       },
     });
   };
@@ -323,6 +320,64 @@ const Result = (props) => {
               flexDirection: 'row',
             }}>
             <Text style={{fontSize: 14, lineHeight: 22, fontWeight: '700'}}>
+              PUPILLARY RESULT:
+            </Text>
+            <View
+              style={{
+                flexDirection: 'row',
+              }}>
+              <Text
+                style={{
+                  fontSize: 14,
+                  lineHeight: 22,
+                  fontWeight: '700',
+                  paddingLeft: 10,
+                }}>
+                {'PUAL:'}
+              </Text>
+              <Text
+                style={{
+                  fontSize: 14,
+                  lineHeight: 22,
+                  fontWeight: '700',
+                  paddingLeft: 5,
+                }}>
+                {parseInt(pupilary_result[0]) === 99
+                  ? 'N/A'
+                  : pupilary_result[0]}
+              </Text>
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+              }}>
+              <Text
+                style={{
+                  fontSize: 14,
+                  lineHeight: 22,
+                  fontWeight: '700',
+                  paddingLeft: 10,
+                }}>
+                {'Ratio:'}
+              </Text>
+              <Text
+                style={{
+                  fontSize: 14,
+                  lineHeight: 22,
+                  fontWeight: '700',
+                  paddingLeft: 5,
+                }}>
+                {parseInt(pupilary_result[1]) === 99
+                  ? 'N/A'
+                  : pupilary_result[1]}
+              </Text>
+            </View>
+          </View>
+          <View
+            style={{
+              flexDirection: 'row',
+            }}>
+            <Text style={{fontSize: 14, lineHeight: 22, fontWeight: '700'}}>
               Impact Score:
             </Text>
             <Text
@@ -332,9 +387,10 @@ const Result = (props) => {
                 fontWeight: '700',
                 paddingLeft: 10,
               }}>
-              {Boolean(impactScore===99) ? 0 : impactScore}
+              {Boolean(impactScore === 99) ? 'N/A' : impactScore}
             </Text>
           </View>
+
           <CustomTouchableOpacity
             style={{
               backgroundColor: COLORS.PRIMARY_MAIN,
@@ -349,9 +405,9 @@ const Result = (props) => {
             }}
             onPress={() => {
               dispatch({
-                type : PATIENT_PROFILE_UPDATE_ACTION.PATIENT_PROFILE_UPDATE,
-                payload : !forceUpdate
-              })
+                type: PATIENT_PROFILE_UPDATE_ACTION.PATIENT_PROFILE_UPDATE,
+                payload: !forceUpdate,
+              });
               clearAssessmentStoreData();
               props.navigation.navigate(SCREEN_NAMES.PATIENT_PROFILE);
               /* if (screenName === SCREEN_NAMES.HOME) {
@@ -378,13 +434,20 @@ const Result = (props) => {
           isVisible={showDatePicker || showTimePicker}
           onDismiss={() => hideDateTimePickers()}
           onBackdropPress={() => hideDateTimePickers()}>
-          <View style={{alignItems: 'center', justifyContent: 'center',backgroundColor:'white',padding:10,borderRadius:5}}>
+          <View
+            style={{
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: 'white',
+              padding: 10,
+              borderRadius: 5,
+            }}>
             <DateTimePicker
               disabled={true}
               style={{width: '100%', backgroundColor: 'white'}}
               value={showDatePicker ? selectedDate : selectedTime}
               mode={showDatePicker ? 'date' : 'time'}
-              display='inline'
+              display="inline"
               onChange={(event, value) => {
                 if (showDatePicker) {
                   setSelectedDate(value);

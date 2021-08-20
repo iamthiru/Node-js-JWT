@@ -350,8 +350,6 @@ const FacialExpressionScreen = ({navigation}) => {
     camera
       .recordAsync(recordOptions)
       .then((data) => {
-        console.log('videoData: ', data);
-
         setShowSpinner({
           open: true,
           message: 'Cropping...',
@@ -372,7 +370,6 @@ const FacialExpressionScreen = ({navigation}) => {
               `-i ${croppedVideoPath} -filter:v fps=${fps} -preset ultrafast ${resultPath}`,
             )
               .then(async (res) => {
-                console.log('RRFFMPEG - FPS Conversion Success', resultPath);
                 if (Platform.OS === 'ios') {
                   setShowSpinner({
                     open: false,
@@ -481,7 +478,6 @@ const FacialExpressionScreen = ({navigation}) => {
       if (Platform.OS === 'ios') {
         VideoCropper.crop(videoURI, options, (error, croppedVideoPath) => {
           if (!error) {
-            console.log('VideoCropper - Crop Success', croppedVideoPath);
             successCallback(croppedVideoPath);
           } else {
             console.log('VideoCropper - Crop Error', error);
@@ -805,7 +801,7 @@ const FacialExpressionScreen = ({navigation}) => {
     let pupilary_data = Boolean(assessment_data?.pupillary_dilation?.length)
       ? assessment_data?.pupillary_dilation
       : [0];
-    let pupilary_data_result = pupilary_data[pupilary_data.length - 1];
+    let pupilary_data_result =pupilary_data[pupilary_data.length - 1];
     let total_score = facialMaxValue;
 
     dispatch({

@@ -34,42 +34,44 @@ import {useRoute} from '@react-navigation/native';
 const greetingTime = new Date().getHours();
 
 const {width, height} = Dimensions.get('window');
-const screenDimentions = Dimensions.get('screen')
+const screenDimentions = Dimensions.get('screen');
 
 const HomeScreen = ({navigation}) => {
   const screenName = useRoute()?.name;
 
-  const recentPatients = useSelector(
-    (state) => state?.allPatients?.all_patients,
-  )?.filter((item, index) => {
-    return index <= 4;
-  });
   const [openNewPatient, setOpenNewPatient] = useState(false);
   const [user, setUser] = useState('');
   const token = useSelector((state) => state.user.authToken);
   const userId = useSelector((state) => state.user.loggedInUserId);
   const userName = useSelector((state) => state.user.userName);
   const dispatch = useDispatch();
-  const [greetingText,setGreetingText] = useState('')  
+  const [greetingText, setGreetingText] = useState('');
 
-  useEffect(()=>{
-    if(greetingTime >= 4 && greetingTime <= 11){
-      setGreetingText('Good Morning')
-      return
-    }
-    if(greetingTime >= 12 && greetingTime <= 15){
-      setGreetingText('Good Afternoon')
-      return
-    }
-    if(greetingTime >= 16 && greetingTime <= 21){
-      setGreetingText('Good Evening')
-      return
-    }
-    if(greetingTime >= 22 || greetingTime <= 3){
-      setGreetingText('Good Night')
-    }
-  },[greetingTime])
+  const allPatients = useSelector((state) => state?.allPatients?.all_patients);
 
+  const recentPatients = allPatients
+    .filter((item, index) => {
+      return item?.createdBy === userId;
+    })
+    ?.filter((_, index) => index <= 4);
+
+  useEffect(() => {
+    if (greetingTime >= 4 && greetingTime <= 11) {
+      setGreetingText('Good Morning');
+      return;
+    }
+    if (greetingTime >= 12 && greetingTime <= 15) {
+      setGreetingText('Good Afternoon');
+      return;
+    }
+    if (greetingTime >= 16 && greetingTime <= 21) {
+      setGreetingText('Good Evening');
+      return;
+    }
+    if (greetingTime >= 22 || greetingTime <= 3) {
+      setGreetingText('Good Night');
+    }
+  }, [greetingTime]);
 
   useEffect(() => {
     let startTime = 0;
@@ -146,7 +148,6 @@ const HomeScreen = ({navigation}) => {
           }
           lookupDataAPI(token)
             .then((res) => {
-             
               if (res.data.isError) {
                 Alert.alert('-------invalid lookup data--------');
                 return;
@@ -167,10 +168,8 @@ const HomeScreen = ({navigation}) => {
                           label: data.displayValue,
                           value: data.id,
                           key: data.id,
-                          
                         };
                       }),
-        
                   };
                 });
               result.data.result
@@ -247,9 +246,9 @@ const HomeScreen = ({navigation}) => {
             onPress={() => {
               navigation.navigate(SCREEN_NAMES.PAINASSESSMENT);
               dispatch({
-                type:ROUTE_NAME_ACTION.ROUTE_NAME,
-                payload : screenName
-              })
+                type: ROUTE_NAME_ACTION.ROUTE_NAME,
+                payload: screenName,
+              });
             }}
             title="New Pain Assessment"
             textStyle={{
@@ -333,7 +332,7 @@ const HomeScreen = ({navigation}) => {
       <Footer />
       <NewPatientPopUp
         open={openNewPatient}
-        goToAssessment = {false}
+        goToAssessment={false}
         onClose={() => {
           setOpenNewPatient(false);
         }}

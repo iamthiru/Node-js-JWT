@@ -746,11 +746,12 @@ const PupillaryDilationScreen = ({navigation}) => {
 
   const handleOnNextPress = () => {
     let resultData = [];
-    resultData = resultValue.map((res) => parseInt(res));
+    resultData = resultValue.map((res) => parseFloat(res));
     dispatch({
       type: CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
       payload: {
         pupillary_dilation: resultData,
+        pupilary_result_data : resultData
       },
     });
     navigation.navigate(SCREEN_NAMES.FACIAL_EXPRESSION);
@@ -1910,7 +1911,8 @@ const PupillaryDilationScreen = ({navigation}) => {
                     await dispatch({
                       type: CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
                       payload: {
-                        pupillary_dilation: [0.0],
+                        pupillary_dilation: [99,99],
+                        pupilary_result_data  : [99,99]
                       },
                     });
                     navigation.navigate(SCREEN_NAMES.FACIAL_EXPRESSION);

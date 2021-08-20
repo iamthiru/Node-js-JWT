@@ -15,6 +15,7 @@ import painLocations from './painLocations';
 import latestEntry from './latestEntryData';
 import patientDetails from './patientDetails';
 import patientProfileUpdate from './patientProfileUpdate';
+import assessmentDetails from './assessmentDatailsData'
 
 const rootReducer = combineReducers({
   user,
@@ -33,6 +34,8 @@ const rootReducer = combineReducers({
   latestEntry,
   patientDetails,
   patientProfileUpdate,
+  assessmentDetails
+
 });
 
 export default rootReducer;

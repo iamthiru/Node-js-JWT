@@ -61,6 +61,12 @@ const SummaryChart = ({
     : null;
   const forceUpdate = useSelector((state) => state.patientProfileUpdate.update);
 
+  useEffect(() => {
+    if(patientData?.length){
+      setCurrentIndex(patientData?.length - 1);
+    }
+  }, [patientData])
+
   let impact = [];
   let nrs = [];
   const data = {

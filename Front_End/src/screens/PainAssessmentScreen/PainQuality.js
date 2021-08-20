@@ -7,7 +7,7 @@ import CustomButton from '../../components/shared/CustomButton';
 import {getStatusBarHeight} from 'react-native-status-bar-height';
 import CustomCheckBox from '../../components/shared/CustomCheckBox';
 import {useDispatch, useSelector} from 'react-redux';
-import {CREATE_ASSESSMENT_ACTION} from '../../constants/actions';
+import {CREATE_ASSESSMENT_ACTION, PAIN_ASSESSMENT_LIST_DATA_ACTION} from '../../constants/actions';
 import Analytics from '../../utils/Analytics';
 import {SCREEN_NAMES} from '../../constants/navigation';
 
@@ -31,6 +31,17 @@ let endTime = 0;
     return item.name === 'PainQuality';
   })?.lookup_data;
 
+  useEffect(()=>{
+    if(quality_data?.length){
+      dispatch({
+        type:PAIN_ASSESSMENT_LIST_DATA_ACTION.PAIN_ASSESSMENT_LIST_DATA,
+        payload :{
+          painQuality : quality_data
+        }
+      })
+    }
+  },[quality_data])
+  
   useEffect(() => {
     startTime = new Date().getTime();
   }, []);
