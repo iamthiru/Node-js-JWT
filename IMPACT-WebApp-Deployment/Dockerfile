@@ -1,7 +1,7 @@
 # Proprietary: Benten Technologies, Inc.
 # Author: Pranav H. Deo { pdeo@bententech.com }
 # Copyright Content (C)
-# Date: 08/14/2021
+# Date: 08/21/2021
 # Version: v1.0
 
 FROM ubuntu:20.04
@@ -28,10 +28,9 @@ RUN ["apt-get", "install", "-y", "gnupg"]
 RUN ["apt-get", "install", "-y", "lsb-release"]
 
 # Run the command for git clone if you want to manually install OpenFace on container
-RUN ["git", "clone", "https://github.com/TadasBaltrusaitis/OpenFace.git"]
+# RUN ["git", "clone", "https://github.com/TadasBaltrusaitis/OpenFace.git"]
 
 # Run the bash script if you want OpenFace to be installed on container automatically
 RUN ["bash", "Install_OpenFace.sh"]
 
 CMD ["flask", "run", "--host", "0.0.0.0"]
-# CMD ["flask", "run"]
