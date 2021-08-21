@@ -12,8 +12,6 @@ const { hashSync, genSaltSync, compareSync } = require("bcrypt");
 const { sign } = require("jsonwebtoken");
 
 module.exports = {
-  
-
   createUser: (req, res) => {
     const userData = req.body;
     const salt = genSaltSync(10);

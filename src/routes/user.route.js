@@ -5,10 +5,10 @@ const {
   getUserByUserEmail,
   updateUser,
   deleteUser,
-  login
+  login,
 } = require("../controller/user.controller");
 
-const {checkToken} = require("../../auth/valid-token");
+const { checkToken } = require("../../auth/valid-token");
 
 const routes = require("express").Router();
 

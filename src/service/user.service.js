@@ -28,12 +28,16 @@ module.exports = {
   },
 
   getUserByEmail: (email, callback) => {
-    pool.query(`select * from user where email = ?`, [email], (err, results) => {
-      if (err) {
-        return callback(err);
+    pool.query(
+      `select * from user where email = ?`,
+      [email],
+      (err, results) => {
+        if (err) {
+          return callback(err);
+        }
+        return callback(null, results);
       }
-      return callback(null, results);
-    });
+    );
   },
 
   getUsers: (callback) => {
