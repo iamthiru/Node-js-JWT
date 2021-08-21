@@ -49,6 +49,7 @@ echo "dlib installed"
 
 echo "Installing OpenFace..."
 apt-get -y install libboost-all-dev
+git clone https://github.com/TadasBaltrusaitis/OpenFace.git
 cd OpenFace
 mkdir -p build
 bash download_models.sh
