@@ -27,10 +27,7 @@ RUN ["apt-get", "install", "-y", "curl"]
 RUN ["apt-get", "install", "-y", "gnupg"]
 RUN ["apt-get", "install", "-y", "lsb-release"]
 
-# Run the command for git clone if you want to manually install OpenFace on container
-# RUN ["git", "clone", "https://github.com/TadasBaltrusaitis/OpenFace.git"]
-
-# Run the bash script if you want OpenFace to be installed on container automatically
-RUN ["bash", "Install_OpenFace.sh"]
+# Clone to install OpenFace on the container
+RUN ["git", "clone", "https://github.com/TadasBaltrusaitis/OpenFace.git"]
 
 CMD ["flask", "run", "--host", "0.0.0.0"]
