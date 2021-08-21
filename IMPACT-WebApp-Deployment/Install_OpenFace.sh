@@ -1,7 +1,7 @@
 # Proprietary: Benten Technologies, Inc.
 # Author: Pranav H. Deo { pdeo@bententech.com }
 # Copyright Content (C)
-# Date: 08/19/2021
+# Date: 08/21/2021
 # Version: v1.0
 #!/bin/bash
 sudo apt-get update
@@ -49,7 +49,6 @@ echo "dlib installed"
 
 echo "Installing OpenFace..."
 apt-get -y install libboost-all-dev
-git clone https://github.com/TadasBaltrusaitis/OpenFace.git
 cd OpenFace
 mkdir -p build
 bash download_models.sh
