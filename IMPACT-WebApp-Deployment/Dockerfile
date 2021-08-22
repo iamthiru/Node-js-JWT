@@ -3,6 +3,7 @@
 # Copyright Content (C)
 # Date: 08/21/2021
 # Version: v1.0
+# Expect Build Time: 1 hour 15 mins { Max }
 
 # Any among ubuntu:16.04, ubuntu:18.04 or ubuntu:20.04
 FROM ubuntu:20.04
