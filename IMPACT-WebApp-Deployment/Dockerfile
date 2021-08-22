@@ -4,6 +4,7 @@
 # Date: 08/21/2021
 # Version: v1.0
 
+# Any among ubuntu:16.04, ubuntu:18.04 or ubuntu:20.04
 FROM ubuntu:20.04
 FROM python:3.9
 
@@ -30,4 +31,8 @@ RUN ["apt-get", "install", "-y", "lsb-release"]
 # Clone to install OpenFace on the container
 RUN ["git", "clone", "https://github.com/TadasBaltrusaitis/OpenFace.git"]
 
+# Install OpenFace automatically while creating a Docker Image
+RUN ["bash", "01-Start-OF-Installation.sh"]
+
+# Run Flask Application
 CMD ["flask", "run", "--host", "0.0.0.0"]
