@@ -1,13 +1,14 @@
 # Proprietary: Benten Technologies, Inc.
 # Author: Pranav H. Deo { pdeo@bententech.com }
 # Copyright Content (C)
-# Date: 08/21/2021
+# Date: 08/19/2021
 # Version: v1.0
 #!/bin/bash
 sudo apt-get update
 sudo apt-get upgrade
+sudo apt install software-properties-common
 sudo apt-get -y install build-essential
-sudo apt-get -y install gcc-8 g++-8
+sudo apt-get -y install gcc-10 g++-10
 sudo apt-get -y install cmake
 sudo apt-get -y install zip
 sudo apt-get -y install libopenblas-dev
@@ -53,7 +54,8 @@ cd OpenFace
 mkdir -p build
 bash download_models.sh
 cd build
-cmake -D CMAKE_CXX_COMPILER=g++-8 -D CMAKE_C_COMPILER=gcc-8 -D CMAKE_BUILD_TYPE=RELEASE ..
+# In case the cmake command doesnt work, try to check the gcc and g++ under your OS's /usr/bin/
+cmake -D CMAKE_CXX_COMPILER=g++-10 -D CMAKE_C_COMPILER=gcc-10 -D CMAKE_BUILD_TYPE=RELEASE ..
 make
 cd ..
 echo "OpenFace successfully installed."
