@@ -60,12 +60,12 @@ const SummaryChart = ({
     ? last_assessment?.medication
     : null;
   const forceUpdate = useSelector((state) => state.patientProfileUpdate.update);
-
   useEffect(() => {
-    if(patientData?.length){
-      setCurrentIndex(patientData?.length - 1);
+    if (!patientData?.length && allAssessmentList?.length) {
+      setCurrentIndex(allAssessmentList?.length - 1);
     }
-  }, [patientData])
+  }, [patientData, allAssessmentList]);
+
 
   let impact = [];
   let nrs = [];
@@ -130,20 +130,21 @@ const SummaryChart = ({
       return `IMPACT  ${impact[currentIndex]}`;
     }
   }, [currentIndex]);
-  
+
   const handleOnDataPointClick = (x, index, dataset, value) => {
-    if (
-      (impact[index] === value && nrs[index] === value) ||
-      (impact[index] === 99 && nrs[index] === 0)
-    ) {
-      setShowAllChartData(true);
-    } else if (JSON.stringify(dataset.data) == JSON.stringify(nrs)) {
-      setShowNrsData(true);
-      setShowAllChartData(false);
-    } else {
-      setShowNrsData(false);
-      setShowAllChartData(false);
-    }
+    // if (
+    //   (impact[index] === value && nrs[index] === value) ||
+    //   (impact[index] === 99 && nrs[index] === 0)
+    // ) {
+    //   setShowAllChartData(true);
+    // } else if (JSON.stringify(dataset.data) == JSON.stringify(nrs)) {
+    //   setShowNrsData(true);
+    //   setShowAllChartData(false);
+    // } else {
+    //   setShowNrsData(false);
+    //   setShowAllChartData(false);
+    // }
+    setShowAllChartData(true)
     setXPoint(x - 45);
     setCurrentIndex(index);
     setShowMarker(index !== currentIndex || !showMarker);
@@ -441,10 +442,22 @@ const SummaryChart = ({
         patientData={patientData}
         chartDataPresent={chartDataPresent}
         scrollRef={scrollRef}
-        date={patientData?.[currentIndex]?.time}
-        impact_score={impact[currentIndex]}
+        date={
+          Boolean(!patientData?.length)
+            ? allAssessmentList?.[currentIndex]?.assessment_datetime
+            : patientData?.[currentIndex]?.time
+        }
+        impact_score={
+          Boolean(!impact?.length)
+            ? allAssessmentList?.[currentIndex]?.total_score
+            : impact[currentIndex]
+        }
         medication={patientData?.[currentIndex]?.medicationData}
-        nrs_score={nrs[currentIndex]}
+        nrs_score={
+          Boolean(!nrs?.length)
+            ? allAssessmentList?.[currentIndex]?.current_pain_score
+            : nrs[currentIndex]
+        }
       />
     </View>
   );

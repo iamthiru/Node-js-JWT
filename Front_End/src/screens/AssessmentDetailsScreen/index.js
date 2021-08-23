@@ -1,50 +1,80 @@
-import React, { useMemo } from 'react';
-import {View, Text, Dimensions, Platform, StatusBar, ScrollView} from 'react-native';
+import React, {useEffect, useMemo} from 'react';
+import {
+  View,
+  Text,
+  Dimensions,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+} from 'react-native';
 import CustomTouchableOpacity from '../../components/shared/CustomTouchableOpacity';
 import {COLORS} from '../../constants/colors';
 import AntDesignIcon from 'react-native-vector-icons/AntDesign';
-import DeviceInfo from 'react-native-device-info';
 import {useNavigation, useRoute} from '@react-navigation/native';
-import { useSelector } from 'react-redux';
-import { formatAMPM } from '../../utils/date';
+import {useSelector} from 'react-redux';
+import {formatAMPM} from '../../utils/date';
+import styles from './styles';
+import {FlatList} from 'react-native-gesture-handler';
+import {
+  BACK_SIDE_BODY_PARTS,
+  FRONT_SIDE_BODY_PART_DATA,
+} from '../../constants/painLocationConstants';
 
 const {width, height} = Dimensions.get('window');
 
+export const RenderDataItems = ({id, label}) => {
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        paddingLeft: width * 0.28,
+      }}>
+      <Text style={[styles.dataText]}>{label}</Text>
+    </View>
+  );
+};
+
 const AssessmentDetailsScreen = () => {
   const navigation = useNavigation();
-  const {params} = useRoute()
-  const  assessment_id  = params?.assessment_id
-  const allAssessmentList = useSelector((state)=>state?.allAssessmentList?.data)
+  const {params} = useRoute();
+  const assessment_id = params?.assessment_id;
+  const allAssessmentList = useSelector(
+    (state) => state?.allAssessmentList?.data,
+  );
   const pain_activities = useSelector((state) => state.lookupData.lookup_data);
   const pain_qualities = useSelector((state) => state.lookupData.lookup_data);
 
- 
   const pain_impact_data = pain_activities.find((item) => {
     return item.name === 'PainImpact';
   })?.lookup_data;
 
-  
   const quality_data = pain_qualities.find((item) => {
     return item.name === 'PainQuality';
   })?.lookup_data;
 
-
-
-
-
-  const assessmentData = useMemo(()=>{
-    if(allAssessmentList?.length){
-      return allAssessmentList?.find((assessment)=>{
-        return assessment?.id === 116 //assessment_id
-      })
+  const assessmentData = useMemo(() => {
+    if (allAssessmentList?.length) {
+      return allAssessmentList?.find((assessment) => {
+        return assessment?.id === assessment_id;
+      });
     }
-  },[allAssessmentList,assessment_id])
-  let date = assessmentData?.assessment_datetime ? new Date( assessmentData?.assessment_datetime ) : null
-  const dateFormat = date ? `${new Date(date).toDateString()}  ${formatAMPM(date)}` : '-'
-  const pain_activity =  Boolean(assessmentData?.description) ? JSON.parse(assessmentData?.description) : []
-  const pain_imapct_ids = Boolean(assessmentData?.pain_impact_id) ? JSON.parse(assessmentData?.pain_impact_id) : []
-  const pain_quality_ids =Boolean(assessmentData?.pain_quality_id) ? JSON.parse(assessmentData?.pain_quality_id) : []
+  }, [allAssessmentList, assessment_id]);
 
+  let date = assessmentData?.assessment_datetime
+    ? new Date(assessmentData?.assessment_datetime)
+    : null;
+  const dateFormat = date
+    ? `${new Date(date).toDateString()}  ${formatAMPM(date)}`
+    : '-';
+  const pain_impact_activities_list = Boolean(assessmentData?.description)
+    ? JSON.parse(assessmentData?.description)
+    : [];
+  const pain_imapct_ids = Boolean(assessmentData?.pain_impact_id)
+    ? JSON.parse(assessmentData?.pain_impact_id)
+    : [];
+  const pain_quality_ids = Boolean(assessmentData?.pain_quality_id)
+    ? JSON.parse(assessmentData?.pain_quality_id)
+    : [];
 
   const pain_quality_data_list = useMemo(() => {
     if (quality_data?.length && pain_quality_ids?.length) {
@@ -56,7 +86,6 @@ const AssessmentDetailsScreen = () => {
     }
   }, [quality_data, pain_quality_ids]);
 
-  
   const pain_imapct_lsit_data = useMemo(() => {
     if (pain_impact_data?.length && pain_imapct_ids?.length) {
       return pain_impact_data.filter((data) => {
@@ -67,306 +96,199 @@ const AssessmentDetailsScreen = () => {
     }
   }, [pain_impact_data, pain_imapct_ids]);
 
+  const painLocationsList = [
+    ...FRONT_SIDE_BODY_PART_DATA,
+    ...BACK_SIDE_BODY_PARTS,
+  ];
 
+  const painLocations = Boolean(assessmentData?.pain_location_id)
+    ? JSON.parse(assessmentData?.pain_location_id)
+    : [];
+  const locations = Boolean(painLocations)
+    ? painLocations?.map((loc) => loc)
+    : [];
 
-  console.log('--after filtering impact---',pain_imapct_lsit_data)
-  console.log('---after filtering pain qualities---',pain_quality_data_list)
-  
-
+  const selectedPainLocationsList = useMemo(() => {
+    if (painLocationsList?.length) {
+      return painLocationsList?.filter((item) => {
+        return locations?.find((loc) => {
+          return loc === item?.value;
+        });
+      });
+    }
+  }, [painLocationsList, locations]);
 
   return (
-    <View
-      style={{
-        width: width,
-        backgroundColor: COLORS.GRAY_10,
-        alignItems: 'flex-start',
-        justifyContent: 'center',
-        paddingTop: Boolean(Platform.OS === 'ios') ? 0 : 50,
-      }}>
-      {Platform.OS === 'android' && (
-        <StatusBar
-          backgroundColor={'transparent'}
-          barStyle="dark-content"
-          translucent
-        />
-      )}
+    <SafeAreaView style={styles.safaAreaBody}>
       <View
         style={{
           width: width,
-          height: 80,
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'center',
-          justifyContent: 'space-evenly',
-          backgroundColor: COLORS.PRIMARY_LIGHTERs
+          height: height,
+          paddingTop: Boolean(Platform.OS === 'ios')
+            ? height <= 736
+              ? 20
+              : 0
+            : 50,
         }}>
-        <CustomTouchableOpacity
-          onPress={() => {
-            navigation.goBack();
-          }}>
-          <AntDesignIcon name={'arrowleft'} size={26} color={COLORS.GRAY_90} />
-        </CustomTouchableOpacity>
-        <Text
-          style={{
-            textAlign: 'center',
-            color: COLORS.PRIMARY_MAIN,
-            fontSize: 24,
-            lineHeight: 30,
-            fontWeight: '400',
-          }}>
-          Assessment Details
-        </Text>
-      </View>
-      <View
-        style={{
-          width: width,
-          paddingHorizontal: 30,
-          paddingVertical: 10,
-
-          flexDirection: 'row',
-        }}>
-        <Text
-          style={{
-            fontSize: 16,
-            color: COLORS.GRAY_90,
-            fontWeight: '800',
-          }}>
-          {'Time : '}
-        </Text>
-        <Text style={{fontSize: 16}}>{dateFormat}</Text>
-      </View>
-      <View
-        style={{
-          width: width,
-          paddingHorizontal: 30,
-          paddingVertical: 10,
-
-          flexDirection: 'row',
-        }}>
-        <Text
-          style={{
-            fontSize: 16,
-            color: COLORS.GRAY_90,
-            fontWeight: '800',
-          }}>
-          {'VerbalAbility: '}
-        </Text>
-        <Text style={{fontSize: 16}}>{assessmentData?.type||'-'}</Text>
-      </View>
-      <View
-        style={{
-          width: width,
-          paddingHorizontal: 30,
-          paddingVertical: 10,
-          flexDirection: 'row',
-        }}>
-        <Text
-          style={{
-            fontSize: 16,
-            color: COLORS.GRAY_90,
-            fontWeight: '800',
-          }}>
-          {'NRS Score: '}
-        </Text>
-        <Text style={{fontSize: 16}}>{assessmentData?.current_pain_score || 0}</Text>
-      </View>
-      <View
-        style={{
-          width: width,
-          paddingHorizontal: 30,
-          paddingVertical: 10,
-          flexDirection: 'row',
-        }}>
-        <Text
-          style={{
-            fontSize: 16,
-            color: COLORS.GRAY_90,
-            fontWeight: '800',
-          }}>
-          {'Pain Timing'}
-        </Text>
-        {pain_activity.map((data) => {
-          return <Text style ={{paddingHorizontal:5}}>{data}</Text>;
-        })}
-      </View>
-      <View
-        style={{
-          width: width,
-          paddingHorizontal: 30,
-          paddingVertical: 10,
-          flexDirection: 'row',
-        }}>
-        <Text
-          style={{
-            fontSize: 16,
-            color: COLORS.GRAY_90,
-            fontWeight: '800',
-          }}>
-          {'Pain Quality'}
-        </Text>
-        {[1, 2, 3].map((data) => {
-          return <Text>{data}</Text>;
-        })}
-      </View>
-      <View
-        style={{
-          width: width,
-          paddingHorizontal: 30,
-          paddingVertical: 10,
-          flexDirection: 'row',
-        }}>
-        <Text
-          style={{
-            fontSize: 16,
-            color: COLORS.GRAY_90,
-            fontWeight: '800',
-          }}>
-          {'Pain Timing'}
-        </Text>
-      </View>
-      <View
-        style={{
-          width: width,
-          paddingHorizontal: 30,
-          paddingVertical: 10,
-          flexDirection: 'row',
-        }}>
-        <Text
-          style={{
-            fontSize: 16,
-            color: COLORS.GRAY_90,
-            fontWeight: '800',
-          }}>
-          {'Pain Activity'}
-        </Text>
-        {[1, 2, 3].map((data) => {
-          return <Text>{data}</Text>;
-        })}
-      </View>
-      <View
-        style={{
-          width: width,
-          paddingHorizontal: 30,
-          paddingVertical: 10,
-          flexDirection: 'row',
-        }}>
-        <Text
-          style={{
-            fontSize: 16,
-            color: COLORS.GRAY_90,
-            fontWeight: '800',
-          }}>
-          {'Note:'}
-        </Text>
-        <Text style={{fontSize: 16}}>{'Note'}</Text>
-      </View>
-      {/* <View
-        style={{
-          width: width,
-          paddingHorizontal: 30,
-          paddingVertical: 10,
-          flexDirection: 'row',
-        }}>
-        <Text
-          style={{
-            fontSize: 16,
-            color: COLORS.GRAY_90,
-            fontWeight: '800',
-          }}>
-          {'Reminder:'}
-        </Text>
-        <Text style={{fontSize: 16}}>{'true'}</Text>
-      </View>
-      <View
-        style={{
-          flexDirection: 'row',
-          paddingHorizontal:30
-        }}>
-        <Text style={{fontSize: 14, lineHeight: 22, fontWeight: '700'}}>
-          PUPILLARY RESULT:
-        </Text>
-        <View
-          style={{
-            flexDirection: 'row',
-          }}>
-          <Text
-            style={{
-              fontSize: 14,
-              lineHeight: 22,
-              fontWeight: '700',
-              paddingLeft: 10,
+        <View style={styles.headerStyle}>
+          <CustomTouchableOpacity
+            onPress={() => {
+              navigation.goBack();
             }}>
-            {'PUAL:'}
-          </Text>
-          <Text
-            style={{
-              fontSize: 14,
-              lineHeight: 22,
-              fontWeight: '700',
-              paddingLeft: 5,
-            }}>
-          </Text>
+            <AntDesignIcon
+              name={'arrowleft'}
+              color={COLORS.GRAY_90}
+              style={styles.arrowStyle}
+            />
+          </CustomTouchableOpacity>
+
+          <Text style={styles.headerText}>Assessment Details</Text>
         </View>
         <View
           style={{
-            flexDirection: 'row',
+            paddingTop: height < 700 ? 10 : 20,
+            flex: 2,
+            width: width,
           }}>
-          <Text
+          <View style={styles.dataFieldView}>
+            <Text style={styles.subHeadingText}>{'Assessment Date: '}</Text>
+            <Text style={styles.dataText}>{dateFormat}</Text>
+          </View>
+          <View style={styles.dataFieldView}>
+            <Text style={styles.subHeadingText}>{'Verbal Ability: '}</Text>
+            <Text style={styles.dataText}>{assessmentData?.type || '-'}</Text>
+          </View>
+          <View style={styles.dataFieldView}>
+            <Text style={styles.subHeadingText}>{'NRS Score: '}</Text>
+            <View>
+              <Text>{''}</Text>
+              <View style={{flexDirection: 'row'}}>
+                <Text style={styles.dataText}>{'Most Pain: '}</Text>
+                <Text style={styles.dataText}>
+                  {assessmentData?.most_pain_score || 0}
+                </Text>
+              </View>
+              <View style={{flexDirection: 'row'}}>
+                <Text style={styles.dataText}>{'Current Pain: '}</Text>
+                <Text style={styles.dataText}>
+                  {assessmentData?.current_pain_score || 0}
+                </Text>
+              </View>
+              <View style={{flexDirection: 'row'}}>
+                <Text style={styles.dataText}>{'Least Pain: '}</Text>
+                <Text style={styles.dataText}>
+                  {' '}
+                  {Boolean(assessmentData?.least_pain_score)
+                    ? 0
+                    : assessmentData?.least_pain_score}
+                </Text>
+              </View>
+            </View>
+          </View>
+          <View style={styles.dataFieldView}>
+            <Text style={styles.subHeadingText}>{'Note: '}</Text>
+            <Text style={styles.dataText}>{assessmentData?.note || ''}</Text>
+          </View>
+          <View style={styles.dataFieldView}>
+            <Text style={styles.subHeadingText}>{'Remainder : '}</Text>
+            <Text style={styles.dataText}>
+              {assessmentData?.isReminder ? 'true' : 'false'}
+            </Text>
+          </View>
+          <View style={styles.dataFieldView}>
+            <Text style={styles.subHeadingText}>{'Impact Score: '}</Text>
+            <Text style={styles.dataText}>
+              {Boolean(assessmentData?.total_score !== 99)
+                ? parseInt(assessmentData?.total_score)
+                : 'N/A'}
+            </Text>
+          </View>
+          <ScrollView
             style={{
-              fontSize: 14,
-              lineHeight: 22,
-              fontWeight: '700',
-              paddingLeft: 10,
-            }}>
-            {'Ratio:'}
-          </Text>
-          <Text
-            style={{
-              fontSize: 14,
-              lineHeight: 22,
-              fontWeight: '700',
-              paddingLeft: 5,
-            }}>
-          </Text>
-        </View> */}
-      {/* </View> */}
-      <View
-        style={{
-          flexDirection: 'row',
-          paddingHorizontal:30
-        }}>
-        <Text style={{fontSize: 14, lineHeight: 22, fontWeight: '700'}}>
-          Pupillary Dilation Score:
-        </Text>
-        <Text
-          style={{
-            fontSize: 14,
-            lineHeight: 22,
-            fontWeight: '700',
-            paddingLeft: 10,
-          }}>
-            {'pupilary dilation'}
-        </Text>
+              paddingBottom: 50,
+              maxHeight: height * 0.51,
+            }}
+            nestedScrollEnabled={true}
+            showsVerticalScrollIndicator={false}
+            horizontal={false}>
+            <View style={{paddingHorizontal: 30, paddingVertical: 10}}>
+              <Text style={styles.subHeadingText}>{'Pain Qualities: '}</Text>
+              <FlatList
+                data={pain_imapct_lsit_data}
+                showsVerticalScrollIndicator={false}
+                horizontal={false}
+                style={{
+                  maxHeight: height * 0.3,
+                }}
+                keyExtractor={(item) => item.value.toString()}
+                nestedScrollEnabled
+                renderItem={({item, index}) => {
+                  return (
+                    <RenderDataItems key={'_' + index} label={item?.label} />
+                  );
+                }}
+              />
+            </View>
+            <View style={{paddingHorizontal: 30, paddingVertical: 10}}>
+              <Text style={styles.subHeadingText}>{'Pain Timing: '}</Text>
+              <FlatList
+                data={pain_impact_activities_list || []}
+                showsVerticalScrollIndicator={false}
+                horizontal={false}
+                style={{
+                  maxHeight: height * 0.3,
+                }}
+                keyExtractor={(item) => item}
+                nestedScrollEnabled
+                renderItem={({item, index}) => {
+                  return <RenderDataItems key={'_' + index} label={item} />;
+                }}
+              />
+            </View>
+            <View style={{paddingHorizontal: 30, paddingVertical: 10}}>
+              <Text style={styles.subHeadingText}>{'Pain  Activies: '}</Text>
+              <FlatList
+                data={pain_quality_data_list || []}
+                showsVerticalScrollIndicator={false}
+                horizontal={false}
+                style={{
+                  maxHeight: height * 0.5,
+                }}
+                keyExtractor={(item) => item.id.toString()}
+                nestedScrollEnabled
+                renderItem={({item, index}) => {
+                  return (
+                    <RenderDataItems key={'_' + index} label={item?.label} />
+                  );
+                }}
+              />
+            </View>
+
+            <View style={{paddingHorizontal: 30, paddingVertical: 10}}>
+              <Text style={styles.subHeadingText}>{'Pain Locations: '}</Text>
+              <FlatList
+                data={selectedPainLocationsList}
+                showsVerticalScrollIndicator={false}
+                horizontal={false}
+                style={{
+                  maxHeight: height * 0.3,
+                }}
+                keyExtractor={(item) => item.key}
+                nestedScrollEnabled
+                renderItem={({item, index}) => {
+                  return (
+                    <RenderDataItems
+                      key={'_' + index}
+                      label={item?.part_name}
+                    />
+                  );
+                }}
+              />
+            </View>
+          </ScrollView>
+        </View>
       </View>
-      <View
-        style={{
-          flexDirection: 'row',
-          paddingHorizontal:30
-        }}>
-        <Text style={{fontSize: 14, lineHeight: 22, fontWeight: '700'}}>
-          Impact Score:
-        </Text>
-        <Text
-          style={{
-            fontSize: 14,
-            lineHeight: 22,
-            fontWeight: '700',
-            paddingLeft: 10,
-          }}>
-            {Boolean(parseInt(assessmentData?.facial_expression)!==99)? parseInt(assessmentData?.facial_expression) : 0}
-        </Text>
-      </View>
-    </View>
+    </SafeAreaView>
   );
 };
 export default AssessmentDetailsScreen;

@@ -1,4 +1,4 @@
-import {Dimensions, StyleSheet} from 'react-native';
+import {Dimensions, Platform, StyleSheet} from 'react-native';
 import {COLORS} from '../../constants/colors';
 
 const {width, height} = Dimensions.get('window');
@@ -51,13 +51,17 @@ const painLocationStyles = () => {
     },
     closeIcon: {
       fontSize: 25,
-      right:10
+      right: 10,
     },
     imageStyle: {
       width: width * 0.9,
       height: height * 0.9,
-      aspectRatio: Boolean(height > 740)
+      aspectRatio: Boolean(height > 740 && Platform.OS === 'ios')
         ? ((width + 330) / height) * 0.5
+        : Boolean(height > 850)
+        ? ((width + 330) / height) * 0.5
+        : Boolean(height > 740)
+        ? ((width + 330) / height) * 0.45
         : (width * 0.8 + 20) / (height + 100),
     },
   });

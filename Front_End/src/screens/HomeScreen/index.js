@@ -51,7 +51,9 @@ const HomeScreen = ({navigation}) => {
 
   const recentPatients = allPatients
     .filter((item, index) => {
-      return item?.createdBy === userId;
+      return item?.modifiedBy
+        ? item?.modifiedBy === userId
+        : item.createdBy === userId;
     })
     ?.filter((_, index) => index <= 4);
 
@@ -127,8 +129,7 @@ const HomeScreen = ({navigation}) => {
           dispatch({
             type: ALL_PATIENTS_ACTIONS.ALL_PATIENTS,
             payload: res.data.result.sort(
-              (item1, item2) =>
-                item2.createdAt - item1.createdAt,
+              (item1, item2) => item2.createdAt - item1.createdAt,
             ),
           });
         })
@@ -193,7 +194,7 @@ const HomeScreen = ({navigation}) => {
                             label: data.displayValue,
                             value: data.id,
                             key: data.id,
-                            heading : data.categoryName
+                            heading: data.categoryName,
                           };
                         }),
                     });

@@ -211,6 +211,7 @@ const NewPatientPopUp = ({
           gender: gender,
           medical_record_no: medicalRecord,
           modifiedAt: userId,
+          modifiedBy : userId
         },
         token,
       )

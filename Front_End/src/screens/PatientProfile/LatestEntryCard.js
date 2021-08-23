@@ -97,7 +97,7 @@ const LatestEntryCard = ({last_assessment, last_medication, scrollRef}) => {
 
       <View style={[styles.latestEntryView]}>
         <Text style={styles.latestPainAssignText}>IMPACT Score:</Text>
-        <CustomTouchableOpacity>
+        <CustomTouchableOpacity disabled={true}>
           <View style={styles.latestEntryButtonStyle}>
             <Text
               style={{

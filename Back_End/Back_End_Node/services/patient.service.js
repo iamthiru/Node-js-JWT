@@ -96,7 +96,7 @@ async function createAssessment(data) {
         data.description, data.pain_impact_id, data.pupillary_dilation, data.facial_expresssion, data.note, data.total_score, data.createdAt, data.createdBy, data.isDeleted
     ];
     const assessment = await new Promise((resolve, reject) => {
-        pool.query(SQL, params, (err, result) => {
+        pool.query(SQL, params, async (err, result) => {
             if (err) {
                 console.log(err);
                 resolve({
@@ -104,6 +104,10 @@ async function createAssessment(data) {
                     error: err,
                 })
             } else {
+                await updatePatientDetails({
+                    modifiedBy: data.createdBy,
+                    id: data.patient_id
+                })
                 resolve({
                     isError: false,
                     result: result
@@ -179,7 +183,7 @@ async function getAssessmentByPatientId() {
 }
 
 async function getLookUp() {
-    const SQL = `SELECT id,lookupTypeId,displayValue,categoryId from lookup where isDeleted = 0`;
+    const SQL = `SELECT id,lookupTypeId,displayValue,categoryId,categoryName from lookup where isDeleted = 0`;
     const lookup = await new Promise((resolve, reject) => {
         pool.query(SQL, (err, result) => {
             if (err) {
@@ -242,7 +246,11 @@ async function createMedication(data) {
             }
         })
     });
-    console.log(medication);
+    const result = await updatePatientDetails({
+        modifiedBy: data.createdBy,
+        id: data.patient_id
+    })
+    console.log(medication, result);
     if (medication.result.affectedRows) {
         return {
             isError: false,
@@ -343,7 +351,7 @@ async function getPatientLastAssessmentAndMedication(patientId) {
 
 async function updatePatientDetails(data){
     let patientDetails ={};
-    const getPatient = await this.getAllPatientList();
+    const getPatient = await getAllPatientList();
    // console.log(getPatient);
     for(let patient of getPatient.result){
         if(patient.id == data.id){
@@ -358,6 +366,7 @@ async function updatePatientDetails(data){
     data.gender = data.gender?data.gender:patientDetails.gender;
     data.medical_record_no = data.medical_record_no?data.medical_record_no:patientDetails.medical_record_no;
     data.modifiedAt = new Date().getTime();
+    data.modifiedBy = data?.modifiedBy ? data?.modifiedBy : patientDetails?.modifiedBy
 
     const SQL = `UPDATE patient set first_name=?,last_name=?,dob=?,eyeColor=?,gender=?,medical_record_no=?,modifiedBy=?,modifiedAt=? where id =?`;
     param= [data.first_name,data.last_name,data.dob,data.eyeColor,data.gender,data.medical_record_no,data.modifiedBy,data.modifiedAt,data.id];

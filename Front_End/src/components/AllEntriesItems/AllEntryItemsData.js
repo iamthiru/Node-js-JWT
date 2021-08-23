@@ -11,7 +11,6 @@ const AllEntryItemsData = ({
   }) => {
     const [allEntriesSortedList,setAllEntriesSortedList] = useState([])
 
-
     useEffect(()=>{
 
       if(sortedValue && allEntries && allEntries.length)
@@ -38,6 +37,7 @@ const AllEntryItemsData = ({
       renderItem ={({item}) =>{
         return (
           <AllEntries
+          key = {item?.id.toString()}
             data={item}
             width={width}
             height={height}

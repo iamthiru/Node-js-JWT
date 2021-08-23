@@ -679,8 +679,8 @@ const FacialExpressionScreen = ({navigation}) => {
             // catch(err){
             //   console.log('----encryption/decvrption error----',err)
 
-            // }
-             // End of the Encryption
+           // }
+             //End of the Encryption
             clearProcessingTimer();
 
             setShowSpinner({
@@ -695,20 +695,8 @@ const FacialExpressionScreen = ({navigation}) => {
                   'initiateFacialExpressionVideoProcessingAPI: ',
                   result,
                 );
-                if (result?.data?.status === 'Failure') {
-                  Alert.alert(
-                    'Error  : ' + result?.data?.msg + ' ' + result?.data?.code,
-                  );
-                  setResultReady(false);
-                  setShowSpinner({
-                    open: false,
-                    message: '',
-                  });
-                  clearProcessingTimer();
-                  return;
-                }
-                if (result && result.data === 'Retake') {
-                  Alert.alert('Error', 'Please retake the video');
+                if (result && result.data?.code === "400") {
+                  Alert.alert('Error', 'Please retake the video' +  result?.data?.msg + ' ' + result?.data?.code);
                   setResultReady(false);
                   // setShowProcessedResult(true);
                   setShowSpinner({
@@ -719,6 +707,19 @@ const FacialExpressionScreen = ({navigation}) => {
                   // resetStates('');
                   return;
                 }
+                // if (result?.data?.status === 'Failure') {
+                //   Alert.alert(
+                //     'Error  : ' + result?.data?.msg + ' ' + result?.data?.code,
+                //   );
+                //   setResultReady(false);
+                //   setShowSpinner({
+                //     open: false,
+                //     message: '',
+                //   });
+                //   clearProcessingTimer();
+                //   return;
+                // }
+                
                 // clearAssessmentStoreData();
                 setResultValue(result?.data?.result);
                 setResultReady(true);

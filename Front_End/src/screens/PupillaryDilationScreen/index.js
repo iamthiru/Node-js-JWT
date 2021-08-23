@@ -588,26 +588,16 @@ const PupillaryDilationScreen = ({navigation}) => {
             //  catch(err){
             //    console.log('----encryption/decvrption error----',err)
 
-            //  }
+             //}
             clearProcessingTimer();
             setSpinnerMessage('Processing...');
             processingTime = 0;
             startProcessingTimer();
             initiatePupilVideoProcessingAPI(filename)
               .then((result) => {
-                console.log('initiatePupilVideoProcessingAPI: ', result);
-                if (result?.data?.status === 'Failure') {
-                  Alert.alert(
-                    'Error :' + result?.data?.msg + ' ' + result?.data?.code,
-                  );
-                  setShowSpinner(false);
-                  setSpinnerMessage('');
-                  setResultReady(false);
-                  clearProcessingTimer();
-                  return;
-                }
-                if (result && result.data === 'Retake') {
-                  Alert.alert('Error', 'Please retake the video');
+                console.log('initiatePupilVideoProcessingAPI: ', result?.data);
+                if (result && result.data?.code ==="400") {
+                  Alert.alert('Error', 'Please retake the video' + + result?.data?.msg + ' ' + result?.data?.code);
                   setResultReady(false);
                   setShowProcessedResult(false);
                   setShowSpinner(false);
@@ -616,6 +606,17 @@ const PupillaryDilationScreen = ({navigation}) => {
                   return;
                   // resetStates('');
                 }
+                // if (result?.data?.status === 'Failure') {
+                //   Alert.alert(
+                //     'Error :' + result?.data?.msg + ' ' + result?.data?.code,
+                //   );
+                //   setShowSpinner(false);
+                //   setSpinnerMessage('');
+                //   setResultReady(false);
+                //   clearProcessingTimer();
+                //   return;
+                // }
+               
                 setResultValue(result.data?.result);
                 setResultReady(true);
                 setShowSpinner(false);
