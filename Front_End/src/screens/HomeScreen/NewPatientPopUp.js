@@ -54,6 +54,7 @@ const NewPatientPopUp = ({
   const patientType = updateApiIntegrate ? 'Edit Patient' : 'New Patient';
   const [patientId, setPatientId] = useState(0);
 
+
   // useEffect(() => {
   //   let startTime = 0;
   //   let endTime = 0;
@@ -139,17 +140,23 @@ const NewPatientPopUp = ({
       token,
     )
       .then((res) => {
+        if (res.data.isError) {
+          Alert.alert('Invalid data patient data');
+          return;
+        }
+        setPatientId(res.data.result.insertId);
+        let id = res.data.result.insertId
+        let dob = new Date(selectedDate).toDateString()
+        let age =new Date().getFullYear() - new Date(selectedDate).getFullYear() 
+        let name =`${firstName[0].toUpperCase() + firstName.slice(1)} ${lastName[0].toUpperCase() + lastName.slice(1)}`
+        Analytics.setPatientInfo(id,name,dob,age,medicalRecord,gender)
         setFirstName('');
         setLastName('');
         setGender(null);
         setEyeColor(null);
         setMedicalRecord('');
         setSelectedDate(null);
-        if (res.data.isError) {
-          Alert.alert('Invalid data patient data');
-          return;
-        }
-        setPatientId(res.data.result.insertId);
+
         if (goToAssessment) {
           dispatch({
             type: PATIENT_NAME_ACTION.PATIENT,
@@ -200,6 +207,7 @@ const NewPatientPopUp = ({
   ]);
 
   const handleSubmit = useCallback(() => {
+   
     if (updateApiIntegrate) {
       patientUpdateApi(
         {
@@ -222,6 +230,11 @@ const NewPatientPopUp = ({
                 Alert.alert('all patinets  data error');
                 return;
               }
+              let id = patientData.id
+              let dob = new Date(selectedDate).toDateString()
+              let age =new Date().getFullYear() - new Date(selectedDate).getFullYear() 
+              let name =`${firstName[0].toUpperCase() + firstName.slice(1)} ${lastName[0].toUpperCase() + lastName.slice(1)}`
+              Analytics.setPatientInfo(id,name,dob,age,medicalRecord,gender)
               setFirstName('');
               setLastName('');
               setGender(null);

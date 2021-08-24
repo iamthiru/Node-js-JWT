@@ -46,7 +46,7 @@ import CustomButton from '../../components/shared/CustomButton';
 import {useNavigation} from '@react-navigation/native';
 import {useSelector, useDispatch} from 'react-redux';
 // import FocusDepthSliderModal from '../../components/FocusDepthSlider';
-import {CREATE_ASSESSMENT_ACTION} from '../../constants/actions';
+import {ASSESSMENT_TIME_DURATION_ACTION, CREATE_ASSESSMENT_ACTION} from '../../constants/actions';
 import Analytics from '../../utils/Analytics';
 // import { decryptData, encryptData } from '../../helpers/encryption';
 // import { ENCRIPTION_KEY, ENCRIPTION_MSG } from '../../constants/encryption';
@@ -59,6 +59,7 @@ const {VideoCropper} = NativeModules;
 let camera = null;
 let intervalId = null;
 let processingIntervalId = null;
+let pupilaryStartTime = 0
 
 const EYE_BORDER_TYPE = {
   OVAL: 'oval',
@@ -135,6 +136,7 @@ const PupillaryDilationScreen = ({navigation}) => {
   // var pressOut;
   useEffect(() => {
     setTimeout(() => checkStoragePermission(), 3000);
+    pupilaryStartTime = new Date().getTime()
   }, []);
 
   useEffect(() => {
@@ -616,6 +618,13 @@ const PupillaryDilationScreen = ({navigation}) => {
                 //   clearProcessingTimer();
                 //   return;
                 // }
+                dispatch({
+                  type : ASSESSMENT_TIME_DURATION_ACTION.ASSESSMENT_TIME_DURATION,
+                  payload : {
+                    pupilaryStartTime : pupilaryStartTime ,
+                    pupilaryEndTime : new Date().getTime()
+                  }
+                })
                
                 setResultValue(result.data?.result);
                 setResultReady(true);
@@ -1909,6 +1918,13 @@ const PupillaryDilationScreen = ({navigation}) => {
                     borderWidth: 1,
                   }}
                   onPress={async () => {
+                   await  dispatch({
+                      type : ASSESSMENT_TIME_DURATION_ACTION.ASSESSMENT_TIME_DURATION,
+                      payload : {
+                        pupilaryStartTime : pupilaryStartTime ,
+                        pupilaryEndTime : new Date().getTime()
+                      }
+                    })
                     await dispatch({
                       type: CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
                       payload: {

@@ -1,7 +1,8 @@
-import {useNavigation} from '@react-navigation/core';
+import {useNavigation, useRoute} from '@react-navigation/core';
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {
   Alert,
+  FlatList,
   Platform,
   SafeAreaView,
   ScrollView,
@@ -26,6 +27,7 @@ import {
   PATIENT_PROFILE_UPDATE_ACTION,
 } from '../../constants/actions';
 import Analytics from '../../utils/Analytics';
+import {formatAMPM} from '../../utils/date';
 
 const createSectionListData = (data) => {
   let lookup = [];
@@ -44,8 +46,10 @@ const createSectionListData = (data) => {
 };
 
 const NewMedication = () => {
+  const {params} = useRoute();
+  const medicationListData = params?.medicationList || [];
   const window = useWindowDimensions();
-  const {width} = window;
+  const {width, height} = window;
   const navigation = useNavigation();
   const [frequency, setFrequency] = useState('');
   const [medicationClass, setMedicationClass] = useState(null);
@@ -190,6 +194,36 @@ const NewMedication = () => {
     latestData?.medication_name_id,
   ]);
 
+  const getMedicationName = useCallback(
+    (data) => {
+      let medicationName = '';
+      let dosageQuantity = '';
+      if (medication && dosage) {
+        let getMedicationClass = medication?.find(
+          (item) => item?.id === data?.medication_class_id,
+        );
+        let getMedicationData = getMedicationClass?.lookup_data?.find(
+          (item) => item?.id === data?.medication_id,
+        );
+        let dosageData = dosage?.find(
+          (item) => item?.id === data?.dosage_unit_id,
+        );
+        medicationName = getMedicationData?.label;
+        dosageQuantity = dosageData?.label;
+        return `${medicationName} ${data?.dosage_number} ${dosageQuantity} `;
+      }
+    },
+    [medication],
+  );
+
+  const getDateAndTime = useCallback((data) => {
+    let date = new Date(data);
+    let year = date.getFullYear();
+    let month = date.getMonth() + 1;
+    let day = date.getDate();
+    return `${month}/${day}/${year} ${formatAMPM(date)}`;
+  },[]);
+
   const validate = useCallback(() => {
     if (errosState?.length) {
       return true;
@@ -228,7 +262,7 @@ const NewMedication = () => {
         dosage_unit_id: unit ? unit : 0,
         frequency: frequency ? frequency : '',
         createdBy: userId,
-        modifiedBy : userId
+        modifiedBy: userId,
       },
       token,
     )
@@ -335,13 +369,14 @@ const NewMedication = () => {
         <View
           style={{
             flex: 1,
-            width: window.widt0h,
+            width: width,
             justifyContent: 'center',
             alignItems: 'flex-start',
             backgroundColor: COLORS.WHITE,
             paddingHorizontal: 30,
           }}>
           <ScrollView
+            style={{width: width}}
             showsVerticalScrollIndicator={false}
             showsHorizontalScrollIndicator={false}>
             <View
@@ -542,7 +577,6 @@ const NewMedication = () => {
               </Text>
             </View>
             <CustomDropDown
-              // items={FREQUENCY}
               items={frequency_data}
               value={frequency}
               onChangeValue={(item) => {
@@ -551,15 +585,104 @@ const NewMedication = () => {
                   type: CREATE_ASSESSMENT_ACTION.CREATE_ASSESSMENT,
                   frequency: item.label,
                 });
-                // dispatch({
-                //   type:CREATE_MEDICATION_ACTION.CREATE_MEDICATION,
-                //   payload : {
-                //     frequencyData : item
-                //   }
-                // })
               }}
               containerStyle={{marginBottom: 20, width: window.width * 0.8}}
             />
+            {Boolean(medicationListData?.length) && (
+              <View
+                style={{
+                  borderColor: COLORS.PRIMARY_DARKER,
+                  paddingTop: 20,
+                  borderTopWidth: 1,
+                  width: width * 0.8,
+                  zIndex: 10,
+                }}>
+                <Text
+                  style={{
+                    fontSize: 22,
+                    fontWeight: 'bold',
+                    color: COLORS.PRIMARY_DARKER,
+                  }}>
+                  {'All Entries'}
+                </Text>
+                <View
+                  style={{
+                    width: width * 0.8,
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    paddingTop: 10,
+                    paddingBottom: 10,
+                  }}>
+                  <Text
+                    style={{
+                      fontSize: 16,
+                    }}>
+                    {'Time'}
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: 16,
+                    }}>
+                    {'Medication Name'}
+                  </Text>
+                </View>
+                <View>
+                  <FlatList
+                    showsVerticalScrollIndicator={false}
+                    horizontal={false}
+                    data={
+                      medicationListData?.sort((item1, item2) => {
+                        return (
+                          item2.modifiedAt - item1?.modifiedAt ||
+                          item2.createdAt - item1?.createdAt
+                        );
+                      }) || []
+                    }
+                    keyExtractor={(item) => item?.id?.toString()}
+                    nestedScrollEnabled
+                    style={{
+                      maxHeight: height * 0.4,
+                    }}
+                    renderItem={({item, index}) => {
+                      return (
+                        <CustomTouchableOpacity
+                          style={{
+                            flexDirection: 'row',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            width: width * 0.8,
+                            borderBottomWidth:
+                              index === medicationListData?.length - 1 ? 0 : 1,
+                            paddingVertical: 10,
+                            borderBottomColor: COLORS.PRIMARY_DARKER,
+                          }}>
+                          <Text
+                            style={{
+                              fontSize: 12,
+                            }}>
+                            {getDateAndTime(item?.createdAt)}
+                          </Text>
+                         
+                          <View>
+                          <Text
+                            style={{
+                              fontSize: 12,
+                            }}>
+                            {getMedicationName(item)}
+                          </Text>
+                          <Text style ={{
+                            textAlign:'center'
+                          }}>{item?.frequency}</Text>
+                          </View>
+                         
+                        </CustomTouchableOpacity>
+                      );
+                    }}
+                  />
+                </View>
+              </View>
+            )}
           </ScrollView>
           <View
             style={{

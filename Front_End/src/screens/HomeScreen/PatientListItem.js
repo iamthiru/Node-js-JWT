@@ -1,6 +1,6 @@
 import {useNavigation} from '@react-navigation/core';
 import React, {useEffect, useMemo, useState} from 'react';
-import {View, Text} from 'react-native';
+import {View, Text, Dimensions} from 'react-native';
 import AntDesignIcon from 'react-native-vector-icons/AntDesign';
 
 import CustomTouchableOpacity from '../../components/shared/CustomTouchableOpacity';
@@ -13,6 +13,7 @@ import {
   PATIENT_DETAILS_ACTION,
   PATIENT_PROFILE_UPDATE_ACTION,
 } from '../../constants/actions';
+const {width, height} = Dimensions.get('window');
 let now = new Date();
 let year = now.getFullYear();
 let month = now.getMonth();
@@ -23,22 +24,22 @@ const PatientListItem = ({item, index}) => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
 
-  
   const createdDateOrTime = useMemo(() => {
-    let dateOrTime = new Date(item?.createdAt);
-    let year = dateOrTime.getFullYear()
-    let month = dateOrTime.getMonth()+1
-    let date = dateOrTime.getDate()
-    
-    if (yesterday && item?.createdAt) {
-      if (item?.createdAt > yesterday) {
-        return `${year}/${padNumber(month)}/${date}   ${formatAMPM(dateOrTime)}`;
+    let dateOrTime = item?.modifiedAt
+      ? new Date(item?.modifiedAt)
+      : new Date(item?.createdAt);
+    let year = dateOrTime.getFullYear();
+    let month = dateOrTime.getMonth() + 1;
+    let date = dateOrTime.getDate();
+
+    if (yesterday && dateOrTime.getTime()) {
+      if (dateOrTime.getTime() > yesterday) {
+        return `Today  ${formatAMPM(dateOrTime)}`;
       } else {
-        return `${year}/${padNumber(month)}/${date}  ${formatAMPM(dateOrTime)}`;
+        return `${month}/${date}/${year}  ${formatAMPM(dateOrTime)}`;
       }
     }
-  }, [yesterday, item?.createdAt]);
-  
+  }, [yesterday, item?.modifiedAt, item?.createdAt]);
 
   return (
     <CustomTouchableOpacity
@@ -55,19 +56,7 @@ const PatientListItem = ({item, index}) => {
           payload: true,
         });
       }}>
-      <Text
-        style={[
-          styles.h2Label,
-          {
-            width: undefined,
-          },
-        ]}>
-        {`${item.first_name} ${item.last_name}`}
-      </Text>
-      <View
-        style={{
-          flexDirection: 'row',
-        }}>
+      <View>
         <Text
           style={[
             styles.h3Label,
@@ -77,6 +66,22 @@ const PatientListItem = ({item, index}) => {
           ]}>
           {createdDateOrTime}
         </Text>
+        <Text
+        numberOfLines = {1}
+          style={[
+            styles.h2Label,
+            {
+              width: width * 0.8,
+            },
+          ]}>
+          {`${item.first_name} ${item.last_name}`}
+        </Text>
+      </View>
+
+      <View
+        style={{
+          flexDirection: 'row',
+        }}>
         <AntDesignIcon name={'arrowright'} size={20} color={COLORS.GRAY_90} />
       </View>
     </CustomTouchableOpacity>

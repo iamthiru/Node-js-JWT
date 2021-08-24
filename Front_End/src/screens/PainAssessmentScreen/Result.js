@@ -1,21 +1,23 @@
-import React, {useEffect, useMemo, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {View, Text, Dimensions, ScrollView, Platform} from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Modal from 'react-native-modal';
 import CustomTouchableOpacity from '../../components/shared/CustomTouchableOpacity';
 import AntDesignIcon from 'react-native-vector-icons/AntDesign';
 import {COLORS} from '../../constants/colors';
-import {formatAMPM} from '../../utils/date';
+import {formatAMPM, padNumber} from '../../utils/date';
 import {useSelector, useDispatch} from 'react-redux';
 import {SCREEN_NAMES} from '../../constants/navigation';
 import Analytics from '../../utils/Analytics';
 import {
+  ASSESSMENT_TIME_DURATION_ACTION,
   CREATE_ASSESSMENT_ACTION,
   PAIN_LOCATIONS_ACTION,
   PATIENT_NAME_ACTION,
   PATIENT_PROFILE_UPDATE_ACTION,
 } from '../../constants/actions';
 import {PAIN_FREQUENCY, VERBAL_ABILITY} from '../../constants/painAssessment';
+import {timeDuration} from '../../helpers/TimeDurationCalcultaion';
 
 const {width, height} = Dimensions.get('window');
 
@@ -30,6 +32,15 @@ const Result = (props) => {
   const forceUpdate = useSelector((state) => state.patientProfileUpdate.update);
   const screenName = useSelector((state) => state.routeName.route);
   const patient_id = useSelector((state) => state.patientDetails.item.id);
+  const assessmentTimeDurationData = useSelector(
+    (state) => state?.timeDuration,
+  );
+  let assessment_startTime = assessmentTimeDurationData?.assessmentStartTime
+    ? assessmentTimeDurationData?.assessmentStartTime
+    : 0;
+  let assessment_endTime = assessmentTimeDurationData?.assessmentEndTime
+    ? assessmentTimeDurationData?.assessmentEndTime
+    : 0;
   const dispatch = useDispatch();
   let pupilary_result = assessment_data?.pupilary_result_data;
   useEffect(() => {
@@ -320,7 +331,64 @@ const Result = (props) => {
               flexDirection: 'row',
             }}>
             <Text style={{fontSize: 14, lineHeight: 22, fontWeight: '700'}}>
-              PUPILLARY RESULT:
+              {' Assessment Time Duration :'}
+            </Text>
+            <Text
+              style={{
+                fontSize: 14,
+                lineHeight: 22,
+                fontWeight: '700',
+                paddingLeft: 10,
+              }}>
+              {timeDuration(assessment_startTime, assessment_endTime)}
+            </Text>
+          </View>
+          <View
+            style={{
+              flexDirection: 'row',
+            }}>
+            <Text style={{fontSize: 14, lineHeight: 22, fontWeight: '700'}}>
+              {'  Pupilary Dilation Time Duration :'}
+            </Text>
+            <Text
+              style={{
+                fontSize: 14,
+                lineHeight: 22,
+                fontWeight: '700',
+                paddingLeft: 10,
+              }}>
+              {timeDuration(
+                assessmentTimeDurationData?.pupilaryStartTime,
+                assessmentTimeDurationData?.pupilaryEndTime,
+              )}
+            </Text>
+          </View>
+          <View
+            style={{
+              flexDirection: 'row',
+            }}>
+            <Text style={{fontSize: 14, lineHeight: 22, fontWeight: '700'}}>
+              {' Facial Expression Time Duration :'}
+            </Text>
+            <Text
+              style={{
+                fontSize: 14,
+                lineHeight: 22,
+                fontWeight: '700',
+                paddingLeft: 10,
+              }}>
+              {timeDuration(
+                assessmentTimeDurationData?.facialStartTime,
+                assessmentTimeDurationData?.facilaEndTime,
+              )}
+            </Text>
+          </View>
+          <View
+            style={{
+              flexDirection: 'row',
+            }}>
+            <Text style={{fontSize: 14, lineHeight: 22, fontWeight: '700'}}>
+              {' PUPILLARY RESULT:'}
             </Text>
             <View
               style={{
@@ -378,7 +446,7 @@ const Result = (props) => {
               flexDirection: 'row',
             }}>
             <Text style={{fontSize: 14, lineHeight: 22, fontWeight: '700'}}>
-              Impact Score:
+              {' Impact Score:'}
             </Text>
             <Text
               style={{
@@ -404,6 +472,10 @@ const Result = (props) => {
               marginBottom: 12,
             }}
             onPress={() => {
+              dispatch({
+                type: ASSESSMENT_TIME_DURATION_ACTION.ASSESSMENT_TIME_DURATION,
+                payload: {},
+              });
               dispatch({
                 type: PATIENT_PROFILE_UPDATE_ACTION.PATIENT_PROFILE_UPDATE,
                 payload: !forceUpdate,

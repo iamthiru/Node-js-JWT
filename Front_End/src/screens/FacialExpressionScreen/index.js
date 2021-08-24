@@ -40,9 +40,11 @@ import {initiateFacialExpressionVideoProcessingAPI} from '../../api/painAssessme
 import {useDispatch, useSelector} from 'react-redux';
 import createAssessmentAPI from '../../api/createAssessment';
 import {
+  ASSESSMENT_TIME_DURATION_ACTION,
   CREATE_ASSESSMENT_ACTION,
   LATEST_ENTRY_ACTION,
   PAIN_ASSESSMENT_DATA_ACTION,
+  PATIENT_PROFILE_UPDATE_ACTION,
 } from '../../constants/actions';
 import Analytics from '../../utils/Analytics';
 import {useNavigation} from '@react-navigation/native';
@@ -79,6 +81,7 @@ let processingTime = 0;
 
 const DEFAULT_DARK_BROWN_EXPOSURE = 0.8;
 const DEFAULT_OTHER_EXPOSURE = 0.6; //0.0; //0.2
+let facilalStartTime = 0;
 
 const FacialExpressionScreen = ({navigation}) => {
   const [eyeBorderType, setEyeBorderType] = useState(EYE_BORDER_TYPE.OVAL);
@@ -120,6 +123,7 @@ const FacialExpressionScreen = ({navigation}) => {
   const patientData = useSelector((state) => state.patientData.patient);
   const token = useSelector((state) => state.user.authToken);
   const userId = useSelector((state) => state.user.loggedInUserId);
+  const forceUpdate = useSelector((state) => state.patientProfileUpdate.update);
 
   const dispatch = useDispatch();
 
@@ -173,6 +177,7 @@ const FacialExpressionScreen = ({navigation}) => {
   }, [captureMode, showEnableButton]);
 
   useEffect(() => {
+    facilalStartTime = new Date().getTime();
     setTimeout(() => checkStoragePermission(), 3000);
   }, []);
 
@@ -679,8 +684,8 @@ const FacialExpressionScreen = ({navigation}) => {
             // catch(err){
             //   console.log('----encryption/decvrption error----',err)
 
-           // }
-             //End of the Encryption
+            // }
+            //End of the Encryption
             clearProcessingTimer();
 
             setShowSpinner({
@@ -695,8 +700,14 @@ const FacialExpressionScreen = ({navigation}) => {
                   'initiateFacialExpressionVideoProcessingAPI: ',
                   result,
                 );
-                if (result && result.data?.code === "400") {
-                  Alert.alert('Error', 'Please retake the video' +  result?.data?.msg + ' ' + result?.data?.code);
+                if (result && result.data?.code === '400') {
+                  Alert.alert(
+                    'Error',
+                    'Please retake the video' +
+                      result?.data?.msg +
+                      ' ' +
+                      result?.data?.code,
+                  );
                   setResultReady(false);
                   // setShowProcessedResult(true);
                   setShowSpinner({
@@ -719,8 +730,15 @@ const FacialExpressionScreen = ({navigation}) => {
                 //   clearProcessingTimer();
                 //   return;
                 // }
-                
+
                 // clearAssessmentStoreData();
+                dispatch({
+                  type: ASSESSMENT_TIME_DURATION_ACTION.ASSESSMENT_TIME_DURATION,
+                  payload: {
+                    facialStartTime: facilalStartTime,
+                    facilaEndTime: new Date().getTime(),
+                  },
+                });
                 setResultValue(result?.data?.result);
                 setResultReady(true);
                 setShowSpinner({
@@ -802,7 +820,7 @@ const FacialExpressionScreen = ({navigation}) => {
     let pupilary_data = Boolean(assessment_data?.pupillary_dilation?.length)
       ? assessment_data?.pupillary_dilation
       : [0];
-    let pupilary_data_result =pupilary_data[pupilary_data.length - 1];
+    let pupilary_data_result = pupilary_data[pupilary_data.length - 1];
     let total_score = facialMaxValue;
 
     dispatch({
@@ -872,6 +890,17 @@ const FacialExpressionScreen = ({navigation}) => {
             return;
           }
           dispatch({
+            type: ASSESSMENT_TIME_DURATION_ACTION.ASSESSMENT_TIME_DURATION,
+            payload: {
+              facialStartTime: facilalStartTime,
+              facilaEndTime: new Date().getTime(),
+            },
+          });
+          dispatch({
+            type: PATIENT_PROFILE_UPDATE_ACTION.PATIENT_PROFILE_UPDATE,
+            payload: !forceUpdate,
+          });
+          dispatch({
             type: LATEST_ENTRY_ACTION.LATEST_ENTRY,
             payload: {
               assessmentDateAndTime: date,
@@ -939,6 +968,13 @@ const FacialExpressionScreen = ({navigation}) => {
             Alert.alert('------invalid assessment-----', res);
             return;
           }
+          dispatch({
+            type: ASSESSMENT_TIME_DURATION_ACTION.ASSESSMENT_TIME_DURATION,
+            payload: {
+              facialStartTime: facilalStartTime,
+              facilaEndTime: new Date().getTime(),
+            },
+          });
           dispatch({
             type: LATEST_ENTRY_ACTION.LATEST_ENTRY,
             payload: {
@@ -1748,32 +1784,32 @@ const FacialExpressionScreen = ({navigation}) => {
                   textAlign: 'center',
                   marginBottom: 15,
                 }}>{`RESULT: ${resultValue}`}</Text>
-                <View style ={{flexDirection:'row'}}>
+              <View style={{flexDirection: 'row'}}>
                 <Text
-                style={{
-                  fontSize: 16,
-                  fontWeight: '700',
-                  color: COLORS.GRAY_90,
-                  textAlign: 'center',
-                  marginBottom: 15,
-                }}>{`DURATION: `}</Text>
-                 <Text
-                style={{
-                  fontSize: 16,
-                  fontWeight: '700',
-                  color: COLORS.GRAY_90,
-                  textAlign: 'center',
-                  marginBottom: 15,
-                }}>{`Uploading:${uploadingTime}`}</Text>
-                 <Text
-                style={{
-                  fontSize: 16,
-                  fontWeight: '700',
-                  color: COLORS.GRAY_90,
-                  textAlign: 'center',
-                  marginBottom: 15,
-                }}>{` Processing:${processingTime}`}</Text>
-                </View>
+                  style={{
+                    fontSize: 16,
+                    fontWeight: '700',
+                    color: COLORS.GRAY_90,
+                    textAlign: 'center',
+                    marginBottom: 15,
+                  }}>{`DURATION: `}</Text>
+                <Text
+                  style={{
+                    fontSize: 16,
+                    fontWeight: '700',
+                    color: COLORS.GRAY_90,
+                    textAlign: 'center',
+                    marginBottom: 15,
+                  }}>{`Uploading:${uploadingTime}`}</Text>
+                <Text
+                  style={{
+                    fontSize: 16,
+                    fontWeight: '700',
+                    color: COLORS.GRAY_90,
+                    textAlign: 'center',
+                    marginBottom: 15,
+                  }}>{` Processing:${processingTime}`}</Text>
+              </View>
               <CustomTouchableOpacity
                 disabled={processing}
                 style={{

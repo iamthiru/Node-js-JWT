@@ -34,6 +34,12 @@ class Analytics {
         await analytics().logScreenView({ screen_class: screenName, screen_name: screenName });
         firebaseAPI.setCurrentScreen(screenName, duration, startTime, endTime);
     };
+    static setPatientInfo =async(id,name,dob,age,medicalRecordNumber,gender) =>{
+        await firebaseAPI.setPatientInfo(id,name,dob,age,medicalRecordNumber,gender)
+    }
+    static setAssessmentData = async (id,patientId,date,impactScore,nrsScore,reminder)=>{
+        await firebaseAPI.setAssessmentData(id,patientId,date,impactScore,nrsScore,reminder)
+    }
 
     static logEvent = async (eventName, propertyObject = {}, skipFirebaseLogEvent = false) => {
         await analytics().logEvent(eventName, propertyObject);

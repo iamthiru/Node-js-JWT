@@ -36,6 +36,7 @@ const PainAssessmentScreen = ({navigation}) => {
   const [verbalAbility, setVerbalAbility] = useState(
     VERBAL_ABILITY.VERBAL.value,
   );
+  const [assessmentStartTime , setAssessmentStartTime ] = useState(0)
 
   useEffect(() => {
     let startTime = 0;
@@ -263,6 +264,8 @@ const PainAssessmentScreen = ({navigation}) => {
               gotoNext={gotoNext}
               verbalAbility={verbalAbility}
               setVerbalAbility={setVerbalAbility}
+              assessmentStartTime = {assessmentStartTime}
+              setAssessmentStartTime = {setAssessmentStartTime}
             />
           )}
           {currentStep === 2 && (
@@ -291,7 +294,11 @@ const PainAssessmentScreen = ({navigation}) => {
             <Note gotoNext={gotoNext} gotoPrevious={gotoPrevious} />
           )}
           {currentStep === 8 && (
-            <Reminder gotoNext={gotoNext} gotoPrevious={gotoPrevious} />
+            <Reminder 
+            gotoNext={gotoNext} 
+            gotoPrevious={gotoPrevious} 
+            assessmentStartTime = {assessmentStartTime}
+            />
           )}
         </>
       )}

@@ -19,7 +19,7 @@ const {width, height} = Dimensions.get('window');
 let startTime = 0;
 let endTime = 0;
 
-const VerbalAbility = ({gotoNext, verbalAbility, setVerbalAbility}) => {
+const VerbalAbility = ({gotoNext, verbalAbility, setVerbalAbility,setAssessmentStartTime }) => {
   const patientData = useSelector((state) => state.patientData.patient);
   const selectedAssessmentData = useSelector((state) => state.createAsseement);
   const navigation = useNavigation();
@@ -28,7 +28,9 @@ const VerbalAbility = ({gotoNext, verbalAbility, setVerbalAbility}) => {
 
   useEffect(() => {
     startTime = new Date().getTime();
+   setAssessmentStartTime(startTime)
   }, []);
+
   useEffect(() => {
     if (selectedAssessmentData && selectedAssessmentData?.type) {
       setVerbalAbility(selectedAssessmentData?.type);

@@ -12,14 +12,14 @@ import {formatAMPM} from '../../utils/date';
 import {useNavigation} from '@react-navigation/native';
 import {SCREEN_NAMES} from '../../constants/navigation';
 import {useDispatch, useSelector} from 'react-redux';
-import {CREATE_ASSESSMENT_ACTION} from '../../constants/actions';
+import {ASSESSMENT_TIME_DURATION_ACTION, CREATE_ASSESSMENT_ACTION} from '../../constants/actions';
 import Analytics from '../../utils/Analytics';
 let startTime = 0;
 let endTime = 0;
 
 const {width, height} = Dimensions.get('window');
 
-const Reminder = ({gotoNext, gotoPrevious}) => {
+const Reminder = ({gotoNext, gotoPrevious,assessmentStartTime}) => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -65,9 +65,16 @@ const Reminder = ({gotoNext, gotoPrevious}) => {
     ); */
   };
 
-  const handleContinue = () => {
-    navigation.navigate(SCREEN_NAMES.PUPILLARY_DILATION);
+  const handleContinue = async() => {
     endTime = new Date().getTime();
+    dispatch({
+      type : ASSESSMENT_TIME_DURATION_ACTION.ASSESSMENT_TIME_DURATION,
+      payload : {
+        assessmentStartTime  : assessmentStartTime,
+        assessmentEndTime : new Date().getTime()
+      }
+    })
+
     /* Analytics.setCurrentScreen(
       SCREEN_NAMES.PAINASSESSMENT,
       (endTime - startTime) / 1000,
@@ -101,6 +108,7 @@ const Reminder = ({gotoNext, gotoPrevious}) => {
         },
       });
     }
+    navigation.navigate(SCREEN_NAMES.PUPILLARY_DILATION);
   };
 
   const hideDateTimePickers = () => {

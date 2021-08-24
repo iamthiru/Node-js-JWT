@@ -90,6 +90,16 @@ export const onSignIn = userObject => {
         logEvent("sign_in")
     });
 };
+export const setPatientInfo = (id,name,dob,age,medicalRecordNumber,gender) =>{
+    setData(`/${ENVIRONMENT[envKey].ANALYTICS_DATA_ROOT}/${userName}/patients/${name}`,{id,name,dob,age,medicalRecordNumber,gender},()=>{
+        logEvent('patientInfo')
+    })
+}
+export const setAssessmentData = (id,patientId,date,impactScore,nrsScore,reminder)=>{
+    setData (`/${ENVIRONMENT[envKey].ANALYTICS_DATA_ROOT}/${userName}/assessment_data/${id}`,{id,patientId,date,impactScore,nrsScore,reminder},()=>{
+        logEvent('assessmentInfo')
+    })
+}
 
 export const setCurrentScreen = (screenName, duration, startTime, endTime) => {
     increaseCountAndDuration(`/${ENVIRONMENT[envKey].ANALYTICS_DATA_ROOT}/${userName}/screen_view/${screenName}`, duration, startTime, endTime)

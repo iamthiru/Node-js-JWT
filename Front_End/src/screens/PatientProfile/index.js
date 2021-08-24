@@ -52,10 +52,7 @@ const reportData = {
 };
 
 const PatientProfile = ({navigation}) => {
-  const params = useRoute();
-  const {item} = params || {};
   const patientDetailsData = useSelector((state) => state.patientDetails);
-  const entry = false;
   const dispatch = useDispatch();
   const token = useSelector((state) => state.user.authToken);
   const userId = useSelector((state) => state.user.loggedInUserId);
@@ -68,14 +65,30 @@ const PatientProfile = ({navigation}) => {
   const [allAssessmentList, setAllAssessmentList] = useState([]);
   const [newPatientPopUp, setNewPatientPopUp] = useState(false);
   const lookup_data = useSelector((state) => state.lookupData.lookup_data);
-  const all_assessment_data = last_assessment?.assessment;
   const all_medication_data = last_assessment?.medication;
   const [summaryChartData, setSummaryChartData] = useState([]);
-  const [summaryChartDataPresent, setSummaryChartDataPresent] = useState(false);
   const [summaryChartLabels, setSummaryChartLabels] = useState([]);
   const scrollRef = useRef(null);
   const forceUpdate = useSelector((state) => state.patientProfileUpdate.update);
   const [showMarker, setShowMarker] = useState(false);
+  useEffect(() => {
+    let id = 0;
+    let name = '';
+    let dob = '';
+    let medicalRecordNumber = '';
+    let gender = '';
+    let age = 0;
+    if (selectedPatient) {
+      id = selectedPatient?.id;
+      name = `${selectedPatient?.first_name} ${selectedPatient?.last_name}`;
+      dob = new Date(selectedPatient?.dob).toDateString();
+      age =
+        new Date().getFullYear() - new Date(selectedPatient?.dob).getFullYear();
+      medicalRecordNumber = `${selectedPatient?.medical_record_no}`;
+      gender = selectedPatient?.gender;
+      Analytics.setPatientInfo(id, name, dob, age, medicalRecordNumber, gender);
+    }
+  }, [selectedPatient]);
 
   useEffect(() => {
     let startTime = 0;
@@ -383,17 +396,17 @@ const PatientProfile = ({navigation}) => {
         <View style={styles.profileButtonsView}>
           <CustomButton
             onPress={() => {
-              navigation.navigate(SCREEN_NAMES.PAINASSESSMENT);
               dispatch({
                 type: PATIENT_NAME_ACTION.PATIENT,
                 payload: {
-                  patient_id: patientDetailsData.item.id,
+                  patient_id: patientDetailsData?.item?.id,
                   patient_name:
-                    patientDetailsData.item.first_name +
+                    patientDetailsData?.item?.first_name +
                     ' ' +
-                    patientDetailsData.item.last_name,
+                    patientDetailsData?.item?.last_name,
                 },
               });
+              navigation.navigate(SCREEN_NAMES.PAINASSESSMENT);
             }}
             title="New Assessment"
             textStyle={{
@@ -412,7 +425,6 @@ const PatientProfile = ({navigation}) => {
           />
           <CustomButton
             onPress={() => {
-              navigation.navigate(SCREEN_NAMES.NEW_MEDICATION);
               dispatch({
                 type: PATIENT_NAME_ACTION.PATIENT,
                 payload: {
@@ -423,6 +435,7 @@ const PatientProfile = ({navigation}) => {
                     patientDetailsData.item.last_name,
                 },
               });
+              navigation.navigate(SCREEN_NAMES.NEW_MEDICATION,{medicationList : last_medication});
             }}
             title="Change Medication"
             textStyle={{

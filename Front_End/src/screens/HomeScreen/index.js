@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import {
   View,
   Text,
@@ -46,6 +46,7 @@ const HomeScreen = ({navigation}) => {
   const userName = useSelector((state) => state.user.userName);
   const dispatch = useDispatch();
   const [greetingText, setGreetingText] = useState('');
+  const forceUpdate = useSelector((state) => state.patientProfileUpdate.update);
 
   const allPatients = useSelector((state) => state?.allPatients?.all_patients);
 
@@ -137,7 +138,7 @@ const HomeScreen = ({navigation}) => {
           console.log('-----all patients error-----', err);
         });
     }
-  }, [token, userName]);
+  }, [token, userName, forceUpdate]);
 
   useEffect(() => {
     if (token) {
@@ -307,7 +308,12 @@ const HomeScreen = ({navigation}) => {
               </Text>
             </View>
             <FlatList
-              data={recentPatients}
+              data={recentPatients?.sort((item1, item2) => {
+                return (
+                  item2?.modifiedAt - item1?.modifiedAt ||
+                  item2?.createdAt - item1?.createdAt
+                );
+              })}
               keyExtractor={(item) => item.id.toString()}
               renderItem={({item, index}) => {
                 return <PatientListItem item={item} />;

@@ -19,6 +19,7 @@ import {
   BACK_SIDE_BODY_PARTS,
   FRONT_SIDE_BODY_PART_DATA,
 } from '../../constants/painLocationConstants';
+import Analytics from '../../utils/Analytics';
 
 const {width, height} = Dimensions.get('window');
 
@@ -33,6 +34,7 @@ export const RenderDataItems = ({id, label}) => {
     </View>
   );
 };
+
 
 const AssessmentDetailsScreen = () => {
   const navigation = useNavigation();
@@ -117,6 +119,28 @@ const AssessmentDetailsScreen = () => {
       });
     }
   }, [painLocationsList, locations]);
+  console.log(assessmentData)
+  // id,date,impactScore,nrsScore,reminder
+  useEffect(()=>{
+    let id =0
+    let patientId = 0
+    let date = ''
+    let impactScore = null
+    let nrsScore = 0
+    let reminder = ''
+
+    if(assessmentData){
+      id = assessmentData?.id 
+      patientId = assessmentData?.patient_id,
+      date = `${new Date(assessmentData?.assessment_datetime).toDateString()}  ${formatAMPM(new Date(assessmentData?.assessment_datetime))}`
+      impactScore = Boolean(assessmentData?.total_score !== 99)
+      ? parseInt(assessmentData?.total_score)
+      : 'N/A'
+      nrsScore = assessmentData?.current_pain_score,
+      reminder = assessmentData?.isReminder ? true :false
+      Analytics.setAssessmentData(id,patientId,date,impactScore,nrsScore,reminder)
+    }
+  },[assessmentData])
 
   return (
     <SafeAreaView style={styles.safaAreaBody}>

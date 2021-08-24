@@ -16,6 +16,7 @@ import latestEntry from './latestEntryData';
 import patientDetails from './patientDetails';
 import patientProfileUpdate from './patientProfileUpdate';
 import assessmentDetails from './assessmentDatailsData'
+import timeDuration from './assessmentTimeDuration'
 
 const rootReducer = combineReducers({
   user,
@@ -34,7 +35,8 @@ const rootReducer = combineReducers({
   latestEntry,
   patientDetails,
   patientProfileUpdate,
-  assessmentDetails
+  assessmentDetails,
+  timeDuration
 
 });
 
