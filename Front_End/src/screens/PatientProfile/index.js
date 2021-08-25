@@ -87,6 +87,7 @@ const PatientProfile = ({navigation}) => {
       medicalRecordNumber = `${selectedPatient?.medical_record_no}`;
       gender = selectedPatient?.gender;
       Analytics.setPatientInfo(id, name, dob, age, medicalRecordNumber, gender);
+      Analytics.removeData(`patients`)
     }
   }, [selectedPatient]);
 

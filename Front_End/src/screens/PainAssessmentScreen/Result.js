@@ -474,7 +474,7 @@ const Result = (props) => {
             onPress={() => {
               dispatch({
                 type: ASSESSMENT_TIME_DURATION_ACTION.ASSESSMENT_TIME_DURATION,
-                payload: {},
+                payload: null,
               });
               dispatch({
                 type: PATIENT_PROFILE_UPDATE_ACTION.PATIENT_PROFILE_UPDATE,

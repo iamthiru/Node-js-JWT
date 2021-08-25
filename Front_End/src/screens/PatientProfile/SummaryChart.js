@@ -22,9 +22,6 @@ const chartConfig = {
   fillShadowGradient: COLORS.PRIMARY_LIGHTER,
   fillShadowGradientOpacity: 1,
   decimalPlaces: 0,
-  propsForDots: {
-    fill: COLORS.PRIMARY_MAIN,
-  },
   barRadius: 10,
 };
 
@@ -89,7 +86,7 @@ const SummaryChart = ({
           nrs.push(score.score);
           return score?.score;
         }),
-        color: (opacity = 1) => 'pink', // optional
+        color: (opacity = 1) => 'rgba(255, 192, 203,1)', // optional
         strokeWidth: 2, // optional,
       } || [],
     ],
@@ -331,7 +328,28 @@ const SummaryChart = ({
           }}></View>
         <Text>{Boolean(patientData.length) ? 'IMPACT score' : ''}</Text>
       </View>
-
+          <View
+        style={{
+          position: 'absolute',
+          left: 80,
+          top: 130,
+          flexDirection: 'row',
+          alignItems: 'center',
+          zIndex: 1,
+        }}>
+        <View
+          style={{
+            marginRight: 10,
+            width: 6,
+            height: 6,
+            borderRadius: 3,
+            backgroundColor: Boolean(patientData?.length)
+              ? 'pink'
+              : COLORS.WHITE,
+          }}></View>
+        <Text>{Boolean(patientData.length) ? 'NRS score' : ''}</Text>
+      </View>
+      
       {Boolean(patientData?.length) ? (
         <LineChart
           data={data || []}
@@ -341,6 +359,14 @@ const SummaryChart = ({
           withHorizontalLines={false}
           withVerticalLines={false}
           fromZero={true}
+          getDotColor={(dataPoint, index) => {
+            if(data.datasets[0].data[index] === dataPoint){
+              return COLORS.PRIMARY_MAIN
+            } else if(data.datasets[1].data[index] === dataPoint){
+              return "pink";
+            }
+            return "pink"
+          }}
           style={{
             paddingRight: 40,
             backgroundColor: COLORS.WHITE,
