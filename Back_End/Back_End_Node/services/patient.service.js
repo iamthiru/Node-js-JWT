@@ -11,7 +11,8 @@ module.exports = {
     createMedication,
     getMedicationList,
     getPatientLastAssessmentAndMedication,
-    updatePatientDetails
+    updatePatientDetails,
+    getRecentPatientDetails
 };
 
 
@@ -397,3 +398,28 @@ async function updatePatientDetails(data){
 
 }
 
+async function getRecentPatientDetails(createdBy){
+    const query = `call getRecentPatients(?)`;
+    const param = [createdBy];
+    let recentPatients = [];
+    const getRecentPatientDetails = await new Promise((resolve, reject) => {
+        pool.query(query, param, (err, result) => {
+            if (err) {
+                console.log(err);
+                resolve({
+                    isError: true,
+                    error: err,
+                })
+            } else {
+                recentPatients = result[0].concat(result[1]);
+                recentPatients.sort((a, b) => b.createdAtDate - a.createdAtDate);
+                recentPatients= recentPatients.slice(0,5);
+                resolve({
+                    isError: false,
+                    result: recentPatients,
+                })
+            }
+        })
+    });
+  return getRecentPatientDetails;
+}

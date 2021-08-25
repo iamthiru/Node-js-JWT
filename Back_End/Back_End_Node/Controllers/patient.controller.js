@@ -14,6 +14,7 @@ router.post('/createMedication',createMedication);
 router.get('/medicationList/:patientId',getMedicationList);
 router.get('/lastMedicationAndAssessment/:patientId',getPatientLastAssessmentAndMedication);
 router.post('/editPatient',editPatientDetails);
+router.get('/recentPatient/:createdBy',getRecentPatientDetails);
 
 
 module.exports = router;
@@ -83,6 +84,12 @@ function getPatientLastAssessmentAndMedication(req,res,next){
 
 function editPatientDetails(req,res,next){
     patientService.updatePatientDetails(req.body)
+        .then(data=>res.json(data))
+        .catch(next);
+}
+
+function getRecentPatientDetails(req,res,next){
+    patientService.getRecentPatientDetails(req.params.createdBy)
         .then(data=>res.json(data))
         .catch(next);
 }
