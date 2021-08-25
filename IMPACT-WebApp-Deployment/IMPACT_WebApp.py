@@ -2,7 +2,7 @@
 # Proprietary: Benten Technologies, Inc.
 # Author: Pranav H. Deo { pdeo@bententech.com }
 # (C) Copyright Content
-# Date: 08/19/2021
+# Date: 08/25/2021
 # Version: v1.11
 
 # Code Description:
@@ -38,10 +38,10 @@ import time
 import yaml
 import pytz
 import boto3
+import base64
 import pymysql
 from flask import *
 import pandas as pd
-import base64 as bsf
 import datetime as dt
 from time import mktime
 from Crypto.Cipher import AES
@@ -402,7 +402,10 @@ def pupil_api(filename):
         upload_folder_s3 = 'Pupil_Data/Results-Output/'
         download_folder_s3 = 'Pupil_Data/Uploads-VideoFiles/'
         PUPIL_UPLOAD_FOLDER = './static/Pupil_Input_Videos/'
+        start_timer = time.time()
         status = Download_from_S3(BUCKET_NAME, download_folder_s3 + filename, PUPIL_UPLOAD_FOLDER + filename)
+        stop_timer = time.time()
+        input_video_download_time = stop_timer - start_timer
         if status == 'Absent':
             status = 'Failure'
             msg = 'Error! Pupil API Failure. File Non-Existent on S3'
@@ -411,9 +414,13 @@ def pupil_api(filename):
         else:
             ts = time.time()
             st = dt.datetime.fromtimestamp(ts).strftime('%Y-%m-%d_%H:%M:%S')
+            start_timer = time.time()
             os.system('python modules/IMPACT_PUPIL_v1_3.py ' + str(filename) + ' Color')
+            stop_timer = time.time()
+            algo_time = stop_timer - start_timer
             token = os.path.exists('./static/Pupil_Output_Images/' + 'PUAL_' + str(os.path.splitext(filename)[0]) + '.csv')
             if token:
+                start_timer = time.time()
                 print('\n*************** TOKEN : GOOD ****************\n')
                 res_img_fold = os.path.join('static', 'Pupil_Output_Images')
                 res_vid_fold = os.path.join('static', 'Pupil_Output_Videos')
@@ -428,17 +435,39 @@ def pupil_api(filename):
                 f = img_name + '_Dilation_Plot.png'
                 vid_file = os.path.join(app.config['PUPIL_VID_OUT_FOLDER'], img_name + '.mp4')
                 pic = os.path.join(app.config['PUPIL_OUTPUT_FOLDER'], f)
+                stop_timer = time.time()
+                post_process_time = stop_timer - start_timer
+
+                start_timer = time.time()
                 Upload_2_S3(BUCKET_NAME, f, pic, upload_folder_s3)
+                stop_timer = time.time()
+                img_upload_time = stop_timer - start_timer
+
+                start_timer = time.time()
                 Upload_2_S3(BUCKET_NAME, img_name + '.mp4', vid_file, upload_folder_s3)
+                stop_timer = time.time()
+                output_video_upload_time = stop_timer - start_timer
+
+                start_timer = time.time()
                 Upload_2_S3(BUCKET_NAME, file, csv_f, upload_folder_s3)
-                table_userData.put_item(Item={'timestamp': str(st), 'Request': 'API', 'user-metric': 'Pupil Pain',
-                                              's3-filepath': 's3://impact-benten/' + download_folder_s3 + filename})
+                stop_timer = time.time()
+                csv_upload_time = stop_timer - start_timer
+
+                # table_userData.put_item(Item={'timestamp': str(st), 'Request': 'API', 'user-metric': 'Pupil Pain',
+                #                               's3-filepath': 's3://impact-benten/' + download_folder_s3 + filename})
+
                 print('PUAL : ', PUAL_SCORE, ' ; AVG RATIO : ', avg_pupil_ratio)
                 pupil_list = [PUAL_SCORE, avg_pupil_ratio]
                 status = 'Success'
                 msg = 'Pupil API Success'
                 code = '200'
-                return jsonify(status=status, msg=msg, code=code, result=pupil_list)
+                timers = {'Download Input Video': str(input_video_download_time),
+                          'Algorithm Run-time': str(algo_time),
+                          'Post-processing time': str(post_process_time),
+                          'Image Upload time': str(img_upload_time),
+                          'Output Video Upload time': str(output_video_upload_time),
+                          'CSV Upload time': str(csv_upload_time)}
+                return jsonify(status=status, msg=msg, code=code, result=pupil_list, timers=timers)
             else:
                 print('\n*************** TOKEN : BAD ****************\n')
                 status = 'Failure'
@@ -449,6 +478,7 @@ def pupil_api(filename):
                 return jsonify(status=status, msg=msg, reasons_failure=reasons_failure, code=code)
 
 
+'''
 # [API] Pupil Processing Algorithm Routine (Routing)
 @app.route('/mobile_pupil_api2/<token>/<filename>', methods=['GET', 'POST'])
 def pupil_api2(token, filename):
@@ -524,6 +554,7 @@ def pupil_api2(token, filename):
         msg = 'Authentication Error! Token Incorrect'
         code = '401'
         return jsonify(status=status, msg=msg, code=code)
+'''
 
 
 # [API] Facial Pain Processing Algorithm Routine (Routing)
@@ -538,7 +569,10 @@ def facial_api(filename):
         upload_folder_s3 = 'Facial_Data/Results-Output/'
         download_folder_s3 = 'Facial_Data/Uploads-VideoFiles/'
         FACIAL_UPLOAD_FOLDER = './static/Face_Input_Videos/'
+        start_timer = time.time()
         status = Download_from_S3(BUCKET_NAME, download_folder_s3 + filename, FACIAL_UPLOAD_FOLDER + filename)
+        stop_timer = time.time()
+        input_video_download_time = stop_timer - start_timer
         if status == 'Absent':
             status = 'Failure'
             msg = 'Error! Facial API Failure. File Non-Existent on S3'
@@ -547,9 +581,13 @@ def facial_api(filename):
         else:
             ts = time.time()
             st = dt.datetime.fromtimestamp(ts).strftime('%Y-%m-%d_%H:%M:%S')
+            start_timer = time.time()
             os.system('python modules/IMPACT_FACIAL_v1_0.py ' + str(filename))
+            stop_timer = time.time()
+            algo_time = stop_timer - start_timer
             token = os.path.exists('./static/Face_Output_Images/' + str(os.path.splitext(filename)[0]) + '.csv')
             if token:
+                start_timer = time.time()
                 print('\n*************** TOKEN : GOOD ****************\n')
                 res_img_fold = os.path.join('static', 'Face_Output_Images')
                 res_img_fold_s3 = upload_folder_s3
@@ -573,15 +611,37 @@ def facial_api(filename):
                 label_sec.append(str(mean_pain_score))
                 label_sec.append(str(max_pain_score))
                 label_sec.append(str(video_score))
+                stop_timer = time.time()
+                post_process_time = stop_timer - start_timer
+
+                start_timer = time.time()
                 Upload_2_S3(BUCKET_NAME, f, pic, res_img_fold_s3)
+                stop_timer = time.time()
+                img_upload_time = stop_timer - start_timer
+
+                start_timer = time.time()
                 Upload_2_S3(BUCKET_NAME, file, csv_file, res_img_fold_s3)
+                stop_timer = time.time()
+                csv1_upload_time = stop_timer - start_timer
+
+                start_timer = time.time()
                 Upload_2_S3(BUCKET_NAME, img_name + '_LabelFile.csv', label_file_csv, res_img_fold_s3)
-                table_userData.put_item(Item={'timestamp': str(st), 'Request': 'API', 'user-metric': 'Facial Pain',
-                                              's3-filepath': 's3://impact-benten/' + download_folder_s3 + filename})
+                stop_timer = time.time()
+                csv2_upload_time = stop_timer - start_timer
+
+                # table_userData.put_item(Item={'timestamp': str(st), 'Request': 'API', 'user-metric': 'Facial Pain',
+                #                               's3-filepath': 's3://impact-benten/' + download_folder_s3 + filename})
+
                 status = 'Success'
                 msg = 'Facial API Success'
                 code = '200'
-                return jsonify(status=status, msg=msg, code=code, result=label_sec)
+                timers = {'Download Input Video': str(input_video_download_time),
+                          'Algorithm Run-time': str(algo_time),
+                          'Post-processing time': str(post_process_time),
+                          'Image Upload time': str(img_upload_time),
+                          'OpenFace CSV Upload time': str(csv1_upload_time),
+                          'LabelFile CSV Upload time': str(csv2_upload_time)}
+                return jsonify(status=status, msg=msg, code=code, result=label_sec, timers=timers)
             else:
                 print('\n*************** TOKEN : BAD ****************\n')
                 status = 'Failure'
