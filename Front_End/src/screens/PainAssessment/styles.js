@@ -5,7 +5,7 @@ const {width, height} = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   addPatientButton: {
-    width: width * 0.4,
+    width: width * 0.61,
     backgroundColor: COLORS.SECONDARY_MAIN,
     borderColor: COLORS.PRIMARY_MAIN,
     borderWidth: 1,
@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 5,
   },
   dataTextInput: {
-    width: width * 0.4,
+    width:Platform.OS === 'ios' ? width *0.45: width * 0.4,
     height: 30,
     borderWidth: 1,
     borderRadius: 5,
@@ -87,11 +87,13 @@ const styles = StyleSheet.create({
   },
   inputView: {
     flexDirection: 'row',
+    width :Platform.OS === 'ios' ? width * 0.63: width *0.61,
     borderWidth: 1,
     borderRadius: 5,
     borderColor: COLORS.GRAY_60,
     backgroundColor: COLORS.WHITE,
     alignItems: 'center',
+    justifyContent:'space-between'
   },
   headerStyle: {
     justifyContent: 'flex-start',
@@ -133,7 +135,7 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   input: {
-    width: width * 0.36,
+    width: width * 0.5,
     height: 30,
     fontSize: 14,
     borderWidth: 0,
@@ -151,6 +153,8 @@ const styles = StyleSheet.create({
     fontSize: 20,
     right: 10,
     backgroundColor: COLORS.WHITE,
+    zIndex:10,
+    paddingLeft :10
   },
   date: {
     flexDirection: 'row',
@@ -183,7 +187,7 @@ const styles = StyleSheet.create({
     paddingLeft: 60,
   },
   addPatientTouch: {
-    width: width * 0.4,
+    width: width * 0.61,
     backgroundColor: COLORS.SECONDARY_MAIN,
     borderColor: COLORS.PRIMARY_MAIN,
     borderWidth: 1.8,

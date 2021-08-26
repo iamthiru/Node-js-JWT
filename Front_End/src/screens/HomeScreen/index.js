@@ -69,10 +69,11 @@ const HomeScreen = ({navigation}) => {
             return;
           }
           console.log('----recent patients---',res)
-          let result = res.data.result.sort(
-            (item1, item2) => item2.createdAt - item1.createdAt,
-          )
-          setRecentPatients(result?.filter((item,index)=>index<=4))
+          // let result = res.data.result.sort(
+          //   (item1, item2) => item2.modifiedAt - item1.modifiedAt,
+          // )
+          // setRecentPatients(result?.filter((item,index)=>index<=4))
+          setRecentPatients(res.data.result)
         })
         .catch((err)=>{
           console.log(err)
@@ -330,13 +331,13 @@ const HomeScreen = ({navigation}) => {
               </Text>
             </View>
             <FlatList
-              data={recentPatients?.sort((item1, item2) => {
-                return (
-                  item2?.modifiedAt - item1?.modifiedAt ||
-                  item2?.createdAt - item1?.createdAt
-                );
-              })}
-              // data = {recentPatients}
+              // data={recentPatients?.sort((item1, item2) => {
+              //   return (
+              //     item2?.modifiedAt - item1?.modifiedAt ||
+              //     item2?.createdAt - item1?.createdAt
+              //   );
+              // })}
+              data = {recentPatients?.filter((_,index)=>index <5)}
               keyExtractor={(item) => item.id.toString()}
               renderItem={({item, index}) => {
                 return <PatientListItem item={item} />;

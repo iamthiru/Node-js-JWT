@@ -70,7 +70,7 @@ const LatestEntryCard = ({last_assessment, last_medication, scrollRef}) => {
             if (scrollRef?.current) {
               scrollRef?.current?.scrollTo({
                 x: 0,
-                y: height > 850 ? height * 0.6 : height * 0.7,
+                y: height > 850? height * 0.65 : height * 0.85,
               });
             }
           }}

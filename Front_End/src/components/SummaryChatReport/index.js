@@ -12,7 +12,7 @@ const SummaryChartReport = ({
   impact_score,
   medication,
   nrs_score,
-  date,
+  date
 }) => {
   return (
     <View style={styles.summaryChatReportMainView}>
