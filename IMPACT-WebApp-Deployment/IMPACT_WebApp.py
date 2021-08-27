@@ -463,10 +463,10 @@ def pupil_api(filename):
                 code = '200'
                 timers = {'Download Input Video': str(input_video_download_time),
                           'Algorithm Run-time': str(algo_time),
-                          'Post-processing time': str(post_process_time),
-                          'Image Upload time': str(img_upload_time),
-                          'Output Video Upload time': str(output_video_upload_time),
-                          'CSV Upload time': str(csv_upload_time)}
+                          'Post-processing files generation time': str(post_process_time),
+                          'Image Upload to S3 time': str(img_upload_time),
+                          'Output Video Upload to S3 time': str(output_video_upload_time),
+                          'CSV Upload upload to S3 time': str(csv_upload_time)}
                 return jsonify(status=status, msg=msg, code=code, result=pupil_list, timers=timers)
             else:
                 print('\n*************** TOKEN : BAD ****************\n')
@@ -637,10 +637,10 @@ def facial_api(filename):
                 code = '200'
                 timers = {'Download Input Video': str(input_video_download_time),
                           'Algorithm Run-time': str(algo_time),
-                          'Post-processing time': str(post_process_time),
-                          'Image Upload time': str(img_upload_time),
-                          'OpenFace CSV Upload time': str(csv1_upload_time),
-                          'LabelFile CSV Upload time': str(csv2_upload_time)}
+                          'Post-processing files generation time': str(post_process_time),
+                          'Image Upload to S3 time': str(img_upload_time),
+                          'OpenFace CSV Upload to S3 time': str(csv1_upload_time),
+                          'LabelFile CSV Upload to S3 time': str(csv2_upload_time)}
                 return jsonify(status=status, msg=msg, code=code, result=label_sec, timers=timers)
             else:
                 print('\n*************** TOKEN : BAD ****************\n')
