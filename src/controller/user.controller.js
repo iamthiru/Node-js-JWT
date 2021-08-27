@@ -12,36 +12,30 @@ const { hashSync, genSaltSync, compareSync } = require("bcrypt");
 const { sign } = require("jsonwebtoken");
 
 module.exports = {
-  createUser: (req, res) => {
+  createUser: async (req, res) => {
     const userData = req.body;
     const salt = genSaltSync(10);
     userData.password = hashSync(userData.password, salt);
-    create(userData, (err, result) => {
-      if (err) {
-        console.log(err);
-        return res.status(500).json({
-          success: false,
-          data: err.message,
-        });
-      }
+
+    try {
+      const result = await create(userData);
       return res.status(200).json({
         success: true,
         data: result,
       });
-    });
+    } catch (err) {
+      return res.status(500).json({
+        success: false,
+        data: err.message,
+      });
+    }
   },
 
-  getUserByUserId: (req, res) => {
+  getUserByUserId: async (req, res) => {
     const id = req.params.id;
-    getUserById(id, (err, result) => {
-      if (err) {
-        console.log(err);
-        return res.status(500).json({
-          success: false,
-          data: err.message,
-        });
-      }
 
+    try {
+      const result = await getUserById(id);
       if (result.length === 0) {
         return res.status(404).json({
           success: false,
@@ -53,43 +47,41 @@ module.exports = {
         success: true,
         data: result,
       });
-    });
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json({
+        success: false,
+        data: error.message,
+      });
+    }
   },
 
-  getAllUsers: (req, res) => {
-    getUsers((err, result) => {
-      if (err) {
-        console.log(err);
-        return res.status(500).json({
-          success: false,
-          data: err.message,
-        });
-      }
-
+  getAllUsers: async (req, res) => {
+    try {
+      const result = await getUsers();
       if (result.length === 0) {
         return res.status(404).json({
           success: false,
-          data: "User List is Empty !",
+          data: "User Id Not Found !",
         });
       }
-
       return res.status(200).json({
         success: true,
         data: result,
       });
-    });
+    } catch (err) {
+      console.log(err);
+      return res.status(500).json({
+        success: false,
+        data: err.message,
+      });
+    }
   },
 
-  getUserByUserEmail: (req, res) => {
+  getUserByUserEmail: async (req, res) => {
     const email = req.body.email;
-    getUserByEmail(email, (err, result) => {
-      if (err) {
-        console.log(err);
-        return res.status(500).json({
-          success: false,
-          data: err.message,
-        });
-      }
+    try {
+      const result = await getUserByEmail(email);
       if (result.length === 0) {
         return res.status(404).json({
           success: false,
@@ -101,21 +93,21 @@ module.exports = {
         success: true,
         data: result,
       });
-    });
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json({
+        success: false,
+        data: error.message,
+      });
+    }
   },
 
-  updateUser: (req, res) => {
+  updateUser: async (req, res) => {
     const userData = req.body;
     const salt = genSaltSync(10);
     userData.password = hashSync(userData.password, salt);
-    update(userData, (err, result) => {
-      if (err) {
-        console.log(err);
-        return res.status(500).json({
-          success: false,
-          data: err.message,
-        });
-      }
+    try {
+      const result = await update(userData);
       if (result.affectedRows === 0) {
         return res.status(404).json({
           success: false,
@@ -126,20 +118,19 @@ module.exports = {
         success: true,
         data: result,
       });
-    });
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json({
+        success: false,
+        data: error.message,
+      });
+    }
   },
 
-  deleteUser: (req, res) => {
+  deleteUser: async (req, res) => {
     const id = req.params.id;
-
-    deleteUser(id, (err, result) => {
-      if (err) {
-        console.log(err);
-        return res.status(500).json({
-          success: false,
-          data: err.message,
-        });
-      }
+    try {
+      const result = await deleteUser(id);
       if (result.affectedRows === 0) {
         return res.status(404).json({
           success: false,
@@ -150,7 +141,13 @@ module.exports = {
         success: true,
         data: result,
       });
-    });
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json({
+        success: false,
+        data: error.message,
+      });
+    }
   },
 
   login: (req, res) => {
