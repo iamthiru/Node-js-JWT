@@ -15,9 +15,14 @@ router.get('/medicationList/:patientId',getMedicationList);
 router.get('/lastMedicationAndAssessment/:patientId',getPatientLastAssessmentAndMedication);
 router.post('/editPatient',editPatientDetails);
 router.get('/recentPatient/:createdBy',getRecentPatientDetails);
+router.delete('/deletePatient/:id', deletePatient);
 
 
 module.exports = router;
+
+function deletePatient(req, res, next) {
+    patientService.deletePatientById(req.params.id).then(data => res.json(data)).catch(next);
+}
 
 function addPatient(req, res, next) {
     patientService.addNewPatient(req.body)

@@ -12,9 +12,68 @@ module.exports = {
     getMedicationList,
     getPatientLastAssessmentAndMedication,
     updatePatientDetails,
-    getRecentPatientDetails
+    getRecentPatientDetails,
+    deletePatientById,
 };
 
+async function deletePatientById(id) {
+    
+  const patientData =  await getPatientDataById(id);
+ // console.log(patientData);
+  
+    return new Promise( (resolve, reject) => {
+        if (patientData.isError === false && !patientData.result[0].isDeleted) {
+            const SQL = `UPDATE patient SET isDeleted = ${true} WHERE id = ${id}`;
+        pool.query(SQL, (err, result) => {
+            if (err) {
+              console.log(err);
+              resolve({
+                isError: true,
+                error: err,
+              });
+            } else {
+              resolve({
+                isError: false,
+                result: result,
+              });
+            }
+          });
+        }else{
+            if(patientData.result[0].isDeleted){
+                resolve({
+                    isError: true,
+                    message: "Already Deleted"
+                })
+            }
+            resolve({
+                isError: true,
+                message: "No data found !"
+            })
+        }
+    })
+    
+  
+}
+
+function getPatientDataById(id) {
+    return new Promise((resolve,reject)=>{
+        pool.query(`SELECT * FROM patient WHERE id = ${id}`, (err, result) => {
+            if (err) {
+              console.log(err);
+              resolve({
+                isError: true,
+                error: err,
+              });
+            } else {
+              resolve({
+                isError: false,
+                result: result,
+              });
+            }
+          });
+    })
+    
+}
 
 async function addNewPatient(data) {
     var date = new Date();
