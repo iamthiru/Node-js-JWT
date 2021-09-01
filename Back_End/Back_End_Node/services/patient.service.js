@@ -19,8 +19,8 @@ module.exports = {
 async function addNewPatient(data) {
     var date = new Date();
     data.createdAt = date.getTime();
-    const SQL = `INSERT INTO patient(first_name,last_name,dob,eyeColor,gender,medical_record_no,createdBy,createdAt) VALUE(?,?,?,?,?,?,?,?)`;
-    params = [data.firstName, data.lastName, data.dob, data.eyeColor, data.gender, data.medicalRecordNo, data.createdBy, data.createdAt];
+    const SQL = `INSERT INTO patient(first_name,last_name,dob,eyeColor,gender,medical_record_no,createdBy,createdAt, modifiedBy, modifiedAt) VALUE(?,?,?,?,?,?,?,?,?,?)`;
+    params = [data.firstName, data.lastName, data.dob, data.eyeColor, data.gender, data.medicalRecordNo, data.createdBy, data.createdAt, data.createdBy, data.createdAt];
     return new Promise((resolve, reject) => {
         pool.query(SQL, params, (err, result) => {
             if (err) {
@@ -411,12 +411,21 @@ async function getRecentPatientDetails(createdBy){
                     error: err,
                 })
             } else {
-                recentPatients = result[0].concat(result[1]);
-                recentPatients.sort((a, b) => b.createdAtDate - a.createdAtDate);
-                recentPatients= recentPatients.slice(0,5);
+                recentPatients = result[0].concat(result[1])?.concat(result[2]);
+                recentPatients = recentPatients?.sort((a,b) => {
+                   const val1 =  a.createdAtDate ? a.createdAtDate : a.modifiedAt ? a.modifiedAt : a.createdAt;
+                    const val2 = b.createdAtDate ? b.createdAtDate : b.modifiedAt ? b.modifiedAt : b.createdAt;
+                    return parseInt(val2) - parseInt(val1);
+                })
+                let filteredRecentPatients = [];
+                recentPatients?.forEach(el => {
+                    if(!filteredRecentPatients?.find(fp => fp.id === el.id) && filteredRecentPatients?.length < 6){
+                        filteredRecentPatients?.push(el);
+                    }
+                });
                 resolve({
                     isError: false,
-                    result: recentPatients,
+                    result: filteredRecentPatients,
                 })
             }
         })
