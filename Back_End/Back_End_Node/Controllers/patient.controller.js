@@ -16,12 +16,23 @@ router.get('/lastMedicationAndAssessment/:patientId',getPatientLastAssessmentAnd
 router.post('/editPatient',editPatientDetails);
 router.get('/recentPatient/:createdBy',getRecentPatientDetails);
 router.delete('/deletePatient/:id', deletePatient);
+router.put('/updateAssessment', updateAssessment);
 
 
 module.exports = router;
 
 function deletePatient(req, res, next) {
-    patientService.deletePatientById(req.params.id).then(data => res.json(data)).catch(next);
+  patientService
+    .deletePatientById(req.params.id)
+    .then((data) => res.json(data))
+    .catch(next);
+}
+
+function updateAssessment(req, res, next) {
+  patientService
+    .updateAssessmentById(req.body)
+    .then((data) => res.json(data))
+    .catch(next);
 }
 
 function addPatient(req, res, next) {
