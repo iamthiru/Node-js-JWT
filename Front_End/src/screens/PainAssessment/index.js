@@ -182,11 +182,32 @@ const PainAssessment = ({route}) => {
                   containerStyle={styles.container}
                   onBlur={() => {}}
                 />
-                <AntDesignIcon
-                  name={'arrowright'}
-                  color={COLORS.GRAY_90}
-                  style={styles.arrow}
-                />
+                {
+                  Platform.OS=== 'ios' ? 
+                  <CustomTouchableOpacity onPress = {()=>{
+                    navigation.navigate(SCREEN_NAMES.ASSIGN_PATIENT)
+                  }}>
+                  <AntDesignIcon
+                    name={'arrowright'}
+                    color={COLORS.GRAY_90}
+                    style={styles.arrow}
+                  />
+  
+                  </CustomTouchableOpacity>
+                  :
+                    <TouchableOpacity onPress ={()=>{
+                    navigation.navigate(SCREEN_NAMES.ASSIGN_PATIENT)
+                  }}>
+                    <AntDesignIcon
+                    name={'arrowright'}
+                    color={COLORS.GRAY_90}
+                    style={styles.arrow}
+                  />
+
+                  </TouchableOpacity>
+                }
+              
+               
               </View>
             )}
           </View>
@@ -235,7 +256,7 @@ const PainAssessment = ({route}) => {
         </View>
 
         <View style={styles.dropView}>
-          <Text style={styles.patientText}>Assessment Time</Text>
+          <Text style={styles.patientText}>Assessment Time:</Text>
           <View style={styles.time}>
             {Boolean(Platform.OS === 'ios') ? (
               <CustomTouchableOpacity

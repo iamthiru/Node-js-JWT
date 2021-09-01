@@ -31,6 +31,7 @@ import {lookupDataAPI} from '../../api/lookupData';
 import {lookupTypeAPI} from '../../api/lookupType';
 import Analytics from '../../utils/Analytics';
 import {useRoute} from '@react-navigation/native';
+import recentPatientsListAPI from '../../api/recentPatientsList';
 const greetingTime = new Date().getHours();
 
 const {width, height} = Dimensions.get('window');
@@ -46,17 +47,39 @@ const HomeScreen = ({navigation}) => {
   const userName = useSelector((state) => state.user.userName);
   const dispatch = useDispatch();
   const [greetingText, setGreetingText] = useState('');
+  const [ recentPatients , setRecentPatients] = useState([])
   const forceUpdate = useSelector((state) => state.patientProfileUpdate.update);
 
   const allPatients = useSelector((state) => state?.allPatients?.all_patients);
 
-  const recentPatients = allPatients
-    .filter((item, index) => {
-      return item?.modifiedBy
-        ? item?.modifiedBy === userId
-        : item.createdBy === userId;
-    })
-    ?.filter((_, index) => index <= 4);
+  // const recentPatients = allPatients
+  //   .filter((item, index) => {
+  //     return item?.modifiedBy
+  //       ? item?.modifiedBy === userId
+  //       : item.createdBy === userId;
+  //   })
+  //   ?.filter((_, index) => index <= 4);
+
+    useEffect(()=>{
+      if(token && userId){
+        recentPatientsListAPI(token,userId).then((res)=>{
+          console.log('----recent patients---',res)
+          if (res.data.isError) {
+            Alert.alert('recent patients  data error');
+            return;
+          }
+          console.log('----recent patients---',res)
+          // let result = res.data.result.sort(
+          //   (item1, item2) => item2.modifiedAt - item1.modifiedAt,
+          // )
+          // setRecentPatients(result?.filter((item,index)=>index<=4))
+          setRecentPatients(res.data.result)
+        })
+        .catch((err)=>{
+          console.log(err)
+        })
+      }
+    },[token,userId,forceUpdate])
 
   useEffect(() => {
     if (greetingTime >= 4 && greetingTime <= 11) {
@@ -308,12 +331,13 @@ const HomeScreen = ({navigation}) => {
               </Text>
             </View>
             <FlatList
-              data={recentPatients?.sort((item1, item2) => {
-                return (
-                  item2?.modifiedAt - item1?.modifiedAt ||
-                  item2?.createdAt - item1?.createdAt
-                );
-              })}
+              // data={recentPatients?.sort((item1, item2) => {
+              //   return (
+              //     item2?.modifiedAt - item1?.modifiedAt ||
+              //     item2?.createdAt - item1?.createdAt
+              //   );
+              // })}
+              data = {recentPatients?.filter((_,index)=>index <5)}
               keyExtractor={(item) => item.id.toString()}
               renderItem={({item, index}) => {
                 return <PatientListItem item={item} />;

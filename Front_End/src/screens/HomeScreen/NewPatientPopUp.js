@@ -234,7 +234,7 @@ const NewPatientPopUp = ({
               let dob = new Date(selectedDate).toDateString()
               let age =new Date().getFullYear() - new Date(selectedDate).getFullYear() 
               let name =`${firstName[0].toUpperCase() + firstName.slice(1)} ${lastName[0].toUpperCase() + lastName.slice(1)}`
-              Analytics.setPatientInfo(id,name,dob,age,medicalRecord,gender)
+              Analytics.update(id,name,dob,age,medicalRecord,gender)
               setFirstName('');
               setLastName('');
               setGender(null);

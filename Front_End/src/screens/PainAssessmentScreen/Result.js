@@ -180,7 +180,7 @@ const Result = (props) => {
               <View
                 style={{
                   flexDirection: 'row',
-                  width: width / 2 - 60,
+                  width :width *0.65,
                   height: 36,
                   borderRadius: 5,
                   backgroundColor: COLORS.WHITE,
@@ -192,15 +192,23 @@ const Result = (props) => {
                   paddingRight: 7.5,
                   alignItems: 'center',
                   justifyContent: 'space-between',
+                  // backgroundColor:'green'
                 }}>
                 <Text
-                  style={{fontSize: 16, lineHeight: 24, color: COLORS.GRAY_90}}>
+                  style={{
+                    fontSize: 14,
+                    color: COLORS.GRAY_90,
+                    maxWidth: width * 0.34,
+                  }}>
                   {patient}
                 </Text>
                 <AntDesignIcon
                   name={'arrowright'}
                   size={15}
                   color={COLORS.GRAY_90}
+                  style={{
+                    zIndex: 10,
+                  }}
                 />
               </View>
             </CustomTouchableOpacity>
@@ -230,7 +238,7 @@ const Result = (props) => {
               <View
                 style={{
                   flexDirection: 'row',
-                  width: width / 2 - 60,
+                  width: width * 0.45,
                   height: 36,
                   borderRadius: 5,
                   backgroundColor: COLORS.WHITE,
@@ -244,7 +252,11 @@ const Result = (props) => {
                   justifyContent: 'space-between',
                 }}>
                 <Text
-                  style={{fontSize: 16, lineHeight: 24, color: COLORS.GRAY_90}}>
+                  style={{
+                    fontSize: 14,
+                    color: COLORS.GRAY_90,
+                    maxWidth: width * 0.34,
+                  }}>
                   {selectedDate
                     ? `${
                         selectedDate.getMonth() + 1
@@ -284,7 +296,7 @@ const Result = (props) => {
               <View
                 style={{
                   flexDirection: 'row',
-                  width: width / 2 - 60,
+                  width: width * 0.45,
                   height: 36,
                   borderRadius: 5,
                   backgroundColor: COLORS.WHITE,
@@ -298,7 +310,11 @@ const Result = (props) => {
                   justifyContent: 'space-between',
                 }}>
                 <Text
-                  style={{fontSize: 16, lineHeight: 24, color: COLORS.GRAY_90}}>
+                  style={{
+                    fontSize: 14,
+                    color: COLORS.GRAY_90,
+                    maxWidth: width * 0.34,
+                  }}>
                   {selectedTime ? `${formatAMPM(selectedTime)}` : ''}
                 </Text>
                 <AntDesignIcon
@@ -474,7 +490,7 @@ const Result = (props) => {
             onPress={() => {
               dispatch({
                 type: ASSESSMENT_TIME_DURATION_ACTION.ASSESSMENT_TIME_DURATION,
-                payload: {},
+                payload: null,
               });
               dispatch({
                 type: PATIENT_PROFILE_UPDATE_ACTION.PATIENT_PROFILE_UPDATE,

@@ -48,7 +48,7 @@ const reportData = {
     medication_times: 'every 4 hour',
   },
   note: 'Lorem ipsum dolor sit amet, consectetur elit',
-  button: 'View Entry',
+  button: 'View All Entries',
 };
 
 const PatientProfile = ({navigation}) => {
@@ -70,7 +70,6 @@ const PatientProfile = ({navigation}) => {
   const [summaryChartLabels, setSummaryChartLabels] = useState([]);
   const scrollRef = useRef(null);
   const forceUpdate = useSelector((state) => state.patientProfileUpdate.update);
-  const [showMarker, setShowMarker] = useState(false);
   useEffect(() => {
     let id = 0;
     let name = '';
@@ -87,6 +86,7 @@ const PatientProfile = ({navigation}) => {
       medicalRecordNumber = `${selectedPatient?.medical_record_no}`;
       gender = selectedPatient?.gender;
       Analytics.setPatientInfo(id, name, dob, age, medicalRecordNumber, gender);
+      Analytics.removeData(`patients`)
     }
   }, [selectedPatient]);
 
@@ -133,7 +133,7 @@ const PatientProfile = ({navigation}) => {
 
   useEffect(() => {
     if (allAssessmentList?.length) {
-      handleSummaryChartData(0, setShowMarker);
+      handleSummaryChartData(0);
     }
   }, [allAssessmentList?.length]);
 
@@ -260,8 +260,7 @@ const PatientProfile = ({navigation}) => {
     }
   }, [lookup_data, all_medication_data]);
 
-  const handleSummaryChartData = (index, setShowMarker) => {
-    setShowMarker(false);
+  const handleSummaryChartData = (index) => {
     let now = new Date();
     let year = now.getFullYear();
     let month = now.getMonth();
@@ -491,11 +490,13 @@ const PatientProfile = ({navigation}) => {
                 summaryChartData={summaryChartData}
                 summaryChartLabels={summaryChartLabels}
                 scrollRef={scrollRef}
-                showMarker={showMarker}
-                setShowMarker={setShowMarker}
               />
             )}
             <AllEntryCard allEntries={allAssessmentList} />
+              <View style ={{
+                height : height > 900 ? width/2.2 :height > 700 ? width/2.8 : width/3.4
+              }}>
+              </View>
           </>
         )}
       </ScrollView>

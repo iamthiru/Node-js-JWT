@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {View, Text, Dimensions, Animated} from 'react-native';
 import {LineChart} from 'react-native-chart-kit';
 import CustomTouchableOpacity from '../../components/shared/CustomTouchableOpacity';
@@ -8,7 +8,9 @@ import {COLORS} from '../../constants/colors';
 import {formatAMPM, padNumber} from '../../utils/date';
 import styles from './styles';
 const {width, height} = Dimensions.get('window');
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
+import AntDesignIcon from 'react-native-vector-icons/AntDesign';
+import {PATIENT_PROFILE_UPDATE_ACTION} from '../../constants/actions';
 
 const chartConfig = {
   backgroundGradientFrom: COLORS.GRAY_10,
@@ -22,9 +24,6 @@ const chartConfig = {
   fillShadowGradient: COLORS.PRIMARY_LIGHTER,
   fillShadowGradientOpacity: 1,
   decimalPlaces: 0,
-  propsForDots: {
-    fill: COLORS.PRIMARY_MAIN,
-  },
   barRadius: 10,
 };
 
@@ -40,10 +39,10 @@ const SummaryChart = ({
   summaryChartLabels,
   scrollRef,
   allAssessmentList,
-  showMarker,
-  setShowMarker,
 }) => {
+  const [showMarker, setShowMarker] = useState(false);
   const [selectedTime, setSelectedTime] = useState(TIME_FILTER_OPTIONS[0]);
+  const [currentPage, setCurrentPage] = useState(0);
   const [xPoint, setXPoint] = useState(0);
   const [currentIndex, setCurrentIndex] = useState(-1);
   const [slideValue] = useState(new Animated.Value(0));
@@ -60,20 +59,40 @@ const SummaryChart = ({
     ? last_assessment?.medication
     : null;
   const forceUpdate = useSelector((state) => state.patientProfileUpdate.update);
+  
+  const currentPageData = useMemo(() => {
+      return patientData?.filter((_, index) => {
+       
+          return index >= 6 * currentPage - 6 &&  index < 6 * currentPage;
+       
+      });
+  }, [patientData, currentPage]);
+
+
   useEffect(() => {
-    if (!patientData?.length && allAssessmentList?.length) {
-      setCurrentIndex(allAssessmentList?.length - 1);
+      if (patientData?.length) {
+        let length = parseInt( patientData?.length/6)
+        setCurrentPage(parseInt(length || 1));
+      }   
+  }, [patientData]);
+
+  useEffect(() => {
+    if (currentPageData?.length) {
+      setCurrentIndex(currentPageData?.length-1);
     }
-  }, [patientData, allAssessmentList]);
+  }, [currentPageData]);
+
 
 
   let impact = [];
   let nrs = [];
   const data = {
-    labels: summaryChartLabels || [],
+    labels: (summaryChartLabels || []).filter(
+      (_, index) => index >= 6 * currentPage - 6 && index < 6 * currentPage,
+    ),
     datasets: [
       {
-        data: patientData?.map((data) => {
+        data: currentPageData?.map((data) => {
           impact.push(data.value);
           if (data?.value === 99) {
             return 0;
@@ -85,21 +104,21 @@ const SummaryChart = ({
         strokeWidth: 2, // optional,
       },
       {
-        data: patientData?.map((score) => {
+        data: currentPageData?.map((score) => {
           nrs.push(score.score);
           return score?.score;
         }),
-        color: (opacity = 1) => 'pink', // optional
+        color: (opacity = 1) => 'orange', // optional
         strokeWidth: 2, // optional,
       } || [],
     ],
     labelColor: () => COLORS.WHITE,
   };
   useEffect(() => {
-    if (patientData?.length === 0) {
+    if (currentPageData?.length === 0) {
       setShowMarker(false);
     }
-  }, [patientData]);
+  }, [currentPageData]);
 
   useEffect(() => {
     Animated.timing(slideValue, {
@@ -120,7 +139,7 @@ const SummaryChart = ({
   }, [xPoint, slideValue, barSlideValue, sliderXValue]);
 
   useEffect(() => {
-    handleSummaryChartData(0, setShowMarker);
+    handleSummaryChartData(0);
   }, [allAssessmentList?.length, forceUpdate]);
 
   const impactScoreData = useMemo(() => {
@@ -131,30 +150,33 @@ const SummaryChart = ({
     }
   }, [currentIndex]);
 
-  const handleOnDataPointClick = (x, index, dataset, value) => {
-    // if (
-    //   (impact[index] === value && nrs[index] === value) ||
-    //   (impact[index] === 99 && nrs[index] === 0)
-    // ) {
-    //   setShowAllChartData(true);
-    // } else if (JSON.stringify(dataset.data) == JSON.stringify(nrs)) {
-    //   setShowNrsData(true);
-    //   setShowAllChartData(false);
-    // } else {
-    //   setShowNrsData(false);
-    //   setShowAllChartData(false);
-    // }
-    setShowAllChartData(true)
-    setXPoint(x - 45);
-    setCurrentIndex(index);
-    setShowMarker(index !== currentIndex || !showMarker);
-    setSummaryReport({
-      date: patientData?.[currentIndex]?.time,
-      impact_score: patientData?.[currentIndex]?.value,
-      medication: patientData?.[currentIndex]?.medicationData,
-      nrs_score: patientData?.[currentIndex]?.score,
-    });
-  };
+  const handleOnDataPointClick = useCallback(
+    (x, index, dataset, value) => {
+      // if (
+      //   (impact[index] === value && nrs[index] === value) ||
+      //   (impact[index] === 99 && nrs[index] === 0)
+      // ) {
+      //   setShowAllChartData(true);
+      // } else if (JSON.stringify(dataset.data) == JSON.stringify(nrs)) {
+      //   setShowNrsData(true);
+      //   setShowAllChartData(false);
+      // } else {
+      //   setShowNrsData(false);
+      //   setShowAllChartData(false);
+      // }
+      setShowAllChartData(true);
+      setXPoint(x - 45);
+      setShowMarker(index !== currentIndex ? true : !showMarker);
+      setCurrentIndex(index);
+      // setSummaryReport({
+      //   date: currentPageData?.[currentIndex]?.time,
+      //   impact_score: currentPageData?.[currentIndex]?.value,
+      //   medication: currentPageData?.[currentIndex]?.medicationData,
+      //   nrs_score: currentPageData?.[currentIndex]?.score,
+      // });
+    },
+    [showMarker, currentIndex],
+  );
   return (
     <View
       style={[
@@ -189,7 +211,7 @@ const SummaryChart = ({
                 }}
                 onPress={() => {
                   setSelectedTime(timeOption);
-                  handleSummaryChartData(index, setShowMarker);
+                  handleSummaryChartData(index);
                 }}>
                 <Text
                   style={{
@@ -225,15 +247,16 @@ const SummaryChart = ({
               style={{
                 textAlign: 'center',
               }}>
-              {Boolean(patientData?.length)
+              {Boolean(currentPageData?.length)
                 ? `${padNumber(
-                    new Date(patientData?.[currentIndex]?.time).getMonth() + 1,
+                    new Date(currentPageData?.[currentIndex]?.time).getMonth() +
+                      1,
                   )}/${padNumber(
-                    new Date(patientData?.[currentIndex]?.time).getDate(),
+                    new Date(currentPageData?.[currentIndex]?.time).getDate(),
                   )}/${new Date(
-                    patientData?.[currentIndex]?.time,
+                    currentPageData?.[currentIndex]?.time,
                   ).getFullYear()} ${formatAMPM(
-                    new Date(patientData?.[currentIndex]?.time),
+                    new Date(currentPageData?.[currentIndex]?.time),
                   )}`
                 : ''}
             </Text>
@@ -257,7 +280,7 @@ const SummaryChart = ({
                 </Text>
               </>
             )}
-            {showNrsData && !showAllChartData && (
+            {/* {showNrsData && !showAllChartData && (
               <Text
                 style={{
                   textAlign: 'center',
@@ -266,8 +289,8 @@ const SummaryChart = ({
                 }}>
                 {'NRS SCORE  ' + nrs?.[currentIndex]}
               </Text>
-            )}
-            {!showNrsData && !showAllChartData && (
+            )} */}
+            {/* {!showNrsData && !showAllChartData && (
               <Text
                 style={{
                   textAlign: 'center',
@@ -276,13 +299,13 @@ const SummaryChart = ({
                 }}>
                 {impactScoreData}
               </Text>
-            )}
+            )} */}
             <Text
               style={{
                 textAlign: 'center',
               }}>
-              {Boolean(patientData?.length)
-                ? patientData?.[currentIndex]?.medicationData
+              {Boolean(currentPageData?.length)
+                ? currentPageData?.[currentIndex]?.medicationData
                 : ''}
             </Text>
           </Animated.View>
@@ -313,6 +336,57 @@ const SummaryChart = ({
       <View
         style={{
           position: 'absolute',
+          left: 30,
+          top: 100,
+          height: 200,
+          width: width * 0.9,
+          zIndex: 10,
+        }}>
+        <View
+          style={{
+            width: width * 0.85,
+            flexDirection: 'row',
+            justifyContent: Boolean(currentPage >= 2)
+              ? 'space-between'
+              : 'flex-end',
+          }}>
+          {Boolean(currentPage >= 2) && (
+            <CustomTouchableOpacity
+              onPress={() => {
+                setCurrentPage(currentPage < 2 ? 1 : currentPage - 1);
+              }}>
+              <AntDesignIcon
+                name={'arrowleft'}
+                style={{
+                  fontSize: 28,
+                  color: COLORS.PRIMARY_MAIN,
+                }}
+              />
+            </CustomTouchableOpacity>
+          )}
+          {Boolean(currentPage < parseInt(patientData?.length / 6)) && (
+            <CustomTouchableOpacity
+              onPress={() => {
+                setCurrentPage(
+                  currentPage >= parseInt(patientData?.length / 6)
+                    ? 1
+                    : currentPage + 1,
+                );
+              }}>
+              <AntDesignIcon
+                name={'arrowright'}
+                style={{
+                  fontSize: 28,
+                  color: COLORS.PRIMARY_MAIN,
+                }}
+              />
+            </CustomTouchableOpacity>
+          )}
+        </View>
+      </View>
+      <View
+        style={{
+          position: 'absolute',
           left: 80,
           top: 110,
           flexDirection: 'row',
@@ -325,14 +399,35 @@ const SummaryChart = ({
             width: 6,
             height: 6,
             borderRadius: 3,
-            backgroundColor: Boolean(patientData?.length)
+            backgroundColor: Boolean(currentPageData?.length)
               ? COLORS.PRIMARY_MAIN
               : COLORS.WHITE,
           }}></View>
-        <Text>{Boolean(patientData.length) ? 'IMPACT score' : ''}</Text>
+        <Text>{Boolean(currentPageData.length) ? 'IMPACT score' : ''}</Text>
+      </View>
+      <View
+        style={{
+          position: 'absolute',
+          left: 80,
+          top: 130,
+          flexDirection: 'row',
+          alignItems: 'center',
+          zIndex: 1,
+        }}>
+        <View
+          style={{
+            marginRight: 10,
+            width: 6,
+            height: 6,
+            borderRadius: 3,
+            backgroundColor: Boolean(currentPageData?.length)
+              ? 'orange'
+              : COLORS.WHITE,
+          }}></View>
+        <Text>{Boolean(currentPageData.length) ? 'NRS score' : ''}</Text>
       </View>
 
-      {Boolean(patientData?.length) ? (
+      {Boolean(currentPageData?.length) ? (
         <LineChart
           data={data || []}
           width={width - 30}
@@ -340,7 +435,16 @@ const SummaryChart = ({
           chartConfig={chartConfig}
           withHorizontalLines={false}
           withVerticalLines={false}
+          verticalLabelRotation={-45}
           fromZero={true}
+          getDotColor={(dataPoint, index) => {
+            if (data.datasets[0].data[index] === dataPoint) {
+              return COLORS.PRIMARY_MAIN;
+            } else if (data.datasets[1].data[index] === dataPoint) {
+              return 'orange';
+            }
+            return COLORS.PRIMARY_MAIN;
+          }}
           style={{
             paddingRight: 40,
             backgroundColor: COLORS.WHITE,
@@ -363,7 +467,7 @@ const SummaryChart = ({
           </Text>
         </View>
       )}
-      {Boolean(patientData.length) && (
+      {Boolean(currentPageData.length) && (
         <View
           style={{
             width: width - 60,
@@ -439,25 +543,13 @@ const SummaryChart = ({
         all_assessment_data={all_assessment_data}
         all_medication_data={all_medication_data}
         lookup_data={lookup_data}
-        patientData={patientData}
+        patientData={currentPageData}
         chartDataPresent={chartDataPresent}
         scrollRef={scrollRef}
-        date={
-          Boolean(!patientData?.length)
-            ? allAssessmentList?.[currentIndex]?.assessment_datetime
-            : patientData?.[currentIndex]?.time
-        }
-        impact_score={
-          Boolean(!impact?.length)
-            ? allAssessmentList?.[currentIndex]?.total_score
-            : impact[currentIndex]
-        }
-        medication={patientData?.[currentIndex]?.medicationData}
-        nrs_score={
-          Boolean(!nrs?.length)
-            ? allAssessmentList?.[currentIndex]?.current_pain_score
-            : nrs[currentIndex]
-        }
+        date={currentPageData?.[currentIndex]?.time}
+        impact_score={impact[currentIndex]}
+        medication={currentPageData?.[currentIndex]?.medicationData}
+        nrs_score={nrs[currentIndex]}
       />
     </View>
   );

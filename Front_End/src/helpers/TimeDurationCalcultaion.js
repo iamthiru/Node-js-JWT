@@ -7,15 +7,13 @@ export const timeDuration = (startTime, endTime) => {
   totalTimeDifference = endTime - startTime;
   seconds = parseInt(totalTimeDifference / 1000);
   minutes = parseInt(seconds / 60);
-  if (seconds > 59) {
-    minutes += 1;
-    seconds = 0;
-  }
+  seconds = seconds % 60;
+
   if (seconds === 0 && minutes === 0) {
-    return `${padNumber(minutes)}:${padNumber(seconds)} secs`;
-  } else if (seconds === 0 && minutes !== 0) {
-    return `${padNumber(minutes)}:${padNumber(seconds)} mins`;
+    return `${padNumber(minutes)}:${padNumber(seconds)} Sec's`;
+  } else if (seconds !== 0 && minutes === 0) {
+    return `${padNumber(minutes)}:${padNumber(seconds)} Sec's`;
   } else {
-    return `${padNumber(minutes)}:${padNumber(seconds)} secs`;
+    return `${padNumber(minutes)}:${padNumber(seconds)} Min's`;
   }
 };

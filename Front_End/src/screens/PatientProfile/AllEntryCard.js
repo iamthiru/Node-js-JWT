@@ -34,7 +34,7 @@ const AllEntryCard = ({allEntries}) => {
       style={[
         styles.patientCardContainer,
         {
-          maxHeight: height * 0.535,
+          height: height * 0.535,
         },
       ]}>
       <View style={styles.allEntriesMainView}>
