@@ -78,29 +78,29 @@ module.exports = {
     }
   },
 
-  getUserByUserEmail: async (req, res) => {
-    const email = req.body.email;
-    try {
-      const result = await getUserByEmail(email);
-      if (result.length === 0) {
-        return res.status(404).json({
-          success: false,
-          data: "User Email is not found !",
-        });
-      }
+  // getUserByUserEmail: async (req, res) => {
+  //   const email = req.body.email;
+  //   try {
+  //     const result = await getUserByEmail(email);
+  //     if (result.length === 0) {
+  //       return res.status(404).json({
+  //         success: false,
+  //         data: "User Email is not found !",
+  //       });
+  //     }
 
-      return res.status(200).json({
-        success: true,
-        data: result,
-      });
-    } catch (error) {
-      console.log(error);
-      return res.status(500).json({
-        success: false,
-        data: error.message,
-      });
-    }
-  },
+  //     return res.status(200).json({
+  //       success: true,
+  //       data: result,
+  //     });
+  //   } catch (error) {
+  //     console.log(error);
+  //     return res.status(500).json({
+  //       success: false,
+  //       data: error.message,
+  //     });
+  //   }
+  // },
 
   updateUser: async (req, res) => {
     const userData = req.body;
@@ -150,12 +150,10 @@ module.exports = {
     }
   },
 
-  login: (req, res) => {
+  login: async (req, res) => {
     const data = req.body;
-    getUserByEmail(data.email, (err, results) => {
-      if (err) {
-        console.log(err);
-      }
+    try {
+      const results = await getUserByEmail(data.email);
       if (results.length === 0) {
         return res.status(404).json({
           success: false,
@@ -180,6 +178,12 @@ module.exports = {
           data: "Invalid email or password !",
         });
       }
-    });
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json({
+        success: false,
+        data: error.message,
+      });
+    }
   },
 };

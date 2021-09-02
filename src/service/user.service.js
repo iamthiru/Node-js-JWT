@@ -25,7 +25,7 @@ module.exports = {
           if (err) {
             return reject(err);
           }
-          return resolve(result);
+          return resolve(result.map((user) => withoutPassword(user)));
         }
       );
     });
@@ -52,7 +52,7 @@ module.exports = {
         if (err) {
           return reject(err);
         }
-        return resolve(result);
+        return resolve(result.map((u) => withoutPassword(u)));
       });
     });
   },
@@ -72,7 +72,7 @@ module.exports = {
     });
   },
 
-  deleteUser: (id, callback) => {
+  deleteUser: (id) => {
     return new Promise((resolve, reject) => {
       pool.query(`delete from user where id = ?`, [id], (err, result) => {
         if (err) {
@@ -83,3 +83,7 @@ module.exports = {
     });
   },
 };
+function withoutPassword(user) {
+  const { password, ...remaining } = user;
+  return remaining;
+}
