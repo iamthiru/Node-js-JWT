@@ -20,48 +20,48 @@ module.exports = {
 async function updateAssessmentById(data) {
  const dbData = await getAssessmentById(data.id); 
   return new Promise((resolve, reject) => {
-    if (dbData.isError === false) {
+    if (dbData.isError === false && dbData.result.length !== 0) {
       const updatedData = {
         id: data.id,
-        patient_id: data.patient_id ? data.patient_id : dbData.result.patient_id,
+        patient_id: data.patient_id ? data.patient_id : dbData.result[0].patient_id,
         assessment_datetime: data.assessment_datetime
           ? data.assessment_datetime
-          : dbData.result.assessment_datetime,
-        type: data.type ? data.type : dbData.result.type,
+          : dbData.result[0].assessment_datetime,
+        type: data.type ? data.type : dbData.result[0].type,
         current_pain_score: data.current_pain_score
           ? data.current_pain_score
-          : dbData.result.current_pain_score,
+          : dbData.result[0].current_pain_score,
         least_pain_score: data.least_pain_score
           ? data.least_pain_score
-          : dbData.result.least_pain_score,
+          : dbData.result[0].least_pain_score,
         most_pain_score: data.most_pain_score
           ? data.most_pain_score
-          : dbData.result.most_pain_score,
+          : dbData.result[0].most_pain_score,
         pain_location_id: data.pain_location_id
           ? data.pain_location_id
-          : dbData.result.pain_location_id,
+          : dbData.result[0].pain_location_id,
         pain_quality_id: data.pain_quality_id
           ? data.pain_quality_id
-          : dbData.result.pain_quality_id,
+          : dbData.result[0].pain_quality_id,
         pain_frequency_id: data.pain_frequency_id
           ? data.pain_frequency_id
-          : dbData.result.pain_frequency_id,
-        description: data.description ? data.description : dbData.result.description,
+          : dbData.result[0].pain_frequency_id,
+        description: data.description ? data.description : dbData.result[0].description,
         pain_impact_id: data.pain_impact_id
           ? data.pain_impact_id
-          : dbData.result.pain_impact_id,
+          : dbData.result[0].pain_impact_id,
         pupillary_dilation: data.pupillary_dilation
           ? data.pupillary_dilation
-          : dbData.result.pupillary_dilation,
+          : dbData.result[0].pupillary_dilation,
         facial_expression: data.facial_expression
           ? data.facial_expression
-          : dbData.result.facial_expression,
-        note: data.note ? data.note : dbData.result.note,
-        total_score: data.total_score ? data.total_score : dbData.result.total_score,
+          : dbData.result[0].facial_expression,
+        note: data.note ? data.note : dbData.result[0].note,
+        total_score: data.total_score ? data.total_score : dbData.result[0].total_score,
         
-        modifiedAt: data.modifiedAt ? data.modifiedAt : dbData.result.modifiedAt,
+        modifiedAt: data.modifiedAt ? data.modifiedAt : dbData.result[0].modifiedAt,
         
-        modifiedBy: data.modifiedBy ? data.modifiedBy : dbData.result.modifiedBy,
+        modifiedBy: data.modifiedBy ? data.modifiedBy : dbData.result[0].modifiedBy,
       };
 
       const SQL = `UPDATE assessment SET patient_id = ?, assessment_datetime = ?, type = ?, current_pain_score = ?,
@@ -125,7 +125,7 @@ function getAssessmentById(id) {
         } else {
           resolve({
             isError: false,
-            result: result[0],
+            result: result,
           });
         }
       }
@@ -191,34 +191,43 @@ function getPatientDataById(id) {
 async function addNewPatient(data) {
   var date = new Date();
   data.createdAt = date.getTime();
-  const SQL = `INSERT INTO patient(first_name,last_name,dob,eyeColor,gender,medical_record_no,createdBy,createdAt, modifiedBy, modifiedAt) VALUE(?,?,?,?,?,?,?,?,?,?)`;
-  params = [
-    data.firstName,
-    data.lastName,
-    data.dob,
-    data.eyeColor,
-    data.gender,
-    data.medicalRecordNo,
-    data.createdBy,
-    data.createdAt,
-    data.createdBy,
-    data.createdAt,
-  ];
+  const noOfRecords = await isPatientAlreadyExists(data); 
+
   return new Promise((resolve, reject) => {
-    pool.query(SQL, params, (err, result) => {
-      if (err) {
-        console.log(err);
-        resolve({
-          isError: true,
-          error: err,
-        });
-      } else {
-        resolve({
-          isError: false,
-          result: result,
-        });
-      }
-    });
+    if (noOfRecords.result[0].noOfRecords > 0) {
+      resolve({
+        isError: true,
+        result: "Same record already exists",
+      });
+    } else {
+      const SQL = `INSERT INTO patient(first_name,last_name,dob,eyeColor,gender,medical_record_no,createdBy,createdAt, modifiedBy, modifiedAt) VALUE(?,?,?,?,?,?,?,?,?,?)`;
+      params = [
+        data.firstName,
+        data.lastName,
+        data.dob,
+        data.eyeColor,
+        data.gender,
+        data.medicalRecordNo,
+        data.createdBy,
+        data.createdAt,
+        data.createdBy,
+        data.createdAt,
+      ];
+      pool.query(SQL, params, (err, result) => {
+        if (err) {
+          console.log(err);
+          resolve({
+            isError: true,
+            error: err,
+          });
+        } else {
+          resolve({
+            isError: false,
+            result: result,
+          });
+        }
+      });
+    }
   });
 }
 
@@ -234,7 +243,8 @@ async function getAllPatientList() {
           error: err,
         });
       } else {
-        resolve({
+        
+        resolve({          
           isError: false,
           result: result,
         });
@@ -242,6 +252,34 @@ async function getAllPatientList() {
     });
   });
   return patients;
+}
+
+async function isPatientAlreadyExists(bodyData) {
+  var SQL = '';
+  if(bodyData.id){
+    SQL = `SELECT count(*) as noOfRecords FROM impact_dev.patient where first_name = '${bodyData.first_name}' and last_name = '${bodyData.last_name}' and gender = '${bodyData.gender}' and dob = '${bodyData.dob}' and medical_record_no = '${bodyData.medical_record_no}'`;
+  }else{
+     SQL = `SELECT count(*) as noOfRecords FROM impact_dev.patient where first_name = '${bodyData.firstName}' and last_name = '${bodyData.lastName}' and gender = '${bodyData.gender}' and dob = '${bodyData.dob}' and medical_record_no = '${bodyData.medicalRecordNo}'`;
+  }
+  
+  params = [];
+  const noOfRecords = await new Promise((resolve, reject) => {
+    pool.query(SQL, params, (err, result) => {
+      if (err) {
+        console.log(err);
+        resolve({
+          isError: true,
+          error: err,
+        });
+      } else {
+        resolve({
+          isError: false,
+          result: result,
+        });
+      }
+    });
+  });
+  return noOfRecords;
 }
 
 async function getPatientListByUserId(userId) {
@@ -567,6 +605,7 @@ async function getPatientLastAssessmentAndMedication(patientId) {
 }
 
 async function updatePatientDetails(data) {
+
   let patientDetails = {};
   const getPatient = await getAllPatientList();
   // console.log(getPatient);
@@ -591,6 +630,15 @@ async function updatePatientDetails(data) {
     ? data?.modifiedBy
     : patientDetails?.modifiedBy;
 
+
+  const editPatient = await new Promise(async(resolve, reject) => {
+    const noOfRecords = await isPatientAlreadyExists(data);
+    if( noOfRecords.result[0].noOfRecords > 0){
+      resolve({
+        isError: true,
+            result: "Same record already exists",
+      })
+    }
   const SQL = `UPDATE patient set first_name=?,last_name=?,dob=?,eyeColor=?,gender=?,medical_record_no=?,modifiedBy=?,modifiedAt=? where id =?`;
   param = [
     data.first_name,
@@ -603,8 +651,6 @@ async function updatePatientDetails(data) {
     data.modifiedAt,
     data.id,
   ];
-
-  const editPatient = await new Promise((resolve, reject) => {
     pool.query(SQL, param, (err, result) => {
       if (err) {
         console.log(err);
@@ -674,3 +720,40 @@ async function getRecentPatientDetails(createdBy) {
   });
   return getRecentPatientDetails;
 }
+
+// function isPatientAlreadyExists(bodyData, dbData) {
+//   // for (let i = 0; i < dbData.length; i++) {
+//   //   // if (
+//   //   //   bodyData.firstName === dbData[i].first_name &&
+//   //   //   bodyData.lastName === dbData[i].last_name &&
+//   //   //   bodyData.dob === dbData[i].dob &&
+//   //   //   bodyData.gender === dbData[i].gender &&
+//   //   //   bodyData.medicalRecordNo === dbData[i].medical_record_no
+//   //   // ) {
+//   //   //   return true;
+//   //   // }
+    
+    
+
+//   // }
+//   if (
+//     dbData.filter(
+//       (e) =>
+//         e.first_name === bodyData.firstName &&
+//         e.last_name === bodyData.lastName &&
+//         e.dob === bodyData.dob &&
+//         e.gender === bodyData.gender &&
+//         e.medical_record_no === bodyData.medicalRecordNo
+//     ).length > 0
+//   ) {
+//     /* Patient table contains the element we're looking for */
+//     return true;
+//   }
+//   return false;
+//   // if (dbData.filter((e) => e.first_name === bodyData.firstName).length > 0) {
+//   //   /* Patient table contains the element we're looking for */
+//   //   return true;
+//   // }
+//   // return false;
+// }
+
